@@ -444,11 +444,11 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 ### D-028 — Código aberto sob Apache-2.0, com aviso de "100% vibe-codado"
 2026-10-31 · aceita
 **Contexto:** o dono vai publicar o repositório como código aberto e escolheu a licença Apache 2.0. Todo o código foi escrito por IA e ainda não foi validado em instalação real; o dono não quer nenhuma responsabilidade pelo uso.
-**Decisão:** `LICENSE` com o texto da Apache-2.0; `NOTICE` com direitos autorais e o aviso de isenção ("100% vibe-codado, uso por conta e risco, toda a responsabilidade é de quem usa"). O mesmo aviso aparece em destaque no README, no `LEIA-ME.txt` do pacote (que leva também `LICENSE` e `NOTICE`) e numa seção "Aviso" da primeira página do Studio (`DISCLAIMER` em `studio/ui/pages.py`).
+**Decisão:** `LICENSE` com o texto da Apache-2.0; `NOTICE` com direitos autorais e o aviso de isenção ("pré-alpha, projeto pessoal, quem usa é testador; 100% vibe-codado, uso por conta e risco, toda a responsabilidade é de quem usa"). O mesmo aviso aparece em destaque no README, no `LEIA-ME.txt` do pacote (que leva também `LICENSE` e `NOTICE`) e numa seção "Aviso" da primeira página do Studio (`DISCLAIMER` em `studio/ui/pages.py`).
 **Consequências:** o aviso acompanha o programa, não só o repositório. Contribuições entram sob a mesma licença (seção 5 da Apache-2.0). O PySide6 (LGPL) continua compatível, porque é usado como biblioteca dinâmica.
 
 ### D-029 — Releases prontas para baixar, publicadas por tag
 2026-10-31 · aceita
 **Contexto:** o dono quer que as pessoas baixem o programa já compilado, sem precisar do código.
-**Decisão:** o workflow `release.yml` roda ao enviar uma tag `vX.Y.Z` (que precisa bater com `winkit.__version__`): testes, `packaging\build.ps1`, `packaging\smoke.ps1` (o mesmo teste de fumaça do CI), `.zip` com SHA-256 e `gh release create` com `packaging/NOTAS_DA_VERSAO.md`. Enquanto a validação em VM não terminar, as versões saem como **pré-lançamento**.
+**Decisão:** o workflow `release.yml` roda ao enviar uma tag `vX.Y.Z` (que precisa bater com `winkit.__version__`) ou à mão (`workflow_dispatch`, que cria a tag `v<versão>` no commit; recusa se a release já existir): testes, `packaging\build.ps1`, `packaging\smoke.ps1` (o mesmo teste de fumaça do CI), `.zip` com SHA-256 e `gh release create` com `packaging/NOTAS_DA_VERSAO.md`. Enquanto a validação em VM não terminar, as versões saem como **pré-lançamento**, com o título "pré-alpha".
 **Consequências:** publicar uma versão = subir `__version__`, registrar no CHANGELOG e enviar a tag. Os executáveis não são assinados (DT-001), então o SmartScreen pode avisar; as notas explicam.

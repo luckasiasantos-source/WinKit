@@ -11,15 +11,17 @@
 ![Windows 11](https://img.shields.io/badge/Windows-11-0078D4)
 [![Licença: Apache 2.0](https://img.shields.io/badge/licen%C3%A7a-Apache%202.0-green)](LICENSE)
 ![100% vibe-codado](https://img.shields.io/badge/100%25-vibe--codado-red)
+![Pré-alpha](https://img.shields.io/badge/est%C3%A1gio-pr%C3%A9--alpha-orange)
 
 </div>
 
 > [!CAUTION]
-> **Aplicativo 100% vibe-codado. Use por sua conta e risco.**
+> **Pré-alpha, 100% vibe-codado, projeto pessoal. Use por sua conta e risco.**
+> O WinKit foi feito para uso próprio, como um teste, e não como um produto lançado. Quem usar será, na prática, um testador.
 > Todo o código do WinKit foi escrito por inteligência artificial, sem auditoria humana completa, e ainda **não foi validado numa instalação real do Windows**. Ele mexe em partes sensíveis do sistema (instalação, registro, drivers, contas, arquivos) e pode ter erros ou falhas de segurança que causem perda de dados ou um Windows inutilizável.
 > **Toda a responsabilidade é de quem baixa e usa.** O autor não se responsabiliza por nenhum dano, perda ou falha de segurança. Teste primeiro numa máquina virtual, faça backup antes e [relate os erros que encontrar](https://github.com/luckasiasantos-source/Iso-Modify-Win11/issues). Veja a seção [Aviso](#aviso).
 
-> **English summary.** WinKit prepares a [Ventoy](https://www.ventoy.net) USB drive so that any *unmodified* Windows 11 ISO installs unattended with a local account, your drivers, your apps (offline installers or winget), your app settings restored to the right folders, bloatware removed and privacy/UI tweaks applied. Everything lives in a `WinKit\` folder on the USB drive; the ISO is never touched. The UI is in Brazilian Portuguese. **This project is 100% vibe-coded (AI-written, not fully human-reviewed, not yet validated on real hardware). Use entirely at your own risk; the author accepts no liability.**
+> **English summary.** WinKit prepares a [Ventoy](https://www.ventoy.net) USB drive so that any *unmodified* Windows 11 ISO installs unattended with a local account, your drivers, your apps (offline installers or winget), your app settings restored to the right folders, bloatware removed and privacy/UI tweaks applied. Everything lives in a `WinKit\` folder on the USB drive; the ISO is never touched. The UI is in Brazilian Portuguese. **Pre-alpha personal project, 100% vibe-coded (AI-written, not fully human-reviewed, not yet validated on real hardware). Use entirely at your own risk; the author accepts no liability.**
 
 ---
 
@@ -109,7 +111,7 @@ winkit validar --pendrive E:
 
 ## Estado do projeto
 
-A versão 1 está implementada e testada automaticamente: 569 testes em Linux e Windows, com executáveis gerados e testados no CI. A validação em máquina virtual e em PC real segue os roteiros de [`docs/validacao/`](docs/validacao/). Veja [`docs/STATUS.md`](docs/STATUS.md).
+**Pré-alpha.** A versão 1 está implementada e testada automaticamente: 569 testes em Linux e Windows, com executáveis gerados e testados no CI. A validação em máquina virtual e em PC real segue os roteiros de [`docs/validacao/`](docs/validacao/). Veja [`docs/STATUS.md`](docs/STATUS.md).
 
 > ⚠️ Use primeiro numa máquina virtual ([`docs/validacao/AMBIENTE_VM.md`](docs/validacao/AMBIENTE_VM.md)). Valores de registro e nomes de pacotes do Windows mudam entre versões.
 
@@ -152,6 +154,8 @@ Contribuições são bem-vindas, principalmente:
 Antes de abrir um PR, leia o [`CONTRIBUTING.md`](CONTRIBUTING.md) e rode `scripts/check.sh`.
 
 ## Aviso
+
+**Versão pré-alpha de um projeto pessoal.** O WinKit foi feito para uso próprio, como um teste, e não como um produto lançado. Ele está aberto para quem quiser usar, mas quem usa é, na prática, um testador (beta tester), com todos os poréns disso: pode faltar recurso, mudar sem aviso e não há suporte garantido.
 
 **O WinKit é 100% vibe-codado.** Todo o código, os testes e a documentação foram escritos por inteligência artificial, sem auditoria humana completa. Os testes automáticos passam, mas eles não substituem uma instalação real, que ainda não foi feita.
 

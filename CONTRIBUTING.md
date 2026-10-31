@@ -47,7 +47,7 @@ Toda mudança de código vem **no mesmo commit** com os documentos afetados:
 ## Publicar uma versão
 
 1. Suba `__version__` em `src/winkit/__init__.py` e registre no `docs/CHANGELOG.md`.
-2. Commit, e então `git tag vX.Y.Z` e `git push origin vX.Y.Z`.
+2. Commit, e então `git tag vX.Y.Z` e `git push origin vX.Y.Z` — ou, no GitHub, **Actions → Release → Run workflow** (a tag é criada sozinha).
 3. O workflow `Release` testa, compila, roda o teste de fumaça e publica o `.zip` na página de Releases.
 
 ## Licença das contribuições

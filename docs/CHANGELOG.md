@@ -30,13 +30,13 @@
 
 ## 2026-10-31 — Fechamento — Licença Apache-2.0, aviso de uso por conta e risco e releases
 **Tipo:** documentação + implementação + infraestrutura
-**Resumo:** o projeto passa a ser código aberto sob a Apache-2.0, com aviso em destaque de que é 100% vibe-codado e de que toda a responsabilidade é de quem usa. Versões prontas para baixar passam a ser publicadas na página de Releases a cada tag `vX.Y.Z`.
+**Resumo:** o projeto passa a ser código aberto sob a Apache-2.0, com aviso em destaque de que é um pré-alpha pessoal (quem usa é testador), 100% vibe-codado e de que toda a responsabilidade é de quem usa. Versões prontas para baixar passam a ser publicadas na página de Releases a cada tag `vX.Y.Z`.
 
 ### Adicionado
 - `LICENSE` — texto da Apache License 2.0
 - `NOTICE` — direitos autorais e aviso de isenção (pt-BR e inglês)
 - `tests/ui/test_studio_ui.py` — teste de que a primeira página do Studio mostra o aviso
-- `.github/workflows/release.yml` — tag `vX.Y.Z` → testes, pacote, fumaça, `.zip` + SHA-256, release (pré-lançamento)
+- `.github/workflows/release.yml` — tag `vX.Y.Z` ou disparo manual → testes, pacote, fumaça, `.zip` + SHA-256, release (pré-lançamento)
 - `packaging/smoke.ps1` — teste de fumaça dos executáveis, extraído do CI para ser usado também na release
 - `packaging/NOTAS_DA_VERSAO.md` — texto da página da release, com o aviso
 

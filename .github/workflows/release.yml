@@ -1,10 +1,12 @@
 name: Release
 
-# Publica uma versão pronta para baixar quando uma tag vX.Y.Z é enviada.
-# A tag precisa bater com winkit.__version__.
+# Publica uma versão pronta para baixar: ao enviar uma tag vX.Y.Z (que precisa bater com
+# winkit.__version__) ou à mão, em Actions → Release → Run workflow (a tag v<versão> é
+# criada no commit escolhido).
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -25,11 +27,17 @@ jobs:
 
       - name: Conferir a versão
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           uv sync --locked
           $version = (uv run python -c "import winkit; print(winkit.__version__)").Trim()
-          if ("v$version" -ne $env:GITHUB_REF_NAME) { throw "Tag $env:GITHUB_REF_NAME não bate com a versão $version" }
+          $tag = "v$version"
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $tag -ne $env:GITHUB_REF_NAME) { throw "Tag $env:GITHUB_REF_NAME não bate com a versão $version" }
+          gh release view $tag 2>$null | Out-Null
+          if ($LASTEXITCODE -eq 0) { throw "A release $tag já existe; suba __version__ antes" }
           "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "TAG=$tag" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Testes
         shell: pwsh
@@ -59,10 +67,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create $env:GITHUB_REF_NAME `
+          gh release create $env:TAG --target $env:GITHUB_SHA `
             "release\WinKit-$env:VERSION-windows-x64.zip" `
             "release\WinKit-$env:VERSION-windows-x64.zip.sha256" `
-            --title "WinKit $env:VERSION (pré-lançamento)" `
+            --title "WinKit $env:VERSION (pré-alpha)" `
             --notes-file packaging\NOTAS_DA_VERSAO.md `
             --prerelease
           if ($LASTEXITCODE -ne 0) { throw "falha ao criar a release" }

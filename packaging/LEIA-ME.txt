@@ -18,7 +18,8 @@ A ISO nunca é modificada. Tudo do WinKit fica na pasta WinKit\ do pendrive.
 
 Pela linha de comando: winkit\winkit.exe --help
 
-AVISO: aplicativo 100% "vibe-codado" (escrito por IA, sem auditoria humana completa e ainda
+AVISO: versão pré-alpha de um projeto pessoal, feito para uso próprio como teste, não como
+produto lançado; quem usar é, na prática, um testador. Aplicativo 100% "vibe-codado" (escrito por IA, sem auditoria humana completa e ainda
 não validado numa instalação real). Pode ter erros e falhas de segurança. O uso é por sua
 conta e risco: toda a responsabilidade é de quem usa. Teste primeiro numa máquina virtual e
 faça backup antes. Detalhes nos arquivos LICENSE (Apache 2.0) e NOTICE.

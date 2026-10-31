@@ -86,3 +86,4 @@ def test_first_page_shows_disclaimer(window: StudioWindow, qapp) -> None:
     wait(qapp, 10)
     assert DISCLAIMER in [r.subtitle_label.text() for r in page.findChildren(Row)]
     assert "vibe-codado" in DISCLAIMER
+    assert "pré-alpha" in DISCLAIMER

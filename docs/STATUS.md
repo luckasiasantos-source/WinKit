@@ -6,7 +6,7 @@
 > Legenda: ⬜ não iniciado · 🟨 em andamento · ✅ concluído · ⛔ bloqueado · ➖ fora do escopo atual
 
 **Última atualização:** 2026-10-31
-**Versão do código:** 0.1.0 (em desenvolvimento)
+**Versão do código:** 0.1.0 (pré-alpha, projeto pessoal)
 **Fase do projeto:** v1 implementada (M0–M10); falta a validação em VM/PC real pelos roteiros de `docs/validacao/`
 
 ## Resumo

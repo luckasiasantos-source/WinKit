@@ -109,6 +109,7 @@ def choice_row(
 # ------------------------------------------------------------------ 1. Pendrive
 #: Aviso de isenção mostrado na primeira página do Studio (ver NOTICE).
 DISCLAIMER = (
+    "Versão pré-alpha de um projeto pessoal: quem usa é, na prática, um testador. "
     "Este aplicativo foi 100% vibe-codado (escrito por IA, sem auditoria humana completa) e "
     "ainda não foi validado numa instalação real. Pode ter erros e falhas de segurança. "
     "O uso é por sua conta e risco: toda a responsabilidade é de quem usa. "

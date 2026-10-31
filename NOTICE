@@ -5,6 +5,11 @@ Licenciado sob a Apache License, Version 2.0 (arquivo LICENSE).
 
 AVISO IMPORTANTE
 ----------------
+Versão pré-alpha de um projeto pessoal. O WinKit foi feito para uso próprio,
+como um teste, e não como um produto lançado. Quem quiser usar será, na
+prática, um testador (beta tester): pode faltar recurso, o programa pode mudar
+sem aviso e não há suporte garantido.
+
 Este aplicativo foi 100% "vibe-codado": todo o código foi escrito por uma
 inteligência artificial e não passou por uma auditoria humana completa. Ele
 ainda não foi validado numa instalação real do Windows.
@@ -24,7 +29,8 @@ encontrar em: https://github.com/luckasiasantos-source/Iso-Modify-Win11/issues
 
 DISCLAIMER (English)
 --------------------
-This application was 100% "vibe-coded": all code was written by an AI and has
+Pre-alpha personal project, made for the author's own use as an experiment;
+anyone using it is effectively a tester. This application was 100% "vibe-coded": all code was written by an AI and has
 not been fully reviewed by a human or validated on a real Windows install. It
 may contain bugs or security flaws that cause data loss or an unusable system.
 Use it entirely at your own risk; the author and contributors accept no
