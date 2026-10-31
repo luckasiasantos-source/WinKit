@@ -139,6 +139,8 @@ Por que isso importa:
 | `agent/live.py` | Modo "aplicar neste PC" (D-033): plano ao vivo, prévia sem escrita, ponto de restauração antes, estado e resumo por aplicação em `ProgramData\WinKit\Aplicacoes` |
 | `agent/steps/restore.py`, `platform/restore.py` | Ponto de restauração (V2-10) por CIM `SystemRestore` e `Win32_ShadowStorage` |
 | `core/live.py` | Modelos da prévia (`PreviewItem`, `LivePreview`) |
+| `core/media.py` | Pendrive comum (D-034): reconhecer a mídia de instalação, marcar o `autounattend.xml` do WinKit |
+| `builder/target.py` | Destino com tipo `ventoy` ou `setup`; lista os dois tipos de pendrive |
 | `agent/integrity.py` | Confere arquivo ou pasta do pendrive contra o `manifesto.json` (R-22) |
 | `agent/fakes.py`, `platform/fakes/services.py` | Fábricas de serviços falsos (um lugar só para acrescentar campos) |
 | `agent/reboot.py`, `steps/windows_update.py` | Política de reinício; Windows Update |
@@ -244,7 +246,7 @@ runner.run(
 ### 5.4 Segurança de dados
 
 - **R-18** Nunca gerar XML com `DiskConfiguration` ou `ImageInstall/OSImage/InstallTo`. Teste de proteção obrigatório.
-- **R-19** **Modo Ventoy:** o Construtor só escreve em `WinKit\` e em `ventoy\script\winkit-*.xml`, e só mescla `ventoy\ventoy.json`. **Modo pendrive comum (D-034, a partir do M13):** só escreve em `WinKit\`, `\autounattend.xml` e, uma vez, `\autounattend.xml.winkit-bak`. Qualquer escrita fora disso é bug.
+- **R-19** **Modo Ventoy:** o Construtor só escreve em `WinKit\` e em `ventoy\script\winkit-*.xml`, e só mescla `ventoy\ventoy.json`. **Modo pendrive comum (D-034, M13):** só escreve em `WinKit\`, `\autounattend.xml` e, uma vez, `\autounattend.xml.winkit-bak`; e, se o Rufus deixou respostas em `sources\$OEM$\$$\Panther\unattend.xml`, as move para `unattend.xml.winkit-bak` na mesma pasta (H17). Qualquer escrita fora disso é bug (teste `tests/builder/test_setup_media.py`).
 - **R-20** `robocopy /MIR` só é permitido com destino dentro de `WinKit\Perfis\<perfil>\Backups\<id>\dados\`. A função que chama `/MIR` valida o destino e lança `UnsafeOperationError` se não for.
 - **R-21** Restauração usa `merge` salvo escolha explícita na receita.
 - **R-22** Instaladores, drivers e o Agente têm SHA-256 conferido contra o `manifesto.json` antes de serem executados/instalados.

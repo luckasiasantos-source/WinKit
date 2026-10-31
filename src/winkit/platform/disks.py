@@ -66,10 +66,30 @@ try {
 """
 
 
+#: Pendrive comum (D-034): a imagem já está aberta no pendrive; só lê os metadados (H16).
+_READ_SETUP_IMAGE = r"""
+$images = @(Get-WindowsImage -ImagePath $p.Path)
+$first = Get-WindowsImage -ImagePath $p.Path -Index $images[0].ImageIndex
+[pscustomobject]@{
+    Windows = $true
+    Version = [string]$first.Version
+    Architecture = [int]$first.Architecture
+    Languages = @($first.Languages | ForEach-Object { [string]$_ })
+    DefaultLanguageIndex = [int]$first.DefaultLanguageIndex
+    Editions = @($images | ForEach-Object {
+        [pscustomobject]@{ Index = [int]$_.ImageIndex; Name = [string]$_.ImageName } })
+}
+"""
+
+
 class DiskInspector(Protocol):
     def list_partitions(self) -> list[PartitionRow]: ...
 
     def read_iso(self, iso_path: Path, image: str) -> IsoInfo: ...
+
+    def read_setup_image(self, image_path: Path) -> IsoInfo:
+        """Metadados de ``sources\\install.wim|esd|swm`` de um pendrive comum (só leitura)."""
+        ...
 
 
 def partition_from_json(item: dict[str, Any]) -> PartitionRow:
@@ -123,3 +143,11 @@ class WindowsDiskInspector:
         out = self._ps.run_json(_READ_ISO, {"Path": str(iso_path)}, timeout=600)
         item = out[0] if out else {"Windows": False}
         return iso_from_json(item, image=image, size=stat.st_size, mtime_ns=stat.st_mtime_ns)
+
+    def read_setup_image(self, image_path: Path) -> IsoInfo:
+        stat = image_path.stat()
+        out = self._ps.run_json(_READ_SETUP_IMAGE, {"Path": str(image_path)}, timeout=600)
+        item = out[0] if out else {"Windows": False}
+        return iso_from_json(
+            item, image="/" + image_path.name, size=stat.st_size, mtime_ns=stat.st_mtime_ns
+        )

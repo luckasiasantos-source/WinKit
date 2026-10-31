@@ -6,7 +6,7 @@
 > Legenda: ⬜ não iniciado · 🟨 em andamento · ✅ concluído · ⛔ bloqueado · ➖ fora do escopo atual
 
 **Última atualização:** 2026-10-31
-**Versão do código:** 0.3.0 (pré-alpha, projeto pessoal)
+**Versão do código:** 0.4.0 (pré-alpha, projeto pessoal)
 **Fase do projeto:** v1 implementada (M0–M10); falta a validação em VM/PC real pelos roteiros de `docs/validacao/`. v2 (M11–M18) aprovada e em implementação (`PLANO_V2.md`)
 
 ## Resumo
@@ -27,7 +27,7 @@
 | M10 | WinKit Studio (GUI) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M10.md`) |
 | M11 | Inglês e espanhol (V2-00) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M11.md`) |
 | M12 | Aplicar neste PC + ponto de restauração (V2-03, V2-10) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M12.md`) |
-| M13 | Pendrive comum: Rufus/Microsoft (V2-01) | ⬜ planejado | — |
+| M13 | Pendrive comum: Rufus/Microsoft (V2-01) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M13.md`) |
 | M14 | Rede e sistema (V2-02, 08, 09, 16, 17, 18, 22) | ⬜ planejado | — |
 | M15 | Personalização (V2-04, 05, 06, 07, 12, 15) | ⬜ planejado | — |
 | M16 | Contas, pastas e jogos (V2-11, 13, 14) | ⬜ planejado | — |
@@ -182,6 +182,12 @@
 - ✅ Teste de fumaça do pacote com `aplicar --simular` e `winkit-agent apply --simular`
 - ⬜ DT-018: progresso por etapa e processo separado
 
+### M13 — Pendrive comum (Rufus/Microsoft) ✅ (código) · validação na VM pendente
+- ✅ `core/media.py`: reconhece o pendrive de instalação (setup.exe + boot.wim + install.wim/esd/swm), só em discos USB/SD sem `VTOYEFI`; layout UEFI:NTFS do Rufus
+- ✅ Construtor: `\autounattend.xml` na raiz com o idioma da imagem; respostas do Rufus guardadas uma vez (`.winkit-bak`); `$OEM$` movido; teste de proteção da R-19 no modo comum
+- ✅ Validação do modo comum; Studio e CLI mostram o tipo de cada pendrive
+- ✅ `docs/RUFUS.md` com as configurações recomendadas
+
 ## Hipóteses técnicas
 
 | # | Hipótese (resumo) | Estado | Onde foi validada |
@@ -201,3 +207,6 @@
 | H13 | `CreateRestorePoint` funciona na Fase 2, logo após o Windows Update | ⬜ | — |
 | H14 | `pnputil` num Windows em uso não força reinício sem aviso | ⬜ | — |
 | H15 | Remover Appx com o usuário logado não exige sair da sessão | ⬜ | — |
+| H16 | `Get-WindowsImage` lê metadados de `.swm` pelo primeiro arquivo | ⬜ | — |
+| H17 | O Rufus grava respostas também em `sources\$OEM$\$$\Panther\unattend.xml` | ⬜ | — |
+| H18 | O instalador usa o `autounattend.xml` do pendrive de boot mesmo com outra mídia removível | ⬜ | — |

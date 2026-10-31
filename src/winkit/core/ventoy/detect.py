@@ -31,6 +31,7 @@ class VentoyTarget:
     file_system: str  # "exFAT", "NTFS", "FAT32"...
     size: int
     free: int
+    kind: str = "ventoy"
 
     @property
     def root(self) -> str:

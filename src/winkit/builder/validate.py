@@ -7,7 +7,7 @@ from pathlib import Path
 
 from winkit import __version__
 from winkit.builder.build import load_profile_recipe
-from winkit.core import layout
+from winkit.core import layout, media
 from winkit.core.catalog.models import Catalogs
 from winkit.core.errors import IntegrityError, UnattendError, VentoyConfigError, WinKitError
 from winkit.core.manifest.manifest import load_manifest, verify_tree
@@ -30,7 +30,12 @@ class PendriveReport:
 
 
 def validate_pendrive(
-    root: Path, catalogs: Catalogs, *, profile_id: str = "padrao", file_system: str = "exFAT"
+    root: Path,
+    catalogs: Catalogs,
+    *,
+    profile_id: str = "padrao",
+    file_system: str = "exFAT",
+    kind: str | None = None,
 ) -> PendriveReport:
     rep = PendriveReport()
     try:
@@ -43,7 +48,11 @@ def validate_pendrive(
         return rep
 
     _check_recipe(root, catalogs, profile_id, marker.pendrive_id, rep)
-    _check_ventoy(root, rep)
+    setup = kind == "setup" if kind else media.has_setup_files(root)
+    if setup:
+        _check_setup_media(root, rep)
+    else:
+        _check_ventoy(root, rep)
     _check_agent(root, rep)
     _check_manifest(root, rep)
     if file_system.upper() in ("FAT32", "FAT"):
@@ -103,9 +112,27 @@ def _check_ventoy(root: Path, rep: PendriveReport) -> None:
             rep.problems.append(f"{e.template}: {exc}")
 
 
+def _check_setup_media(root: Path, rep: PendriveReport) -> None:
+    """Pendrive comum (D-034): o ``autounattend.xml`` da raiz tem que ser o do WinKit."""
+    path = root / media.UNATTEND
+    if not path.is_file():
+        rep.problems.append(t("validate.no_unattend"))
+        return
+    data = path.read_bytes()
+    if not media.is_winkit_unattend(data):
+        rep.problems.append(t("validate.unattend_not_winkit"))
+    try:
+        check_safety(data)
+    except UnattendError as exc:
+        rep.problems.append(f"{media.UNATTEND}: {exc}")
+    oem = root / media.OEM_UNATTEND
+    if oem.is_file() and not media.is_winkit_unattend(oem.read_bytes()):
+        rep.warnings.append(t("validate.oem_unattend_present"))
+
+
 def _check_agent(root: Path, rep: PendriveReport) -> None:
     if not (root / layout.BOOTSTRAP).is_file():
-        rep.problems.append("WinKit\\Agent\\bootstrap.ps1 ausente")
+        rep.problems.append(t("validate.no_bootstrap"))
     version_file = root / layout.AGENT_VERSION
     if version_file.is_file():
         version = version_file.read_text(encoding="utf-8").strip()

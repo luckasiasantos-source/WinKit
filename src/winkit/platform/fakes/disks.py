@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from winkit.core.errors import PlatformError
 from winkit.core.isos import IsoArch, IsoEdition, IsoInfo
 from winkit.core.ventoy.detect import PartitionRow
 
@@ -47,6 +48,8 @@ class FakeDiskInspector:
     #: nome do arquivo (ex.: "Windows11.iso") → informação; ausente = não é Windows
     isos: dict[str, IsoInfo] = field(default_factory=dict)
     reads: list[str] = field(default_factory=list)
+    #: Pendrive comum: o que ``Get-WindowsImage`` devolveria (``None`` = falha na leitura).
+    setup_image: IsoInfo | None = field(default_factory=lambda: windows_iso("/install.wim"))
 
     def list_partitions(self) -> list[PartitionRow]:
         return list(self.rows)
@@ -62,3 +65,32 @@ class FakeDiskInspector:
         return info.model_copy(
             update={"image": image, "size": stat.st_size, "mtime_ns": stat.st_mtime_ns}
         )
+
+    def read_setup_image(self, image_path: Path) -> IsoInfo:
+        self.reads.append(image_path.name)
+        if self.setup_image is None:
+            raise PlatformError("Get-WindowsImage falhou")
+        return self.setup_image.model_copy(update={"image": "/" + image_path.name})
+
+
+def setup_rows(letter: str = "F", fs: str = "NTFS") -> list[PartitionRow]:
+    """Pendrive gravado pelo Rufus (NTFS + partição UEFI_NTFS) ao lado do disco interno."""
+    return [
+        PartitionRow(0, "Samsung SSD", "NVMe", 1, 500 * 2**30, "C", "Windows", "NTFS", 100 * 2**30),
+        PartitionRow(
+            3, "Kingston DataTraveler", "USB", 1, 32 * 2**30, letter, "CCCOMA", fs, 20 * 2**30
+        ),
+        PartitionRow(3, "Kingston DataTraveler", "USB", 2, 1 * 2**20, "G", "UEFI_NTFS", "FAT", 0),
+    ]
+
+
+def make_setup_folder(root: Path, image: str = "install.wim") -> Path:
+    """Simula os arquivos de um pendrive de instalação do Windows."""
+    (root / "sources").mkdir(parents=True, exist_ok=True)
+    (root / "efi" / "boot").mkdir(parents=True, exist_ok=True)
+    (root / "setup.exe").write_bytes(b"MZ")
+    (root / "bootmgr").write_bytes(b"x")
+    (root / "sources" / "boot.wim").write_bytes(b"wim")
+    (root / "sources" / image).write_bytes(b"wim")
+    (root / "efi" / "boot" / "bootx64.efi").write_bytes(b"efi")
+    return root

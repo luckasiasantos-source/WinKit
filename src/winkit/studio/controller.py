@@ -42,7 +42,6 @@ from winkit.core.planner.planner import plan
 from winkit.core.recipe.io import new_recipe
 from winkit.core.recipe.models import AppItem, BackupItem, ConflictPolicy, Recipe, Scope
 from winkit.core.recipe.validation import ValidationReport, validate_recipe
-from winkit.core.ventoy.detect import VentoyTarget
 from winkit.core.winget_manifest import split_args
 from winkit.i18n import current_language
 from winkit.platform.services import Services
@@ -86,11 +85,11 @@ class StudioController:
     def catalogs(self) -> Catalogs:
         return self.catalogs_override or default_catalogs()
 
-    def pendrives(self) -> list[VentoyTarget]:
-        return targets.list_targets(self.services.disks)
+    def pendrives(self) -> list[targets.AnyDrive]:
+        return targets.list_targets(self.services.disks, self.services.volume_root)
 
-    def open_ventoy(self, v: VentoyTarget) -> None:
-        self._open(targets.from_ventoy(v))
+    def open_ventoy(self, v: targets.AnyDrive) -> None:
+        self._open(targets.from_drive(v))
 
     def open_folder(self, folder: Path) -> None:
         self._open(targets.from_folder(folder))
@@ -337,7 +336,11 @@ class StudioController:
     def validate_pendrive(self) -> PendriveReport:
         fs = self.target.file_system if self.target else "exFAT"
         return validate_pendrive(
-            self.root, self.catalogs, profile_id=self.profile_id, file_system=fs
+            self.root,
+            self.catalogs,
+            profile_id=self.profile_id,
+            file_system=fs,
+            kind=self.target.kind if self.target else None,
         )
 
     @staticmethod

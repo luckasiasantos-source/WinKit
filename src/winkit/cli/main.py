@@ -87,7 +87,7 @@ def _target(args: argparse.Namespace, services: Services) -> targets.Target:
     if args.raiz:
         return targets.from_folder(Path(args.raiz), args.sistema_arquivos)
     _require_admin()
-    return targets.resolve_target(services.disks, args.pendrive)
+    return targets.resolve_target(services.disks, args.pendrive, services.volume_root)
 
 
 def _require_admin() -> None:
@@ -99,14 +99,14 @@ def _require_admin() -> None:
 def cmd_pendrive_listar(args: argparse.Namespace, services: Services, out: Out) -> int:
     del args
     _require_admin()
-    found = targets.list_targets(services.disks)
+    found = targets.list_targets(services.disks, services.volume_root)
     if not found:
         out(t("pendrive.none"))
         return 1
     for v in found:
         out(
-            f"{v.data_letter}  {v.disk_name} ({v.bus_type})  {v.file_system}  "
-            + t("cli.free_of", free=_gib(v.free), size=_gib(v.size))
+            f"{v.data_letter}  [{t(f'pendrive.kind_{v.kind}')}]  {v.disk_name} ({v.bus_type})  "
+            f"{v.file_system}  " + t("cli.free_of", free=_gib(v.free), size=_gib(v.size))
         )
     return 0
 
@@ -206,7 +206,11 @@ def cmd_construir(args: argparse.Namespace, services: Services, out: Out) -> int
 def cmd_validar(args: argparse.Namespace, services: Services, out: Out) -> int:
     tgt = _target(args, services)
     rep = validate_pendrive(
-        tgt.root, default_catalogs(), profile_id=args.perfil, file_system=tgt.file_system
+        tgt.root,
+        default_catalogs(),
+        profile_id=args.perfil,
+        file_system=tgt.file_system,
+        kind=tgt.kind,
     )
     if rep.warnings:
         out(t("validate.warnings", count=len(rep.warnings)))

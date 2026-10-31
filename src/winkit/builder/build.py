@@ -18,7 +18,7 @@ from pathlib import Path
 from winkit import __version__
 from winkit.builder.isos import scan_isos
 from winkit.builder.target import Target
-from winkit.core import layout
+from winkit.core import layout, media
 from winkit.core.catalog.models import Catalogs
 from winkit.core.errors import PendriveError, RecipeError, WinKitError
 from winkit.core.fsutil import atomic_write_text, write_if_changed
@@ -170,6 +170,67 @@ def _update_ventoy_json(root: Path, recipe: Recipe, entries: list[AutoInstallEnt
     atomic_write_text(path, text)
 
 
+def _keep_original(path: Path, backup: Path, report: BuildReport, key: str) -> None:
+    """Guarda uma vez o arquivo de respostas que não é do WinKit (D-034)."""
+    if not path.is_file() or media.is_winkit_unattend(path.read_bytes()):
+        return
+    if backup.exists():
+        n = 2
+        while backup.with_name(f"{backup.name}{n}").exists():
+            n += 1
+        backup = backup.with_name(f"{backup.name}{n}")
+    shutil.copy2(path, backup)
+    report.warnings.append(t(key, name=backup.name))
+
+
+def _build_setup_media(  # noqa: PLR0917 — mesma assinatura das outras etapas da construção
+    root: Path,
+    recipe: Recipe,
+    catalogs: Catalogs,
+    inspector: DiskInspector,
+    pendrive_id: str,
+    report: BuildReport,
+) -> None:
+    """Pendrive comum (Rufus/Microsoft): só ``\\autounattend.xml`` na raiz (R-19)."""
+    image = media.image_file(root)
+    lang, arch, os_major = FALLBACK_LANGUAGE, recipe.windows.architecture, None
+    if image is not None:
+        try:
+            info = inspector.read_setup_image(image)
+        except (WinKitError, OSError) as exc:
+            report.warnings.append(t("builder.setup_image_unreadable", detail=str(exc)))
+        else:
+            report.isos.append(info)
+            if info.architecture not in ("unknown", recipe.windows.architecture):
+                report.warnings.append(
+                    t(
+                        "builder.arch_mismatch",
+                        name=info.name,
+                        iso_arch=info.architecture,
+                        recipe_arch=recipe.windows.architecture,
+                    )
+                )
+            lang = info.default_language or FALLBACK_LANGUAGE
+            os_major = 10 if info.os_major == 10 else None
+    xml = generate_unattend(
+        recipe,
+        catalogs,
+        UnattendTarget(ui_language=lang, architecture=arch, os_major=os_major),
+        pendrive_id=pendrive_id,
+    )
+    path = root / media.UNATTEND
+    _keep_original(path, root / media.UNATTEND_BACKUP, report, "builder.rufus_unattend_kept")
+    write_if_changed(path, media.stamp_unattend(xml, __version__, pendrive_id))
+    report.templates.append("/" + media.UNATTEND)
+    oem = root / media.OEM_UNATTEND
+    if oem.is_file() and not media.is_winkit_unattend(oem.read_bytes()):
+        # seria aplicado depois do nosso e poderia desfazer a conta local (H17)
+        _keep_original(
+            oem, oem.with_name(oem.name + ".winkit-bak"), report, "builder.oem_unattend_kept"
+        )
+        oem.unlink()
+
+
 def _copy_agent(root: Path, options: BuildOptions, report: BuildReport) -> None:
     bootstrap = resources.files("winkit.builder").joinpath("assets/bootstrap.ps1").read_bytes()
     write_if_changed(root / layout.BOOTSTRAP, bootstrap)
@@ -208,21 +269,23 @@ def build(
     validation = ensure_valid(recipe, catalogs)
     report.warnings.extend(validation.warnings)
 
-    isos, errors = scan_isos(root, inspector, options.iso_cache)
-    report.skipped.extend(errors)
-    groups = _group_isos(recipe, isos, report)
-    if not groups:
-        report.warnings.append(t("builder.no_isos"))
-
-    entries = _write_templates(
-        root,
-        recipe=recipe,
-        catalogs=catalogs,
-        groups=groups,
-        pendrive_id=marker.pendrive_id,
-        report=report,
-    )
-    _update_ventoy_json(root, recipe, entries)
+    if target.kind == "setup":
+        _build_setup_media(root, recipe, catalogs, inspector, marker.pendrive_id, report)
+    else:
+        isos, errors = scan_isos(root, inspector, options.iso_cache)
+        report.skipped.extend(errors)
+        groups = _group_isos(recipe, isos, report)
+        if not groups:
+            report.warnings.append(t("builder.no_isos"))
+        entries = _write_templates(
+            root,
+            recipe=recipe,
+            catalogs=catalogs,
+            groups=groups,
+            pendrive_id=marker.pendrive_id,
+            report=report,
+        )
+        _update_ventoy_json(root, recipe, entries)
     _copy_agent(root, options, report)
     if not options.xml_only:
         _write_manifest(root, report)

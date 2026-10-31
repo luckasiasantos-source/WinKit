@@ -49,7 +49,9 @@ class PendrivePage(Page):
             found.add_row(
                 Row(
                     f"{v.data_letter}  {v.disk_name}",
-                    t(
+                    t(f"pendrive.kind_{v.kind}")
+                    + " · "
+                    + t(
                         "studio.pendrive.free_of",
                         fs=v.file_system,
                         free=format_size(v.free),

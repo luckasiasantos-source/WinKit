@@ -28,6 +28,26 @@
 
 ---
 
+## 2026-10-31 — M13 — Pendrive comum: Rufus e ferramenta da Microsoft (0.4.0)
+**Tipo:** implementação
+**Resumo:** além do Ventoy, o WinKit prepara um pendrive de instalação gravado pelo Rufus ou pela Ferramenta de Criação de Mídia: grava só o `autounattend.xml` na raiz (com o idioma da imagem) e a pasta `WinKit\`, guarda as respostas do Rufus e nunca formata nada (V2-01, D-034). A release 0.3.0 foi publicada antes deste commit.
+
+### Adicionado
+- `src/winkit/core/media.py` — reconhecimento da mídia, `find_setup_targets`, marca de origem do XML
+- `DiskInspector.read_setup_image` (+ dublê, `setup_rows`, `make_setup_folder`)
+- `tests/builder/test_setup_media.py` — detecção, R-19 no modo comum, respostas do Rufus, idioma da imagem, validação
+- `docs/RUFUS.md`, `docs/validacao/M13.md`
+
+### Alterado
+- `src/winkit/builder/target.py` — `Target.kind`, `list_targets`/`resolve_target` com os dois tipos, `from_drive`
+- `src/winkit/builder/build.py` — `_build_setup_media`, cópia única das respostas existentes
+- `src/winkit/builder/validate.py` — validação do modo comum; mensagem do bootstrap traduzida
+- Studio e CLI mostram o tipo de cada pendrive; textos da página Pendrive
+- Versão 0.4.0; notas da release
+
+### Documentos vivos atualizados
+- ARQUITETURA — R-19 (caminho do `$OEM$`) e módulos; STATUS — M13 e H16–H18
+
 ## 2026-10-31 — M11 — Correção: testes independentes do idioma do Windows
 **Tipo:** correção (testes)
 **Resumo:** os testes da CLI falhavam no runner do Windows (em inglês) porque a CLI detecta o idioma da máquina (IN-014).
