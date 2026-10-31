@@ -12,7 +12,7 @@ from dataclasses import dataclass
 
 from winkit.core.catalog.models import Catalogs
 from winkit.core.errors import UnattendError
-from winkit.core.recipe.models import Account, Recipe
+from winkit.core.recipe.models import Account, ExtraAccount, Recipe
 from winkit.core.unattend.commands import (
     bootstrap_command,
     first_logon_command,
@@ -88,7 +88,7 @@ def encode_password(password: str) -> str:
     return base64.b64encode((password + "Password").encode("utf-16-le")).decode("ascii")
 
 
-def _password(parent: ET.Element, account: Account) -> None:
+def _password(parent: ET.Element, account: Account | ExtraAccount) -> None:
     pw = _sub(parent, "Password")
     if account.password_mode == "stored" and account.password:  # noqa: S105
         _sub(pw, "Value", encode_password(account.password))
@@ -226,6 +226,13 @@ def _oobe_system(root: ET.Element, recipe: Recipe, arch: str, ui_lang: str) -> N
     _sub(acc, "Group", "Administrators")
     _sub(acc, "Name", account.username)
     _password(acc, account)
+    for extra in win.extra_accounts:  # V2-11; o grupo é conferido de novo pelo SID (H11)
+        acc = ET.SubElement(accounts, _q("LocalAccount"), {f"{{{WCM}}}action": "add"})
+        _sub(acc, "Description", t("unattend.account_description"))
+        _sub(acc, "DisplayName", extra.display_name or extra.username)
+        _sub(acc, "Group", "Administrators" if extra.group == "administrators" else "Users")
+        _sub(acc, "Name", extra.username)
+        _password(acc, extra)
 
 
 def check_safety(xml: bytes) -> None:

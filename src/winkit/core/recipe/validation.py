@@ -158,6 +158,18 @@ def _validate_windows(recipe: Recipe, catalogs: Catalogs | None, err: Sink, warn
         if not win.account.password:
             err(t("recipe.password_missing"))
         warn(t("recipe.password_stored_warning"))
+    seen = {win.account.username.casefold()}
+    for extra in win.extra_accounts:
+        problem = username_problem(extra.username)
+        if problem:
+            err(t("recipe.username_invalid", name=extra.username, reason=problem))
+        if extra.username.casefold() in seen:
+            err(t("recipe.account_duplicate", name=extra.username))
+        seen.add(extra.username.casefold())
+        if extra.password_mode == "stored":  # noqa: S105 — modo, não senha
+            if not extra.password:
+                err(t("recipe.account_password_missing", name=extra.username))
+            warn(t("recipe.password_stored_warning"))
     if catalogs is not None and catalogs.edition(win.edition) is None:
         err(t("recipe.unknown_edition", edition=win.edition))
 

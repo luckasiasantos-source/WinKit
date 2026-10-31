@@ -30,7 +30,7 @@
 | M13 | Pendrive comum: Rufus/Microsoft (V2-01) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M13.md`) |
 | M14 | Rede e sistema (V2-02, 08, 09, 16, 17, 18, 22) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M14.md`) |
 | M15 | Personalização (V2-04, 05, 06, 07, 12, 15) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M15.md`) |
-| M16 | Contas, pastas e jogos (V2-11, 13, 14) | 🟨 em andamento | — |
+| M16 | Contas, pastas e jogos (V2-11, 13, 14) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M16.md`) |
 | M17 | Inteligência do pendrive (V2-19, 20, 21, 23) | ⬜ planejado | — |
 | M18 | Fechamento da v2 | ⬜ planejado | — |
 
@@ -208,11 +208,12 @@
 - ✅ V2-04 Iniciar e barra: fixados da barra ligados aos atalhos do menu Iniciar (`LayoutModification.xml`, `Replace`); Iniciar no modo lista (`LayoutModification.json`, formato `ConfigureStartPins`) ou cópia exata do `start2.bin` só no mesmo build (com aviso e volta para a lista); só na Fase 1, no perfil Default; Studio (O que levar) e CLI (`coletar iniciar --modo list|exact`)
 - ✅ Roteiro `docs/validacao/M15.md` e versão 0.6.0
 
-### M16 — Contas, pastas e jogos 🟨
+### M16 — Contas, pastas e jogos ✅ (código) · validação na VM pendente
 - ✅ Resolver de volumes (D-035, R-52): `VolumeRef` pelo serial do CIM; a letra antiga é só dica; volume ausente = etapa pulada com motivo; teste de proteção da R-52; `meta.source_system_volume`
 - ✅ V2-14 Pastas do usuário em outro disco: detecta as que já estão fora do C:; escolha do disco (nunca o do sistema), pasta base com `%USERNAME%` e pastas; `User Shell Folders` no perfil Default (Fase 1, antes de backups e ajustes, R16) ou no `HKCU` ao vivo; os moldes `{DOCUMENTS}` e afins passam a apontar para lá; "Copiar agora" em `merge` (origem intacta); Studio (grupo Sistema) e CLI (`pastas mostrar|definir|copiar-agora`)
 - ✅ V2-13 Jogos: leitor/gravador VDF (ida e volta idêntica); bibliotecas da Steam e jogos da Epic fora do C:; na Fase 2, depois do app do launcher (R22), a biblioteca entra no `libraryfolders.vdf` e o manifesto da Epic é reescrito com a letra atual; nunca toca nos arquivos dos jogos; Studio (O que levar) e CLI (`coletar jogos`, `jogos listar|marcar|desmarcar`)
-- ⬜ V2-11 Contas extras
+- ✅ V2-11 Contas extras: administrador ou padrão; senha "trocar no primeiro acesso" (padrão), "sem senha" ou "definida agora" (registrada como segredo, R-53); `LocalAccount` no XML (snapshot com duas contas); na Fase 1 o grupo é conferido pelo SID e a conta padrão sai de Administradores; backups "só a conta principal" vão para a Fase 2 no perfil dela; nunca ao vivo; Studio (Windows e conta) e CLI (`contas listar|adicionar|remover`, `backup-para-quem`)
+- ✅ Roteiro `docs/validacao/M16.md` e versão 0.7.0
 
 ## Hipóteses técnicas
 

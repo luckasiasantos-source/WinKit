@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from winkit.agent.steps.account import AccountStep
 from winkit.agent.steps.app import AppStep, ShortcutStep
 from winkit.agent.steps.backup import BackupStep
 from winkit.agent.steps.base import StepBase, StepContext, StepHandler, StepResult
@@ -68,6 +69,7 @@ def default_handlers() -> dict[StepKind, StepHandler]:
     handlers["start_layout"] = StartLayoutStep()
     handlers["user_folders"] = UserFoldersStep()
     handlers["game_library"] = GameLibraryStep()
+    handlers["account"] = AccountStep()
     handlers["feature"] = FeatureStep()
     handlers["driver_report"] = DriverReportStep()
     handlers["finalize"] = FinalizeStep()

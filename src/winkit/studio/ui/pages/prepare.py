@@ -7,14 +7,14 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtWidgets import QFileDialog, QLineEdit, QMessageBox
+from PySide6.QtWidgets import QFileDialog, QInputDialog, QLineEdit, QMessageBox
 
 from winkit.core.recipe.models import Recipe
 from winkit.core.recipe.validation import username_problem, validate_computer_name
 from winkit.i18n import t
 from winkit.i18n.format import format_size
 from winkit.studio.ui.base import Page
-from winkit.studio.ui.pages.common import TIME_ZONES, combo, keyboards, toggle
+from winkit.studio.ui.pages.common import TIME_ZONES, combo, empty, keyboards, toggle
 from winkit.ui.widgets import Card, Row, SegmentedControl, button, label, section, symbol_icon
 
 
@@ -229,6 +229,7 @@ class AccountPage(Page):
                 )
             )
         self.content.addWidget(section(t("studio.account.section_account"), acc))
+        self._extra_accounts(w)
 
         win = Card()
         ed = combo(
@@ -400,3 +401,62 @@ class AccountPage(Page):
         if account.password_mode == "stored" and not account.password:  # noqa: S105
             msgs.append(t("recipe.password_missing"))
         self.problems.setText("\n".join(msgs))
+
+    # ---- contas extras (V2-11)
+    def _extra_accounts(self, w: Any) -> None:
+        card = Card()
+        for extra in w.extra_accounts:
+            kind = t(f"studio.extra.group_{extra.group}")
+            pw = t(f"studio.extra.password_{extra.password_mode}")
+            card.add_row(
+                Row(
+                    extra.display_name or extra.username,
+                    f"{extra.username} · {kind} · {pw}",
+                    accessory=button(
+                        t("studio.extra.remove"),
+                        "Secondary",
+                        partial(self._remove_extra, extra.username),
+                    ),
+                    icon=symbol_icon("pencil", "#AF52DE"),
+                )
+            )
+        self.content.addWidget(
+            section(
+                t("studio.extra.section"),
+                card if card.rows else empty(t("studio.extra.none")),
+                footer=t("studio.extra.footer"),
+            )
+        )
+        self.content.addLayout(
+            self.toolbar(button(t("studio.extra.add"), "Secondary", self._add_extra))
+        )
+
+    def _add_extra(self) -> None:
+        name, ok = QInputDialog.getText(self, t("studio.extra.add"), t("studio.extra.username"))
+        if not ok or not name.strip():
+            return
+        groups = [t("studio.extra.group_users"), t("studio.extra.group_administrators")]
+        group, ok = QInputDialog.getItem(
+            self, t("studio.extra.add"), t("studio.extra.group"), groups, 0, False
+        )
+        if not ok:
+            return
+        modes = ["must_change", "empty"]
+        labels = [t(f"studio.extra.password_{m}") for m in modes]
+        mode, ok = QInputDialog.getItem(
+            self, t("studio.extra.add"), t("studio.extra.password"), labels, 0, False
+        )
+        if not ok:
+            return
+        problem = self.ctl.add_extra_account(
+            name.strip(),
+            admin=group == groups[1],
+            password_mode=modes[labels.index(mode)],
+        )
+        if problem:
+            QMessageBox.warning(self, t("app.name"), problem)
+        self.refresh()
+
+    def _remove_extra(self, username: str) -> None:
+        self.ctl.remove_extra_account(username)
+        self.refresh()

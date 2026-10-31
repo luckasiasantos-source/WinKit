@@ -28,6 +28,24 @@
 
 ---
 
+## 2026-10-31 — M16 — Contas extras (V2-11) e fechamento do M16 (0.7.0)
+**Tipo:** implementação
+**Resumo:** a instalação cria outras contas locais (administrador ou padrão), com a senha trocada no primeiro acesso por padrão. Backups podem valer só para a conta principal. Fecha o M16 com o roteiro de validação e a versão 0.7.0.
+
+### Adicionado
+- `src/winkit/agent/steps/account.py`; `Accounts.ensure_group` (pelos SIDs) e `expire_password`
+- Receita: `windows.extra_accounts`, `BackupItem.for_accounts` (aditivos); validação de nomes; plano: `account` no começo da Fase 1 (R24); backups `main` na Fase 2
+- `autounattend.xml`: uma `LocalAccount` por conta extra (snapshot `tests/fixtures/unattend_extra_accounts.xml`)
+- Senhas da receita registradas como segredo no Agente (R-53)
+- Studio: "Contas extras" em Windows e conta; "Só a conta principal" nos backups; CLI: `contas listar|adicionar|remover`, `backup-para-quem`
+- Testes: `tests/agent/test_accounts.py`; `docs/validacao/M16.md`
+
+### Alterado
+- `src/winkit/__init__.py` — versão 0.7.0; `packaging/NOTAS_DA_VERSAO.md` — novidades do M16
+
+### Documentos vivos atualizados
+- ARQUITETURA — módulos; STATUS — M16 ✅ código; PLANO_V2 — §11.4
+
 ## 2026-10-31 — M16 — Resolver de volumes, pastas do usuário em outro disco (V2-14) e jogos (V2-13)
 **Tipo:** implementação
 **Resumo:** volumes passam a ser achados pelo número de série, nunca pela letra (D-035). Documentos, Downloads e as outras pastas podem ficar num outro disco, e o Windows novo já aponta para lá. Jogos da Steam e da Epic em outro disco aparecem instalados sem baixar de novo. A release 0.6.0 foi disparada antes deste commit.

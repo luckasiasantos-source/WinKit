@@ -61,13 +61,14 @@ from winkit.core.recipe.models import (
     ConflictPolicy,
     EnvPathEntry,
     EnvVar,
+    ExtraAccount,
     FontItem,
     NetworkDrive,
     Recipe,
     Scope,
     WifiNetwork,
 )
-from winkit.core.recipe.validation import ValidationReport, validate_recipe
+from winkit.core.recipe.validation import ValidationReport, username_problem, validate_recipe
 from winkit.core.user_folders import ORDER, default_folders
 from winkit.core.volumes import VolumeInfo
 from winkit.core.volumes import ref_for as volume_ref
@@ -484,6 +485,33 @@ class StudioController:
         )
         self.save()
         return result
+
+    # ---- contas extras (V2-11)
+    def add_extra_account(self, username: str, *, admin: bool, password_mode: str) -> str | None:
+        """Devolve o problema (texto) ou ``None`` se a conta entrou na receita."""
+        recipe = self.require_recipe()
+        problem = username_problem(username)
+        taken = {recipe.windows.account.username.casefold()}
+        taken |= {a.username.casefold() for a in recipe.windows.extra_accounts}
+        if problem is None and username.casefold() in taken:
+            problem = t("recipe.account_duplicate", name=username)
+        if problem:
+            return problem
+        account = ExtraAccount(
+            username=username,
+            group="administrators" if admin else "users",
+            password_mode=password_mode,
+        )
+        recipe.windows.extra_accounts = [*recipe.windows.extra_accounts, account]
+        self.save()
+        return None
+
+    def remove_extra_account(self, username: str) -> None:
+        recipe = self.require_recipe()
+        recipe.windows.extra_accounts = [
+            a for a in recipe.windows.extra_accounts if a.username != username
+        ]
+        self.save()
 
     def collect_games(self) -> games_collector.GamesReport:
         """Bibliotecas da Steam e jogos da Epic em outros discos (V2-13)."""

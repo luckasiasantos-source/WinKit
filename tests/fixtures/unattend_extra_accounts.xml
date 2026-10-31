@@ -1,0 +1,138 @@
+<?xml version='1.0' encoding='utf-8'?>
+<unattend xmlns="urn:schemas-microsoft-com:unattend" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
+  <settings pass="windowsPE">
+    <component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <InputLocale>0416:00010416</InputLocale>
+      <SetupUILanguage>
+        <UILanguage>pt-BR</UILanguage>
+      </SetupUILanguage>
+      <SystemLocale>pt-BR</SystemLocale>
+      <UILanguage>pt-BR</UILanguage>
+      <UserLocale>pt-BR</UserLocale>
+    </component>
+    <component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <DynamicUpdate>
+        <Enable>false</Enable>
+        <WillShowUI>OnError</WillShowUI>
+      </DynamicUpdate>
+      <RunSynchronous>
+        <RunSynchronousCommand wcm:action="add">
+          <Description>WinKit: requisitos do Windows 11</Description>
+          <Order>1</Order>
+          <Path>reg.exe add "HKLM\SYSTEM\Setup\LabConfig" /v BypassTPMCheck /t REG_DWORD /d 1 /f</Path>
+        </RunSynchronousCommand>
+        <RunSynchronousCommand wcm:action="add">
+          <Description>WinKit: requisitos do Windows 11</Description>
+          <Order>2</Order>
+          <Path>reg.exe add "HKLM\SYSTEM\Setup\LabConfig" /v BypassSecureBootCheck /t REG_DWORD /d 1 /f</Path>
+        </RunSynchronousCommand>
+        <RunSynchronousCommand wcm:action="add">
+          <Description>WinKit: requisitos do Windows 11</Description>
+          <Order>3</Order>
+          <Path>reg.exe add "HKLM\SYSTEM\Setup\LabConfig" /v BypassRAMCheck /t REG_DWORD /d 1 /f</Path>
+        </RunSynchronousCommand>
+        <RunSynchronousCommand wcm:action="add">
+          <Description>WinKit: requisitos do Windows 11</Description>
+          <Order>4</Order>
+          <Path>reg.exe add "HKLM\SYSTEM\Setup\LabConfig" /v BypassCPUCheck /t REG_DWORD /d 1 /f</Path>
+        </RunSynchronousCommand>
+      </RunSynchronous>
+      <UserData>
+        <AcceptEula>true</AcceptEula>
+        <ProductKey>
+          <Key>VK7JG-NPHTM-C97JM-9MPGT-3V66T</Key>
+          <WillShowUI>OnError</WillShowUI>
+        </ProductKey>
+      </UserData>
+    </component>
+  </settings>
+  <settings pass="specialize">
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <TimeZone>E. South America Standard Time</TimeZone>
+    </component>
+    <component name="Microsoft-Windows-Deployment" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <RunSynchronous>
+        <RunSynchronousCommand wcm:action="add">
+          <Description>WinKit: não criptografar o disco</Description>
+          <Order>1</Order>
+          <Path>reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\BitLocker" /v "PreventDeviceEncryption" /t REG_DWORD /d "1" /f</Path>
+        </RunSynchronousCommand>
+        <RunSynchronousCommand wcm:action="add">
+          <Description>WinKit: preparar o agente</Description>
+          <Order>2</Order>
+          <Path>cmd.exe /c for %d in (D E F G H I J K L M N O P Q R S T U V W X Y Z) do @if exist %d:\WinKit\winkit.marker powershell.exe -nop -ep Bypass -File %d:\WinKit\Agent\bootstrap.ps1 %d: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx padrao</Path>
+        </RunSynchronousCommand>
+      </RunSynchronous>
+    </component>
+  </settings>
+  <settings pass="oobeSystem">
+    <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <InputLocale>0416:00010416</InputLocale>
+      <SystemLocale>pt-BR</SystemLocale>
+      <UILanguage>pt-BR</UILanguage>
+      <UserLocale>pt-BR</UserLocale>
+    </component>
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <AutoLogon>
+        <Enabled>true</Enabled>
+        <LogonCount>1</LogonCount>
+        <Password>
+          <Value />
+          <PlainText>true</PlainText>
+        </Password>
+        <Username>Samuel</Username>
+      </AutoLogon>
+      <FirstLogonCommands>
+        <SynchronousCommand wcm:action="add">
+          <CommandLine>cmd.exe /c if exist "%ProgramData%\WinKit\Agent\winkit-agent\winkit-agent.exe" start "" "%ProgramData%\WinKit\Agent\winkit-agent\winkit-agent.exe" phase2 --first-logon</CommandLine>
+          <Description>WinKit: iniciar a Fase 2</Description>
+          <Order>1</Order>
+          <RequiresUserInput>false</RequiresUserInput>
+        </SynchronousCommand>
+      </FirstLogonCommands>
+      <OOBE>
+        <HideEULAPage>true</HideEULAPage>
+        <HideLocalAccountScreen>true</HideLocalAccountScreen>
+        <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
+        <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
+        <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+        <ProtectYourPC>3</ProtectYourPC>
+      </OOBE>
+      <TimeZone>E. South America Standard Time</TimeZone>
+      <UserAccounts>
+        <LocalAccounts>
+          <LocalAccount wcm:action="add">
+            <Description>Conta local criada pelo WinKit</Description>
+            <DisplayName>Samuel</DisplayName>
+            <Group>Administrators</Group>
+            <Name>Samuel</Name>
+            <Password>
+              <Value />
+              <PlainText>true</PlainText>
+            </Password>
+          </LocalAccount>
+          <LocalAccount wcm:action="add">
+            <Description>Conta local criada pelo WinKit</Description>
+            <DisplayName>Ana &amp; Cia</DisplayName>
+            <Group>Administrators</Group>
+            <Name>Ana</Name>
+            <Password>
+              <Value />
+              <PlainText>true</PlainText>
+            </Password>
+          </LocalAccount>
+          <LocalAccount wcm:action="add">
+            <Description>Conta local criada pelo WinKit</Description>
+            <DisplayName>Visita</DisplayName>
+            <Group>Users</Group>
+            <Name>Visita</Name>
+            <Password>
+              <Value />
+              <PlainText>true</PlainText>
+            </Password>
+          </LocalAccount>
+        </LocalAccounts>
+      </UserAccounts>
+    </component>
+  </settings>
+</unattend>

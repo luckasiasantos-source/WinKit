@@ -1873,7 +1873,7 @@ Segurança:
   - "sem senha";
   - "definida agora": fica no pendrive, como a DT-006.
 - Os backups ganham, na tela de Configurações dos apps, o campo **"Para quem"**: Todas as contas (padrão, perfil Default) ou só a conta principal.
-- **CLI:** `winkit contas adicionar <nome> [--admin] [--senha-no-primeiro-acesso|--sem-senha|--senha]`, `winkit contas listar|remover`.
+- **CLI:** `winkit contas adicionar <nome> [--admin] [--sem-senha|--senha X]` (sem opção = trocar no primeiro acesso), `winkit contas listar|remover`, `winkit backup-para-quem <id> todas|principal`.
 
 **Dados.**
 - `windows.extra_accounts[]` (§5.1).

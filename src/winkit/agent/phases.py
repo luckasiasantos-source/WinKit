@@ -28,6 +28,7 @@ from winkit.core.planner.models import Plan, PlanContext, StepKind
 from winkit.core.planner.planner import plan as make_plan
 from winkit.core.recipe.io import load_recipe, recipe_hash
 from winkit.core.recipe.models import Recipe
+from winkit.core.secrets import SECRETS
 from winkit.core.state import models as st
 from winkit.i18n import Language, msg, normalize, set_language
 from winkit.platform.environment import single_instance
@@ -141,6 +142,7 @@ def open_session(rt: Runtime, log: EventLog, *, phase: int) -> Session | None:
     recipe = load_agent_recipe(rt, log)
     if recipe is None:
         return None
+    register_secrets(recipe)
     store = StateStore(rt.paths.state)
     try:
         state = store.load()
@@ -168,6 +170,14 @@ def open_session(rt: Runtime, log: EventLog, *, phase: int) -> Session | None:
     store.save(state)
     locator = PendriveLocator(rt.services.env, recipe.meta.pendrive_id)
     return Session(rt, log, recipe, state, plan, store, locator)
+
+
+def register_secrets(recipe: Recipe) -> None:
+    """R-53: as senhas da receita nunca aparecem em log (mascaradas pelo registro de segredos)."""
+    win = recipe.windows
+    for password in [win.account.password, *(a.password for a in win.extra_accounts)]:
+        if password:
+            SECRETS.add(password)
 
 
 def _safety_nets(s: Session, *, phase: int) -> None:

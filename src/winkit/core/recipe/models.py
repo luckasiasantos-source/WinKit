@@ -86,6 +86,17 @@ class Account(_Model):
     auto_logon: bool = True
 
 
+class ExtraAccount(_Model):
+    """V2-11: outra conta local criada na instalação (o login automático fica só na principal)."""
+
+    username: Annotated[str, Field(min_length=1, max_length=20)]
+    display_name: str | None = None
+    group: Literal["administrators", "users"] = "users"
+    #: ``must_change``: nasce sem senha e o Windows pede uma nova no primeiro login.
+    password_mode: Literal["empty", "stored", "must_change"] = "must_change"  # noqa: S105
+    password: str | None = Field(default=None, repr=False)
+
+
 class WindowsSettings(_Model):
     target_os: list[OsMajor] = Field(default_factory=_only_11)
     edition: Edition = "pro"
@@ -102,6 +113,8 @@ class WindowsSettings(_Model):
     account: Account
     #: V2-08: ids de ``features.yaml`` a ligar (nunca desliga nada).
     optional_features: list[ItemId] = Field(default_factory=list)
+    #: V2-11: contas locais além da principal.
+    extra_accounts: list[ExtraAccount] = Field(default_factory=list)
 
 
 class Updates(_Model):
@@ -185,6 +198,8 @@ class BackupItem(_Model):
     related_app: ItemId | None = None
     decide_at_runtime: bool = False
     warnings: list[str] = Field(default_factory=list)
+    #: V2-11: ``main`` = só a conta principal (Fase 2), em vez do perfil padrão de todas.
+    for_accounts: Literal["all", "main"] = "all"
 
 
 class Bloatware(_Model):

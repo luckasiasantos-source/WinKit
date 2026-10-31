@@ -29,6 +29,7 @@ from winkit.i18n import t, tn
 
 # Ordem dos grupos dentro de cada fase (PLANO.md §11.2, tabela "Ordem dentro de cada fase").
 _G1 = {
+    "account": 2,  # R24: no começo da Fase 1
     "driver": 10,
     "user_folders": 12,  # R16: antes de backups e ajustes do usuário
     "wifi": 15,  # R17: logo depois dos drivers (precisa do driver de rede)
@@ -109,6 +110,7 @@ def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> 
     drafts: list[_Draft] = []
     excluded: list[ExcludedItem] = []
 
+    _plan_accounts(recipe, drafts)
     _plan_drivers(recipe, drafts)
     _plan_user_folders(recipe, drafts)
     _plan_wifi(recipe, drafts)
@@ -157,6 +159,21 @@ def _plan_drivers(recipe: Recipe, out: list[_Draft]) -> None:  # R3
                 "machine",
                 needs_pendrive=True,
                 sort=(_G1["driver"], d.priority, d.id),
+            )
+        )
+
+
+def _plan_accounts(recipe: Recipe, out: list[_Draft]) -> None:  # R24
+    for a in recipe.windows.extra_accounts:
+        ref = a.username.casefold()
+        out.append(
+            _Draft(
+                "account",
+                ref,
+                1,
+                t("plan.account", name=a.username),
+                "machine",
+                sort=(_G1["account"], 0, ref),
             )
         )
 
@@ -555,6 +572,8 @@ def _backup_phase(b: BackupItem, ask: Ask) -> tuple[Phase, Target, bool]:
         return 2, "machine", ask(b.decide_at_runtime)
     if ask(b.decide_at_runtime):  # R2
         return 2, ("user_profile" if parsed.is_profile else "machine"), True
+    if parsed.is_profile and b.for_accounts == "main":  # V2-11: só a conta principal
+        return 2, "user_profile", False
     if parsed.is_profile:  # R7
         return 1, "default_profile", False
     return 1, "machine", False  # R8

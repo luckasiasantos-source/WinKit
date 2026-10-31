@@ -64,6 +64,8 @@ class FakeAccounts:
     admins: set[str] = field(default_factory=set)
     users: set[str] = field(default_factory=lambda: {"Samuel"})
 
+    expired: set[str] = field(default_factory=set)
+
     def ensure_administrator(self, username: str) -> str:
         if username not in self.users:
             return "no_user"
@@ -71,6 +73,23 @@ class FakeAccounts:
             return "already"
         self.admins.add(username)
         return "added"
+
+    def ensure_group(self, username: str, *, admin: bool) -> str:
+        if username not in self.users:
+            return "no_user"
+        if (username in self.admins) == admin:
+            return "same"
+        if admin:
+            self.admins.add(username)
+        else:
+            self.admins.discard(username)
+        return "changed"
+
+    def expire_password(self, username: str) -> bool:
+        if username not in self.users:
+            return False
+        self.expired.add(username)
+        return True
 
 
 @dataclass

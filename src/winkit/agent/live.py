@@ -17,7 +17,7 @@ from pathlib import Path
 from winkit.agent.eventlog import EventLog
 from winkit.agent.executor import Executor
 from winkit.agent.paths import AgentPaths
-from winkit.agent.phases import INSTANCE_NAME, Runtime, apply_language
+from winkit.agent.phases import INSTANCE_NAME, Runtime, apply_language, register_secrets
 from winkit.agent.progress import AgentUi, NullUi
 from winkit.agent.store import StateStore
 from winkit.core import layout
@@ -100,6 +100,7 @@ def run_live(
 ) -> LiveResult:
     ui = ui or NullUi()
     recipe = load_live_recipe(options)
+    register_secrets(recipe)
     apply_language(rt, recipe, override=options.language)
     name = (stamp or (lambda: rt.clock().strftime("%Y-%m-%d_%H-%M-%S")))()
     run_dir = rt.paths.base / RUNS_DIR / name

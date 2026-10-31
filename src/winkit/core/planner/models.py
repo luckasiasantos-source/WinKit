@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict
 from winkit.core.recipe.models import ExecutionMode
 
 StepKind = Literal[
+    "account",
     "driver",
     "user_folders",
     "wifi",

@@ -282,6 +282,14 @@ class BackupsPage(Page):
                 on_ask=partial(self._set_flag, b, "decide_at_runtime"),
             )
             card.add_row(row)
+            if r.windows.extra_accounts:
+                card.add_row(
+                    Row(
+                        t("studio.backups.main_only"),
+                        t("studio.backups.main_only_hint"),
+                        accessory=toggle(b.for_accounts == "main", partial(self._for_main, b)),
+                    )
+                )
         self.content.addWidget(
             section(
                 t("studio.on_pendrive"),
@@ -292,6 +300,10 @@ class BackupsPage(Page):
 
     def _set_flag(self, item: Any, attr: str, value: bool) -> None:
         setattr(item, attr, value)
+        self.save()
+
+    def _for_main(self, item: Any, value: bool) -> None:
+        item.for_accounts = "main" if value else "all"
         self.save()
 
     def _add_suggestion(self, s: Any) -> None:

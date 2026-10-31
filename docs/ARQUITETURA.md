@@ -153,6 +153,7 @@ Por que isso importa:
 | `core/volumes.py`, `platform/volumes.py` | Resolver de volumes (D-035, R-52): pelo serial do CIM `Win32_Volume`, letra atual só para montar caminhos |
 | `core/user_folders.py`, `collector/user_folders.py`, `agent/steps/user_folders.py` | Pastas do usuário em outro disco (V2-14): `User Shell Folders` com `%USERNAME%`; "Copiar agora" só em `merge` |
 | `core/vdf.py`, `core/games.py`, `collector/games.py`, `agent/steps/game_library.py` | Jogos sem baixar de novo (V2-13): `libraryfolders.vdf` da Steam e manifestos da Epic |
+| `agent/steps/account.py`, `platform/accounts.py` | Contas extras (V2-11): `LocalAccount` no XML, grupo conferido pelo SID, `PasswordExpired`; nunca ao vivo |
 | `core/secrets.py` | Registro único de segredos do processo (R-53); `runner` e `EventLog` mascaram |
 | `core/wifi.py`, `collector/wifi.py`, `platform/wifi.py`, `agent/steps/wifi.py` | Wi-Fi (V2-02): XML do perfil, coleta, `netsh` só por código de saída e arquivos, etapa antes do login |
 | `core/media.py` | Pendrive comum (D-034): reconhecer a mídia de instalação, marcar o `autounattend.xml` do WinKit |

@@ -62,6 +62,7 @@ SAME_AS_BASE: dict[str, set[str]] = {
         "studio.pendrive.iso_detail",
         "studio.apps.src_winget",
         "cli.backup_added",
+        "cli.backup_for",
     },
     "es": {
         "validate.warnings",
@@ -89,6 +90,7 @@ SAME_AS_BASE: dict[str, set[str]] = {
         "studio.browsers.enabled",
         "cli.browser_search",
         "studio.folders.default_base",
+        "studio.extra.group_administrators",
     },
 }
 ALWAYS_SAME = {

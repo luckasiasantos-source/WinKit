@@ -58,8 +58,15 @@ from winkit.core.planner.models import PlanContext
 from winkit.core.planner.planner import plan
 from winkit.core.presets import apply_preset, preview_preset
 from winkit.core.recipe.io import new_recipe
-from winkit.core.recipe.models import BrowserConfig, EnvScope, EnvVar, Recipe, UserFolders
-from winkit.core.recipe.validation import validate_recipe
+from winkit.core.recipe.models import (
+    BrowserConfig,
+    EnvScope,
+    EnvVar,
+    ExtraAccount,
+    Recipe,
+    UserFolders,
+)
+from winkit.core.recipe.validation import username_problem, validate_recipe
 from winkit.core.text import human_size
 from winkit.core.user_folders import ORDER as USER_FOLDER_ORDER
 from winkit.core.user_folders import default_folders
@@ -1433,6 +1440,97 @@ def _add_game_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
         jm.set_defaults(func=cmd_jogos_marcar, command_value=value)
 
 
+# ------------------------------------------------------------------ contas extras (V2-11)
+def cmd_contas_listar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    win = load_profile_recipe(tgt.root, args.perfil).windows
+    out(f"  * {win.account.username}  ({t('studio.extra.main')})")
+    for a in win.extra_accounts:
+        group = t(f"studio.extra.group_{a.group}")
+        out(f"  - {a.username}  ({group}, {t(f'studio.extra.password_{a.password_mode}')})")
+    return 0
+
+
+def cmd_contas_adicionar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    mode = "stored" if args.senha else ("empty" if args.sem_senha else "must_change")
+    taken = {recipe.windows.account.username.casefold()}
+    taken |= {a.username.casefold() for a in recipe.windows.extra_accounts}
+    problem = username_problem(args.nome)
+    if problem is None and args.nome.casefold() in taken:
+        problem = t("recipe.account_duplicate", name=args.nome)
+    if problem:
+        out(problem)
+        return 1
+    account = ExtraAccount(
+        username=args.nome,
+        display_name=args.nome_exibicao,
+        group="administrators" if args.admin else "users",
+        password_mode=mode,
+        password=args.senha,
+    )
+    recipe.windows.extra_accounts = [*recipe.windows.extra_accounts, account]
+    _save(tgt, recipe)
+    if mode == "stored":
+        out(t("recipe.password_stored_warning"))
+    return cmd_contas_listar(args, services, out)
+
+
+def cmd_contas_remover(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    before = len(recipe.windows.extra_accounts)
+    recipe.windows.extra_accounts = [
+        a for a in recipe.windows.extra_accounts if a.username.casefold() != args.nome.casefold()
+    ]
+    if len(recipe.windows.extra_accounts) == before:
+        out(t("cli.not_found", ids=args.nome))
+        return 1
+    _save(tgt, recipe)
+    return cmd_contas_listar(args, services, out)
+
+
+def cmd_backup_para_quem(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    item = recipe.backup(args.id)
+    if item is None:
+        out(t("cli.not_found", ids=args.id))
+        return 1
+    item.for_accounts = "main" if args.quem in ("principal", "main") else "all"
+    _save(tgt, recipe)
+    out(t("cli.backup_for", id=item.id, who=t(f"cli.backup_for_{item.for_accounts}")))
+    return 0
+
+
+def _add_account_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    ct = sub.add_parser("contas", aliases=["accounts"], help=t("cli.h.accounts"))
+    ct_sub = ct.add_subparsers(dest="action", required=True)
+    ct_sub.add_parser("listar", aliases=["list"], parents=[common]).set_defaults(
+        func=cmd_contas_listar
+    )
+    ca = ct_sub.add_parser("adicionar", aliases=["add"], parents=[common])
+    ca.add_argument("nome", help=t("cli.h.account_name"))
+    ca.add_argument("--nome-exibicao", help=t("cli.h.account_display"))
+    ca.add_argument("--admin", action="store_true", help=t("cli.h.account_admin"))
+    pw = ca.add_mutually_exclusive_group()
+    pw.add_argument("--sem-senha", action="store_true", help=t("cli.h.account_no_password"))
+    pw.add_argument("--senha", help=t("cli.h.account_password"))
+    ca.set_defaults(func=cmd_contas_adicionar)
+    cr = ct_sub.add_parser("remover", aliases=["remove"], parents=[common])
+    cr.add_argument("nome", help=t("cli.h.account_name"))
+    cr.set_defaults(func=cmd_contas_remover)
+    bp = sub.add_parser(
+        "backup-para-quem", aliases=["backup-for"], parents=[common], help=t("cli.h.backup_for")
+    )
+    bp.add_argument("id", help=t("cli.h.backup_id"))
+    bp.add_argument(
+        "quem", choices=["todas", "principal", "all", "main"], help=t("cli.h.backup_who")
+    )
+    bp.set_defaults(func=cmd_backup_para_quem)
+
+
 def _add_dns_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     dns = sub.add_parser("dns", help=t("cli.h.dns"))
     dns_sub = dns.add_subparsers(dest="action", required=True)
@@ -1697,6 +1795,7 @@ def _add_system_and_network_parsers(sub: Any, common: argparse.ArgumentParser) -
     _add_browser_parsers(sub, common)
     _add_folder_parsers(sub, common)
     _add_game_parsers(sub, common)
+    _add_account_parsers(sub, common)
 
 
 def build_parser() -> argparse.ArgumentParser:
