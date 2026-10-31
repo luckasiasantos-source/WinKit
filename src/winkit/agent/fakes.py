@@ -23,6 +23,7 @@ from winkit.platform.fakes.system import (
     FakeKnownFolders,
     FakeScheduler,
 )
+from winkit.platform.fakes.system_tweaks import FakeAppx, FakeFeatures
 
 
 def fake_agent_services(*, pendrive: Path, system: Path, **overrides: Any) -> AgentServices:
@@ -40,6 +41,8 @@ def fake_agent_services(*, pendrive: Path, system: Path, **overrides: Any) -> Ag
         "installers": FakeInstallerRunner(),
         "shortcuts": FakeShortcuts(),
         "copier": PythonCopier(),
+        "appx": FakeAppx(),
+        "features": FakeFeatures(),
     }
     values.update(overrides)
     return AgentServices(**values)

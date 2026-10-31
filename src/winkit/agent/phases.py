@@ -225,6 +225,8 @@ def run_phase2(rt: Runtime, *, retry_failed: bool = False) -> int:
                 log.info("adiado pelo usuário para o próximo login")
                 return 0
             s.state.postponed = False
+            if choice.computer_name:
+                s.state.computer_name_choice = choice.computer_name
             ps = s.state.phase2
             ps.status, ps.runs = "running", ps.runs + 1
             ps.started_at = ps.started_at or rt.clock()

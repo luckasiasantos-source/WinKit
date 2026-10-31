@@ -5,9 +5,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from winkit.platform.accounts import Accounts, WindowsAccounts
+from winkit.platform.appx import AppxManager, WindowsAppxManager
 from winkit.platform.copy import Copier, RobocopyCopier
 from winkit.platform.drivers import DriverManager, WindowsDriverManager
 from winkit.platform.environment import Environment, WindowsEnvironment
+from winkit.platform.features import SystemFeatures, WindowsSystemFeatures
 from winkit.platform.installers import InstallerRunner, WindowsInstallerRunner
 from winkit.platform.inventory import AppInventory, WindowsAppInventory
 from winkit.platform.known_folders import KnownFolders, WindowsKnownFolders
@@ -34,6 +36,8 @@ class AgentServices:
     installers: InstallerRunner
     shortcuts: Shortcuts
     copier: Copier
+    appx: AppxManager
+    features: SystemFeatures
 
 
 def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windows
@@ -54,4 +58,6 @@ def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windo
         installers=WindowsInstallerRunner(runner, ps),
         shortcuts=WindowsShortcuts(ps),
         copier=RobocopyCopier(runner),
+        appx=WindowsAppxManager(ps),
+        features=WindowsSystemFeatures(ps),
     )

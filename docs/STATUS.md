@@ -21,7 +21,7 @@
 | M4 | Drivers | ✅ código | ⬜ roteiro pronto (`docs/validacao/M4.md`) |
 | M5 | Aplicativos | ✅ código | ⬜ roteiro pronto (`docs/validacao/M5.md`) |
 | M6 | Backups | ✅ código | ⬜ roteiro pronto (`docs/validacao/M6.md`) |
-| M7 | Bloatware e ajustes | ⬜ | ⬜ pendente |
+| M7 | Bloatware e ajustes | ✅ código | ⬜ roteiro pronto (`docs/validacao/M7.md`) |
 | M8 | Windows Update, resumo e notificações | ⬜ | ⬜ pendente |
 | M9 | Interface do Agente | ⬜ | ⬜ pendente |
 | M10 | WinKit Studio (GUI) | ⬜ | — |
@@ -112,7 +112,14 @@
 - ✅ CLI: `coletar backups [--adicionar-recomendados]`, `backup adicionar|listar|capturar|remover`, `apps portatil`, `sincronizar` (item 27)
 - ✅ `TweakOp` aceita catálogo exportado e lido de novo (contagem por campos preenchidos)
 - ✅ Roteiro `docs/validacao/M6.md`
-### M7 — Bloatware e ajustes ⬜
+### M7 — Bloatware e ajustes ✅ (código) · validação na VM pendente
+- ✅ `platform/appx.py` — remoção de pacote provisionado e instalado para todos os usuários; presença
+- ✅ `platform/features.py` — recursos opcionais (ativar/desativar, reinício necessário) e renomear o computador
+- ✅ Registro: `create_key` (chave `Deprovisioned`, item 37)
+- ✅ `agent/steps/tweak.py` — motor de operações tipadas: registro (perfil Default montado e sempre desmontado, HKCU, HKLM), tipo de início de serviço via registro, recursos opcionais, powercfg, appx; conferência "já aplicado"
+- ✅ `agent/steps/system.py` — bloatware + bloqueio de reinstalação; plano de energia com duplicação de planos ocultos (Modern Standby), hibernação, inicialização rápida; renomear o computador (decidir na hora)
+- ✅ Teste de dados: todos os ajustes do catálogo aplicam em todos os alvos
+- ✅ Roteiro `docs/validacao/M7.md`
 ### M8 — Windows Update, resumo e notificações ⬜
 ### M9 — Interface do Agente ⬜
 ### M10 — WinKit Studio ⬜

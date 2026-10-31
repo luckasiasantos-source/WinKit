@@ -104,7 +104,8 @@ Por que isso importa:
 | `copy.py` | robocopy e alternativa em Python (captura e restauração), salvaguarda R-20 | `Copier` |
 | `vss.py` | Cópias de sombra (CIM), exposição por link, pendentes | `ShadowCopies`, `PendingSnapshots` |
 | `drivers.py` | Listagem (`Get-WindowsDriver`), exportação e instalação (`pnputil`) de drivers | `DriverManager` |
-| `appx.py` | Pacotes MSIX: remoção e bloqueio de reinstalação | `AppxManager` |
+| `appx.py` | Pacotes MSIX: remoção para todos os usuários e presença | `AppxManager` |
+| `features.py` | Recursos opcionais do Windows; renomear o computador | `SystemFeatures` |
 | `winget.py` | export, download, install, list, registro do App Installer | `Winget` |
 | `inventory.py` | Apps instalados: registro de desinstalação + `Get-AppxPackage` | `AppInventory` |
 | `shortcuts.py` | Atalhos `.lnk` (WScript.Shell) | `Shortcuts` |
@@ -135,6 +136,7 @@ Por que isso importa:
 | `agent/executor.py` | Executa um `Plan`, persiste `State`, trata reinicialização e pendrive ausente |
 | `agent/integrity.py` | Confere arquivo ou pasta do pendrive contra o `manifesto.json` (R-22) |
 | `agent/fakes.py`, `platform/fakes/services.py` | Fábricas de serviços falsos (um lugar só para acrescentar campos) |
+| `agent/steps/tweak.py`, `steps/system.py` | Motor de ajustes (onde gravar conforme o alvo); bloatware, energia, nome do PC |
 | `agent/steps/*.py` | Uma classe por tipo de etapa: `DriverStep`, `BloatStep`, `TweakStep`, `BackupStep`, `AppStep`, `ShortcutStep`, `WindowsUpdateStep`, `CleanupStep` |
 | `agent/ui/` | Janela da Fase 2, bandeja, resumo (import tardio) |
 

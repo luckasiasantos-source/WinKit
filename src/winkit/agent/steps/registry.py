@@ -7,15 +7,11 @@ from winkit.agent.steps.backup import BackupStep
 from winkit.agent.steps.base import StepContext, StepHandler, StepResult
 from winkit.agent.steps.driver import DriverStep
 from winkit.agent.steps.finalize import FinalizeStep
+from winkit.agent.steps.system import BloatStep, PowerStep, RenameComputerStep
+from winkit.agent.steps.tweak import TweakStep
 from winkit.core.planner.models import StepKind
 
-PLACEHOLDER_KINDS: tuple[StepKind, ...] = (
-    "bloat",
-    "tweak",
-    "power",
-    "rename_computer",
-    "windows_update",
-)
+PLACEHOLDER_KINDS: tuple[StepKind, ...] = ("windows_update",)
 
 
 class NotImplementedStep:
@@ -34,6 +30,10 @@ def default_handlers() -> dict[StepKind, StepHandler]:
     handlers["driver"] = DriverStep()
     handlers["app"] = AppStep()
     handlers["backup"] = BackupStep()
+    handlers["bloat"] = BloatStep()
+    handlers["tweak"] = TweakStep()
+    handlers["power"] = PowerStep()
+    handlers["rename_computer"] = RenameComputerStep()
     handlers["shortcut"] = ShortcutStep()
     handlers["finalize"] = FinalizeStep()
     return handlers

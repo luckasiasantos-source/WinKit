@@ -58,6 +58,8 @@ class AgentState(_Model):
     reboot_pending: bool = False
     warnings: list[str] = Field(default_factory=list)
     postponed: bool = False
+    #: Nome escolhido na janela da Fase 2 (item 33, "decidir na hora").
+    computer_name_choice: str | None = None
 
     def step(self, step_id: str) -> StepState:
         try:

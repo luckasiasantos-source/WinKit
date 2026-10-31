@@ -36,6 +36,8 @@ class Registry(Protocol):
 
     def key_exists(self, hive: str, key: str) -> bool: ...
 
+    def create_key(self, hive: str, key: str) -> None: ...
+
     def subkeys(self, hive: str, key: str) -> list[str]: ...
 
     def values(self, hive: str, key: str) -> dict[str, Any]: ...
@@ -153,6 +155,14 @@ class WindowsRegistry:  # pragma: no cover — exercitado no CI Windows
                 return True
         except FileNotFoundError:
             return False
+
+    def create_key(self, hive: str, key: str) -> None:
+        w = self._w
+        try:
+            with w.CreateKeyEx(self._root(hive), key, 0, w.KEY_WRITE | w.KEY_WOW64_64KEY):
+                pass
+        except OSError as exc:
+            raise RegistryError(f"{hive}\\{key}: {exc}") from exc
 
     def subkeys(self, hive: str, key: str) -> list[str]:
         w = self._w

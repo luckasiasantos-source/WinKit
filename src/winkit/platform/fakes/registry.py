@@ -56,6 +56,10 @@ class FakeRegistry:
         h, k = self._k(hive, key)
         return any(x[0] == h and (x[1] == k or x[1].startswith(k + "\\")) for x in self.data)
 
+    def create_key(self, hive: str, key: str) -> None:
+        self._check(key)
+        self.data.setdefault(self._k(hive, key), {})
+
     def subkeys(self, hive: str, key: str) -> list[str]:
         h, k = self._k(hive, key)
         prefix = k + "\\" if k else ""

@@ -28,6 +28,29 @@
 
 ---
 
+## 2026-10-31 — M7 — Bloatware, ajustes, energia e nome do computador
+**Tipo:** implementação + testes + documentação
+**Resumo:** o Agente remove os apps escolhidos e impede que voltem, aplica os ajustes de privacidade/visual/sistema no perfil Default (a conta já nasce configurada), ajusta energia e renomeia o computador quando decidido na hora.
+
+### Adicionado
+- `src/winkit/platform/appx.py`, `features.py`, `fakes/system_tweaks.py`
+- `src/winkit/agent/steps/tweak.py` — `TweakStep`, `locate`, `apply_op`, `registry_scope`
+- `src/winkit/agent/steps/system.py` — `BloatStep`, `PowerStep`, `RenameComputerStep`
+- Registro: `create_key`
+- `AgentState.computer_name_choice`
+- Testes: `tests/agent/test_system_steps.py` (inclui todos os ajustes do catálogo em todos os alvos)
+- `docs/validacao/M7.md`
+
+### Alterado
+- `src/winkit/agent/services.py`, `agent/fakes.py` — `appx`, `features`
+- `src/winkit/agent/steps/registry.py` — só `windows_update` segue pendente de implementação
+- `src/winkit/agent/phases.py` — guarda o nome do PC escolhido na janela
+
+### Documentos vivos atualizados
+- STATUS — M7; ARQUITETURA — módulos
+
+---
+
 ## 2026-10-31 — M6 — Backups de configuração
 **Tipo:** implementação + testes + documentação
 **Resumo:** o pedido central do usuário: escolher pastas (ou arquivos) de configuração no PC atual, guardar em pasta crua no pendrive com cópia de sombra e restaurar no lugar certo do Windows novo antes do primeiro uso do app.
