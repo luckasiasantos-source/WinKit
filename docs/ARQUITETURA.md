@@ -392,3 +392,9 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 2026-10-31 · aceita
 **Contexto:** "puro" foi definido como "sem Windows, sem Qt, sem subprocess". O manifesto (hashes) e a leitura dos catálogos precisam ler arquivos.
 **Decisão:** `core` pode usar `pathlib`/`hashlib`/`importlib.resources` para ler e gravar arquivos comuns, porque isso é portável e testável no Linux. Continua proibido: APIs específicas do Windows, registro, processos, Qt.
+
+### D-023 — Três caminhos para iniciar o Agente
+2026-10-31 · aceita
+**Contexto:** a Fase 1 depende do `SetupComplete.cmd` (H3) e a Fase 2 de uma tarefa agendada criada na etapa *specialize*, quando não se sabe se o serviço de agendamento já está disponível.
+**Decisão:** (1) `SetupComplete.cmd` → Fase 1; (2) tarefa `\WinKit\Fase2` registrada pelo bootstrap **e** garantida de novo pelo Agente; (3) `FirstLogonCommands` no XML inicia a Fase 2 com `cmd /c start` (não bloqueia a área de trabalho). A trava de instância única do Agente torna as execuções repetidas inofensivas.
+**Consequências:** a Fase 2 começa mesmo se um dos mecanismos falhar; a Fase 1 que não rodou é coberta pelo fallback de D-012.

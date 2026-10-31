@@ -16,7 +16,7 @@
 | — | Planejamento e documentação | ✅ | — |
 | M0 | Fundação | ✅ | — |
 | M1 | Núcleo puro | ✅ | — |
-| M2 | Construtor mínimo + primeira instalação real | ⬜ | ⬜ pendente |
+| M2 | Construtor mínimo + primeira instalação real | ✅ código | ⬜ roteiro pronto (`docs/validacao/M2.md`), aguardando execução na VM |
 | M3 | Esqueleto do Agente | ⬜ | ⬜ pendente |
 | M4 | Drivers | ⬜ | ⬜ pendente |
 | M5 | Aplicativos | ⬜ | ⬜ pendente |
@@ -62,14 +62,18 @@
 
 **Testes:** 300 passando; cobertura do `core` = 98%.
 
-### M2 — Construtor mínimo ⬜
-- ⬜ Detecção do Ventoy
-- ⬜ Leitura de ISOs
-- ⬜ Gerador do `autounattend.xml`
-- ⬜ Mesclagem do `ventoy.json`
-- ⬜ `bootstrap.ps1` mínimo
-- ⬜ CLI: `pendrive listar`, `construir --somente-xml`, `validar`
-- ⬜ Roteiro `docs/validacao/M2.md`
+### M2 — Construtor mínimo ✅ (código) · validação na VM pendente
+- ✅ `core/ventoy/detect.py` — detecção do Ventoy pela partição `VTOYEFI`
+- ✅ `core/ventoy/config.py` — mesclagem do `ventoy.json` (preserva plugins e entradas de terceiros, remove entradas obsoletas só deste perfil)
+- ✅ `core/isos.py` + `platform/disks.py` — partições e leitura de ISO somente leitura (`Mount-DiskImage -Access ReadOnly` + `Get-WindowsImage`), com cache
+- ✅ `core/unattend/` — gerador do XML (windowsPE/specialize/oobeSystem), linhas de comando com limite de 259 caracteres, salvaguarda contra elementos de disco
+- ✅ `core/layout.py` — layout do pendrive e marcador com `pendrive_id`
+- ✅ `builder/` — alvo, leitura de ISOs, construção (XML por idioma/arquitetura, `ventoy.json`, bootstrap, cópia do Agente), validação do pendrive
+- ✅ `builder/assets/bootstrap.ps1` — versão completa (cópia do Agente, receita, `SetupComplete.cmd`, tarefa pelo SID, log no pendrive, nunca falha a instalação)
+- ✅ CLI: `pendrive listar`, `receita nova`, `plano`, `construir [--somente-xml] [--agente]`, `validar`, opção `--raiz` para simular o pendrive numa pasta
+- ✅ Roteiros: `docs/validacao/AMBIENTE_VM.md` (Hyper-V) e `docs/validacao/M2.md`
+
+**Testes:** 392 passando no Linux; testes reais do `bootstrap.ps1` e da listagem de partições rodam no CI Windows.
 
 ### M3 — Esqueleto do Agente ⬜
 - ⬜ Empacotamento PyInstaller onedir
@@ -103,3 +107,4 @@
 | H8 | Desempenho aceitável de pasta crua em exFAT via USB | ⬜ | — |
 | H9 | PowerShell funciona na etapa *specialize* | ⬜ | — |
 | H10 | Instalador enxerga o SSD sem driver extra | ⬜ | — |
+| H11 | Grupo `Administrators` funciona em Windows pt-BR | ⬜ | — |

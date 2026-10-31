@@ -735,7 +735,13 @@ Todos os componentes recebem `processorArchitecture` da receita (`amd64` ou `arm
 
 ### 9.2 Comando de bootstrap embutido
 
-O XML contém apenas uma linha que localiza o pendrive certo e chama `bootstrap.ps1`. Forma (o texto exato fica em `core/unattend/bootstrap_command.py` e tem teste de snapshot):
+O XML contém apenas uma linha que localiza o pendrive certo e chama `bootstrap.ps1`. O campo `Path` aceita no máximo 259 caracteres, por isso a forma implementada (M2, `core/unattend/commands.py`, coberta por teste de snapshot) é:
+
+```
+cmd.exe /c for %d in (D E F ... Z) do @if exist %d:\WinKit\winkit.marker powershell.exe -nop -ep Bypass -File %d:\WinKit\Agent\bootstrap.ps1 %d: <pendrive_id> <perfil>
+```
+
+O `bootstrap.ps1` confere o `pendrive_id` do marcador e ignora pendrives de outro WinKit. Forma original planejada, descartada por exceder o limite:
 
 ```
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "
@@ -769,13 +775,13 @@ A edição é escolhida pela **chave genérica de instalação** pública da Mic
 
 ```
 1. Recebe -PendriveRoot e -Profile
-2. Copia WinKit\Agent\winkit-agent\  →  C:\ProgramData\WinKit\Agent\
+2. Copia WinKit\Agent\winkit-agent\  →  C:\ProgramData\WinKit\Agent\winkit-agent\
    (cópia local: o Agente continua funcionando entre reinicializações mesmo sem o pendrive;
     o pendrive só é necessário para o conteúdo — instaladores, drivers, backups)
 3. Copia a receita → C:\ProgramData\WinKit\receita.json
 4. Grava C:\ProgramData\WinKit\bootstrap.json  { pendrive_id, profile, timestamp, agent_version }
-5. Cria C:\Windows\Setup\Scripts\SetupComplete.cmd:
-       "C:\ProgramData\WinKit\Agent\winkit-agent.exe" phase1
+5. Cria C:\Windows\Setup\Scripts\SetupComplete.cmd (ou acrescenta uma linha, se já existir):
+       "C:\ProgramData\WinKit\Agent\winkit-agent\winkit-agent.exe" phase1
 6. Registra a tarefa agendada "WinKit\Fase2" (10.3)
 7. Grava log em C:\ProgramData\WinKit\Logs\bootstrap.log
 8. Sai SEMPRE com código 0 (um erro aqui não pode abortar a instalação do Windows)
@@ -794,7 +800,9 @@ Roda como SYSTEM depois da instalação e antes da tela de login, com a tela nat
 - Nome: `\WinKit\Fase2`.
 - Gatilho: **ao fazer logon** (qualquer usuário).
 - Principal: grupo `BUILTIN\Administrators`, `RunLevel = Highest` → roda na sessão do usuário logado, já elevado, **sem pedido de UAC**.
-- Ação: `C:\ProgramData\WinKit\Agent\winkit-agent.exe phase2`.
+- Ação: `C:\ProgramData\WinKit\Agent\winkit-agent\winkit-agent.exe phase2`.
+- Principal pelo SID `S-1-5-32-544` (Administradores), nunca pelo nome do grupo, que muda com o idioma.
+- **Terceira rede de segurança (D-023):** o XML tem um `FirstLogonCommands` que inicia a Fase 2 sem bloquear a área de trabalho (`cmd /c start`), caso a tarefa agendada não tenha sido criada na etapa *specialize*. O Agente usa trava de instância única, então rodar duas vezes não causa problema.
 - **Fallback:** ao iniciar, `phase2` lê o estado (11.4). Se a Fase 1 nunca rodou (H3 falhou, ou o `SetupComplete.cmd` foi ignorado), ela executa as etapas da Fase 1 primeiro, **redirecionando** os destinos do perfil Default para o perfil do usuário atual. O resultado final é o mesmo, só que mais tarde.
 - A tarefa é removida na limpeza final (11.6).
 
@@ -1459,6 +1467,7 @@ Cada marco tem um **critério de pronto**. Um marco só é marcado como concluí
 | H7 | O Agente PyInstaller roda como SYSTEM no `SetupComplete.cmd` sem bloqueio do Defender | Ajustes de empacotamento; em último caso, Fase 1 em PowerShell | M3 |
 | H8 | O desempenho de leitura de milhares de arquivos pequenos em exFAT via USB é aceitável | Revisar D-005 (ZIP) com o usuário | M6 |
 | H9 | PowerShell funciona na etapa *specialize* | Bootstrap em `cmd` puro | M2 |
+| H11 | O valor `Administrators` no elemento `Group` da conta local funciona num Windows em pt-BR (onde o grupo se chama "Administradores") | O Agente (Fase 1) adiciona a conta ao grupo pelo SID `S-1-5-32-544` | M2 |
 | H10 | O instalador do Windows enxerga o SSD do usuário sem driver extra | Fora do escopo do WinKit (exigiria modificar a ISO); documentar como carregar driver manualmente na tela do instalador | M2 |
 
 ---

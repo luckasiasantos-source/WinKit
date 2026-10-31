@@ -28,6 +28,41 @@
 
 ---
 
+## 2026-10-31 — M2 — Construtor mínimo (XML, Ventoy, bootstrap, CLI)
+**Tipo:** implementação + testes + documentação
+**Resumo:** o WinKit já prepara um pendrive Ventoy de verdade: lê as ISOs sem alterá-las, gera um `autounattend.xml` por idioma/arquitetura, mescla o `ventoy.json` com segurança, grava o `bootstrap.ps1` e valida o resultado. Primeira versão utilizável da linha de comando.
+
+### Adicionado
+- `src/winkit/core/isos.py` — `IsoInfo`, `IsoEdition`, conversões de versão/arquitetura/idioma
+- `src/winkit/core/layout.py` — caminhos do pendrive, `Marker` (`pendrive_id`)
+- `src/winkit/core/ventoy/detect.py` — `PartitionRow`, `VentoyTarget`, `find_ventoy_targets`
+- `src/winkit/core/ventoy/config.py` — `merge_auto_install`, `winkit_entries`, `parse_config`
+- `src/winkit/core/unattend/commands.py` — `bootstrap_command`, `first_logon_command`, `reg_add_command`, `labconfig_commands` (limite de 259 caracteres)
+- `src/winkit/core/unattend/generator.py` — `generate_unattend`, `check_safety`, `encode_password`, `template_name`
+- `src/winkit/platform/disks.py` — `WindowsDiskInspector` (partições, leitura de ISO) + conversões JSON
+- `src/winkit/platform/fakes/disks.py` — `FakeDiskInspector`, `ventoy_rows`, `windows_iso`
+- `src/winkit/platform/session.py` — `is_admin`
+- `src/winkit/platform/services.py` — `Services`, `real_services`
+- `src/winkit/builder/target.py`, `isos.py`, `build.py`, `validate.py`
+- `src/winkit/builder/assets/bootstrap.ps1`
+- `src/winkit/cli/main.py` — comandos `pendrive listar`, `receita nova`, `plano`, `construir`, `validar`
+- Testes: `tests/core/test_unattend.py` (inclui snapshot `tests/fixtures/unattend_default.xml`), `test_ventoy.py`, `test_isos.py`, `tests/platform/test_disks.py`, `tests/builder/test_build.py`, `tests/builder/test_bootstrap_ps1.py` (Windows), `tests/cli/test_cli.py`
+- `docs/validacao/AMBIENTE_VM.md`, `docs/validacao/M2.md`
+
+### Alterado
+- `pyproject.toml` — `T20` liberado só na CLI
+
+### Documentos vivos atualizados
+- STATUS — M2 com código concluído e validação na VM pendente; H11
+- PLANO — §9.2 (forma real do comando de bootstrap), §10.1/§10.3 (caminho do Agente, SID, FirstLogonCommands), H11
+- ARQUITETURA — D-023
+- INCIDENTES — IN-002 (backup do `ventoy.json`)
+
+### Decisões
+- D-023 (três caminhos para iniciar o Agente)
+
+---
+
 ## 2026-10-31 — M1 — Núcleo puro + catálogos + criptografia desligada por padrão
 **Tipo:** implementação + correção + documentação
 **Resumo:** toda a lógica de decisão testável no Linux: receita, validação, moldes de caminho, catálogos de dados, planejador de fases, estado do Agente e manifesto. Corrige a falha de CI do M0 (IN-001) e registra o pedido do usuário de deixar a criptografia automática desligada por padrão (D-020).

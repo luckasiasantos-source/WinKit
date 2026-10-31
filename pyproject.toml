@@ -62,7 +62,8 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S105", "S106", "S108", "PLR0915", "T20", "PLC0415", "A005"]
 "src/winkit/agent/ui/**" = ["N802"]
-"src/winkit/i18n/**" = ["E501"]           # textos longos ficam inteiros para facilitar a revisão
+"src/winkit/i18n/**" = ["E501"]
+"src/winkit/cli/**" = ["T20"]           # textos longos ficam inteiros para facilitar a revisão
 "src/winkit/platform/powershell.py" = ["E501"]  # trechos de script PowerShell
 "src/winkit/studio/**" = ["N802"]
 

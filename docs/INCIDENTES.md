@@ -27,6 +27,15 @@
 - Correção: catálogos movidos para `src/winkit/data/` e `force-include` removido (D-021).
 - Prevenção: antes de cada commit, rodar `uv sync --locked` a partir de um clone limpo (`git clone` local para uma pasta temporária) quando mexer em empacotamento.
 
+### IN-002 — Backup do `ventoy.json` copiava o arquivo do próprio WinKit
+- Data: 2026-10-31
+- Marco: M2
+- O que aconteceu: o teste `test_rebuild_is_idempotent` falhou: na segunda construção apareceu um `ventoy.json.winkit-bak` que não existia na primeira.
+- Causa raiz: o backup só era criado "se existir `ventoy.json` e ainda não houver backup". Num pendrive sem `ventoy.json`, a primeira construção criava o arquivo e não criava backup; a segunda via o arquivo (gerado pelo WinKit) e o tratava como o original do usuário.
+- Impacto: nenhum (pego pelo teste antes de qualquer uso real). Se tivesse passado, "restaurar o backup" devolveria uma configuração do WinKit em vez do estado original.
+- Correção: na primeira construção o backup é sempre gravado; sem arquivo original, ele recebe `{}`.
+- Prevenção: teste de idempotência mantido (rodar `construir` duas vezes deve produzir exatamente os mesmos arquivos).
+
 ## Lições da fase de desenho
 
 Problemas encontrados na conversa anterior (PDF de referência) e corrigidos **antes** de virar código. Ficam registrados porque são erros fáceis de repetir.
