@@ -90,6 +90,15 @@
 - Correção: arquivo removido; `program_data()` nunca devolve caminho relativo fora do Windows; `.gitignore` bloqueia nomes com letra de unidade.
 - Prevenção: testes `test_no_windows_drive_paths_tracked` e `test_program_data_is_never_relative`; conferir o CI do commit anterior antes de fechar o marco seguinte.
 
+### IN-009 — Atalho de app portátil quebrado; testes tocando disco e navegador reais
+- Data: 2026-10-31
+- Marco: M5/M6 (descoberto no CI Windows do M6 e do M7)
+- O que aconteceu: `test_portable_shortcuts` passou no Linux e falhou no Windows com "molde ABS inválido: `{ABS:D:\Portateis\Tool}\tool.exe`". No mesmo CI, processos do Edge ficaram abertos no runner.
+- Causa raiz: (1) **bug real**: o atalho de um app portátil é "pasta absoluta + executável", mas o leitor de moldes recusava qualquer texto depois de `{ABS:...}`; (2) no Linux o `D:` não existe, então o backup era pulado e o atalho nem rodava — o teste aceitava "pulado" e não exercitava o caminho de sucesso; no runner Windows o `D:` existe e o teste chegou a gravar em `D:\` real; (3) o teste do comando `summary` chamava `os.startfile`, que abre o navegador de verdade no Windows.
+- Impacto: no PC real, todo app portátil fora das pastas do usuário ficaria sem atalho.
+- Correção: `{ABS:pasta}\resto` passa a ser um caminho dentro da pasta absoluta; teste com unidade que nunca existe (`Q:`) e teste novo do caminho de sucesso com pasta do perfil; `open_file` substituível e substituído no teste.
+- Prevenção: testes de comportamento afirmam o resultado esperado exato (não "feito ou pulado"); testes nunca usam letras de unidade que podem existir (`C:`/`D:`) para gravar.
+
 ## Lições da fase de desenho
 
 Problemas encontrados na conversa anterior (PDF de referência) e corrigidos **antes** de virar código. Ficam registrados porque são erros fáceis de repetir.

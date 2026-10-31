@@ -149,9 +149,10 @@ def parse(template: str) -> ParsedTemplate:
     var, absolute, rest = match.group("var"), match.group("abs"), match.group("rest")
     rest = rest.replace("/", "\\").lstrip("\\")
     if var == "ABS":
-        if absolute is None or rest:
+        if absolute is None:
             raise PathTemplateError(f"molde ABS inválido: {template!r}")
-        norm = normalize(absolute)
+        # "{ABS:D:\\Apps\\X}\\x.exe" = arquivo dentro de uma pasta absoluta (apps portáteis)
+        norm = normalize(absolute + ("\\" + rest if rest else ""))
         if not _DRIVE_RE.match(norm + ("\\" if len(norm) == 2 else "")):
             raise PathTemplateError(f"molde ABS sem letra de unidade: {template!r}")
         _reject_traversal(norm, template)

@@ -169,7 +169,7 @@ def test_portable_shortcuts(world: World) -> None:
     from tests.factories import backup
 
     r = world.recipe()
-    r.backups.append(backup("port", "{ABS:D:\\Portateis\\Tool}"))
+    r.backups.append(backup("port", "{ABS:Q:\\Portateis\\Tool}"))
     r.apps.append(
         AppItem(
             id="tool",
@@ -178,10 +178,10 @@ def test_portable_shortcuts(world: World) -> None:
             portable_backup="port",
             after_install=AfterInstall(
                 shortcuts=[
-                    ShortcutSpec(name="Tool", target="{ABS:D:\\Portateis\\Tool}\\tool.exe"),
+                    ShortcutSpec(name="Tool", target="{ABS:Q:\\Portateis\\Tool}\\tool.exe"),
                     ShortcutSpec(
                         name="Tool",
-                        target="{ABS:D:\\Portateis\\Tool}\\tool.exe",
+                        target="{ABS:Q:\\Portateis\\Tool}\\tool.exe",
                         location="desktop",
                     ),
                 ]
@@ -197,6 +197,45 @@ def test_portable_shortcuts(world: World) -> None:
     run_phase2(world.runtime())
     sc = world.services.shortcuts
     assert isinstance(sc, FakeShortcuts)
-    # o backup do D: ainda não tem implementação (M6) → atalho fica pulado por dependência
-    st = state(world).step("shortcut:tool")
-    assert st.status in ("done", "skipped")
+    # Q: não existe: o backup é pulado e o atalho também (dependência), sem tocar em disco real
+    assert state(world).step("backup:port").status == "skipped"
+    assert state(world).step("shortcut:tool").status == "skipped"
+    assert sc.created == []
+
+
+def test_portable_shortcuts_created(world: World) -> None:
+    from tests.factories import backup
+
+    r = world.recipe()
+    r.backups.append(backup("port2", "{LOCALAPPDATA}\\Programs\\Tool"))
+    r.apps.append(
+        AppItem(
+            id="tool2",
+            name="Tool",
+            source="portable",
+            portable_backup="port2",
+            after_install=AfterInstall(
+                shortcuts=[
+                    ShortcutSpec(name="Tool", target="{LOCALAPPDATA}\\Programs\\Tool\\tool.exe"),
+                    ShortcutSpec(
+                        name="Tool",
+                        target="{LOCALAPPDATA}\\Programs\\Tool\\tool.exe",
+                        location="desktop",
+                    ),
+                ]
+            ),
+        )
+    )
+    (world.pendrive / "WinKit" / "Perfis" / "padrao" / "Backups" / "port2" / "dados").mkdir(
+        parents=True
+    )
+    world.save_recipe(r)
+    rebuild(world)
+    run_phase1(world.runtime())
+    run_phase2(world.runtime())
+    sc = world.services.shortcuts
+    assert isinstance(sc, FakeShortcuts)
+    assert state(world).step("shortcut:tool2").status == "done"
+    names = sorted(p.parent.name for p, _, _ in sc.created)
+    assert names == ["Desktop", "Programs"]
+    assert all(t.endswith("tool.exe") and "Programs" in t for _, t, _ in sc.created)

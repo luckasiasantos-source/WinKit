@@ -8,6 +8,7 @@ import sys
 import traceback
 from collections.abc import Sequence
 from datetime import UTC, datetime
+from pathlib import Path
 
 from winkit import __version__
 from winkit.agent import phases
@@ -40,6 +41,12 @@ def _crash_file(exc: BaseException) -> None:
             fh.write("".join(traceback.format_exception(exc)) + "\n")
     except OSError:
         pass
+
+
+def open_file(path: Path) -> None:
+    """Abre com o programa padrão (navegador para o resumo). Substituível nos testes."""
+    if sys.platform == "win32":  # pragma: no cover
+        os.startfile(path)  # noqa: S606
 
 
 def build_runtime() -> Runtime:
@@ -81,8 +88,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "retry":
             return phases.run_phase2(rt, retry_failed=True)
         html = phases.open_summary(rt.paths)
-        if html is not None and sys.platform == "win32":  # pragma: no cover
-            os.startfile(html)  # noqa: S606
+        if html is not None:
+            open_file(html)
         return 0 if html else 1
     except BaseException as exc:  # noqa: BLE001 — a Fase 1 nunca pode quebrar o SetupComplete
         _crash_file(exc)

@@ -28,6 +28,22 @@
 
 ---
 
+## 2026-10-31 — M8 — Correção: atalho de app portátil e isolamento dos testes
+**Tipo:** correção
+**Resumo:** corrige o molde `{ABS:pasta}\arquivo` usado pelos atalhos de apps portáteis e isola os testes de discos e do navegador reais (IN-009).
+
+### Alterado
+- `src/winkit/core/paths/templates.py` — `{ABS:...}` aceita sufixo (caminho dentro da pasta)
+- `src/winkit/agent/main.py` — `open_file` substituível
+- `tests/agent/test_app_step.py` — unidade `Q:` + novo teste do caminho de sucesso dos atalhos
+- `tests/agent/test_phases.py` — `summary` sem abrir navegador
+- `tests/core/test_templates.py` — `test_abs_with_suffix_is_a_path_inside_the_folder`
+
+### Documentos vivos atualizados
+- INCIDENTES — IN-009
+
+---
+
 ## 2026-10-31 — M8 — Windows Update, política de reinício e "tentar de novo"
 **Tipo:** implementação + testes + documentação
 **Resumo:** última etapa da Fase 2: Windows Update pela API oficial; reinício conforme a política da receita; atalho para tentar de novo o que falhou. Com isso, todos os tipos de etapa do Agente estão implementados.

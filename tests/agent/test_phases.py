@@ -194,8 +194,11 @@ def test_agent_main_never_fails_phase1(tmp_path: Path, monkeypatch: pytest.Monke
 
 
 def test_agent_main_dispatch(world: World, monkeypatch: pytest.MonkeyPatch) -> None:
+    opened: list[Path] = []
     monkeypatch.setattr(agent_main, "build_runtime", world.runtime)
+    monkeypatch.setattr(agent_main, "open_file", opened.append)  # nunca abrir o navegador
     assert agent_main.main(["phase1"]) == 0
     assert agent_main.main(["phase2", "--first-logon"]) == 0
     assert agent_main.main(["retry"]) == 0
     assert agent_main.main(["summary"]) == 0
+    assert opened and opened[0].name == "resumo.html"

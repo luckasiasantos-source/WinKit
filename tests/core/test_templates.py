@@ -99,7 +99,6 @@ def test_roundtrip_between_machines() -> None:
         "{NOPE}\\x",
         r"{APPDATA}\..\..\Windows",
         r"{ABS:relativo}",
-        r"{ABS:D:\a}\extra",
         r"{APPDATA:C:\x}",
     ],
 )
@@ -135,3 +134,9 @@ def test_default_profile_and_retarget() -> None:
 def test_normalize() -> None:
     assert tp.normalize("C:\\") == "C:\\"
     assert tp.normalize(r"C:\a\b\\") == r"C:\a\b"
+
+
+def test_abs_with_suffix_is_a_path_inside_the_folder() -> None:  # IN-009
+    parsed = tp.parse(r"{ABS:D:\Apps\Tool}\tool.exe")
+    assert parsed.absolute == r"D:\Apps\Tool\tool.exe" and parsed.drive == "D:"
+    assert tp.resolve(r"{ABS:D:\Apps\Tool}\bin\x.exe", {}) == r"D:\Apps\Tool\bin\x.exe"
