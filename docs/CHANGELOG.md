@@ -28,6 +28,16 @@
 
 ---
 
+## 2026-10-31 — Correção: varredura das sugestões seguia junções
+**Tipo:** correção
+**Resumo:** no Windows, `DirEntry.is_dir(follow_symlinks=False)` é verdadeiro para junções (ex.: "Application Data" nos perfis), então a medição das pastas podia andar em ciclo até o limite de tempo e contar arquivos em dobro. Agora links e junções são ignorados, e o tamanho dos saves também tem limite de tempo (5 s). Entra na próxima versão; a 0.9.0 já publicada tem o limite de tempo geral, que segura o caso.
+
+### Alterado
+- `src/winkit/collector/suggest.py` — `bounded_size` ignora links e junções; saves medidos com `bounded_size` e prazo próprio
+
+### Documentos vivos atualizados
+- DIVIDAS — DT-026 sem o item dos saves sem limite de tempo
+
 ## 2026-10-31 — M18 — Fechamento da v2 (0.9.0)
 **Tipo:** documentação
 **Resumo:** fecha a v2: documentos revisados e cruzados, traduções revisadas pelo glossário, README nos três idiomas com as funções novas, capturas novas, teste de fumaça com os comandos novos e versão 0.9.0. Dois ajustes pequenos no assistente de sugestões.

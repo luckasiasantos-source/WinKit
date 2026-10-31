@@ -25,7 +25,6 @@ from winkit.core.text import slugify
 from winkit.core.userassist import UsageEntry
 from winkit.i18n.format import format_size
 from winkit.i18n.msg import msg
-from winkit.platform.copy import tree_stats
 from winkit.platform.inventory import AppInventory
 from winkit.platform.registry import Registry
 from winkit.platform.usage import read_usage
@@ -50,6 +49,8 @@ SYSTEM_ROOT_DIRS = {
     "winkit",
 }
 MIN_FOLDER_BYTES = 100 * 1024**2
+#: Limite de tempo para medir as pastas de saves (as da raiz usam ``budget_s``).
+SAVES_BUDGET_S = 5.0
 
 
 def _segments(path: str) -> set[str]:
@@ -79,6 +80,8 @@ def bounded_size(folder: Path, deadline: float, clock: Callable[[], float]) -> t
             with os.scandir(current) as it:
                 for e in it:
                     try:
+                        if e.is_symlink() or e.is_junction():  # junções criam ciclos
+                            continue
                         if e.is_dir(follow_symlinks=False):
                             stack.append(Path(e.path))
                         elif e.is_file(follow_symlinks=False):
@@ -153,7 +156,13 @@ def _config_suggestions(
 
 
 def _save_suggestions(
-    recipe: Recipe, catalogs: Catalogs, folders: Mapping[str, str], volume_root: VolumeRoot
+    recipe: Recipe,
+    catalogs: Catalogs,
+    folders: Mapping[str, str],
+    volume_root: VolumeRoot,
+    *,
+    deadline: float,
+    clock: Callable[[], float],
 ) -> list[Suggestion]:
     have = {b.template.casefold() for b in recipe.backups}
     out = []
@@ -167,16 +176,16 @@ def _save_suggestions(
         src = local_source(volume_root(literal[:2].upper()), literal)
         if not src.is_dir():
             continue
-        stats = tree_stats(src, [])
-        if stats.files == 0:  # pasta vazia: nada a levar
+        size, _ = bounded_size(src, deadline, clock)
+        if size == 0:  # pasta vazia (ou sem tempo para medir): nada a levar
             continue
         out.append(
             Suggestion(
                 id=f"save:{g.id}",
                 kind="save",
                 title=g.name,
-                reason=msg("suggest.save", size=format_size(stats.bytes)),
-                score=40 + size_score(stats.bytes),
+                reason=msg("suggest.save", size=format_size(size)),
+                score=40 + size_score(size),
                 payload={"template": g.template, "name": g.name},
             )
         )
@@ -230,7 +239,14 @@ def analyze(
     items = [
         *_app_suggestions(inventory, usage, recipe, now),
         *_config_suggestions(recipe, catalogs, folders, volume_root),
-        *_save_suggestions(recipe, catalogs, folders, volume_root),
+        *_save_suggestions(
+            recipe,
+            catalogs,
+            folders,
+            volume_root,
+            deadline=clock() + SAVES_BUDGET_S,
+            clock=clock,
+        ),
         *_folder_suggestions(volume_root("C:"), budget_s, clock),
     ]
     return rank(items, recipe.meta.dismissed_suggestions)
