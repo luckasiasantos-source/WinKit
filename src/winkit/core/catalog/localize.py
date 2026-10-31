@@ -54,6 +54,7 @@ class CatalogTranslation(_Model):
     hosts_blocklists: dict[str, FeatureText] = Field(default_factory=dict)
     presets: dict[str, FeatureText] = Field(default_factory=dict)
     association_groups: dict[str, NameText] = Field(default_factory=dict)
+    personal_groups: dict[str, NameText] = Field(default_factory=dict)
 
 
 def localize(catalogs: Catalogs, tr: CatalogTranslation) -> Catalogs:
@@ -109,8 +110,15 @@ def localize(catalogs: Catalogs, tr: CatalogTranslation) -> Catalogs:
         else g
         for g in catalogs.association_groups
     ]
+    personal = [
+        g.model_copy(update=tr.personal_groups[g.id].model_dump())
+        if g.id in tr.personal_groups
+        else g
+        for g in catalogs.personal_groups
+    ]
     return catalogs.model_copy(
         update={
+            "personal_groups": personal,
             "association_groups": groups,
             "presets": presets,
             "features": features,
@@ -152,6 +160,11 @@ def missing_translations(catalogs: Catalogs, tr: CatalogTranslation) -> list[str
         f"association_groups.{g.id}"
         for g in catalogs.association_groups
         if g.id not in tr.association_groups
+    ]
+    out += [
+        f"personal_groups.{g.id}"
+        for g in catalogs.personal_groups
+        if g.id not in tr.personal_groups
     ]
     return out
 

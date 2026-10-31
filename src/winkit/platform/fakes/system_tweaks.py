@@ -165,3 +165,17 @@ class FakeFontLoader:
     def load(self, path: Path) -> bool:
         self.loaded.append(path)
         return True
+
+
+@dataclass
+class FakeLiveAppearance:
+    wallpapers: list[Path] = field(default_factory=list)
+    cursor_reloads: int = 0
+
+    def set_wallpaper(self, path: Path) -> bool:
+        self.wallpapers.append(path)
+        return True
+
+    def reload_cursors(self) -> bool:
+        self.cursor_reloads += 1
+        return True

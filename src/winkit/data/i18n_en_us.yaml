@@ -381,3 +381,16 @@ association_groups:
     name: Email
   text:
     name: Text
+personal_groups:
+  wallpaper:
+    name: Wallpaper
+  accent:
+    name: Accent color
+  theme:
+    name: Light or dark theme and transparency
+  mouse:
+    name: Mouse speed and buttons
+  cursor:
+    name: Mouse pointer
+  keyboard_repeat:
+    name: Keyboard repeat

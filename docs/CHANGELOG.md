@@ -28,6 +28,19 @@
 
 ---
 
+## 2026-10-31 — M15 — Aparência pessoal (V2-06)
+**Tipo:** implementação
+**Resumo:** papel de parede, cor de destaque, tema, mouse, ponteiro e repetição do teclado iguais aos do PC antigo. Só valores conhecidos e dentro do padrão do Windows são levados. A release 0.5.0 foi publicada.
+
+### Adicionado
+- `src/winkit/data/personal_settings.yaml` (+ traduções), `src/winkit/core/personal.py`, `src/winkit/collector/personal.py`, `src/winkit/platform/personal.py`, `src/winkit/agent/steps/personal.py`
+- Receita: `personal` (aditivo); plano: tipo `personal` no perfil Default (R23)
+- Studio: seção "Aparência" com miniatura do papel de parede; CLI: `coletar aparencia`, `aparencia listar|marcar|desmarcar`
+- Testes: `tests/agent/test_personal.py`
+
+### Documentos vivos atualizados
+- ARQUITETURA — módulos; STATUS — V2-06, H26; DIVIDAS — DT-023; INCIDENTES — IN-017 (a 0.5.0 passou)
+
 ## 2026-10-31 — M15 — Apps padrão (V2-05)
 **Tipo:** implementação
 **Resumo:** navegador, leitor de PDF, players, visualizador e compactador padrão iguais aos do PC antigo, aplicados na instalação. O que o Windows não deixar (apps instalados depois do login) aparece no resumo para confirmar.

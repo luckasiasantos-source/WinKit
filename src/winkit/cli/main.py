@@ -42,6 +42,7 @@ from winkit.collector import env as env_collector
 from winkit.collector import features as feature_collector
 from winkit.collector import fonts as font_collector
 from winkit.collector import netdrives as netdrive_collector
+from winkit.collector import personal as personal_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import dns as dns_rules
 from winkit.core import layout
@@ -1074,6 +1075,69 @@ def _add_default_apps_parsers(sub: Any, common: argparse.ArgumentParser) -> None
         dm.set_defaults(func=cmd_associacoes_marcar, command_value=value)
 
 
+# ------------------------------------------------------------------ aparência (V2-06)
+def cmd_coletar_aparencia(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    if services.registry is None:
+        out(t("cli.registry_unavailable"))
+        return 1
+    report = personal_collector.collect_personal(
+        services.registry,
+        tgt.root,
+        recipe,
+        default_catalogs(),
+        appdata=services.folders.current_user()["APPDATA"],
+        volume_root=services.volume_root,
+    )
+    _save(tgt, recipe)
+    out(tn("studio.appearance.read_done", report.values))
+    if report.dropped:
+        out(tn("studio.appearance.dropped", len(report.dropped)))
+    if report.wallpaper_skipped:
+        out(t("studio.appearance.no_wallpaper"))
+    return cmd_aparencia_listar(args, services, out)
+
+
+def cmd_aparencia_listar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    p = load_profile_recipe(tgt.root, args.perfil).personal
+    for g in default_catalogs().personal_groups:
+        n = sum(1 for s in g.values if f"{s.key}\\{s.value}" in p.values)
+        if g.file and p.wallpaper_file:
+            n += 1
+        if n:
+            out(f"  [{'x' if g.id in p.groups else ' '}] {g.id:16} {g.name} ({n})")
+    return 0
+
+
+def cmd_aparencia_marcar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    catalogs = default_catalogs()
+    missing = [g for g in args.grupos if catalogs.personal_group(g) is None]
+    for group_id in args.grupos:
+        if group_id not in missing:
+            personal_collector.set_group(recipe, group_id, args.command_value)
+    _save(tgt, recipe)
+    if missing:
+        out(t("cli.not_found", ids=", ".join(missing)))
+        return 1
+    return cmd_aparencia_listar(args, services, out)
+
+
+def _add_appearance_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    ap = sub.add_parser("aparencia", aliases=["appearance"], help=t("cli.h.appearance"))
+    ap_sub = ap.add_subparsers(dest="action", required=True)
+    ap_sub.add_parser("listar", aliases=["list"], parents=[common]).set_defaults(
+        func=cmd_aparencia_listar
+    )
+    for name, alias, value in (("marcar", "select", True), ("desmarcar", "deselect", False)):
+        am = ap_sub.add_parser(name, aliases=[alias], parents=[common])
+        am.add_argument("grupos", nargs="+", help=t("cli.h.appearance_groups"))
+        am.set_defaults(func=cmd_aparencia_marcar, command_value=value)
+
+
 def _add_dns_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     dns = sub.add_parser("dns", help=t("cli.h.dns"))
     dns_sub = dns.add_subparsers(dest="action", required=True)
@@ -1205,6 +1269,10 @@ def _add_collect_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
         "associacoes", aliases=["defaults"], parents=[common], help=t("cli.h.collect_defaults")
     )
     cas.set_defaults(func=cmd_coletar_associacoes)
+    cap = col_sub.add_parser(
+        "aparencia", aliases=["appearance"], parents=[common], help=t("cli.h.collect_appearance")
+    )
+    cap.set_defaults(func=cmd_coletar_aparencia)
 
     capp = col_sub.add_parser("apps", parents=[common], help=t("cli.h.collect_apps"))
     capp.add_argument(
@@ -1321,6 +1389,7 @@ def _add_system_and_network_parsers(sub: Any, common: argparse.ArgumentParser) -
     _add_preset_parsers(sub, common)
     _add_font_parsers(sub, common)
     _add_default_apps_parsers(sub, common)
+    _add_appearance_parsers(sub, common)
 
 
 def build_parser() -> argparse.ArgumentParser:

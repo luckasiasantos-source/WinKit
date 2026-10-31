@@ -347,6 +347,32 @@ class AssociationGroup(_Model):
         return self
 
 
+# ------------------------------------------------------------------ aparência pessoal (V2-06)
+class PersonalValueSpec(_Model):
+    key: str  # sempre relativo ao HKCU
+    value: str  # "" = valor padrão da chave
+    type: Literal["dword", "sz", "expand_sz", "binary"]
+    allowed: list[int | str] | None = None
+    pattern: str | None = None
+    #: Tamanho exato, em bytes, de um valor binário.
+    length: int | None = None
+
+    @model_validator(mode="after")
+    def _check(self) -> Self:
+        if self.pattern is not None:
+            re.compile(self.pattern)
+        return self
+
+
+class PersonalGroup(_Model):
+    id: Annotated[str, Field(pattern=r"^[a-z0-9_]+$")]
+    name: str
+    values: list[PersonalValueSpec]
+    #: O grupo leva um arquivo (o papel de parede).
+    file: bool = False
+    source: Annotated[str, Field(min_length=5)]
+
+
 # ------------------------------------------------------------------ outros
 class EditionEntry(_Model):
     id: str
@@ -393,6 +419,10 @@ class Catalogs(_Model):
     protected_env: ProtectedEnv = Field(default_factory=ProtectedEnv)
     presets: list[Preset] = Field(default_factory=list)
     association_groups: list[AssociationGroup] = Field(default_factory=list)
+    personal_groups: list[PersonalGroup] = Field(default_factory=list)
+
+    def personal_group(self, group_id: str) -> PersonalGroup | None:
+        return next((x for x in self.personal_groups if x.id == group_id), None)
 
     def association_group(self, group_id: str) -> AssociationGroup | None:
         return next((x for x in self.association_groups if x.id == group_id), None)

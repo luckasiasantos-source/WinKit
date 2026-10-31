@@ -1,6 +1,7 @@
 """Páginas do WinKit Studio, uma por seção da barra lateral (D-042)."""
 
 from winkit.studio.ui.pages.bring import (
+    AppearancePage,
     AppsPage,
     BackupsPage,
     DefaultAppsPage,
@@ -21,6 +22,7 @@ from winkit.studio.ui.pages.system import (
 
 __all__ = [
     "AccountPage",
+    "AppearancePage",
     "AppsPage",
     "BackupsPage",
     "BloatPage",

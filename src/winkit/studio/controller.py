@@ -36,6 +36,7 @@ from winkit.collector import env as env_collector
 from winkit.collector import features as feature_collector
 from winkit.collector import fonts as font_collector
 from winkit.collector import netdrives as netdrive_collector
+from winkit.collector import personal as personal_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import layout
 from winkit.core.catalog.loader import default_catalogs
@@ -398,6 +399,31 @@ class StudioController:
 
     def set_default_app_group(self, group_id: str, selected: bool) -> None:
         assoc_collector.set_group(self.require_recipe(), group_id, selected)
+        self.save()
+
+    def collect_personal(self) -> personal_collector.PersonalReport:
+        """Aparência deste PC (V2-06): valores validados e papel de parede."""
+        recipe = self.require_recipe()
+        if self.services.registry is None:
+            return personal_collector.PersonalReport()
+        report = personal_collector.collect_personal(
+            self.services.registry,
+            self.root,
+            recipe,
+            self.catalogs,
+            appdata=self.services.folders.current_user()["APPDATA"],
+            volume_root=self.services.volume_root,
+        )
+        self.save()
+        return report
+
+    def wallpaper_path(self) -> Path | None:
+        rel = self.require_recipe().personal.wallpaper_file
+        path = layout.payload(self.root, rel) if rel else None
+        return path if path is not None and path.is_file() else None
+
+    def set_personal_group(self, group_id: str, selected: bool) -> None:
+        personal_collector.set_group(self.require_recipe(), group_id, selected)
         self.save()
 
     def preset_preview(self, preset_id: str) -> PresetResult:

@@ -382,6 +382,7 @@ KIND_STYLE: dict[str, tuple[str, str]] = {
     "font": ("pencil", "#FF2D55"),
     "default_apps": ("check", "#007AFF"),
     "default_apps_verify": ("check", "#007AFF"),
+    "personal": ("pencil", "#5856D6"),
     "finalize": ("check", "#34C759"),
 }
 

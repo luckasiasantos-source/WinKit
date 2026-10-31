@@ -76,6 +76,7 @@ GROUPS: tuple[SectionGroup, ...] = (
             Section("drivers", "chip", "#636366", pages.DriversPage),
             Section("fonts", "pencil", "#FF2D55", pages.FontsPage),
             Section("defaults", "check", "#007AFF", pages.DefaultAppsPage),
+            Section("appearance", "pencil", "#5856D6", pages.AppearancePage),
         ),
     ),
     SectionGroup(

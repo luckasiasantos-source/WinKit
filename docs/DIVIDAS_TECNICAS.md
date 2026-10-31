@@ -213,3 +213,12 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Impacto: a lista pode mostrar fontes que vieram com o Windows ou com o Office; como nada vem marcado, só polui a tela.
 - Plano: gerar `default_fonts.yaml` na validação na VM e usar como lista de exclusão.
 - Prioridade: baixa
+
+### DT-023 — Aparência: sem reaplicação na Fase 2 e sem ponteiros personalizados
+- Estado: aberta
+- Origem: M15 (V2-06)
+- Onde: `agent/steps/personal.py`, `data/personal_settings.yaml`
+- Descrição: o plano previa conferir e reaplicar papel de parede e cor na Fase 2, caso o Windows troque pelo tema padrão no primeiro login (H26). Isso ficou para depois da validação na VM. Ponteiros fora de `%SystemRoot%\cursors` (arquivos `.cur`/`.ani` próprios) também não são levados: o valor é descartado na captura.
+- Impacto: se H26 for falsa, o papel de parede e a cor podem voltar ao padrão no primeiro login; quem usa ponteiro baixado da internet precisa reinstalar.
+- Plano: validar H26; se falsa, uma etapa de conferência na Fase 2 no `HKCU`. Cursores próprios: copiar para `%SystemRoot%\Cursors\WinKit\` e reescrever os caminhos.
+- Prioridade: média

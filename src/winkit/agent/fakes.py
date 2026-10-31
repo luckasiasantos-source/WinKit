@@ -33,6 +33,7 @@ from winkit.platform.fakes.system_tweaks import (
     FakeFeatures,
     FakeFontLoader,
     FakeIsoMounter,
+    FakeLiveAppearance,
     FakeSession,
     FakeUpdater,
 )
@@ -66,6 +67,7 @@ def fake_agent_services(*, pendrive: Path, system: Path, **overrides: Any) -> Ag
         "drive_mapper": FakeDriveMapper(),
         "font_loader": FakeFontLoader(),
         "associations": FakeAssociations(),
+        "appearance": FakeLiveAppearance(),
     }
     values.update(overrides)
     return AgentServices(**values)

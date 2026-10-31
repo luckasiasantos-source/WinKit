@@ -15,6 +15,7 @@ from winkit.agent.steps.font import FontStep
 from winkit.agent.steps.maintenance import MaintenanceStep
 from winkit.agent.steps.network_drive import NetworkDriveStep
 from winkit.agent.steps.network_privacy import DnsStep, HostsStep
+from winkit.agent.steps.personal import PersonalStep
 from winkit.agent.steps.restore import RestorePointStep
 from winkit.agent.steps.system import BloatStep, PowerStep, RenameComputerStep
 from winkit.agent.steps.tweak import TweakStep
@@ -58,6 +59,7 @@ def default_handlers() -> dict[StepKind, StepHandler]:
     handlers["font"] = FontStep()
     handlers["default_apps"] = DefaultAppsStep()
     handlers["default_apps_verify"] = DefaultAppsVerifyStep()
+    handlers["personal"] = PersonalStep()
     handlers["feature"] = FeatureStep()
     handlers["driver_report"] = DriverReportStep()
     handlers["finalize"] = FinalizeStep()

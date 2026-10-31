@@ -53,6 +53,10 @@ def associations_file(profile_id: str) -> str:
     return f"{profile_dir(profile_id)}/Associacoes/exportado.xml"
 
 
+def appearance_dir(profile_id: str) -> str:
+    return f"{profile_dir(profile_id)}/Aparencia"
+
+
 def fonts_dir(profile_id: str) -> str:
     return f"{profile_dir(profile_id)}/Fontes"
 

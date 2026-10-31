@@ -1,0 +1,56 @@
+# Aparência pessoal (V2-06, M15; D-037). Só estes valores do HKCU são levados, e cada um é
+# validado (tipo, faixa, padrão) na captura: o que não passa é descartado, nunca gravado.
+- id: wallpaper
+  name: Papel de parede
+  file: true
+  source: https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-systemparametersinfow
+  values:
+    - {key: 'Control Panel\Desktop', value: WallpaperStyle, type: sz, allowed: ['0', '2', '6', '10', '22']}
+    - {key: 'Control Panel\Desktop', value: TileWallpaper, type: sz, allowed: ['0', '1']}
+- id: accent
+  name: Cor de destaque
+  source: https://learn.microsoft.com/windows/apps/design/style/color
+  values:
+    - {key: 'Software\Microsoft\Windows\DWM', value: AccentColor, type: dword}
+    - {key: 'Software\Microsoft\Windows\DWM', value: ColorPrevalence, type: dword, allowed: [0, 1]}
+    - {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Accent', value: AccentPalette, type: binary, length: 32}
+    - {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Accent', value: StartColorMenu, type: dword}
+    - {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Accent', value: AccentColorMenu, type: dword}
+    - {key: 'Software\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: ColorPrevalence, type: dword, allowed: [0, 1]}
+- id: theme
+  name: Tema claro ou escuro e transparência
+  source: https://learn.microsoft.com/windows/apps/desktop/modernize/apply-windows-themes
+  values:
+    - {key: 'Software\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: AppsUseLightTheme, type: dword, allowed: [0, 1]}
+    - {key: 'Software\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: SystemUsesLightTheme, type: dword, allowed: [0, 1]}
+    - {key: 'Software\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: EnableTransparency, type: dword, allowed: [0, 1]}
+- id: mouse
+  name: Velocidade e botões do mouse
+  source: https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-systemparametersinfow
+  values:
+    - {key: 'Control Panel\Mouse', value: MouseSensitivity, type: sz, pattern: '^([1-9]|1[0-9]|20)$'}
+    - {key: 'Control Panel\Mouse', value: MouseSpeed, type: sz, allowed: ['0', '1', '2']}
+    - {key: 'Control Panel\Mouse', value: MouseThreshold1, type: sz, pattern: '^[0-9]{1,2}$'}
+    - {key: 'Control Panel\Mouse', value: MouseThreshold2, type: sz, pattern: '^[0-9]{1,2}$'}
+    - {key: 'Control Panel\Mouse', value: DoubleClickSpeed, type: sz, pattern: '^[1-9][0-9]{2,3}$'}
+    - {key: 'Control Panel\Mouse', value: SwapMouseButtons, type: sz, allowed: ['0', '1']}
+- id: cursor
+  name: Ponteiro do mouse
+  source: https://learn.microsoft.com/windows/win32/menurc/about-cursors
+  values:
+    - {key: 'Control Panel\Cursors', value: '', type: sz, pattern: '^[A-Za-zÀ-ÿ0-9 ()_.-]{0,60}$'}
+    - {key: 'Control Panel\Cursors', value: Scheme Source, type: dword, allowed: [0, 1, 2]}
+    - {key: 'Control Panel\Cursors', value: Arrow, type: expand_sz, pattern: '(?i)^(%SystemRoot%\\cursors\\[a-z0-9_ .-]+\.(cur|ani))?$'}
+    - {key: 'Control Panel\Cursors', value: Hand, type: expand_sz, pattern: '(?i)^(%SystemRoot%\\cursors\\[a-z0-9_ .-]+\.(cur|ani))?$'}
+    - {key: 'Control Panel\Cursors', value: IBeam, type: expand_sz, pattern: '(?i)^(%SystemRoot%\\cursors\\[a-z0-9_ .-]+\.(cur|ani))?$'}
+    - {key: 'Control Panel\Cursors', value: Wait, type: expand_sz, pattern: '(?i)^(%SystemRoot%\\cursors\\[a-z0-9_ .-]+\.(cur|ani))?$'}
+    - {key: 'Control Panel\Cursors', value: AppStarting, type: expand_sz, pattern: '(?i)^(%SystemRoot%\\cursors\\[a-z0-9_ .-]+\.(cur|ani))?$'}
+    - {key: 'Control Panel\Cursors', value: Help, type: expand_sz, pattern: '(?i)^(%SystemRoot%\\cursors\\[a-z0-9_ .-]+\.(cur|ani))?$'}
+    - {key: 'Control Panel\Cursors', value: 'No', type: expand_sz, pattern: '(?i)^(%SystemRoot%\\cursors\\[a-z0-9_ .-]+\.(cur|ani))?$'}
+    - {key: 'Control Panel\Cursors', value: SizeAll, type: expand_sz, pattern: '(?i)^(%SystemRoot%\\cursors\\[a-z0-9_ .-]+\.(cur|ani))?$'}
+- id: keyboard_repeat
+  name: Repetição do teclado
+  source: https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-systemparametersinfow
+  values:
+    - {key: 'Control Panel\Keyboard', value: KeyboardDelay, type: sz, allowed: ['0', '1', '2', '3']}
+    - {key: 'Control Panel\Keyboard', value: KeyboardSpeed, type: sz, pattern: '^([0-9]|[12][0-9]|3[01])$'}

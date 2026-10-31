@@ -170,6 +170,7 @@
 - Impacto: uma release a menos; nenhum efeito no aplicativo.
 - Correção: `faulthandler_timeout = 300` no pytest (um teste preso imprime a pilha de todas as threads) e `timeout-minutes: 25` nos passos de teste da CI e da release; a release também fixa `QT_QPA_PLATFORM=offscreen`, como a CI.
 - Prevenção: se acontecer de novo, o log mostra o teste e a linha; o achado vira um incidente com causa raiz.
+- Depois: a release 0.5.0 (`e455e1b`) rodou os mesmos testes em 5 minutos, sem travar; o travamento foi intermitente.
 
 ## Lições da fase de desenho
 

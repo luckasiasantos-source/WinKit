@@ -1022,4 +1022,28 @@ MESSAGES: dict[str, Entry] = {
     "cli.h.defaults": "aplicaciones predeterminadas de la receta",
     "cli.h.collect_defaults": "lee las aplicaciones predeterminadas de este PC",
     "cli.h.default_groups": "grupos (browser, pdf, video, music, images, archives, email, text)",
+    "plan.personal": "Apariencia: {name}",
+    "preview.personal": "aplicar {name} de este perfil",
+    "step.personal.applied": "{name} aplicado",
+    "step.personal.nothing": "nada capturado en este grupo",
+    "studio.appearance.title": "Apariencia",
+    "studio.appearance.subtitle": "Fondo de pantalla, color de énfasis, tema, mouse, puntero y teclado iguales a los de este PC.",
+    "studio.appearance.read": "Leer de este PC",
+    "studio.appearance.reading": "Leyendo la apariencia de este PC…",
+    "studio.appearance.read_done": Plural(
+        one="Se leyó {n} configuración.", other="Se leyeron {n} configuraciones."
+    ),
+    "studio.appearance.dropped": Plural(
+        one="Se ignoró {n} valor fuera de rango.", other="Se ignoraron {n} valores fuera de rango."
+    ),
+    "studio.appearance.no_wallpaper": "El fondo de pantalla no se llevó (presentación, Contenido destacado de Windows o un archivo que ya no existe).",
+    "studio.appearance.values": Plural(one="{n} configuración", other="{n} configuraciones"),
+    "studio.appearance.preview": "Fondo de pantalla",
+    "studio.appearance.none": "Nada leído todavía.",
+    "studio.appearance.footer": "Solo se llevan valores conocidos y dentro del rango normal de Windows.",
+    "studio.keywords.appearance": "apariencia fondo de pantalla color de énfasis tema oscuro mouse puntero cursor teclado",
+    "studio.live.kind.personal": "Apariencia",
+    "cli.h.appearance": "apariencia personal de la receta",
+    "cli.h.collect_appearance": "lee la apariencia de este PC (fondo, colores, mouse…)",
+    "cli.h.appearance_groups": "grupos (wallpaper, accent, theme, mouse, cursor, keyboard_repeat)",
 }

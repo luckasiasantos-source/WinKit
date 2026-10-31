@@ -6,7 +6,9 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtWidgets import QFileDialog, QInputDialog, QLineEdit, QMessageBox
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import QFileDialog, QInputDialog, QLabel, QLineEdit, QMessageBox
 
 from winkit.core.recipe.models import AppItem
 from winkit.i18n import t, tn
@@ -426,3 +428,73 @@ class DefaultAppsPage(Page):
         self.tasks.run(
             t("studio.defaults.reading"), self.ctl.collect_default_apps, lambda _: self.refresh()
         )
+
+
+class AppearancePage(Page):
+    """V2-06: papel de parede, cor de destaque, tema, mouse, ponteiro e teclado."""
+
+    title_key = "studio.appearance.title"
+    subtitle_key = "studio.appearance.subtitle"
+
+    def refresh(self) -> None:
+        self.clear_content()
+        if self.needs_recipe():
+            return
+        r = self.ctl.recipe
+        assert r is not None  # noqa: S101
+        self.content.addLayout(
+            self.toolbar(button(t("studio.appearance.read"), "Primary", self._read))
+        )
+        p = r.personal
+        card = Card()
+        if p.values or p.wallpaper_file:
+            for g in self.ctl.catalogs.personal_groups:
+                n = sum(1 for s in g.values if f"{s.key}\\{s.value}" in p.values)
+                has_file = g.file and bool(p.wallpaper_file)
+                if not n and not has_file:
+                    continue
+                row = choice_row(
+                    g.name,
+                    tn("studio.appearance.values", n),
+                    icon_kind="personal",
+                    selected=g.id in p.groups,
+                    on_select=partial(self._set, g.id),
+                )
+                card.add_row(row)
+                if has_file:
+                    thumb = self._thumbnail()
+                    if thumb is not None:
+                        card.add_row(Row(t("studio.appearance.preview"), None, accessory=thumb))
+        self.content.addWidget(
+            section(
+                "",
+                card if card.rows else empty(t("studio.appearance.none")),
+                footer=t("studio.appearance.footer"),
+            )
+        )
+
+    def _thumbnail(self) -> QLabel | None:
+        path = self.ctl.wallpaper_path()
+        if path is None:
+            return None
+        pix = QPixmap(str(path))
+        if pix.isNull():
+            return None
+        lab = QLabel()
+        lab.setPixmap(pix.scaledToWidth(160, Qt.TransformationMode.SmoothTransformation))
+        return lab
+
+    def _set(self, group_id: str, value: bool) -> None:
+        self.ctl.set_personal_group(group_id, value)
+
+    def _read(self) -> None:
+        def done(report: Any) -> None:
+            self.refresh()
+            lines = [tn("studio.appearance.read_done", report.values)]
+            if report.dropped:
+                lines.append(tn("studio.appearance.dropped", len(report.dropped)))
+            if report.wallpaper_skipped:
+                lines.append(t("studio.appearance.no_wallpaper"))
+            QMessageBox.information(self, t("app.name"), "\n".join(lines))
+
+        self.tasks.run(t("studio.appearance.reading"), self.ctl.collect_personal, done)

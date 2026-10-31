@@ -293,6 +293,20 @@ class DefaultApps(_Model):
     groups: list[ItemId] = Field(default_factory=list)
 
 
+class PersonalValue(_Model):
+    type: Literal["dword", "sz", "expand_sz", "binary"]
+    data: int | str  # binário em hexadecimal
+
+
+class Personal(_Model):
+    """V2-06: aparência pessoal; os valores são capturados e validados pelo catálogo (D-037)."""
+
+    groups: list[ItemId] = Field(default_factory=list)
+    #: ``<chave>\<valor>`` → valor capturado.
+    values: dict[str, PersonalValue] = Field(default_factory=dict)
+    wallpaper_file: PayloadPath | None = None
+
+
 class RestorePoint(_Model):
     """V2-10: ponto de restauração "Windows pronto" no fim da instalação (M12)."""
 
@@ -328,6 +342,7 @@ class Recipe(_Model):
     presets_applied: list[str] = Field(default_factory=list)
     fonts: list[FontItem] = Field(default_factory=list)
     default_apps: DefaultApps = Field(default_factory=DefaultApps)
+    personal: Personal = Field(default_factory=Personal)
 
     # ---- consultas de conveniência (sem efeito colateral)
     def app(self, app_id: str) -> AppItem | None:

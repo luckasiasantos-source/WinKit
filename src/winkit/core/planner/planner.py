@@ -41,6 +41,7 @@ _G1 = {
     "maintenance": 47,
     "env": 48,
     "font": 49,
+    "personal": 42,  # R23: perfil Default, junto dos ajustes de aparência
     "backup": 50,
     "default_apps": 65,  # depois dos apps offline, para que os ProgIds já existam
     "app": 60,
@@ -112,6 +113,7 @@ def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> 
     _plan_env(recipe, drafts)
     _plan_fonts(recipe, drafts)
     _plan_default_apps(recipe, ctx, drafts)
+    _plan_personal(recipe, catalogs, drafts)
     _plan_power(recipe, drafts)
     _plan_bloat(recipe, catalogs, ctx, drafts, excluded)
     _plan_features(recipe, catalogs, ctx, drafts, excluded)
@@ -284,6 +286,28 @@ def _plan_default_apps(recipe: Recipe, ctx: PlanContext, out: list[_Draft]) -> N
                 needs_pendrive=True,
                 depends_on=["default_apps:import"],
                 sort=(_G2["default_apps_verify"], 0, "user"),
+            )
+        )
+
+
+def _plan_personal(recipe: Recipe, catalogs: Catalogs, out: list[_Draft]) -> None:  # R23
+    p = recipe.personal
+    for group_id in p.groups:
+        group = catalogs.personal_group(group_id)
+        if group is None:
+            continue
+        has_values = any(f"{s.key}\\{s.value}" in p.values for s in group.values)
+        if not has_values and not (group.file and p.wallpaper_file):
+            continue
+        out.append(
+            _Draft(
+                "personal",
+                group_id,
+                1,
+                t("plan.personal", name=group.name),
+                "default_profile",
+                needs_pendrive=group.file,
+                sort=(_G1["personal"], 0, group_id),
             )
         )
 
