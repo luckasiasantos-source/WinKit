@@ -7,9 +7,11 @@ Windows clona para a conta nova (H4). Na Fase 2 é o perfil do usuário logado.
 from __future__ import annotations
 
 import ntpath
+from pathlib import Path
 
-from winkit.agent.steps.base import StepContext, StepResult, local_path
+from winkit.agent.steps.base import StepBase, StepContext, StepResult, item, local_path
 from winkit.core.errors import PathTemplateError, WinKitError
+from winkit.core.live import PreviewItem
 from winkit.core.paths import templates
 from winkit.core.recipe.models import BackupItem
 from winkit.i18n import msg
@@ -23,7 +25,42 @@ def destination(ctx: StepContext, item: BackupItem) -> str:
     return templates.resolve(item.template, ctx.folders())
 
 
-class BackupStep:
+def _count(src: Path, dest: Path) -> tuple[int, int]:
+    """(arquivos no backup, quantos já existem no destino) — só leitura."""
+    total = existing = 0
+    for path in src.rglob("*"):
+        if path.is_file():
+            total += 1
+            if (dest / path.relative_to(src)).exists():
+                existing += 1
+    return total, existing
+
+
+class BackupStep(StepBase):
+    def preview(self, ctx: StepContext) -> PreviewItem:
+        """Quantos arquivos seriam copiados e quantos já existem (mantidos no modo mesclar)."""
+        b = _item(ctx)
+        if b is None or ctx.pendrive is None:
+            return item(ctx, "not_applicable", (msg("step.not_in_recipe"),))
+        try:
+            dest_str = destination(ctx, b)
+        except PathTemplateError as exc:
+            return item(ctx, "not_applicable", (msg("step.failed_generic", detail=str(exc)),))
+        src, dest = ctx.payload(b.data_path), local_path(dest_str)
+        if not src.is_dir():
+            return item(ctx, "not_applicable", (msg("step.backup_missing", path=b.data_path),))
+        if b.kind == "file":
+            name = ntpath.basename(dest_str)
+            total, existing = int((src / name).is_file()), int(dest.exists())
+        else:
+            total, existing = _count(src, dest)
+        overwrite = b.on_conflict == "overwrite"
+        if total == 0 or (existing == total and not overwrite):
+            return item(ctx, "already_done")
+        changes = (msg("preview.backup_copy", new=total - existing, kept=existing, path=dest_str),)
+        warnings = (msg("preview.backup_overwrite", n=existing),) if overwrite and existing else ()
+        return item(ctx, "will_change", changes, warnings)
+
     def check(self, ctx: StepContext) -> bool:
         item = _item(ctx)
         if item is None or item.on_conflict != "skip":

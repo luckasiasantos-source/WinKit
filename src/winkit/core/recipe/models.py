@@ -183,6 +183,13 @@ class TweakSelection(_Model):
     decide_at_runtime: bool = False
 
 
+class RestorePoint(_Model):
+    """V2-10: ponto de restauração "Windows pronto" no fim da instalação (M12)."""
+
+    enabled: bool = True
+    max_disk_percent: Annotated[int, Field(ge=1, le=50)] = 5
+
+
 class Power(_Model):
     scheme: PowerScheme = "unchanged"
     hibernate: bool | None = None
@@ -201,6 +208,7 @@ class Recipe(_Model):
     bloatware: Bloatware = Field(default_factory=Bloatware)
     tweaks: list[TweakSelection] = Field(default_factory=list)
     power: Power = Field(default_factory=Power)
+    restore_point: RestorePoint = Field(default_factory=RestorePoint)
 
     # ---- consultas de conveniência (sem efeito colateral)
     def app(self, app_id: str) -> AppItem | None:

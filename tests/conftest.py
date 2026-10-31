@@ -31,10 +31,15 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 
 @pytest.fixture(autouse=True)
-def _base_language() -> object:
-    """Todo teste começa e termina em pt-BR (o idioma é estado do processo, D-030)."""
+def _base_language(monkeypatch: pytest.MonkeyPatch) -> object:
+    """Todo teste começa e termina em pt-BR (o idioma é estado do processo, D-030).
+
+    ``WINKIT_LANG`` fixo: sem isso a CLI e o Studio detectam o idioma do Windows da máquina
+    de teste (o runner do CI é em inglês — IN-014).
+    """
     from winkit.i18n import set_language
 
+    monkeypatch.setenv("WINKIT_LANG", "pt-BR")
     set_language("pt-BR")
     yield
     set_language("pt-BR")

@@ -6,7 +6,7 @@
 > Legenda: ⬜ não iniciado · 🟨 em andamento · ✅ concluído · ⛔ bloqueado · ➖ fora do escopo atual
 
 **Última atualização:** 2026-10-31
-**Versão do código:** 0.2.0 (pré-alpha, projeto pessoal)
+**Versão do código:** 0.3.0 (pré-alpha, projeto pessoal)
 **Fase do projeto:** v1 implementada (M0–M10); falta a validação em VM/PC real pelos roteiros de `docs/validacao/`. v2 (M11–M18) aprovada e em implementação (`PLANO_V2.md`)
 
 ## Resumo
@@ -26,7 +26,7 @@
 | M9 | Interface do Agente | ✅ código | ⬜ roteiro pronto (`docs/validacao/M9.md`) |
 | M10 | WinKit Studio (GUI) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M10.md`) |
 | M11 | Inglês e espanhol (V2-00) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M11.md`) |
-| M12 | Aplicar neste PC + ponto de restauração (V2-03, V2-10) | ⬜ planejado | — |
+| M12 | Aplicar neste PC + ponto de restauração (V2-03, V2-10) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M12.md`) |
 | M13 | Pendrive comum: Rufus/Microsoft (V2-01) | ⬜ planejado | — |
 | M14 | Rede e sistema (V2-02, 08, 09, 16, 17, 18, 22) | ⬜ planejado | — |
 | M15 | Personalização (V2-04, 05, 06, 07, 12, 15) | ⬜ planejado | — |
@@ -173,6 +173,15 @@
 - ✅ README em três idiomas (`README.en.md`, `README.es.md`), `NOTICE`, LEIA-ME do pacote (`README.txt`, `LEAME.txt`) e notas da release trilíngues; links para o repositório `WinKit`
 - ✅ Capturas do Studio em pt/en/es (`docs/imagens/`, `docs/imagens/en/`, `docs/imagens/es/`); roteiro `docs/validacao/M11.md`; versão 0.2.0
 
+### M12 — Aplicar neste PC e ponto de restauração ✅ (código) · validação na VM pendente
+- ✅ V2-10: ponto de restauração "Windows pronto" no fim da instalação (`restore_point:ready`, R30), com espaço máximo configurável; frequência de 24 h contornada e restaurada; política que desliga a Restauração do Sistema respeitada
+- ✅ V2-03: `agent/live.py` — plano ao vivo (perfil do usuário atual, R31), filtro "o que aplicar", ponto de restauração **antes** (D-033), prévia sem escrita (R-54, teste de proteção), estado/resumo por aplicação, logs no pendrive
+- ✅ Contrato de etapa com `live_safe` e `preview()`; prévia real dos backups (novos × mantidos)
+- ✅ `winkit-agent apply`, `winkit aplicar` (`--simular`, `--somente`, `--sem-ponto-de-restauracao` com confirmação extra)
+- ✅ Studio: seção "Aplicar neste PC" (escolher → prévia → aplicar) e cartão do ponto de restauração em "Energia e atualizações"
+- ✅ Teste de fumaça do pacote com `aplicar --simular` e `winkit-agent apply --simular`
+- ⬜ DT-018: progresso por etapa e processo separado
+
 ## Hipóteses técnicas
 
 | # | Hipótese (resumo) | Estado | Onde foi validada |
@@ -188,3 +197,7 @@
 | H9 | PowerShell funciona na etapa *specialize* | ⬜ | — |
 | H10 | Instalador enxerga o SSD sem driver extra | ⬜ | — |
 | H11 | Grupo `Administrators` funciona em Windows pt-BR | ⬜ | — |
+| H12 | Idioma de exibição lido como SYSTEM na Fase 1 | ⬜ | — |
+| H13 | `CreateRestorePoint` funciona na Fase 2, logo após o Windows Update | ⬜ | — |
+| H14 | `pnputil` num Windows em uso não força reinício sem aviso | ⬜ | — |
+| H15 | Remover Appx com o usuário logado não exige sair da sessão | ⬜ | — |

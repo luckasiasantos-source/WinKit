@@ -135,7 +135,10 @@ Por que isso importa:
 | `agent/main.py` | Ponto de entrada (`phase1`, `phase2`, `retry`, `summary`) |
 | `agent/phases.py` | Abre a sessão (receita, estado, plano), redes de segurança, Fase 1, Fase 2, fallback |
 | `agent/paths.py`, `store.py`, `eventlog.py`, `pendrive.py`, `progress.py`, `cleanup.py`, `services.py`, `ui_select.py` | Caminhos locais, estado atômico, logs, localização do pendrive, protocolo de UI sem Qt, limpeza, serviços, escolha da UI |
-| `agent/executor.py` | Executa um `Plan`, persiste `State`, trata reinicialização e pendrive ausente |
+| `agent/executor.py` | Executa um `Plan`, persiste `State`, trata reinicialização e pendrive ausente; `context()` monta o contexto de uma etapa (usado também pela prévia) |
+| `agent/live.py` | Modo "aplicar neste PC" (D-033): plano ao vivo, prévia sem escrita, ponto de restauração antes, estado e resumo por aplicação em `ProgramData\WinKit\Aplicacoes` |
+| `agent/steps/restore.py`, `platform/restore.py` | Ponto de restauração (V2-10) por CIM `SystemRestore` e `Win32_ShadowStorage` |
+| `core/live.py` | Modelos da prévia (`PreviewItem`, `LivePreview`) |
 | `agent/integrity.py` | Confere arquivo ou pasta do pendrive contra o `manifesto.json` (R-22) |
 | `agent/fakes.py`, `platform/fakes/services.py` | Fábricas de serviços falsos (um lugar só para acrescentar campos) |
 | `agent/reboot.py`, `steps/windows_update.py` | Política de reinício; Windows Update |
@@ -167,7 +170,14 @@ class Step(Protocol):
 
     def run(self, ctx: StepContext) -> StepResult:
         """Produz o efeito. Precisa ser seguro rodar de novo após uma falha no meio."""
+
+    live_safe: bool              # desde o M12 (R-54): pode rodar num Windows em uso?
+
+    def preview(self, ctx: StepContext) -> PreviewItem:
+        """O que run() faria, sem efeito colateral (modo "aplicar neste PC", D-033)."""
 ```
+
+Desde o M12 as etapas herdam `StepBase` (`agent/steps/base.py`): `live_safe = True` e uma prévia padrão a partir de `check()`; etapas com prévia própria (backup: arquivos novos × mantidos) sobrescrevem `preview`. `StepContext.mode` diz se é instalação (`install`) ou modo ao vivo (`live`).
 
 `StepResult`: `ok`, `reboot_required`, `skipped(reason)`, `failed(reason, recoverable)`. O executor nunca deixa uma exceção de uma etapa derrubar o Agente: captura, registra, marca `failed` e segue (P4 do plano).
 
@@ -307,6 +317,7 @@ runner.run(
 | R-35 | `test_phase1_does_not_import_qt` |
 | R-50 | `test_todo_requires_debt_entry` |
 | R-51 | `tests/i18n/test_parity.py` (chaves, marcadores, plurais) e `tests/i18n/test_usage.py` (toda chave usada existe; toda chave existente é usada) |
+| R-54 | `tests/agent/test_live.py::test_preview_never_writes` (todo serviço de escrita falha durante a prévia) |
 | R-55 | `tests/i18n/test_usage.py::test_no_loose_ui_strings` (AST em `studio`, `agent/ui`, `ui`, `cli`) |
 | Empacotamento | `test_no_dynamic_imports_in_package` (IN-013) |
 

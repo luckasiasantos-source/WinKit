@@ -16,6 +16,7 @@ from winkit.platform.known_folders import KnownFolders, WindowsKnownFolders
 from winkit.platform.power import SessionControl, WindowsSessionControl
 from winkit.platform.powershell import PowerShell
 from winkit.platform.registry import Registry, WindowsRegistry
+from winkit.platform.restore import RestorePoints, WindowsRestorePoints
 from winkit.platform.runner import CommandRunner, SubprocessRunner
 from winkit.platform.scheduler import TaskScheduler, WindowsTaskScheduler
 from winkit.platform.shortcuts import Shortcuts, WindowsShortcuts
@@ -42,6 +43,7 @@ class AgentServices:
     features: SystemFeatures
     updater: WindowsUpdater
     session: SessionControl
+    restore: RestorePoints
 
 
 def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windows
@@ -66,4 +68,5 @@ def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windo
         features=WindowsSystemFeatures(ps),
         updater=ComWindowsUpdater(ps),
         session=WindowsSessionControl(runner),
+        restore=WindowsRestorePoints(ps),
     )

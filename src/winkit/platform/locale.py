@@ -6,6 +6,7 @@ import ctypes
 import os
 import sys
 
+from winkit.core.errors import WinKitError
 from winkit.core.regional import RegionalDefaults, regional_from_values
 from winkit.i18n import Language, normalize
 from winkit.platform.registry import Registry
@@ -37,7 +38,17 @@ def detect_language() -> Language:
 
 
 def read_regional(registry: Registry) -> RegionalDefaults:
-    """Formatos, teclado e fuso do usuário atual, pelo registro (nunca por texto, R-13)."""
+    """Formatos, teclado e fuso do usuário atual, pelo registro (nunca por texto, R-13).
+
+    Nunca impede a receita nova: se o registro não puder ser lido, valem os padrões.
+    """
+    try:
+        return _read_regional(registry)
+    except (WinKitError, OSError):
+        return RegionalDefaults()
+
+
+def _read_regional(registry: Registry) -> RegionalDefaults:
     preload = registry.get("HKCU", r"Keyboard Layout\Preload", "1")
     substitute = (
         registry.get("HKCU", r"Keyboard Layout\Substitutes", str(preload)) if preload else None

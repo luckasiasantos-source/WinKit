@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 from winkit.agent.integrity import verify_payload
-from winkit.agent.steps.base import StepContext, StepResult
+from winkit.agent.steps.base import StepBase, StepContext, StepResult
 from winkit.core.errors import IntegrityError, PlatformError
 from winkit.i18n import msg
 
 
-class DriverStep:
+class DriverStep(StepBase):
     def check(self, ctx: StepContext) -> bool:
         return False  # pnputil /add-driver é idempotente
 

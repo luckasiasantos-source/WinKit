@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from winkit.agent.cleanup import cleanup
-from winkit.agent.steps.base import StepContext, StepResult, local_path
+from winkit.agent.steps.base import StepBase, StepContext, StepResult, local_path
 from winkit.core.fsutil import atomic_write_text
 from winkit.core.state.models import should_run
 from winkit.core.summary import build_summary, render_html
@@ -34,7 +34,7 @@ def write_summary(ctx: StepContext) -> Path:
     atomic_write_text(ctx.paths.summary_json, summary.model_dump_json(indent=2) + "\n")
     html = render_html(summary, log_path=str(ctx.log.dir / "agente.log"))
     atomic_write_text(ctx.paths.summary_html, html)
-    if ctx.recipe.execution.desktop_summary_shortcut:
+    if ctx.recipe.execution.desktop_summary_shortcut and ctx.mode != "live":
         _desktop_shortcut(ctx)
     ctx.ui.finished(summary, ctx.paths.summary_html)
     return ctx.paths.summary_html
@@ -65,11 +65,13 @@ def _retry_shortcut(ctx: StepContext) -> None:
         ctx.log.warning(f"atalho de nova tentativa não criado: {exc}", step=ctx.step.id)
 
 
-class FinalizeStep:
+class FinalizeStep(StepBase):
     def check(self, ctx: StepContext) -> bool:
         return False
 
     def run(self, ctx: StepContext) -> StepResult:
+        if ctx.mode == "live":
+            return self._live(ctx)
         write_summary(ctx)
         pending = _pending_others(ctx)
         if pending:
@@ -94,6 +96,14 @@ class FinalizeStep:
             else:
                 text = t("agent.finished")
             ctx.ui.notify(t("app.name"), text)
+        return StepResult.ok(
+            msg("step.finalize_counts", done=counts["done"], failed=counts["failed"])
+        )
+
+    def _live(self, ctx: StepContext) -> StepResult:
+        """Modo ao vivo (R31): só o resumo; nada de limpeza, Agente ou atalhos de instalação."""
+        write_summary(ctx)
+        counts = ctx.state.counts()
         return StepResult.ok(
             msg("step.finalize_counts", done=counts["done"], failed=counts["failed"])
         )

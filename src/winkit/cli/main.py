@@ -23,6 +23,8 @@ from pathlib import Path
 from typing import Any, Literal
 
 from winkit import __version__
+from winkit.agent.live import LiveOptions, run_live
+from winkit.agent.phases import Runtime
 from winkit.builder import target as targets
 from winkit.builder.build import (
     BuildOptions,
@@ -45,7 +47,7 @@ from winkit.core.recipe.models import Recipe
 from winkit.core.recipe.validation import validate_recipe
 from winkit.core.text import human_size
 from winkit.core.winget_manifest import split_args
-from winkit.i18n import CHOICES, normalize, set_language, t, tn
+from winkit.i18n import CHOICES, current_language, normalize, render, set_language, t, tn
 from winkit.platform.locale import detect_language
 from winkit.platform.services import Services, real_services
 from winkit.platform.session import is_admin
@@ -520,6 +522,54 @@ def cmd_apps_portatil(args: argparse.Namespace, services: Services, out: Out) ->
     return 0
 
 
+def _agent_runtime() -> Runtime:
+    from winkit.agent.main import build_runtime  # noqa: PLC0415 — só o "aplicar" precisa do Agente
+
+    return build_runtime()
+
+
+#: Monta o Agente para ``winkit aplicar`` (os testes trocam por um com dublês).
+AGENT_RUNTIME: Callable[[], Runtime] = _agent_runtime
+
+
+def cmd_aplicar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    """V2-03: aplica a receita neste Windows, com prévia e ponto de restauração (D-033)."""
+    if args.sem_ponto_de_restauracao and not args.sei_o_que_estou_fazendo:
+        out(t("cli.live_needs_confirmation"))
+        return 2
+    root = _target(args, services).root
+    kinds = frozenset(k.strip() for k in (args.somente or "").split(",") if k.strip())
+    options = LiveOptions(
+        root=root,
+        profile_id=args.perfil,
+        simulate=args.simular,
+        only_kinds=kinds or None,  # type: ignore[arg-type]
+        restore_point=not args.sem_ponto_de_restauracao,
+        language=current_language(),
+    )
+    result = run_live(AGENT_RUNTIME(), options)
+    if result.preview is not None:
+        for item in result.preview.items:
+            out(f"  [{t(f'preview.status.{item.status}')}] {item.title}")
+            for change in (*item.changes, *item.warnings):
+                out(f"      {render(change)}")
+        for step_id in result.preview.not_live_safe:
+            out(f"  [{t('preview.status.not_applicable')}] {step_id}: {t('step.not_live_safe')}")
+        return 0
+    counts = result.counts
+    out(
+        t(
+            "cli.live_done",
+            done=counts.get("done", 0),
+            failed=counts.get("failed", 0),
+            skipped=counts.get("skipped", 0),
+        )
+    )
+    if result.summary_html is not None:
+        out(t("cli.summary_at", path=result.summary_html))
+    return result.code
+
+
 def cmd_sincronizar(args: argparse.Namespace, services: Services, out: Out) -> int:
     tgt = _target(args, services)
     if not args.sem_backups:
@@ -695,6 +745,13 @@ def build_parser() -> argparse.ArgumentParser:
     _add_collect_parsers(sub, common)
     _add_apps_parsers(sub, common)
     _add_backup_parsers(sub, common)
+
+    ap = sub.add_parser("aplicar", aliases=["apply"], parents=[common], help=t("cli.h.apply"))
+    ap.add_argument("--simular", action="store_true", help=t("cli.h.simulate"))
+    ap.add_argument("--somente", help=t("cli.h.only_kinds"))
+    ap.add_argument("--sem-ponto-de-restauracao", action="store_true", help=t("cli.h.no_restore"))
+    ap.add_argument("--sei-o-que-estou-fazendo", action="store_true", help=argparse.SUPPRESS)
+    ap.set_defaults(func=cmd_aplicar)
 
     val = sub.add_parser(
         "validar", aliases=["validate"], parents=[common], help=t("cli.h.validate")

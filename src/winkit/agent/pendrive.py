@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Protocol
 
 from winkit.core.errors import PendriveError
 from winkit.core.layout import read_marker
 from winkit.platform.environment import Environment
+
+
+class Locator(Protocol):
+    def find(self) -> Path | None: ...
 
 
 class PendriveLocator:

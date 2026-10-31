@@ -156,3 +156,36 @@ def test_first_page_shows_disclaimer(window: StudioWindow, qapp, lang: str) -> N
     assert text in [r.subtitle_label.text() for r in page.findChildren(Row)]
     assert {"pt-BR": "vibe-codado", "en-US": "vibe-coded", "es": "vibe coding"}[lang] in text
     assert {"pt-BR": "pré-alpha", "en-US": "Pre-alpha", "es": "pre-alfa"}[lang] in text
+
+
+def test_live_page_preview_then_apply(qapp, tmp_path: Path) -> None:
+    """V2-03 no Studio: prévia obrigatória antes de aplicar; aplicar usa o Agente."""
+    from tests.agent.helpers import make_world
+    from tests.factories import backup
+
+    (tmp_path / "w").mkdir()
+    world = make_world(tmp_path / "w")
+    r = world.recipe()
+    r.backups = [backup("discord", "{APPDATA}\\discord")]
+    world.save_recipe(r)
+    dados = world.pendrive / "WinKit" / "Perfis" / "padrao" / "Backups" / "discord" / "dados"
+    dados.mkdir(parents=True)
+    (dados / "settings.json").write_text("x")
+    ctl = StudioController(services=fake_services(), agent_runtime=world.runtime)
+    ctl.open_folder(world.pendrive)
+    w = StudioWindow(ctl, synchronous_tasks=True, prefs_path=tmp_path / "p.json")
+    w.show()
+    page = w.go_to("live")
+    assert "backup" in page._kinds  # type: ignore[attr-defined]
+    assert not page.apply_button.isEnabled()  # type: ignore[attr-defined]
+    page._preview()  # type: ignore[attr-defined]
+    assert page.apply_button.isEnabled()  # type: ignore[attr-defined]
+    page._set_kind("tweak", False)  # type: ignore[attr-defined]
+    assert not page.apply_button.isEnabled()  # mudou a escolha: refazer a prévia  # type: ignore[attr-defined]
+    page._preview()  # type: ignore[attr-defined]
+    page._apply()  # type: ignore[attr-defined]
+    assert page.result.text().startswith("Aplicado:")  # type: ignore[attr-defined]
+    restored = (
+        world.system / "Users" / "Samuel" / "AppData" / "Roaming" / "discord" / "settings.json"
+    )
+    assert restored.read_text() == "x"

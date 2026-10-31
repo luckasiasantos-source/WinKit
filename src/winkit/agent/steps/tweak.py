@@ -14,7 +14,7 @@ from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass
 from pathlib import Path
 
-from winkit.agent.steps.base import StepContext, StepResult, local_path
+from winkit.agent.steps.base import StepBase, StepContext, StepResult, local_path
 from winkit.core.catalog.models import Tweak, TweakOp
 from winkit.core.errors import WinKitError
 from winkit.i18n import msg
@@ -117,7 +117,7 @@ def already_applied(ctx: StepContext, tweak: Tweak) -> bool:
     return True
 
 
-class TweakStep:
+class TweakStep(StepBase):
     def check(self, ctx: StepContext) -> bool:
         tweak = ctx.catalogs.tweak(ctx.step.ref)
         return tweak is not None and already_applied(ctx, tweak)

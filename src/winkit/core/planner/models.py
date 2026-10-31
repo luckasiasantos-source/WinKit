@@ -18,6 +18,7 @@ StepKind = Literal[
     "shortcut",
     "rename_computer",
     "windows_update",
+    "restore_point",
     "finalize",
 ]
 #: Onde o efeito acontece: máquina, perfil Default (Fase 1) ou perfil do usuário logado.
@@ -51,10 +52,19 @@ class ExcludedItem(_Frozen):
     reason: str
 
 
+#: ``install`` = Windows recém-instalado; ``live`` = aplicar num Windows em uso (D-033).
+PlanMode = Literal["install", "live"]
+
+
 class PlanContext(_Frozen):
     os_major: int | None = None
     build: int | None = None
     phase1_ran: bool = True
+    mode: PlanMode = "install"
+    #: Só estes tipos de etapa (modo ao vivo, "o que aplicar"); ``None`` = todos.
+    only_kinds: frozenset[StepKind] | None = None
+    #: Modo ao vivo: ponto de restauração antes de tudo (D-033), ligado por padrão.
+    restore_before: bool = True
 
 
 class Plan(_Frozen):

@@ -17,6 +17,11 @@ if ($LASTEXITCODE -ne 0) { throw "construir falhou" }
 if ($LASTEXITCODE -ne 0) { throw "validar falhou" }
 if (-not (Test-Path (Join-Path $root 'WinKit\Agent\winkit-agent\winkit-agent.exe'))) { throw "Agente não copiado" }
 if (-not (Test-Path (Join-Path $root 'WinKit\Agent\bootstrap.ps1'))) { throw "bootstrap ausente" }
+# M12: modo "aplicar neste PC" só em simulação (não muda nada no runner)
+& $cli aplicar --raiz $root --simular
+if ($LASTEXITCODE -ne 0) { throw "aplicar --simular falhou" }
+$live = Start-Process -FilePath (Join-Path $agent 'winkit-agent.exe') -ArgumentList 'apply', '--root', $root, '--simular' -Wait -PassThru
+if ($live.ExitCode -ne 0) { throw "Agente apply --simular falhou (código $($live.ExitCode))" }
 $p = Start-Process -FilePath (Join-Path $agent 'winkit-agent.exe') -ArgumentList 'summary' -Wait -PassThru
 if ($p.ExitCode -ne 1) { throw "Agente não iniciou corretamente (código $($p.ExitCode))" }
 $studio = Join-Path $pkg.FullName 'winkit-studio\winkit-studio.exe'

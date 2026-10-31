@@ -35,8 +35,13 @@ _G2 = {
     "shortcut": 50,
     "rename_computer": 60,
     "windows_update": 70,
+    "restore_point": 80,
     "finalize": 99,
 }
+#: Modo ao vivo: o ponto de restauração "antes" vem antes de tudo (R30).
+_LIVE_FIRST = 1
+#: Tipos que nunca saem do plano pelo filtro "o que aplicar".
+_ALWAYS = ("finalize", "restore_point")
 _FALLBACK_GROUP = 5
 
 #: Ajustes ligados por campos da receita, não pela lista ``tweaks``.
@@ -84,6 +89,15 @@ def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> 
     _plan_backups(recipe, ask, post_install, drafts)
     _plan_apps(recipe, ask, post_install, drafts)
     _plan_tail(recipe, ask, drafts)
+    _plan_live_and_restore(recipe, ctx, drafts)
+    if ctx.only_kinds is not None:
+        kept = [d for d in drafts if d.kind in ctx.only_kinds or d.kind in _ALWAYS]
+        for d in drafts:
+            if d not in kept:
+                excluded.append(
+                    ExcludedItem(kind=d.kind, ref=d.ref, reason=t("plan.excluded_not_selected"))
+                )
+        drafts = kept
 
     steps = _finalize(drafts, ctx)
     return Plan(mode=mode, steps=tuple(steps), excluded=tuple(excluded))
@@ -379,6 +393,46 @@ def _plan_tail(recipe: Recipe, ask: Ask, out: list[_Draft]) -> None:
     )
 
 
+def _plan_live_and_restore(recipe: Recipe, ctx: PlanContext, out: list[_Draft]) -> None:
+    """R30/R31: ponto de restauração e particularidades do modo ao vivo."""
+    if ctx.mode == "live":
+        if ctx.restore_before:
+            out.append(
+                _Draft(
+                    "restore_point",
+                    "before",
+                    2,
+                    t("plan.restore_before"),
+                    "machine",
+                    sort=(_LIVE_FIRST, 0, "before"),
+                )
+            )
+        name = recipe.windows.computer_name
+        if name and not any(d.kind == "rename_computer" for d in out):
+            out.append(
+                _Draft(
+                    "rename_computer",
+                    "computer",
+                    2,
+                    t("plan.rename_computer"),
+                    "machine",
+                    sort=(_G2["rename_computer"], 0, "computer"),
+                )
+            )
+        return
+    if recipe.restore_point.enabled:
+        out.append(
+            _Draft(
+                "restore_point",
+                "ready",
+                2,
+                t("plan.restore_ready"),
+                "machine",
+                sort=(_G2["restore_point"], 0, "ready"),
+            )
+        )
+
+
 # ------------------------------------------------------------------ montagem final
 def _finalize(drafts: list[_Draft], ctx: PlanContext) -> list[PlannedStep]:
     ids = [d.id for d in drafts]
@@ -395,7 +449,7 @@ def _finalize(drafts: list[_Draft], ctx: PlanContext) -> list[PlannedStep]:
             if target == "default_profile":
                 target = "user_profile"
         group, sub, name = d.sort
-        if moved:
+        if moved and d.kind != "restore_point":
             key = (phase, _FALLBACK_GROUP, group * 10000 + sub, name)
         else:
             key = (phase, group, sub, name)

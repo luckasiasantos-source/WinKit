@@ -16,6 +16,7 @@ from winkit.platform.fakes.apps import (
 from winkit.platform.fakes.drivers import FakeDriverManager
 from winkit.platform.fakes.powershell import FakePowerShell
 from winkit.platform.fakes.registry import FakeRegistry
+from winkit.platform.fakes.restore import FakeRestorePoints
 from winkit.platform.fakes.runner import FakeRunner
 from winkit.platform.fakes.system import (
     FakeAccounts,
@@ -45,6 +46,7 @@ def fake_agent_services(*, pendrive: Path, system: Path, **overrides: Any) -> Ag
         "features": FakeFeatures(),
         "updater": FakeUpdater(),
         "session": FakeSession(),
+        "restore": FakeRestorePoints(),
     }
     values.update(overrides)
     return AgentServices(**values)

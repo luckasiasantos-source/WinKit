@@ -1056,7 +1056,7 @@ Por que juntos e logo no começo:
   7. copia os logs para `WinKit\Logs\<pc>_<data>_aplicar\`.
 - `--simular`: monta o plano e chama `preview()` de cada etapa (R-54), gravando `previa.json` (lista de `Preview` serializada com `Msg`). O Studio lê esse JSON. **Teste de proteção:** em modo simulação, os fakes de plataforma falham em qualquer escrita.
 - Instância única: a mesma trava da Fase 2 (não deixa rodar "aplicar" e "Fase 2" ao mesmo tempo).
-- O Studio chama o Agente como **processo separado** (o Agente já existe empacotado). O progresso volta por um arquivo `progresso.jsonl` que o Studio acompanha, não por importar o Agente: assim o contrato entre Studio e Agente fica igual ao da instalação, e um travamento do Agente não derruba o Studio.
+- *(Implementado de outro jeito no M12:)* o Studio e a CLI rodam o motor do Agente (`agent/live.py`) **no próprio processo**, numa thread de fundo (`TaskRunner`), com os mesmos serviços reais. Motivo: o Studio já roda como administrador e assim não depende de achar o executável do Agente. A ideia original (processo separado com `progresso.jsonl`) fica registrada como dívida (DT-018). O comando `winkit-agent apply` continua existindo para rodar direto do pendrive, sem o Studio.
 
 **Plataforma.** Nada novo além do `restore.py`. O `runner` ganha `start_detached(args)` para o Studio iniciar o Agente e acompanhar o processo.
 

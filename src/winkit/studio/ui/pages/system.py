@@ -5,6 +5,8 @@ from __future__ import annotations
 from collections.abc import Callable
 from functools import partial
 
+from PySide6.QtWidgets import QSpinBox
+
 from winkit.core.recipe.models import Recipe, TweakSelection
 from winkit.i18n import t
 from winkit.studio.ui.base import Page
@@ -222,6 +224,28 @@ class EnergyPage(Page):
                 )
             )
         self.content.addWidget(section(t("studio.energy.section_updates"), up))
+
+        rp = Card()
+        rp.add_row(
+            Row(
+                t("studio.restore.enabled"),
+                t("studio.restore.enabled_hint"),
+                accessory=toggle(
+                    r.restore_point.enabled,
+                    lambda v: self._set(lambda r: setattr(r.restore_point, "enabled", v)),
+                ),
+                icon=kind_icon("restore_point"),
+            )
+        )
+        spin = QSpinBox()
+        spin.setRange(1, 50)
+        spin.setSuffix(" %")
+        spin.setValue(r.restore_point.max_disk_percent)
+        spin.valueChanged.connect(
+            lambda v: self._set(lambda r: setattr(r.restore_point, "max_disk_percent", int(v)))
+        )
+        rp.add_row(Row(t("studio.restore.space"), t("studio.restore.space_hint"), accessory=spin))
+        self.content.addWidget(section(t("studio.restore.section"), rp))
 
     def _set(self, fn: Callable[[Recipe], None]) -> None:
         if self.ctl.recipe is not None:

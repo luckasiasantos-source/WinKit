@@ -169,3 +169,12 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Plano: revisão por falantes nativos; issues com rótulo `tradução`.
 - Prioridade: baixa
 
+### DT-018 — "Aplicar neste PC" roda no processo do Studio, sem progresso por etapa
+- Estado: aberta
+- Origem: M12
+- Onde: `src/winkit/studio/controller.py` (`live_apply`), `src/winkit/studio/ui/pages/finish.py` (`LivePage`)
+- Descrição: o plano previa o Studio chamando o Agente como processo separado e acompanhando um `progresso.jsonl`. Foi feito no mesmo processo, numa thread, com a folha "Aplicando…" sem progresso por etapa.
+- Impacto: uma falha grave no motor pode derrubar o Studio; durante a aplicação não se vê qual etapa está rodando (o resumo no fim mostra tudo).
+- Plano: passar o progresso do executor para a interface (sinal Qt a partir de um `AgentUi` próprio) e, se necessário, rodar `winkit-agent apply` como processo.
+- Prioridade: média
+

@@ -68,3 +68,13 @@ def test_read_regional_from_registry() -> None:
         time_zone="E. South America Standard Time",
     )
     assert read_regional(FakeRegistry()) == RegionalDefaults()
+
+
+def test_read_regional_never_breaks_the_new_recipe() -> None:
+    from winkit.core.errors import PlatformError
+
+    class Broken(FakeRegistry):
+        def get(self, hive: str, key: str, value: str) -> object:
+            raise PlatformError("registro só existe no Windows")
+
+    assert read_regional(Broken()) == RegionalDefaults()

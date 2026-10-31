@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from winkit.agent.steps.base import StepContext, StepResult
+from winkit.agent.steps.base import StepBase, StepContext, StepResult
 from winkit.core.errors import WinKitError
 from winkit.i18n import msg
 from winkit.platform.windows_update import WU_SUCCEEDED_WITH_ERRORS
 
 
-class WindowsUpdateStep:
+class WindowsUpdateStep(StepBase):
     def check(self, ctx: StepContext) -> bool:
         return False
 

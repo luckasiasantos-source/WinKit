@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from winkit.agent.steps.base import StepContext, StepResult
+from winkit.agent.steps.base import StepBase, StepContext, StepResult
 from winkit.core.errors import WinKitError
 from winkit.core.recipe.validation import validate_computer_name
 from winkit.i18n import msg
@@ -19,7 +19,7 @@ WINKIT_ULTIMATE = "6f9c2f0a-3e1b-4a4e-9d55-8f2d1c7b5a02"
 POWER_KEY = r"SYSTEM\CurrentControlSet\Control\Session Manager\Power"
 
 
-class BloatStep:
+class BloatStep(StepBase):
     def check(self, ctx: StepContext) -> bool:
         if ctx.services.appx.is_present(ctx.step.ref):
             return False
@@ -49,7 +49,7 @@ class BloatStep:
         )
 
 
-class PowerStep:
+class PowerStep(StepBase):
     def check(self, ctx: StepContext) -> bool:
         return False
 
@@ -97,7 +97,7 @@ class PowerStep:
         return StepResult.ok()
 
 
-class RenameComputerStep:
+class RenameComputerStep(StepBase):
     def check(self, ctx: StepContext) -> bool:
         return False
 

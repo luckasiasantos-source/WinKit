@@ -7,7 +7,7 @@ import shutil
 from pathlib import Path
 
 from winkit.agent.integrity import verify_payload
-from winkit.agent.steps.base import StepContext, StepResult, local_path
+from winkit.agent.steps.base import StepBase, StepContext, StepResult, local_path
 from winkit.core.errors import IntegrityError, PathTemplateError, WinKitError
 from winkit.core.paths import templates
 from winkit.core.recipe.models import AppItem, ShortcutSpec
@@ -65,7 +65,7 @@ def create_shortcuts(ctx: StepContext, specs: list[ShortcutSpec]) -> None:
         ctx.services.shortcuts.create(shortcut_path(ctx, spec), target, spec.arguments)
 
 
-class AppStep:
+class AppStep(StepBase):
     def check(self, ctx: StepContext) -> bool:
         item = _item(ctx)
         if item is None:
@@ -147,7 +147,7 @@ class AppStep:
         return StepResult.failed(msg("step.winget_code", code=f"0x{code:08X}"))
 
 
-class ShortcutStep:
+class ShortcutStep(StepBase):
     """Apps portáteis (R12): a pasta já foi restaurada; aqui só os atalhos."""
 
     def check(self, ctx: StepContext) -> bool:

@@ -28,6 +28,41 @@
 
 ---
 
+## 2026-10-31 — M11 — Correção: testes independentes do idioma do Windows
+**Tipo:** correção (testes)
+**Resumo:** os testes da CLI falhavam no runner do Windows (em inglês) porque a CLI detecta o idioma da máquina (IN-014).
+
+### Alterado
+- `tests/conftest.py` — `WINKIT_LANG=pt-BR` fixo em todo teste
+
+### Documentos vivos atualizados
+- INCIDENTES — IN-014
+
+## 2026-10-31 — M12 — Aplicar neste PC e ponto de restauração (0.3.0)
+**Tipo:** implementação
+**Resumo:** a receita pode ser aplicada num Windows já instalado, com prévia que não muda nada, ponto de restauração antes e estado próprio por aplicação (V2-03, D-033). A instalação passa a terminar com um ponto de restauração "Windows pronto" (V2-10). A 0.2.0 (M11) não foi publicada à parte: o CI dela falhou (IN-014) e a release 0.3.0 leva o M11 e o M12 juntos.
+
+### Adicionado
+- `src/winkit/agent/live.py` — `run_live`, `LiveOptions`, `FixedLocator`, prévia e aplicação
+- `src/winkit/agent/steps/restore.py`, `src/winkit/platform/restore.py`, `src/winkit/platform/fakes/restore.py` — ponto de restauração por CIM
+- `src/winkit/core/live.py` — `PreviewItem`, `LivePreview`
+- Receita: `restore_point` (`enabled`, `max_disk_percent`; aditivo, D-039)
+- Agente: `winkit-agent apply`; CLI: `winkit aplicar` (`apply`)
+- Studio: seção "Aplicar neste PC" e cartão "Ponto de restauração"
+- Testes: `tests/agent/test_live.py` (inclui o de proteção R-54), `tests/core/test_planner_live.py`, página do Studio, regional tolerante
+- `docs/validacao/M12.md`
+
+### Alterado
+- Planejador: `PlanContext.mode/only_kinds/restore_before`, R30/R31, tipo `restore_point`
+- Contrato de etapa: `StepBase` com `live_safe` e `preview()`; prévia real do backup; `StepContext.mode`; `finalize` sem limpeza no modo ao vivo
+- `src/winkit/agent/executor.py` — `context()`, modo; `Locator` como protocolo
+- `src/winkit/platform/locale.py` — leitura regional nunca impede a receita nova (achado no teste com o executável)
+- `packaging/smoke.ps1` — `aplicar --simular` e `winkit-agent apply --simular`
+- Versão 0.3.0; notas da release com as novidades
+
+### Documentos vivos atualizados
+- ARQUITETURA — contrato de etapa (§4.1), módulos, R-54 na §5.12; PLANO_V2 — Studio roda o motor no próprio processo; DIVIDAS — DT-018; STATUS — M12 e H12–H15
+
 ## 2026-10-31 — M11 — Documentação trilíngue, capturas e versão 0.2.0
 **Tipo:** documentação + versão
 **Resumo:** fecha o M11. README em inglês e espanhol, `NOTICE` com a seção em espanhol, LEIA-ME do pacote nos três idiomas, notas da release trilíngues com as novidades, capturas novas do Studio e roteiro de validação. Links atualizados para o repositório renomeado (`WinKit`). Versão 0.2.0.

@@ -7,6 +7,8 @@
 
 ## Novidades desta versão
 
+- **Aplicar neste PC:** roda a receita num Windows já instalado, sem formatar. Mostra uma prévia do que vai mudar, cria um ponto de restauração antes e nunca sobrescreve arquivos que já existem. No Studio (seção "Aplicar neste PC") ou na linha de comando (`winkit aplicar --simular`).
+- **Ponto de restauração "Windows pronto"** no fim da instalação.
 - **Três idiomas:** português, inglês e espanhol no Studio, na linha de comando, na janela do primeiro login e no resumo. Automático pelo idioma do Windows ou escolhido em **Preferências**.
 - Studio com barra lateral agrupada, busca e tema claro/escuro escolhível.
 - Receita nova já com teclado, formatos e fuso do seu PC.
@@ -33,7 +35,7 @@ Requisitos: Windows 10 ou 11 (64 bits) no PC onde você monta o pendrive; pendri
 > [!CAUTION]
 > **Pre-alpha, 100% vibe-coded, personal project. Use at your own risk.** WinKit was made for the author's own use as an experiment; anyone using this version is, in practice, a tester. All code was written by AI without a full human review, and this version **has not yet been validated on a real Windows install**. It may have bugs and security flaws that cause data loss or an unusable Windows. **All responsibility lies with whoever downloads and uses it**; the author accepts no liability (sections 7 and 8 of the Apache 2.0 license and the `NOTICE` file). Test it in a virtual machine first and back up beforehand.
 
-**New in this version:** the app now speaks Portuguese, English and Spanish (Studio, command line, first sign-in window and summary), automatically from the Windows language or chosen in **Preferences**; grouped sidebar with search; light/dark theme choice; new recipes take the keyboard, formats and time zone of your PC.
+**New in this version:** **Apply to this PC** runs the recipe on an already installed Windows (preview first, restore point before, existing files never overwritten); a "Windows ready" restore point at the end of the install; the app now speaks Portuguese, English and Spanish (Studio, command line, first sign-in window and summary), automatically from the Windows language or chosen in **Preferences**; grouped sidebar with search; light/dark theme choice; new recipes take the keyboard, formats and time zone of your PC.
 
 **How to use:** download `WinKit-…-windows-x64.zip` below, extract it, open `winkit-studio\winkit-studio.exe` (it asks for administrator), follow the sidebar and click **Build USB drive** at the end. Boot from Ventoy, choose the original Windows 11 ISO and the `winkit-…` template. The executables are not signed: if SmartScreen warns you, click "More info" → "Run anyway". Check the download against the `.sha256` file.
 
@@ -44,6 +46,6 @@ Requisitos: Windows 10 ou 11 (64 bits) no PC onde você monta o pendrive; pendri
 > [!CAUTION]
 > **Pre-alfa, 100% hecho con vibe coding, proyecto personal. Úsalo bajo tu propio riesgo.** WinKit se hizo para uso propio, como una prueba; quien use esta versión es, en la práctica, un probador. Todo el código lo escribió IA sin auditoría humana completa, y esta versión **aún no se validó en una instalación real de Windows**. Puede tener errores y fallas de seguridad que causen pérdida de datos o un Windows inutilizable. **Toda la responsabilidad es de quien lo descarga y lo usa**; el autor no se responsabiliza por nada (secciones 7 y 8 de la licencia Apache 2.0 y archivo `NOTICE`). Pruébalo primero en una máquina virtual y haz una copia de seguridad antes.
 
-**Novedades de esta versión:** la aplicación ahora habla portugués, inglés y español (Studio, línea de comandos, ventana del primer inicio de sesión y resumen), automáticamente según el idioma de Windows o elegido en **Preferencias**; barra lateral agrupada con búsqueda; tema claro/oscuro a elección; las recetas nuevas toman el teclado, los formatos y la zona horaria de tu PC.
+**Novedades de esta versión:** **Aplicar en este PC** ejecuta la receta en un Windows ya instalado (vista previa primero, punto de restauración antes, los archivos existentes nunca se sobrescriben); punto de restauración "Windows listo" al final de la instalación; la aplicación ahora habla portugués, inglés y español (Studio, línea de comandos, ventana del primer inicio de sesión y resumen), automáticamente según el idioma de Windows o elegido en **Preferencias**; barra lateral agrupada con búsqueda; tema claro/oscuro a elección; las recetas nuevas toman el teclado, los formatos y la zona horaria de tu PC.
 
 **Cómo usarlo:** descarga `WinKit-…-windows-x64.zip` abajo, descomprímelo, abre `winkit-studio\winkit-studio.exe` (pide permisos de administrador), sigue la barra lateral y haz clic en **Preparar memoria USB** al final. Arranca desde Ventoy, elige la ISO original de Windows 11 y la plantilla `winkit-…`. Los ejecutables no están firmados: si SmartScreen avisa, haz clic en "Más información" → "Ejecutar de todas formas". Compara la descarga con el archivo `.sha256`.

@@ -135,6 +135,15 @@
 - Correção: importações explícitas dentro de `_load` (`from winkit.i18n.messages import pt_br`), que o PyInstaller detecta.
 - Prevenção: teste `test_no_dynamic_imports_in_package` proíbe `import_module` e `__import__` no pacote; o teste de fumaça com executáveis continua obrigatório no CI.
 
+### IN-014 — Testes da CLI dependiam do idioma do Windows da máquina de teste
+- Data: 2026-10-31
+- Marco: M11 (CI do commit de fechamento)
+- O que aconteceu: no CI do Windows, 8 testes da CLI falharam porque as mensagens saíram em inglês ("Recipe created at…") em vez de português. No Linux passavam.
+- Causa raiz: a CLI escolhe o idioma por `--idioma`, depois `WINKIT_LANG`, depois o idioma do Windows. O runner do GitHub é em inglês; no Linux a detecção cai em pt-BR. Os testes fixavam o idioma do processo, mas a CLI o redefinia ao iniciar.
+- Impacto: só nos testes; o comportamento do produto estava certo.
+- Correção: o `conftest.py` fixa `WINKIT_LANG=pt-BR` em todo teste (os testes de idioma mudam de propósito).
+- Prevenção: todo teste de componente que detecta idioma roda com o idioma fixado; a detecção real tem testes próprios.
+
 ## Lições da fase de desenho
 
 Problemas encontrados na conversa anterior (PDF de referência) e corrigidos **antes** de virar código. Ficam registrados porque são erros fáceis de repetir.

@@ -14,6 +14,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from winkit import __version__
+from winkit.agent.live import LiveOptions, LiveResult, run_live
+from winkit.agent.phases import Runtime
 from winkit.builder import target as targets
 from winkit.builder.build import (
     BuildOptions,
@@ -34,13 +36,15 @@ from winkit.core.catalog.loader import default_catalogs
 from winkit.core.catalog.models import Catalogs
 from winkit.core.errors import RecipeError, WinKitError
 from winkit.core.isos import IsoInfo
-from winkit.core.planner.models import Plan, PlanContext
+from winkit.core.live import LivePreview
+from winkit.core.planner.models import Plan, PlanContext, StepKind
 from winkit.core.planner.planner import plan
 from winkit.core.recipe.io import new_recipe
 from winkit.core.recipe.models import AppItem, BackupItem, ConflictPolicy, Recipe, Scope
 from winkit.core.recipe.validation import ValidationReport, validate_recipe
 from winkit.core.ventoy.detect import VentoyTarget
 from winkit.core.winget_manifest import split_args
+from winkit.i18n import current_language
 from winkit.platform.services import Services
 from winkit.platform.vss import PendingSnapshots
 
@@ -58,6 +62,12 @@ def default_agent_source() -> Path | None:
     return None
 
 
+def _real_agent_runtime() -> Runtime:  # pragma: no cover — só no Windows
+    from winkit.agent.main import build_runtime  # noqa: PLC0415
+
+    return build_runtime()
+
+
 @dataclass
 class StudioController:
     services: Services
@@ -68,6 +78,8 @@ class StudioController:
     target: targets.Target | None = None
     recipe: Recipe | None = None
     agent_source: Path | None = field(default_factory=default_agent_source)
+    #: Monta o Agente para "aplicar neste PC" (os testes passam um com dublês).
+    agent_runtime: Callable[[], Runtime] = field(default=_real_agent_runtime)
 
     # ------------------------------------------------------------------ pendrive
     @property
@@ -273,6 +285,38 @@ class StudioController:
 
     def plan(self, os_major: int = 11) -> Plan:
         return plan(self.require_recipe(), self.catalogs, PlanContext(os_major=os_major))
+
+    # ------------------------------------------------------------------ aplicar neste PC (V2-03)
+    def live_kinds(self) -> list[StepKind]:
+        """Tipos de etapa que a receita teria no modo ao vivo (para "o que aplicar")."""
+        ctx = PlanContext(os_major=11, phase1_ran=False, mode="live", restore_before=False)
+        p = plan(self.require_recipe(), self.catalogs, ctx)
+        kinds = dict.fromkeys(s.kind for s in p.steps if s.kind not in ("finalize",))
+        return list(kinds)
+
+    def _live_options(
+        self, kinds: frozenset[StepKind], restore_point: bool, *, simulate: bool
+    ) -> LiveOptions:
+        self.save()
+        return LiveOptions(
+            root=self.root,
+            profile_id=self.profile_id,
+            simulate=simulate,
+            only_kinds=kinds,
+            restore_point=restore_point,
+            language=current_language(),
+        )
+
+    def live_preview(self, kinds: frozenset[StepKind], restore_point: bool) -> LivePreview:
+        result = run_live(
+            self.agent_runtime(), self._live_options(kinds, restore_point, simulate=True)
+        )
+        return result.preview or LivePreview()
+
+    def live_apply(self, kinds: frozenset[StepKind], restore_point: bool) -> LiveResult:
+        return run_live(
+            self.agent_runtime(), self._live_options(kinds, restore_point, simulate=False)
+        )
 
     def build(self) -> BuildReport:
         self.save()

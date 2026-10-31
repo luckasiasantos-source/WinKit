@@ -14,6 +14,7 @@ from pathlib import Path
 from winkit import __version__
 from winkit.agent import phases
 from winkit.agent.eventlog import EventLog
+from winkit.agent.live import LiveOptions, run_live
 from winkit.agent.paths import AgentPaths
 from winkit.agent.phases import Runtime
 from winkit.agent.services import real_agent_services
@@ -86,6 +87,24 @@ def run_phase2_with_ui(rt: Runtime, *, retry: bool = False) -> int:
     return code
 
 
+def live_options(args: argparse.Namespace) -> LiveOptions:
+    kinds = frozenset(k.strip() for k in args.somente.split(",") if k.strip())
+    return LiveOptions(
+        root=Path(args.root),
+        profile_id=args.perfil,
+        simulate=args.simular,
+        only_kinds=kinds or None,
+        restore_point=not args.sem_ponto_de_restauracao,
+    )
+
+
+def run_apply_command(rt: Runtime, args: argparse.Namespace) -> int:
+    result = run_live(rt, live_options(args))
+    if result.summary_html is not None and not args.simular:
+        open_file(result.summary_html)
+    return result.code
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     _ensure_streams()
     parser = argparse.ArgumentParser(prog="winkit-agent", description="Agente do WinKit")
@@ -96,6 +115,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     p2.add_argument("--first-logon", action="store_true", help="chamado pelo FirstLogonCommands")
     sub.add_parser("retry", help="tenta de novo as etapas que falharam")
     sub.add_parser("summary", help="abre o resumo")
+    ap = sub.add_parser("apply", help="aplica a receita neste Windows (modo ao vivo, D-033)")
+    ap.add_argument("--root", required=True, help="pasta que contém WinKit\\ (o pendrive)")
+    ap.add_argument("--perfil", default="padrao")
+    ap.add_argument("--simular", action="store_true", help="só a prévia; não muda nada")
+    ap.add_argument("--somente", default="", help="tipos de etapa separados por vírgula")
+    ap.add_argument("--sem-ponto-de-restauracao", action="store_true")
     args = parser.parse_args(argv)
 
     try:
@@ -106,6 +131,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return run_phase2_with_ui(rt)
         if args.command == "retry":
             return run_phase2_with_ui(rt, retry=True)
+        if args.command == "apply":
+            return run_apply_command(rt, args)
         html = phases.open_summary(rt.paths)
         if html is not None:
             open_file(html)

@@ -12,10 +12,11 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Literal
 
 from winkit.agent.eventlog import EventLog
 from winkit.agent.paths import AgentPaths
-from winkit.agent.pendrive import PendriveLocator
+from winkit.agent.pendrive import Locator
 from winkit.agent.progress import AgentUi
 from winkit.agent.services import AgentServices
 from winkit.agent.steps.base import StepContext, StepHandler, StepResult
@@ -56,10 +57,11 @@ class Executor:
         handlers: dict[StepKind, StepHandler],
         log: EventLog,
         ui: AgentUi,
-        locator: PendriveLocator,
+        locator: Locator,
         clock: Callable[[], datetime],
         sleep: Callable[[float], None] = time.sleep,
         waits: Waits | None = None,
+        mode: Literal["install", "live"] = "install",
     ) -> None:
         self.plan = plan
         self.state = state
@@ -75,6 +77,7 @@ class Executor:
         self.clock = clock
         self.sleep = sleep
         self.waits = waits or Waits()
+        self.mode = mode
         self._pendrive: Path | None = None
 
     # ------------------------------------------------------------------ espera
@@ -173,22 +176,7 @@ class Executor:
             return "deferred"
 
         handler = self.handlers[step.kind]
-        ctx = StepContext(
-            step=step,
-            plan=self.plan,
-            state=state,
-            recipe=self.recipe,
-            catalogs=self.catalogs,
-            services=self.services,
-            paths=self.paths,
-            log=self.log,
-            ui=self.ui,
-            pendrive=self.pendrive() if step.needs_pendrive else self._pendrive,
-            phase=phase,
-            clock=self.clock,
-            wait=self._wait_for,
-            winget_wait_seconds=self.waits.winget_seconds,
-        )
+        ctx = self.context(step, phase)
         st.mark_running(state, step.id, phase, self.clock())
         self.store.save(state)
         self.log.info(f"início: {step.title}", step=step.id)
@@ -202,6 +190,26 @@ class Executor:
             result = StepResult.failed(msg("step.failed_generic", detail=str(exc)))
         self._apply(step, result)
         return "deferred" if result.outcome == "deferred" else "ran"
+
+    def context(self, step: PlannedStep, phase: int) -> StepContext:
+        """Contexto de uma etapa (também usado pela prévia do modo ao vivo)."""
+        return StepContext(
+            step=step,
+            plan=self.plan,
+            state=self.state,
+            recipe=self.recipe,
+            catalogs=self.catalogs,
+            services=self.services,
+            paths=self.paths,
+            log=self.log,
+            ui=self.ui,
+            pendrive=self.pendrive() if step.needs_pendrive else self._pendrive,
+            phase=phase,
+            clock=self.clock,
+            wait=self._wait_for,
+            winget_wait_seconds=self.waits.winget_seconds,
+            mode=self.mode,
+        )
 
     def _apply(self, step: PlannedStep, result: StepResult) -> None:
         state, now = self.state, self.clock()

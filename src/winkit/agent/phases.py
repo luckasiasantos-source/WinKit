@@ -29,7 +29,7 @@ from winkit.core.planner.planner import plan as make_plan
 from winkit.core.recipe.io import load_recipe, recipe_hash
 from winkit.core.recipe.models import Recipe
 from winkit.core.state import models as st
-from winkit.i18n import msg, normalize, set_language
+from winkit.i18n import Language, msg, normalize, set_language
 from winkit.platform.environment import single_instance
 
 INSTANCE_NAME = "WinKitAgent"
@@ -51,9 +51,9 @@ class Runtime:
     catalog_loader: Callable[[], Catalogs] | None = None
 
 
-def apply_language(rt: Runtime, recipe: Recipe) -> None:
-    """Janela, notificações, resumo e motivos no idioma da receita."""
-    choice = recipe.execution.language
+def apply_language(rt: Runtime, recipe: Recipe, *, override: Language | None = None) -> None:
+    """Janela, notificações, resumo e motivos no idioma da receita (ou no de quem chamou)."""
+    choice = override or recipe.execution.language
     set_language(normalize(rt.detect_language()) if choice == "auto" else choice)
     if rt.catalog_loader is not None:
         rt.catalogs = rt.catalog_loader()

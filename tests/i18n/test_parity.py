@@ -74,6 +74,7 @@ SAME_AS_BASE: dict[str, set[str]] = {
         "studio.backups.recommended",
         "cli.iso_ignored",
         "collect.portable_name",
+        "restore.description_before",
     },
 }
 ALWAYS_SAME = {
@@ -84,6 +85,7 @@ ALWAYS_SAME = {
     "agent.tray_tip",
     "summary.phase_time",
     "studio.window_title",
+    "studio.live.kind.windows_update",
     "summary.backup_warning",
 }
 
