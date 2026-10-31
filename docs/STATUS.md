@@ -7,7 +7,7 @@
 
 **Última atualização:** 2026-10-31
 **Versão do código:** 0.1.0 (pré-alpha, projeto pessoal)
-**Fase do projeto:** v1 implementada (M0–M10); falta a validação em VM/PC real pelos roteiros de `docs/validacao/`. v2 (M11–M18) planejada em `PLANO_V2.md`, aguardando aprovação
+**Fase do projeto:** v1 implementada (M0–M10); falta a validação em VM/PC real pelos roteiros de `docs/validacao/`. v2 (M11–M18) aprovada e em implementação (`PLANO_V2.md`)
 
 ## Resumo
 
@@ -25,7 +25,7 @@
 | M8 | Windows Update, resumo e notificações | ✅ código | ⬜ roteiro pronto (`docs/validacao/M8.md`) |
 | M9 | Interface do Agente | ✅ código | ⬜ roteiro pronto (`docs/validacao/M9.md`) |
 | M10 | WinKit Studio (GUI) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M10.md`) |
-| M11 | Inglês e espanhol (V2-00) | ⬜ planejado (`PLANO_V2.md` §6), aguardando aprovação | — |
+| M11 | Inglês e espanhol (V2-00) | 🟨 em andamento | — |
 | M12 | Aplicar neste PC + ponto de restauração (V2-03, V2-10) | ⬜ planejado | — |
 | M13 | Pendrive comum: Rufus/Microsoft (V2-01) | ⬜ planejado | — |
 | M14 | Rede e sistema (V2-02, 08, 09, 16, 17, 18, 22) | ⬜ planejado | — |
@@ -158,6 +158,14 @@
 - ✅ Roteiro `docs/validacao/M10.md`
 
 (Itens detalhados de M4–M10 em `PLANO.md` §20; são desdobrados aqui quando o marco começar.)
+
+### M11 — Inglês e espanhol 🟨
+- ✅ Decisões D-030 a D-042 e regras R-51 a R-55 no `ARQUITETURA.md`
+- ✅ `winkit/i18n`: idiomas, `t`/`tn` com plural, `Msg`, formatação por idioma, tabelas pt-BR/en-US/es com paridade testada (R-51); contrato de pureza no import-linter
+- ⬜ `Msg` no estado (schema 2), nas etapas e no resumo
+- ⬜ Extração dos textos do Studio, da janela do Agente e da CLI; teste AST (R-55)
+- ⬜ Catálogos traduzidos, detecção do idioma, troca no Studio, idioma do Agente pela receita
+- ⬜ README, NOTICE, LEIA-ME e notas da release trilíngues; capturas; roteiro `M11.md`
 
 ## Hipóteses técnicas
 

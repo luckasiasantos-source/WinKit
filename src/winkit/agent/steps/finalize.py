@@ -9,7 +9,7 @@ from winkit.agent.steps.base import StepContext, StepResult, local_path
 from winkit.core.fsutil import atomic_write_text
 from winkit.core.state.models import should_run
 from winkit.core.summary import build_summary, render_html
-from winkit.i18n import t
+from winkit.i18n import t, tn
 
 
 def _pending_others(ctx: StepContext) -> list[str]:
@@ -88,9 +88,9 @@ class FinalizeStep:
         counts = ctx.state.counts()
         if ctx.recipe.execution.notify_on_finish:
             if failures:
-                msg = t("agent.finished_with_failures", count=len(failures))
+                msg = tn("agent.finished_with_failures", len(failures))
             elif ctx.state.warnings:
-                msg = t("agent.finished_with_warnings", count=len(ctx.state.warnings))
+                msg = tn("agent.finished_with_warnings", len(ctx.state.warnings))
             else:
                 msg = t("agent.finished")
             ctx.ui.notify(t("app.name"), msg)

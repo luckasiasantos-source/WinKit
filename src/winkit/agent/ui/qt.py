@@ -34,7 +34,7 @@ from winkit.agent.progress import Choice
 from winkit.core.planner.models import PlannedStep
 from winkit.core.recipe.models import Execution
 from winkit.core.summary import Summary
-from winkit.i18n import t
+from winkit.i18n import t, tn
 from winkit.ui import theme
 from winkit.ui.widgets import (
     Card,
@@ -111,9 +111,7 @@ class ChoosePage(QWidget):
             ):
                 key = KIND_COUNT_KEYS.get(kind)
                 if key and count:
-                    done_card.add_row(
-                        Row(t(key, count=count), icon=symbol_icon("check", "#34C759"))
-                    )
+                    done_card.add_row(Row(tn(key, count), icon=symbol_icon("check", "#34C759")))
         if not done_card.rows:
             done_card.add_row(Row(t("ui.agent.nothing_before")))
         col.addWidget(section(t("agent.done_before_login"), done_card))

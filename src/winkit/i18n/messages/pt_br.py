@@ -1,11 +1,14 @@
-"""Todos os textos exibidos ao usuário, em pt-BR (ARQUITETURA.md, R-03).
+"""Textos em português do Brasil: a base de todas as traduções (R-03, R-51).
 
 Uso: ``t("chave", nome="valor")``. Chave inexistente é erro de programação e lança ``KeyError``.
 """
 
 from __future__ import annotations
 
-MESSAGES: dict[str, str] = {
+from winkit.i18n.core import Entry, Plural
+
+MESSAGES: dict[str, Entry] = {
+    "legacy.text": "{text}",
     # ---------------------------------------------------------------- geral
     "app.name": "WinKit",
     "error.unexpected": "Erro inesperado: {detail}. Veja o log para mais detalhes.",
@@ -84,11 +87,17 @@ MESSAGES: dict[str, str] = {
     "builder.confirm": "Continuar? [s/N] ",
     "builder.cancelled": "Cancelado. Nada foi alterado.",
     "validate.ok": "Tudo certo: o pendrive está consistente.",
-    "validate.problems": "Foram encontrados {count} problema(s):",
+    "validate.problems": Plural(
+        one="Foi encontrado {n} problema:", other="Foram encontrados {n} problemas:"
+    ),
     "validate.warnings": "Avisos ({count}):",
     # ---------------------------------------------------------------- coletor
-    "collect.apps_found": "{count} aplicativos encontrados.",
-    "collect.drivers_found": "{count} drivers de terceiros encontrados.",
+    "collect.apps_found": Plural(
+        one="{n} aplicativo encontrado.", other="{n} aplicativos encontrados."
+    ),
+    "collect.drivers_found": Plural(
+        one="{n} driver de terceiros encontrado.", other="{n} drivers de terceiros encontrados."
+    ),
     "collect.vss_unavailable": (
         "Não foi possível criar a cópia de sombra de {volume} ({detail}). Copiando diretamente: "
         "arquivos em uso podem falhar."
@@ -111,8 +120,13 @@ MESSAGES: dict[str, str] = {
     "agent.progress": "{done} de {total} — {current}",
     "agent.tray_tip": "WinKit: {done} de {total} — {current}",
     "agent.finished": "WinKit concluído",
-    "agent.finished_with_warnings": "WinKit concluído — {count} aviso(s)",
-    "agent.finished_with_failures": "WinKit concluído — {count} falha(s). Abra o resumo.",
+    "agent.finished_with_warnings": Plural(
+        one="WinKit concluído — {n} aviso", other="WinKit concluído — {n} avisos"
+    ),
+    "agent.finished_with_failures": Plural(
+        one="WinKit concluído — {n} falha. Abra o resumo.",
+        other="WinKit concluído — {n} falhas. Abra o resumo.",
+    ),
     "agent.reconnect_pendrive": "Reconecte o pendrive WinKit para continuar.",
     "agent.reboot_needed": "É preciso reiniciar para continuar a configuração.",
     "agent.reboot_now": "Reiniciar agora",
@@ -140,12 +154,16 @@ MESSAGES: dict[str, str] = {
     "ui.agent.done_with_failures": "Concluído com pendências",
     "ui.agent.reboot_title": "Reiniciar agora?",
     "ui.agent.show_progress": "Mostrar progresso",
-    "ui.count.driver": "{count} driver(s) instalado(s)",
-    "ui.count.bloat": "{count} app(s) pré-instalado(s) removido(s)",
-    "ui.count.tweak": "{count} ajuste(s) aplicado(s)",
-    "ui.count.power": "Plano de energia ajustado",
-    "ui.count.backup": "{count} configuração(ões) restaurada(s)",
-    "ui.count.app": "{count} app(s) instalado(s)",
+    "ui.count.driver": Plural(one="{n} driver instalado", other="{n} drivers instalados"),
+    "ui.count.bloat": Plural(
+        one="{n} app pré-instalado removido", other="{n} apps pré-instalados removidos"
+    ),
+    "ui.count.tweak": Plural(one="{n} ajuste aplicado", other="{n} ajustes aplicados"),
+    "ui.count.power": Plural(one="Plano de energia ajustado", other="Plano de energia ajustado"),
+    "ui.count.backup": Plural(
+        one="{n} configuração restaurada", other="{n} configurações restauradas"
+    ),
+    "ui.count.app": Plural(one="{n} app instalado", other="{n} apps instalados"),
     # ---------------------------------------------------------------- títulos das etapas
     "plan.driver": "Driver: {name}",
     "plan.bloat": "Remover: {name}",
@@ -186,9 +204,3 @@ MESSAGES: dict[str, str] = {
     "step.os_not_applicable": "não se aplica a esta versão do Windows",
     "step.failed_generic": "falhou: {detail}",
 }
-
-
-def t(key: str, /, **kwargs: object) -> str:
-    """Retorna o texto ``key`` formatado com ``kwargs``."""
-    template = MESSAGES[key]
-    return template.format(**kwargs) if kwargs else template

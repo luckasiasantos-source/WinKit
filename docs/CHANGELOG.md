@@ -28,6 +28,32 @@
 
 ---
 
+## 2026-10-31 — M11 — Base da tradução (pt-BR, en-US, es)
+**Tipo:** implementação + documentação
+**Resumo:** plano da v2 aprovado. Decisões e regras novas registradas; o módulo de tradução passa a ter três idiomas, plural, mensagens estruturadas e formatação por idioma.
+
+### Adicionado
+- `src/winkit/i18n/{core,languages,msg,format}.py` — `t`, `tn`, `Plural`, `render`, `set_language`, `normalize`, `Msg`, `format_size/duration/datetime`
+- `src/winkit/i18n/messages/{en_us,es}.py` — traduções de todas as chaves existentes
+- `tests/i18n/` — paridade de chaves, marcadores e plurais (R-51), núcleo, idiomas e formatação
+- Contrato do import-linter: `winkit.i18n` é puro
+
+### Alterado
+- `src/winkit/i18n/pt_br.py` → `src/winkit/i18n/messages/pt_br.py`; contagens viram plurais de verdade (`tn`)
+- `src/winkit/core/text.py` — reexporta `Msg`
+- `tests/conftest.py` — todo teste começa e termina em pt-BR
+
+### Removido
+- `tests/test_i18n.py` — substituído por `tests/i18n/`
+
+### Documentos vivos atualizados
+- ARQUITETURA — D-030 a D-042, R-03/R-04/R-19 alteradas, D-018 alterada, R-51 a R-55
+- STATUS — v2 aprovada; M11 em andamento; DIVIDAS — DT-016, DT-017
+- PLANO_V2 e PLANO — plano marcado como aprovado
+
+### Decisões
+- D-030 a D-042 (novas); D-018 (alterada)
+
 ## 2026-10-31 — Planejamento v2 — Plano detalhado M11 a M18
 **Tipo:** documentação
 **Resumo:** plano minucioso da v2, aguardando aprovação: tradução para inglês e espanhol e 23 funções novas, em 8 marcos, com decisões, regras, hipóteses, riscos, testes e checklists.

@@ -5,6 +5,10 @@ from __future__ import annotations
 import re
 import unicodedata
 
+from winkit.i18n.msg import Msg, legacy, msg
+
+__all__ = ["Msg", "human_size", "legacy", "msg", "slugify"]
+
 _NON_SLUG = re.compile(r"[^a-z0-9]+")
 
 

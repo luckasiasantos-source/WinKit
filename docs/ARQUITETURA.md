@@ -207,8 +207,8 @@ runner.run(
 
 - **R-01** Python 3.12. Nada de recursos de versões mais novas.
 - **R-02** Identificadores (variáveis, funções, classes, módulos, chaves JSON da receita) em **inglês**.
-- **R-03** Todo texto exibido ao usuário (CLI, GUI, notificações, resumo, `agente.log`) em **pt-BR**, e **somente** em `winkit/i18n/pt_br.py`. Nenhuma string de interface solta pelo código.
-- **R-04** Documentação, comentários e mensagens de commit em pt-BR.
+- **R-03** Todo texto exibido ao usuário (CLI, GUI, notificações, resumo, motivos das etapas, avisos da validação e do Construtor) em **pt-BR, en-US e es**, e **somente** em `winkit/i18n/messages/*.py` e `winkit/i18n/catalogs/*.yaml` (D-030). Nenhuma string de interface solta pelo código. Exceções documentadas: mensagens técnicas de exceção e linhas livres do log (`agente.log`), que ficam em pt-BR (DT-016), e o log técnico do `bootstrap.ps1`.
+- **R-04** Documentação, comentários e mensagens de commit em pt-BR. Exceções: `README.en.md`, `README.es.md`, notas da release e `NOTICE` (trilíngue).
 - **R-05** Nomes de arquivo e pasta gravados no pendrive: só `[a-z0-9-_.]`, exceto os que o Windows/Ventoy exigem (`ventoy.json`, `SetupComplete.cmd`).
 
 ### 5.2 Estilo e tipos
@@ -232,7 +232,7 @@ runner.run(
 ### 5.4 Segurança de dados
 
 - **R-18** Nunca gerar XML com `DiskConfiguration` ou `ImageInstall/OSImage/InstallTo`. Teste de proteção obrigatório.
-- **R-19** O Construtor só escreve em `WinKit\` e em `ventoy\script\winkit-*.xml`, e só mescla `ventoy\ventoy.json`. Qualquer escrita fora disso é bug.
+- **R-19** **Modo Ventoy:** o Construtor só escreve em `WinKit\` e em `ventoy\script\winkit-*.xml`, e só mescla `ventoy\ventoy.json`. **Modo pendrive comum (D-034, a partir do M13):** só escreve em `WinKit\`, `\autounattend.xml` e, uma vez, `\autounattend.xml.winkit-bak`. Qualquer escrita fora disso é bug.
 - **R-20** `robocopy /MIR` só é permitido com destino dentro de `WinKit\Perfis\<perfil>\Backups\<id>\dados\`. A função que chama `/MIR` valida o destino e lança `UnsafeOperationError` se não for.
 - **R-21** Restauração usa `merge` salvo escolha explícita na receita.
 - **R-22** Instaladores, drivers e o Agente têm SHA-256 conferido contra o `manifesto.json` antes de serem executados/instalados.
@@ -285,6 +285,14 @@ runner.run(
 - **R-48** Commits pequenos, mensagem em pt-BR no imperativo, citando o marco: `M1: adiciona planejador de fases`.
 - **R-49** Todo commit atualiza `docs/CHANGELOG.md`, e os demais documentos vivos quando aplicável (ver `CLAUDE.md`).
 - **R-50** Marcação de pendência no código só no formato `TODO(DT-nnn): ...`, citando uma entrada existente em `DIVIDAS_TECNICAS.md`. Um teste falha se encontrar `TODO` sem referência válida.
+
+### 5.11a Regras da v2 (`PLANO_V2.md` §4)
+
+- **R-51** Toda chave de mensagem existe nos três idiomas, com os mesmos marcadores `{x}` e as mesmas formas de plural. Toda chave usada no código existe; toda chave existente é usada (com lista explícita de prefixos dinâmicos). Em vigor desde o M11.
+- **R-52** Volumes fora do disco do sistema são referenciados só por `VolumeRef` (número de série, D-035). Nenhum campo da receita guarda letra de unidade fixa, salvo `letter_hint` e `{ABS:...}`. Em vigor desde o M16.
+- **R-53** Arquivos e valores com segredo (senhas de Wi-Fi, senhas de contas) ficam num registro único (`core/secrets.py`); o `runner`, o `EventLog` e o resumo os mascaram. Em vigor desde o M14.
+- **R-54** Toda etapa do Agente declara `live_safe` e implementa `preview()` sem efeito colateral. Em vigor desde o M12.
+- **R-55** Strings de interface só aparecem dentro de `t(...)`, `tn(...)` ou `Msg(...)`: nenhum literal de texto passado a `label`, `button`, `Row`, `section`, `setText`, `setWindowTitle`, `setToolTip`, `QMessageBox.*`, `help=`/`description=` do `argparse` nem a `out()`/`print()` da CLI. Em vigor desde o M11.
 
 ### 5.12 Como as regras são verificadas automaticamente
 
@@ -388,8 +396,8 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 **Consequências:** a instalação não é 100% sem toque, em troca de nunca apagar o disco errado.
 
 ### D-018 — Identificadores em inglês, textos em pt-BR
-2026-10-31 · aceita
-**Decisão:** R-02 a R-04.
+2026-10-31 · alterada por D-030
+**Decisão:** R-02 a R-04. Desde o M11, os textos ao usuário existem em pt-BR, en-US e es (D-030).
 
 ### D-019 — Documentos vivos e CHANGELOG obrigatórios
 2026-10-31 · aceita
@@ -452,3 +460,57 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 **Contexto:** o dono quer que as pessoas baixem o programa já compilado, sem precisar do código.
 **Decisão:** o workflow `release.yml` roda ao enviar uma tag `vX.Y.Z` (que precisa bater com `winkit.__version__`) ou à mão (`workflow_dispatch`, que cria a tag `v<versão>` no commit; recusa se a release já existir): testes, `packaging\build.ps1`, `packaging\smoke.ps1` (o mesmo teste de fumaça do CI), `.zip` com SHA-256 e `gh release create` com `packaging/NOTAS_DA_VERSAO.md`. Enquanto a validação em VM não terminar, as versões saem como **pré-lançamento**, com o título "pré-alpha".
 **Consequências:** publicar uma versão = subir `__version__`, registrar no CHANGELOG e enviar a tag. Os executáveis não são assinados (DT-001), então o SmartScreen pode avisar; as notas explicam.
+
+### D-030 — Interface em três idiomas, com o português como base
+2026-10-31 · aceita
+**Contexto:** projeto público; pedido do dono de inglês e espanhol.
+**Decisão:** idiomas `pt-BR` (base), `en-US` e `es` (espanhol neutro, "tú"). Mensagens em `winkit/i18n/messages/{pt_br,en_us,es}.py` com as mesmas chaves e marcadores (R-51); textos dos catálogos YAML traduzidos por arquivos `winkit/i18n/catalogs/{en_us,es}.yaml`. Idioma: Studio = preferência salva ou idioma do Windows; CLI = `--idioma`, `WINKIT_LANG` ou idioma do Windows; Agente = `execution.language` da receita (`auto` = idioma do Windows novo).
+**Consequências:** R-03, R-04 e D-018 mudam; `winkit.i18n` vira camada pura com contrato próprio no import-linter. Detalhes em `PLANO_V2.md` §3 e §6.
+
+### D-031 — Mensagens estruturadas (`Msg`) no que é guardado
+2026-10-31 · aceita
+**Decisão:** `Msg(key, params)` (`winkit/i18n/msg.py`, reexportado por `core/text.py`) substitui texto pronto em `StepResult.message`, `StepState.error/reason`, `AgentState.warnings` e `SummaryItem.detail`. O texto é montado só na borda (interface, log, HTML). O estado sobe para `schema_version: 2`, com migração (R-47). Títulos do plano continuam texto pronto, porque o plano é recalculado no idioma atual e nunca é gravado.
+
+### D-032 — Comandos da CLI em português, com apelidos em inglês
+2026-10-31 · aceita
+**Decisão:** nomes atuais mantidos; apelidos em inglês via `aliases`; ajuda e saída no idioma escolhido. Sem apelidos em espanhol.
+
+### D-033 — Modo "aplicar neste PC" com prévia e ponto de restauração antes
+2026-10-31 · aceita
+**Decisão:** comando `winkit-agent apply`; prévia sempre antes (`preview()` sem efeito colateral, R-54); ponto de restauração antes, ligado por padrão; etapas declaram `live_safe`; estado separado por aplicação. Detalhes em `PLANO_V2.md` §7.2.
+
+### D-034 — Pendrive comum: só `autounattend.xml` na raiz e `WinKit\`
+2026-10-31 · aceita
+**Decisão:** pendrive gravado pelo Rufus ou pela Ferramenta de Criação de Mídia é reconhecido pelos arquivos do instalador (sem `VTOYEFI`); o Construtor escreve só `\autounattend.xml` (com cópia `.winkit-bak` uma vez) e `\WinKit\`. O WinKit nunca embute nem chama o Rufus. Detalhes em `PLANO_V2.md` §8.
+
+### D-035 — Volumes pelo número de série, nunca pela letra
+2026-10-31 · aceita
+**Decisão:** `VolumeRef(serial, label, letter_hint, size)`; serial de `Win32_Volume.SerialNumber`; no destino, a letra atual é usada para montar caminhos; volume ausente = etapa pulada; nunca se troca letra (R-52).
+
+### D-036 — Dados sensíveis novos fora da receita
+2026-10-31 · aceita
+**Decisão:** senhas de Wi-Fi em arquivos próprios no perfil, nunca na receita nem em log; registro de segredos mascarado (R-53); aviso permanente no Studio e opção de levar a rede sem a senha.
+
+### D-037 — Configurações pessoais por catálogo curado
+2026-10-31 · aceita
+**Decisão:** valores do `HKCU` só a partir de `personal_settings.yaml` (chave, tipo, faixa, fonte); nada de `.reg` bruto.
+
+### D-038 — Políticas de navegador em modo "recomendado"
+2026-10-31 · aceita
+**Decisão:** página inicial e buscador pela chave `Recommended`; extensões como extensões externas (removíveis); forçar só por escolha explícita; aviso de "gerenciado pela organização".
+
+### D-039 — Campos novos da receita são aditivos
+2026-10-31 · aceita
+**Decisão:** todo campo novo tem padrão que reproduz a v1; a receita continua `schema_version: 1` enquanto nenhum campo mudar de significado. O estado do Agente sobe para 2 (D-031).
+
+### D-040 — Perfis rápidos e receitas compartilháveis sem dados pessoais
+2026-10-31 · aceita
+**Decisão:** perfis rápidos só listam ids (aplicar = mesclar); receita compartilhável tem formato próprio que por construção não contém conta, nomes, senhas, drivers, backups, Wi-Fi, volumes nem instaladores offline; importar sempre mostra prévia.
+
+### D-041 — Atualização de instaladores por `winget download` e manifesto
+2026-10-31 · aceita
+**Decisão:** verificar = baixar e comparar a versão do manifesto YAML (ou `Find-WinGetPackage` se o módulo existir); o instalador antigo só é apagado depois que o novo está no lugar e no manifesto.
+
+### D-042 — Barra lateral do Studio agrupada e com busca
+2026-10-31 · aceita
+**Decisão:** seções em grupos (Preparar, O que levar, Sistema, Rede, Concluir), campo de busca e Preferências (idioma e tema) no rodapé.

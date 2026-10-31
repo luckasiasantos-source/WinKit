@@ -1,6 +1,6 @@
 # WinKit v2 — Plano de implementação (M11 a M18)
 
-> **Estado deste documento:** proposta, **aguardando aprovação do dono do projeto**. Nada daqui foi implementado.
+> **Estado deste documento:** **aprovado pelo dono do projeto em 2026-10-31**; em implementação (ver `STATUS.md`).
 > Quando aprovado, ele vira documento vivo como o `PLANO.md`: muda no mesmo commit que mudar o código (`CLAUDE.md`).
 >
 > **Relação com os outros documentos:** o `PLANO.md` continua descrevendo a v1 (M0–M10), que está implementada. Este arquivo descreve **só o que é novo**. Onde a v2 muda algo da v1, a seção diz explicitamente "muda o PLANO.md §x". As decisões propostas aqui (D-030 em diante) e as mudanças de regra (§4) só entram no `ARQUITETURA.md` no primeiro commit do M11, depois da aprovação.

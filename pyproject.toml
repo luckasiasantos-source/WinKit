@@ -128,6 +128,15 @@ forbidden_modules = [
 ]
 
 [[tool.importlinter.contracts]]
+name = "i18n é puro: só textos, sem plataforma, casos de uso ou interface"
+type = "forbidden"
+source_modules = ["winkit.i18n"]
+forbidden_modules = [
+    "winkit.core", "winkit.platform", "winkit.collector", "winkit.builder", "winkit.agent",
+    "winkit.cli", "winkit.studio", "winkit.ui", "PySide6", "winreg", "subprocess", "ctypes",
+]
+
+[[tool.importlinter.contracts]]
 name = "platform não depende de casos de uso, CLI ou interface"
 type = "forbidden"
 source_modules = ["winkit.platform"]

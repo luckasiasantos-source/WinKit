@@ -150,3 +150,22 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Impacto: sem licença, ninguém pode legalmente usar, modificar ou redistribuir o código, mesmo com o repositório público.
 - Plano: escolher (MIT, Apache-2.0 ou GPL-3.0), criar `LICENSE`, ajustar `pyproject.toml` e o README. O PySide6 é LGPL; qualquer uma delas é compatível com o uso dinâmico atual.
 - Prioridade: alta antes de tornar o repositório público
+
+### DT-016 — Mensagens técnicas e linhas livres do log só em português
+- Estado: aberta
+- Origem: M11
+- Onde: exceções de `winkit.core.errors`/`winkit.platform` e chamadas livres de `EventLog.info/warning/error`
+- Descrição: os textos para o usuário (interface, CLI, motivos das etapas, avisos, resumo) estão nos três idiomas, mas o **detalhe técnico** de uma exceção (ex.: "falhou: <detalhe>") e as linhas livres do `agente.log` continuam em pt-BR.
+- Impacto: num Windows em inglês ou espanhol, o detalhe técnico de um erro aparece em português dentro de uma frase traduzida.
+- Plano: converter as exceções que chegam ao usuário em `Msg` conforme aparecerem em issues.
+- Prioridade: baixa
+
+### DT-017 — Traduções feitas por IA, sem revisão nativa
+- Estado: aberta
+- Origem: M11
+- Onde: `src/winkit/i18n/messages/{en_us,es}.py`, `src/winkit/i18n/catalogs/*.yaml`, `README.en.md`, `README.es.md`
+- Descrição: inglês e espanhol escritos por IA, seguindo o glossário do `PLANO_V2.md` §6.6.
+- Impacto: frases pouco naturais ou termos diferentes dos que o Windows usa.
+- Plano: revisão por falantes nativos; issues com rótulo `tradução`.
+- Prioridade: baixa
+

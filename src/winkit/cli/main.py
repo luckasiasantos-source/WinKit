@@ -45,7 +45,7 @@ from winkit.core.recipe.models import Recipe
 from winkit.core.recipe.validation import validate_recipe
 from winkit.core.text import human_size
 from winkit.core.winget_manifest import split_args
-from winkit.i18n import t
+from winkit.i18n import t, tn
 from winkit.platform.services import Services, real_services
 from winkit.platform.session import is_admin
 from winkit.platform.system import is_windows
@@ -213,7 +213,7 @@ def cmd_validar(args: argparse.Namespace, services: Services, out: Out) -> int:
     if rep.ok:
         out(t("validate.ok"))
         return 0
-    out(t("validate.problems", count=len(rep.problems)))
+    out(tn("validate.problems", len(rep.problems)))
     for p in rep.problems:
         out(f"  x {p}")
     return 1
@@ -225,7 +225,7 @@ def cmd_coletar_drivers(args: argparse.Namespace, services: Services, out: Out) 
     recipe = load_profile_recipe(tgt.root, args.perfil)
     catalogs = default_catalogs()
     candidates = driver_collector.list_candidates(services.drivers, catalogs)
-    out(t("collect.drivers_found", count=len(candidates)))
+    out(tn("collect.drivers_found", len(candidates)))
     wanted_classes = {c.casefold() for c in args.classe or []}
     chosen = []
     for c in candidates:
@@ -267,7 +267,7 @@ def cmd_coletar_apps(args: argparse.Namespace, services: Services, out: Out) -> 
     recipe = load_profile_recipe(tgt.root, args.perfil)
     catalogs = default_catalogs()
     apps = app_collector.collect_inventory(services.inventory, services.winget, catalogs)
-    out(t("collect.apps_found", count=len(apps)))
+    out(tn("collect.apps_found", len(apps)))
     added = app_collector.add_inventory(
         recipe, apps, catalogs, include_redist=args.incluir_redistribuiveis
     )
