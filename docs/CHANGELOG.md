@@ -28,6 +28,17 @@
 
 ---
 
+## 2026-10-31 — Correção dos testes de fontes no Windows (IN-018)
+**Tipo:** correção
+**Resumo:** os testes das fontes dependiam de como o Linux trata a data dos arquivos e falharam no Windows. O id da fonte também saía com a extensão duplicada.
+
+### Alterado
+- `src/winkit/collector/fonts.py` — data de criação injetável; id sem a extensão
+- `tests/agent/test_fonts.py` — datas controladas pelo teste
+
+### Documentos vivos atualizados
+- INCIDENTES — IN-018
+
 ## 2026-10-31 — M15 — Iniciar e barra de tarefas (V2-04) e fechamento do M15 (0.6.0)
 **Tipo:** implementação
 **Resumo:** os ícones fixados na barra e no Iniciar chegam ao Windows novo, no modo lista (entre versões) ou como cópia exata do Iniciar (mesma versão, experimental). Fecha o M15 com o roteiro de validação e a versão 0.6.0.

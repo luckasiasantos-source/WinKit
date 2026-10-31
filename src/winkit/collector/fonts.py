@@ -31,9 +31,13 @@ from winkit.platform.registry import Registry
 VolumeRoot = Callable[[str], Path]
 
 
-def _created(path: Path) -> float:
+def file_created(path: Path) -> float:
+    """Data de criação (no Windows); onde não existe, a de modificação."""
     st = path.stat()
     return float(getattr(st, "st_birthtime", st.st_mtime))
+
+
+Created = Callable[[Path], float]
 
 
 def _slug(name: str) -> str:
@@ -54,7 +58,7 @@ def _sources(registry: Registry, windows_dir: str) -> list[tuple[str, Scope]]:
 
 
 def font_candidates(
-    registry: Registry, windows_dir: str, volume_root: VolumeRoot
+    registry: Registry, windows_dir: str, volume_root: VolumeRoot, created: Created = file_created
 ) -> tuple[list[FontItem], list[str]]:
     """(fontes que dá para levar, arquivos ilegíveis). Nada é copiado aqui."""
     install = registry.get("HKLM", INSTALL_KEY, "InstallDate")
@@ -67,14 +71,14 @@ def font_candidates(
             continue
         local = local_source(volume_root(source[:2].upper()), source)
         try:
-            if origin == "machine" and (installed_at is None or _created(local) <= installed_at):
+            if origin == "machine" and (installed_at is None or created(local) <= installed_at):
                 continue  # veio com o Windows (ou não dá para saber): não leva
             names = read_names(local.read_bytes())
             size = local.stat().st_size
         except (OSError, FontError):
             errors.append(source)
             continue
-        base = _slug(ntpath.basename(source))
+        base = _slug(ntpath.splitext(ntpath.basename(source))[0])
         font_id, n = base, 2
         while font_id in used:
             font_id, n = f"{base}-{n}", n + 1
@@ -93,10 +97,14 @@ def font_candidates(
 
 
 def collect_fonts(
-    registry: Registry, windows_dir: str, volume_root: VolumeRoot, recipe: Recipe
+    registry: Registry,
+    windows_dir: str,
+    volume_root: VolumeRoot,
+    recipe: Recipe,
+    created: Created = file_created,
 ) -> tuple[list[FontItem], list[str]]:
     """Acrescenta à receita as fontes novas (desmarcadas). Devolve (novas, ilegíveis)."""
-    found, errors = font_candidates(registry, windows_dir, volume_root)
+    found, errors = font_candidates(registry, windows_dir, volume_root, created)
     known = {f.source.casefold() for f in recipe.fonts}
     ids = {f.id for f in recipe.fonts}
     added = []

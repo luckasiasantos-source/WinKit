@@ -172,6 +172,15 @@
 - Prevenção: se acontecer de novo, o log mostra o teste e a linha; o achado vira um incidente com causa raiz.
 - Depois: a release 0.5.0 (`e455e1b`) rodou os mesmos testes em 5 minutos, sem travar; o travamento foi intermitente.
 
+### IN-018 — Teste das fontes dependia da data de arquivo do Linux
+- Data: 2026-10-31
+- Marco: M15 (CI do commit `d68fdfc`, Windows)
+- O que aconteceu: três testes das fontes falharam só no Windows: uma fonte "que veio com o Windows" aparecia como instalada pelo usuário.
+- Causa raiz: o coletor separa as fontes da máquina pela **data de criação** do arquivo (`st_birthtime`, que só existe no Windows); no Linux ele cai na data de modificação. O teste envelhecia o arquivo com `os.utime`, que muda a modificação, mas não a criação. O comportamento do produto estava certo; o teste não.
+- Impacto: a release 0.6.0 esperou a correção. De quebra, o id da fonte saía com a extensão duplicada (`inter-regular.ttf.ttf`); corrigido.
+- Correção: a função que lê a data é injetável (`created`); os testes passam uma baseada na modificação, que eles controlam; o teste da CLI não depende mais da data.
+- Prevenção: testes que dependem de metadados de arquivo usam funções injetadas, nunca o comportamento do sistema de arquivos de uma plataforma.
+
 ## Lições da fase de desenho
 
 Problemas encontrados na conversa anterior (PDF de referência) e corrigidos **antes** de virar código. Ficam registrados porque são erros fáceis de repetir.

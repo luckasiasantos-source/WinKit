@@ -34,6 +34,11 @@ from winkit.platform.fakes.system_tweaks import FakeFontLoader
 INSTALLED_AT = 1_700_000_000
 
 
+def mtime(path: Path) -> float:
+    """Data controlada pelo teste (no Windows a de criação não muda com ``os.utime``, IN-018)."""
+    return path.stat().st_mtime
+
+
 def _new(path: Path) -> Path:
     path.mkdir(parents=True, exist_ok=True)
     return path
@@ -133,7 +138,7 @@ def test_collect_skips_windows_fonts_and_copies_only_on_select(tmp_path: Path) -
     w = make_world(_new(tmp_path / "w"))
     reg, folders = old_pc(tmp_path)
     r = w.recipe()
-    added, errors = collect_fonts(reg, r"C:\Windows", folders.volume_root, r)
+    added, errors = collect_fonts(reg, r"C:\Windows", folders.volume_root, r, mtime)
     assert {(f.full_name, f.origin) for f in added} == {
         ("Inter Regular", "user"),
         ("Fira Code Regular", "machine"),
@@ -145,14 +150,14 @@ def test_collect_skips_windows_fonts_and_copies_only_on_select(tmp_path: Path) -
     assert select_font(w.pendrive, r, inter.id, True, folders.volume_root)
     assert inter.file.startswith("Perfis/padrao/Fontes/") and inter.sha256
     assert (w.pendrive / "WinKit" / inter.file).is_file()
-    assert collect_fonts(reg, r"C:\Windows", folders.volume_root, r) == ([], errors)
+    assert collect_fonts(reg, r"C:\Windows", folders.volume_root, r, mtime) == ([], errors)
 
 
 def _world(tmp_path: Path) -> World:
     w = make_world(_new(tmp_path / "w"))
     reg, folders = old_pc(tmp_path)
     r = w.recipe()
-    collect_fonts(reg, r"C:\Windows", folders.volume_root, r)
+    collect_fonts(reg, r"C:\Windows", folders.volume_root, r, mtime)
     for f in r.fonts:
         select_font(w.pendrive, r, f.id, True, folders.volume_root)
     w.save_recipe(r)
@@ -194,6 +199,8 @@ def test_live_loads_in_session_and_second_preview_is_done(tmp_path: Path) -> Non
 def test_cli_fonts(tmp_path: Path) -> None:
     w = make_world(_new(tmp_path / "w"))
     reg, folders = old_pc(tmp_path)
+    # a CLI usa a data de criação real; tira a fonte "do Windows" para o teste não depender dela
+    reg.delete_value("HKLM", FONTS_KEY, "Arial (TrueType)")
     services = fake_services(old_pc=folders.base, registry=reg)
     out: list[str] = []
     raiz = ["--raiz", str(w.pendrive)]
