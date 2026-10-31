@@ -28,6 +28,16 @@
 
 ---
 
+## 2026-10-31 — Correção de lint do commit anterior (IN-016)
+**Tipo:** correção
+**Resumo:** o commit do diagnóstico de drivers entrou com dois erros de lint num teste porque um pipe escondeu a falha do `check.sh`. Corrigido e registrado.
+
+### Alterado
+- `tests/agent/test_driver_report.py` — importações no topo, linha longa quebrada
+
+### Documentos vivos atualizados
+- INCIDENTES — IN-016
+
 ## 2026-10-31 — M14 — Diagnóstico de drivers (V2-09)
 **Tipo:** implementação
 **Resumo:** no fim da instalação, o Agente lista os dispositivos que ficaram sem driver, procura no Windows Update só os drivers deles e mostra o que sobrou no resumo, com os ids de hardware para procurar no site do fabricante.

@@ -153,6 +153,15 @@
 - Correção: o Wi-Fi usa `ET.tostring(..., default_namespace=...)` e não toca no registro; o gerador reafirma os prefixos imediatamente antes de serializar.
 - Prevenção: `test_no_global_xml_namespace_registration` (só o gerador pode registrar) e `test_strip_key_does_not_change_other_xml`.
 
+### IN-016 — Commit feito com a verificação falhando (pipe escondeu o erro)
+- Data: 2026-10-31
+- Marco: M14 (commit `67a6e40`, V2-09)
+- O que aconteceu: o commit do diagnóstico de drivers foi feito e enviado com dois erros de lint num arquivo de teste (importação fora de ordem e linha longa). Os testes passavam; só o lint falhava.
+- Causa raiz: a verificação foi chamada como `scripts/check.sh | tail -2 && git commit …`. Num pipe, o código de saída é o do `tail` (sempre 0), então o `&&` seguiu mesmo com o `check.sh` parado no lint. Repetiu a falha de processo do IN-003 por outro caminho.
+- Impacto: nenhum no aplicativo (só estilo de um teste); a CI mostraria o erro.
+- Correção: commit seguinte corrige o lint, com `check.sh` terminando em `== OK`.
+- Prevenção: rodar a verificação sem pipe antes do commit (`scripts/check.sh > log; echo $?`) ou com `set -o pipefail`; nunca encadear `git commit` depois de um pipe.
+
 ## Lições da fase de desenho
 
 Problemas encontrados na conversa anterior (PDF de referência) e corrigidos **antes** de virar código. Ficam registrados porque são erros fáceis de repetir.

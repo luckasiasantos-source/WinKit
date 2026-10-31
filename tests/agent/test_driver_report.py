@@ -5,7 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 from tests.agent.helpers import World, make_world
-from winkit.agent.phases import run_phase1, run_phase2
+from winkit.agent.eventlog import EventLog
+from winkit.agent.phases import open_session, run_phase1, run_phase2
 from winkit.agent.store import StateStore
 from winkit.core.devices import PROBLEM_CODES, ProblemDevice, hardware_ids, problem_text
 from winkit.core.summary import build_summary, render_html
@@ -115,13 +116,11 @@ def test_summary_section_in_every_language(tmp_path: Path) -> None:
     run_phase2(w.runtime())
     state = StateStore(w.paths.state).load()
     assert state is not None
-    from winkit.agent.phases import open_session
-    from winkit.agent.eventlog import EventLog
-
     rt = w.runtime()
     s = open_session(rt, EventLog(w.tmp / "logs", rt.clock), phase=2)
     assert s is not None
     summary = build_summary(s.plan, state, s.recipe, computer="PC", now=rt.clock())
-    for lang, title in (("en-US", "Devices without drivers"), ("es", "Dispositivos sin controlador")):
+    titles = (("en-US", "Devices without drivers"), ("es", "Dispositivos sin controlador"))
+    for lang, title in titles:
         set_language(lang)  # type: ignore[arg-type]
         assert title in render_html(summary, log_path="x")
