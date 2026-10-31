@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import importlib
 import logging
 import threading
 from dataclasses import dataclass
@@ -23,22 +22,31 @@ class Plural:
 
 Entry = str | Plural
 
-_MODULES: dict[Language, str] = {
-    "pt-BR": "winkit.i18n.messages.pt_br",
-    "en-US": "winkit.i18n.messages.en_us",
-    "es": "winkit.i18n.messages.es",
-}
 _lock = threading.Lock()
 _current: Language = BASE
 _cache: dict[Language, dict[str, Entry]] = {}
 _warned: set[tuple[Language, str]] = set()
 
 
+def _load(lang: Language) -> dict[str, Entry]:
+    """Importações explícitas: o PyInstaller só empacota o que enxerga no código (IN-013)."""
+    if lang == "en-US":
+        from winkit.i18n.messages import en_us  # noqa: PLC0415 — evita ciclo com as tabelas
+
+        return en_us.MESSAGES
+    if lang == "es":
+        from winkit.i18n.messages import es  # noqa: PLC0415
+
+        return es.MESSAGES
+    from winkit.i18n.messages import pt_br  # noqa: PLC0415
+
+    return pt_br.MESSAGES
+
+
 def messages_for(lang: Language) -> dict[str, Entry]:
     with _lock:
         if lang not in _cache:
-            module = importlib.import_module(_MODULES[lang])
-            _cache[lang] = module.MESSAGES
+            _cache[lang] = _load(lang)
         return _cache[lang]
 
 

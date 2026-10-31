@@ -126,6 +126,15 @@
 - Correção: zerar `$LASTEXITCODE` depois da verificação.
 - Prevenção: em passos `pwsh` do Actions, todo comando nativo cujo código diferente de zero é esperado termina com `$global:LASTEXITCODE = 0`.
 
+### IN-013 — Tabelas de tradução fora do executável empacotado
+- Data: 2026-10-31
+- Marco: M11 (CI do commit "base da tradução")
+- O que aconteceu: no teste de fumaça do pacote Windows, `winkit construir` quebrou com `ModuleNotFoundError: No module named 'winkit.i18n.messages'`. No Linux e nos testes tudo passava.
+- Causa raiz: as tabelas de mensagens eram carregadas com `importlib.import_module(nome)`. O PyInstaller só empacota os módulos que enxerga em `import` no código, então as tabelas ficaram de fora do executável.
+- Impacto: nenhum para o usuário (a release 0.1.0 não tinha esse código); o CI pegou antes.
+- Correção: importações explícitas dentro de `_load` (`from winkit.i18n.messages import pt_br`), que o PyInstaller detecta.
+- Prevenção: teste `test_no_dynamic_imports_in_package` proíbe `import_module` e `__import__` no pacote; o teste de fumaça com executáveis continua obrigatório no CI.
+
 ## Lições da fase de desenho
 
 Problemas encontrados na conversa anterior (PDF de referência) e corrigidos **antes** de virar código. Ficam registrados porque são erros fáceis de repetir.

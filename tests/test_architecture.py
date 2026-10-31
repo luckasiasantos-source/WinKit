@@ -103,3 +103,19 @@ def test_program_data_is_never_relative() -> None:
     from winkit.platform.system import program_data
 
     assert program_data().is_absolute()
+
+
+def test_no_dynamic_imports_in_package() -> None:
+    """IN-013: o PyInstaller não enxerga ``importlib.import_module``; módulo some do executável."""
+    import ast
+    from pathlib import Path
+
+    offenders = []
+    for path in Path("src/winkit").rglob("*.py"):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Attribute) and node.attr == "import_module":
+                offenders.append(str(path))
+            if isinstance(node, ast.Call) and getattr(node.func, "id", "") == "__import__":
+                offenders.append(str(path))
+    assert offenders == []

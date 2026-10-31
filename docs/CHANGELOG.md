@@ -28,6 +28,19 @@
 
 ---
 
+## 2026-10-31 — M11 — Correção: tabelas de tradução no executável
+**Tipo:** correção
+**Resumo:** o executável empacotado não tinha as tabelas de tradução (importação dinâmica invisível ao PyInstaller, IN-013).
+
+### Alterado
+- `src/winkit/i18n/core.py` — importações explícitas das tabelas
+
+### Adicionado
+- `tests/test_architecture.py` — proíbe importação dinâmica no pacote
+
+### Documentos vivos atualizados
+- INCIDENTES — IN-013
+
 ## 2026-10-31 — M11 — Mensagens estruturadas no estado, nas etapas e no resumo
 **Tipo:** implementação
 **Resumo:** motivos e erros das etapas, avisos do Agente e itens do resumo passam a ser guardados como `Msg` (chave + parâmetros) e só viram texto na hora de mostrar, no idioma atual (D-031). O `estado.json` sobe para a versão 2, com migração da v1.
