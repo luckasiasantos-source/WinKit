@@ -115,6 +115,8 @@ def _app_suggestions(
             reason = msg("suggest.app_used_count", n=count)
         elif (now - last).days < 1:
             reason = msg("suggest.app_used_today", n=count)
+        elif (now - last).days == 1:
+            reason = msg("suggest.app_used_yesterday", n=count)
         else:
             reason = msg("suggest.app_used", n=count, days=(now - last).days)
         out.append(
@@ -166,6 +168,8 @@ def _save_suggestions(
         if not src.is_dir():
             continue
         stats = tree_stats(src, [])
+        if stats.files == 0:  # pasta vazia: nada a levar
+            continue
         out.append(
             Suggestion(
                 id=f"save:{g.id}",

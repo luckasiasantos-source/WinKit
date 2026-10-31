@@ -1334,4 +1334,7 @@ MESSAGES: dict[str, Entry] = {
     "cli.h.suggest_ids": "ids das sugestões (veja “sugestoes listar”)",
     "cli.h.json": "saída em JSON",
     "cli.suggest_failed": "Não deu para adicionar: {ids}",
+    "suggest.app_used_yesterday": Plural(
+        one="Você abriu 1 vez; último uso ontem.", other="Você abriu {n} vezes; último uso ontem."
+    ),
 }

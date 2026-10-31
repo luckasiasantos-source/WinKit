@@ -193,8 +193,9 @@ def test_live_page_preview_then_apply(qapp, tmp_path: Path) -> None:
 
 def test_suggestions_page_adds_and_ignores(window: StudioWindow, qapp, tmp_path: Path) -> None:
     roaming = tmp_path / "C" / "Users" / "Samuel" / "AppData" / "Roaming"
-    (roaming / ".minecraft" / "saves" / "Mundo").mkdir(parents=True)
-    (roaming / "StardewValley" / "Saves" / "Fazenda").mkdir(parents=True)
+    for save in (roaming / ".minecraft" / "saves" / "Mundo", roaming / "StardewValley" / "Saves"):
+        save.mkdir(parents=True)
+        (save / "jogo.sav").write_bytes(b"x")
     window.ctl.create_recipe("Samuel", None)
     page = window.go_to("suggest")
     page._analyze()  # type: ignore[attr-defined]

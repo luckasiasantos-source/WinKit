@@ -1288,7 +1288,7 @@ MESSAGES: dict[str, Entry] = {
     "studio.keywords.suggest": "suggestions assistant what to take recommended used saves folders",
     "studio.suggest.analyze": "Analyze this PC",
     "studio.suggest.analyzing": "Analyzing this PC…",
-    "studio.suggest.hint": "Click “Analyze this PC”. Nothing is added on its own: you choose each item.",
+    "studio.suggest.hint": 'Click "Analyze this PC". Nothing is added on its own: you choose each item.',
     "studio.suggest.privacy": "The analysis runs only on this PC. Nothing is sent to the internet.",
     "studio.suggest.none": "No new suggestions. The recipe already takes what this PC uses most.",
     "studio.suggest.kind_app": "Programs you use",
@@ -1299,7 +1299,11 @@ MESSAGES: dict[str, Entry] = {
     "studio.suggest.ignore": "Ignore",
     "studio.suggest.add_failed": "This item could not be added. Add it from its own page.",
     "cli.h.suggest": "suggestions of what to take, based on this PC",
-    "cli.h.suggest_ids": "suggestion ids (see “suggestions list”)",
+    "cli.h.suggest_ids": "suggestion ids (see 'suggestions list')",
     "cli.h.json": "JSON output",
     "cli.suggest_failed": "Could not add: {ids}",
+    "suggest.app_used_yesterday": Plural(
+        one="You opened it once; last used yesterday.",
+        other="You opened it {n} times; last used yesterday.",
+    ),
 }

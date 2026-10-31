@@ -23,7 +23,7 @@
 11. [M16 — Contas, pastas e jogos](#11-m16--contas-pastas-e-jogos)
 12. [M17 — Inteligência do pendrive](#12-m17--inteligência-do-pendrive)
 13. [M18 — Fechamento da v2](#13-m18--fechamento-da-v2)
-14. [Hipóteses novas (H12 a H34)](#14-hipóteses-novas-h12-a-h34)
+14. [Hipóteses novas (H12 a H35)](#14-hipóteses-novas-h12-a-h35)
 15. [Riscos novos](#15-riscos-novos)
 16. [Dívidas técnicas já previstas](#16-dívidas-técnicas-já-previstas)
 17. [Estratégia de testes da v2](#17-estratégia-de-testes-da-v2)
@@ -2087,7 +2087,7 @@ Tarefas:
 
 ---
 
-## 14. Hipóteses novas (H12 a H34)
+## 14. Hipóteses novas (H12 a H35)
 
 Continuam a tabela do `PLANO.md` §21. Cada uma é validada no roteiro do marco indicado. Se for falsa, vira incidente e a alternativa é aplicada.
 
@@ -2116,6 +2116,7 @@ Continuam a tabela do `PLANO.md` §21. Cada uma é validada no roteiro do marco 
 | H32 | `%USERNAME%` em `User Shell Folders` do Default expande certo em cada conta | Redirecionar na Fase 2 por conta (contas extras no primeiro login de cada uma) | M16 |
 | H33 | Acrescentar a biblioteca no `libraryfolders.vdf` basta para a Steam reconhecer os jogos | Instruir "Adicionar pasta de biblioteca" no resumo, com o caminho pronto | M16 |
 | H34 | A estrutura binária do UserAssist é a mesma no Windows 11 atual | Ranqueamento só por tamanho e catálogo (sem uso) | M17 |
+| H35 | O endereço `addons.mozilla.org/.../latest/<id>/latest.xpi` aceita o id da extensão quando não há nome curto | Firefox só com as extensões que têm nome curto no catálogo | M15 |
 
 ---
 

@@ -48,6 +48,7 @@ def _pc(tmp_path: Path) -> tuple[FakeOldPcFolders, Path]:
     (user / "AppData" / "Roaming" / ".minecraft" / "saves" / "Mundo" / "level.dat").write_bytes(
         b"x" * 10
     )
+    (user / "AppData" / "Roaming" / "StardewValley" / "Saves").mkdir(parents=True)  # vazia
     code = user / "AppData" / "Roaming" / "Code" / "User"
     code.mkdir(parents=True)
     (code / "settings.json").write_text("{}")
@@ -65,7 +66,7 @@ def _registry() -> FakeRegistry:
     key = f"{USERASSIST_KEY}\\{EXECUTABLES_GUID}\\Count"
     for path, count, days in (
         (r"C:\Program Files\Mozilla Firefox\firefox.exe", 120, 0),
-        (r"C:\Program Files\OBS Studio\bin\64bit\obs64.exe", 30, 3),
+        (r"C:\Program Files\OBS Studio\bin\64bit\obs64.exe", 30, 1),
         (r"C:\Program Files\Raro\raro.exe", 1, 100),
         (r"C:\Program Files\7-Zip\7zFM.exe", 9, 5),
     ):
@@ -121,8 +122,9 @@ def test_analyze_suggests_each_kind_with_reason(tmp_path: Path) -> None:
         "app:OBSProject.OBSStudio",
     ]
     assert items[0].reason.key == "suggest.app_used_today"
+    assert items[1].reason.key == "suggest.app_used_yesterday"
     assert any(i.startswith("config:vscode:") for i in ids)
-    assert "save:minecraft" in ids
+    assert "save:minecraft" in ids and "save:stardew_valley" not in ids  # pasta vazia
     assert "folder:fotos-antigas" in ids
     assert "folder:pequena" not in ids and "folder:windows" not in ids
     kinds = [s.kind for s in items]

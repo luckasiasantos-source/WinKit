@@ -6,7 +6,7 @@
 
 **Português** · [English](README.en.md) · [Español](README.es.md)
 
-**Instale o Windows já do seu jeito — drivers, apps, configurações e privacidade — a partir de um pendrive Ventoy, sem modificar a ISO.**
+**Instale o Windows já do seu jeito — drivers, apps, configurações e privacidade — a partir de um pendrive Ventoy (ou do Rufus e da Microsoft), sem modificar a ISO. Ou aplique a mesma receita no Windows que você já tem.**
 
 [![CI](https://github.com/luckasiasantos-source/WinKit/actions/workflows/ci.yml/badge.svg)](https://github.com/luckasiasantos-source/WinKit/actions/workflows/ci.yml)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
@@ -23,7 +23,7 @@
 > Todo o código do WinKit foi escrito por inteligência artificial, sem auditoria humana completa, e ainda **não foi validado numa instalação real do Windows**. Ele mexe em partes sensíveis do sistema (instalação, registro, drivers, contas, arquivos) e pode ter erros ou falhas de segurança que causem perda de dados ou um Windows inutilizável.
 > **Toda a responsabilidade é de quem baixa e usa.** O autor não se responsabiliza por nenhum dano, perda ou falha de segurança. Teste primeiro numa máquina virtual, faça backup antes e [relate os erros que encontrar](https://github.com/luckasiasantos-source/WinKit/issues). Veja a seção [Aviso](#aviso).
 
-> **English summary.** WinKit prepares a [Ventoy](https://www.ventoy.net) USB drive so that any *unmodified* Windows 11 ISO installs unattended with a local account, your drivers, your apps (offline installers or winget), your app settings restored to the right folders, bloatware removed and privacy/UI tweaks applied. Everything lives in a `WinKit\` folder on the USB drive; the ISO is never touched. The app speaks Portuguese, English and Spanish ([README in English](README.en.md)). **Pre-alpha personal project, 100% vibe-coded (AI-written, not fully human-reviewed, not yet validated on real hardware). Use entirely at your own risk; the author accepts no liability.**
+> **English summary.** WinKit prepares a [Ventoy](https://www.ventoy.net) USB drive (or one made by Rufus or Microsoft's Media Creation Tool) so that any *unmodified* Windows 11 ISO installs unattended with a local account, your drivers, your apps (offline installers or winget), your app settings restored to the right folders, Wi-Fi, fonts, default apps, browsers, Start layout, user folders on another disk, games on another disk, bloatware removed and privacy/UI tweaks applied. The same recipe can also be applied to the Windows you already have, with a preview and a restore point. Everything lives in a `WinKit\` folder on the USB drive; the ISO is never touched. The app speaks Portuguese, English and Spanish ([README in English](README.en.md)). **Pre-alpha personal project, 100% vibe-coded (AI-written, not fully human-reviewed, not yet validated on real hardware). Use entirely at your own risk; the author accepts no liability.**
 
 ---
 
@@ -49,6 +49,24 @@ O WinKit faz isso de uma vez. Você monta uma **receita** no seu PC atual, e o p
 | 🪟 **Primeiro login do seu jeito** | Silencioso (só um aviso no fim), com contagem regressiva ou interativo — e itens marcados como "perguntar" para decidir na hora. |
 | 🧾 **Resumo e logs** | Resumo em HTML na área de trabalho e logs gravados de volta no pendrive. |
 | 🌎 **Três idiomas** | Português, inglês e espanhol, no Studio, na linha de comando e no primeiro login. Automático pelo idioma do Windows ou escolhido em Preferências. |
+
+### Novidades da versão 2
+
+| | |
+|---|---|
+| 💡 **Sugestões do que levar** | O WinKit olha este PC e sugere os programas que você mais usa, as configurações recomendadas, os saves de jogos e as pastas grandes no C:, sempre dizendo por quê. Nada entra sem você clicar em "Adicionar", e a análise é feita só neste PC. |
+| 🖥️ **Aplicar neste PC** | A mesma receita num Windows já instalado, sem reinstalar: prévia do que muda, ponto de restauração antes e só as etapas seguras ao vivo. |
+| 💾 **Pendrive comum** | Além do Ventoy, funciona com o pendrive gravado pelo Rufus ou pela Ferramenta de Criação de Mídia da Microsoft. |
+| 📶 **Rede e sistema** | Redes Wi-Fi conectadas antes do login, recursos do Windows (WSL, Sandbox, .NET 3.5…), drivers que faltam pelo Windows Update, DNS seguro e bloqueio de anúncios no `hosts`, unidades de rede, tarefas de manutenção e variáveis de ambiente. |
+| 🎨 **Personalização** | Perfis rápidos (Gamer, Privacidade máxima, Escritório, Programador), fontes, apps padrão, papel de parede e cores, navegadores com extensões e buscador, e o menu Iniciar e a barra fixados. |
+| 🗃️ **Contas, pastas e jogos** | Contas extras (administrador ou padrão), Documentos e Downloads em outro disco (achado pelo número de série, mesmo se a letra mudar) e jogos da Steam e da Epic em outro disco aparecendo instalados, sem baixar de novo. |
+| 📋 **Modelos e receitas compartilháveis** | Comece de um modelo pronto ou importe a receita de outra pessoa, sempre com prévia. A exportação nunca leva conta, senha, Wi-Fi nem caminhos pessoais. |
+| ⬆️ **Instaladores sempre novos** | "Procurar atualizações" troca os instaladores velhos do pendrive sem refazer a receita; a versão antiga só sai depois que a nova está no lugar. |
+| 🔍 **Comparação com o PC antigo** | No fim da instalação, o resumo mostra os apps que faltaram, os dispositivos sem driver e os recursos que não foram ligados. |
+
+<div align="center">
+<img src="docs/imagens/studio-sugestoes.png" alt="Sugestões do que levar" width="820">
+</div>
 
 <div align="center">
 <img src="docs/imagens/agente-inicio.png" alt="Janela do primeiro login" width="420">
@@ -87,7 +105,8 @@ O WinKit faz isso de uma vez. Você monta uma **receita** no seu PC atual, e o p
 1. Baixe o `WinKit-…-windows-x64.zip` na página de [**Releases**](https://github.com/luckasiasantos-source/WinKit/releases) e extraia. Não precisa compilar nada. Os executáveis não são assinados: se o SmartScreen avisar, clique em "Mais informações" → "Executar assim mesmo".
 2. Abra `winkit-studio\winkit-studio.exe`.
 3. Siga a barra lateral, de cima para baixo (grupos **Preparar**, **O que levar**, **Sistema** e **Concluir**). O botão **Preferências** troca idioma e tema.
-4. Dê boot pelo Ventoy, escolha a ISO e o modelo `winkit-…`.
+4. Dê boot pelo Ventoy, escolha a ISO e o modelo `winkit-…`. Com um pendrive do Rufus ou da Microsoft, só dê boot por ele (veja [`docs/RUFUS.md`](docs/RUFUS.md)).
+5. Para usar a receita no Windows que você já tem, abra **Aplicar neste PC** (grupo Concluir): o WinKit mostra a prévia e cria um ponto de restauração antes.
 
 <div align="center">
 <img src="docs/imagens/studio-conta.png" alt="Windows e conta" width="420">
@@ -107,14 +126,18 @@ winkit apps baixar --pendrive E:
 winkit coletar backups --pendrive E: --adicionar-recomendados
 winkit backup capturar --pendrive E:
 winkit coletar drivers --pendrive E:
+winkit sugestoes listar --pendrive E:
+winkit receita modelo gamer --aplicar --pendrive E:
+winkit dns definir cloudflare --pendrive E:
 winkit plano --pendrive E:
 winkit construir --pendrive E:
 winkit validar --pendrive E:
+winkit aplicar --pendrive E: --simular    # prévia do "Aplicar neste PC"
 ```
 
 ## Estado do projeto
 
-**Pré-alpha.** A versão 1 está implementada e testada automaticamente (mais de 500 testes em Linux e Windows, com executáveis gerados e testados no CI). A versão 2 está em andamento, marco a marco ([`docs/PLANO_V2.md`](docs/PLANO_V2.md)). A validação em máquina virtual e em PC real segue os roteiros de [`docs/validacao/`](docs/validacao/). Veja [`docs/STATUS.md`](docs/STATUS.md).
+**Pré-alpha.** As versões 1 e 2 estão implementadas e testadas automaticamente (mais de 700 testes em Linux e Windows, com executáveis gerados e testados no CI). O plano da v2 está em [`docs/PLANO_V2.md`](docs/PLANO_V2.md); o que ainda é provisório está em [`docs/DIVIDAS_TECNICAS.md`](docs/DIVIDAS_TECNICAS.md). A validação em máquina virtual e em PC real segue os roteiros de [`docs/validacao/`](docs/validacao/). Veja [`docs/STATUS.md`](docs/STATUS.md).
 
 > ⚠️ Use primeiro numa máquina virtual ([`docs/validacao/AMBIENTE_VM.md`](docs/validacao/AMBIENTE_VM.md)). Valores de registro e nomes de pacotes do Windows mudam entre versões.
 
@@ -138,7 +161,7 @@ O código é Python 3.12 + PySide6, em camadas com regras verificadas automatica
 | `platform/` | Tudo que toca o Windows (registro, PowerShell, robocopy, VSS, pnputil, winget, Appx), atrás de interfaces com versões falsas para testes |
 | `collector/`, `builder/`, `agent/` | Casos de uso: coletar do PC atual, montar o pendrive, configurar o Windows novo |
 | `ui/`, `studio/`, `agent/ui/` | Interface no estilo macOS (tema claro/escuro) |
-| `data/` | Catálogos versionados: apps conhecidos, ajustes (com fonte e "desfazer"), bloatware, edições |
+| `data/` | Catálogos versionados: apps conhecidos, ajustes (com fonte e "desfazer"), bloatware, edições, recursos do Windows, DNS e listas de bloqueio, perfis rápidos, saves de jogos e modelos de receita |
 
 Documentação completa:
 
@@ -160,7 +183,7 @@ Antes de abrir um PR, leia o [`CONTRIBUTING.md`](CONTRIBUTING.md) e rode `script
 
 **Versão pré-alpha de um projeto pessoal.** O WinKit foi feito para uso próprio, como um teste, e não como um produto lançado. Ele está aberto para quem quiser usar, mas quem usa é, na prática, um testador (beta tester), com todos os poréns disso: pode faltar recurso, mudar sem aviso e não há suporte garantido.
 
-**O WinKit é 100% vibe-codado.** Todo o código, os testes e a documentação foram escritos por inteligência artificial, sem auditoria humana completa. Os testes automáticos passam, mas eles não substituem uma instalação real, que ainda não foi feita.
+**O WinKit é 100% vibe-codado.** Todo o código, os testes, a documentação e as traduções para inglês e espanhol foram escritos por inteligência artificial, sem auditoria humana completa. Os testes automáticos passam, mas eles não substituem uma instalação real, que ainda não foi feita. O modo "Aplicar neste PC" mexe no Windows que você usa todo dia: use a prévia e confira o ponto de restauração antes.
 
 Ao baixar, compilar ou usar o WinKit, você concorda que:
 

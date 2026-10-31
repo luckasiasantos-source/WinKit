@@ -11,6 +11,34 @@ New-Item -ItemType Directory -Force $root | Out-Null
 & $cli --version
 & $cli receita nova --raiz $root --usuario Samuel --nome-pc PC-CI
 if ($LASTEXITCODE -ne 0) { throw "receita nova falhou" }
+# v2 (M14–M17): os comandos novos com --raiz, sem tocar no runner
+function Invoke-Cli([string[]]$CliArgs) {
+    & $cli @CliArgs --raiz $root | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "winkit $($CliArgs -join ' ') falhou (código $LASTEXITCODE)" }
+}
+Invoke-Cli receita, modelo
+Invoke-Cli receita, modelo, gamer, --aplicar
+Invoke-Cli perfil-rapido, aplicar, privacy_max, --simular
+Invoke-Cli perfil-rapido, aplicar, office
+Invoke-Cli recursos, marcar, wsl
+Invoke-Cli dns, definir, cloudflare
+Invoke-Cli dns, mostrar
+Invoke-Cli unidades, listar
+Invoke-Cli manutencao, mostrar
+Invoke-Cli variaveis, listar
+Invoke-Cli fontes, listar
+Invoke-Cli associacoes, listar
+Invoke-Cli aparencia, listar
+Invoke-Cli navegador, listar
+Invoke-Cli pastas, mostrar
+Invoke-Cli jogos, listar
+Invoke-Cli contas, adicionar, Ana, --admin
+Invoke-Cli sugestoes, listar, --json
+$shared = Join-Path $tmp 'smoke.winkit.json'
+Invoke-Cli receita, exportar, $shared
+if ((Get-Content $shared -Raw) -match 'Samuel|PC-CI') { throw "exportação levou dados pessoais" }
+Invoke-Cli receita, importar, $shared
+Invoke-Cli plano
 & $cli construir --raiz $root --agente $agent
 if ($LASTEXITCODE -ne 0) { throw "construir falhou" }
 & $cli validar --raiz $root

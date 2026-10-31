@@ -121,7 +121,7 @@ Decisões tomadas com o usuário durante o desenho. Detalhes e justificativa no 
 | 12 | Captura de backup de pastas | **v1** | |
 | 13 | Restauração no perfil Default (antes do login) | **v1** | |
 | 14 | Restauração no primeiro logon | **v1** | |
-| 15 | Backup de chaves de registro `HKCU` | Depois | |
+| 15 | Backup de chaves de registro `HKCU` | **v2** (curado) | Só valores curados de um catálogo (V2-06, D-037), nunca o `HKCU` bruto. |
 | 16 | Aviso do que não sobrevive (tokens, senhas) | **v1** | |
 | 17 | Receita salva em JSON | **v1** | Espinha do projeto. |
 | 18 | Teste da ISO em VM | **Fora** | Decisão do usuário. |
@@ -135,7 +135,7 @@ Decisões tomadas com o usuário durante o desenho. Detalhes e justificativa no 
 | 26 | Log de volta no pendrive | **v1** | |
 | 27 | Atualizar só o que mudou no pendrive | **v1** | |
 | 28 | Sugestão de pastas de configuração | **v1** | |
-| 29 | Fixar na barra de tarefas | Depois | O Windows 11 bloqueia isso por design. |
+| 29 | Fixar na barra de tarefas | **v2** | V2-04: layout no perfil Default antes do primeiro login (H27, H28). |
 | 30 | Restaurar arquivos soltos | **v1** | |
 | 31 | Ajustes de privacidade | **v1** | |
 | 32 | Ajustes visuais | **v1** | |
@@ -144,6 +144,18 @@ Decisões tomadas com o usuário durante o desenho. Detalhes e justificativa no 
 | 35 | Escolher backups na janela do primeiro login | **v1** | Via marcação "decidir na hora". |
 | 36 | Tela final de resumo | **v1** | |
 | 37 | Bloquear reinstalação de apps removidos | **v1** | |
+
+**Funções da v2** (detalhes em [`PLANO_V2.md`](PLANO_V2.md) §1; todas implementadas, validação na VM pendente):
+
+| Código | Função | Marco |
+|---|---|---|
+| V2-00 | Interface em inglês e espanhol | M11 |
+| V2-03, V2-10 | Aplicar neste PC, com prévia e ponto de restauração | M12 |
+| V2-01 | Pendrive comum (Rufus ou Ferramenta de Criação de Mídia) | M13 |
+| V2-02, 08, 09, 16, 17, 18, 22 | Wi-Fi, recursos do Windows, drivers que faltam, DNS e `hosts`, unidades de rede, manutenção, variáveis de ambiente | M14 |
+| V2-04, 05, 06, 07, 12, 15 | Iniciar e barra, apps padrão, aparência, fontes, navegadores, perfis rápidos | M15 |
+| V2-11, 13, 14 | Contas extras, jogos sem baixar de novo, pastas do usuário em outro disco | M16 |
+| V2-19, 20, 21, 23 | Relatório antes/depois, assistente "o que levar", atualizar instaladores, receitas compartilháveis | M17 |
 
 ### 3.2 Fora do escopo, explicitamente
 
@@ -1455,7 +1467,7 @@ Cada marco tem um **critério de pronto**. Um marco só é marcado como concluí
 
 ### Depois do v1 (backlog ordenado)
 
-> A v2 (M11–M18) está planejada em detalhe em [`PLANO_V2.md`](PLANO_V2.md), **aprovada** e em implementação. Os itens 3 (backup de `HKCU`, agora em forma curada, D-037) e 4 (fixar na barra, V2-04) deste backlog foram absorvidos por ela.
+> A v2 (M11–M18) está detalhada em [`PLANO_V2.md`](PLANO_V2.md) e **implementada** (0.9.0); falta a validação na VM (roteiros `docs/validacao/M11.md` a `M17.md`). Os itens 3 (backup de `HKCU`, agora em forma curada, D-037) e 4 (fixar na barra, V2-04) deste backlog foram absorvidos por ela.
 
 1. Item 20 — Windows 10 (catálogos com `os: [10]`, validação em hardware).
 2. Item 23 — Perfis múltiplos (o Ventoy mostra um menu com os modelos; um XML por perfil).
@@ -1532,6 +1544,8 @@ Regra: código e documentos mudam **no mesmo commit** (ver `CLAUDE.md`).
 | 16 Avisos DPAPI | M6 | | 36 Resumo | M8 + M9 |
 | 17 Receita | M1 | | 37 Bloquear reinstalação | M7 |
 | 19 Ventoy nativo | M2 | | Modos de execução | M3 (silencioso) + M9 |
+
+Funções da v2: a tabela por código e marco está em [`PLANO_V2.md`](PLANO_V2.md) §1 e, resumida, no fim da §3.1 acima. O item 15 virou V2-06 (valores curados) e o 29 virou V2-04.
 
 ---
 

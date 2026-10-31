@@ -6,7 +6,7 @@
 
 [Português](README.md) · **English** · [Español](README.es.md)
 
-**Install Windows already the way you like it — drivers, apps, settings and privacy — from a Ventoy USB drive, without modifying the ISO.**
+**Install Windows already the way you like it — drivers, apps, settings and privacy — from a Ventoy USB drive (or one made by Rufus or Microsoft), without modifying the ISO. Or apply the same recipe to the Windows you already have.**
 
 [![CI](https://github.com/luckasiasantos-source/WinKit/actions/workflows/ci.yml/badge.svg)](https://github.com/luckasiasantos-source/WinKit/actions/workflows/ci.yml)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
@@ -48,6 +48,24 @@ WinKit does it all at once. You build a **recipe** on your current PC, and the V
 | 🧾 **Summary and logs** | HTML summary on the desktop and logs written back to the USB drive. |
 | 🌎 **Three languages** | Portuguese, English and Spanish in Studio, on the command line and at first sign-in. Automatic from the Windows language or chosen in Preferences. |
 
+### New in version 2
+
+| | |
+|---|---|
+| 💡 **Suggestions of what to take** | WinKit looks at this PC and suggests the programs you use most, recommended settings, game saves and large folders on C:, always saying why. Nothing is added until you click "Add", and the analysis runs only on this PC. |
+| 🖥️ **Apply to this PC** | The same recipe on an already installed Windows, without reinstalling: a preview of what changes, a restore point first and only the steps that are safe on a running system. |
+| 💾 **Regular USB drive** | Besides Ventoy, it works with a USB drive made by Rufus or by Microsoft's Media Creation Tool. |
+| 📶 **Network and system** | Wi-Fi networks connected before sign-in, Windows features (WSL, Sandbox, .NET 3.5…), missing drivers from Windows Update, secure DNS and ad blocking in `hosts`, network drives, maintenance tasks and environment variables. |
+| 🎨 **Personalization** | Quick profiles (Gamer, Maximum privacy, Office, Developer), fonts, default apps, wallpaper and colors, browsers with extensions and search engine, and the Start menu and taskbar pins. |
+| 🗃️ **Accounts, folders and games** | Extra accounts (administrator or standard), Documents and Downloads on another disk (found by serial number even if the letter changes), and Steam and Epic games on another disk showing up installed, without downloading again. |
+| 📋 **Templates and shareable recipes** | Start from a ready template or import someone else's recipe, always with a preview. Exports never include your account, password, Wi-Fi or personal paths. |
+| ⬆️ **Always-fresh installers** | "Check for updates" replaces old installers on the USB drive without redoing the recipe; the old version is only removed after the new one is in place. |
+| 🔍 **Comparison with the old PC** | At the end of the install, the summary shows missing apps, devices without a driver and features that were not turned on. |
+
+<div align="center">
+<img src="docs/imagens/en/studio-templates.png" alt="Templates" width="820">
+</div>
+
 ## How it works
 
 ```
@@ -80,7 +98,8 @@ WinKit does it all at once. You build a **recipe** on your current PC, and the V
 1. Download `WinKit-…-windows-x64.zip` from the [**Releases**](https://github.com/luckasiasantos-source/WinKit/releases) page and extract it. Nothing to compile. The executables are not signed: if SmartScreen warns you, click "More info" → "Run anyway".
 2. Open `winkit-studio\winkit-studio.exe`.
 3. Follow the sidebar from top to bottom (groups **Prepare**, **What to bring**, **System** and **Finish**). The **Preferences** button changes language and theme.
-4. Boot from Ventoy, choose the ISO and the `winkit-…` template.
+4. Boot from Ventoy, choose the ISO and the `winkit-…` template. With a Rufus or Microsoft USB drive, just boot from it (see [`docs/RUFUS.md`](docs/RUFUS.md), in Portuguese).
+5. To use the recipe on the Windows you already have, open **Apply to this PC** (Finish group): WinKit shows a preview and creates a restore point first.
 
 ### Command line
 
@@ -95,14 +114,18 @@ winkit apps download --pendrive E:
 winkit collect backups --pendrive E: --adicionar-recomendados
 winkit backup capture --pendrive E:
 winkit collect drivers --pendrive E:
+winkit suggestions list --pendrive E:
+winkit recipe template gamer --aplicar --pendrive E:
+winkit dns set cloudflare --pendrive E:
 winkit plan --pendrive E:
 winkit build --pendrive E:
 winkit validate --pendrive E:
+winkit apply --pendrive E: --simular    # preview of "Apply to this PC"
 ```
 
 ## Project status
 
-**Pre-alpha.** Version 1 is implemented and automatically tested (over 500 tests on Linux and Windows, with executables built and smoke-tested in CI). Version 2 is in progress, milestone by milestone ([`docs/PLANO_V2.md`](docs/PLANO_V2.md), in Portuguese). Validation in a virtual machine and on a real PC follows the scripts in [`docs/validacao/`](docs/validacao/).
+**Pre-alpha.** Versions 1 and 2 are implemented and automatically tested (over 700 tests on Linux and Windows, with executables built and smoke-tested in CI). The v2 plan is in [`docs/PLANO_V2.md`](docs/PLANO_V2.md) (in Portuguese); what is still provisional is in [`docs/DIVIDAS_TECNICAS.md`](docs/DIVIDAS_TECNICAS.md). Validation in a virtual machine and on a real PC follows the scripts in [`docs/validacao/`](docs/validacao/).
 
 > ⚠️ Use it in a virtual machine first. Windows registry values and package names change between versions.
 
@@ -126,7 +149,7 @@ Python 3.12 + PySide6, in layers whose rules are checked automatically:
 | `platform/` | Everything that touches Windows (registry, PowerShell, robocopy, VSS, pnputil, winget, Appx), behind interfaces with fakes for tests |
 | `collector/`, `builder/`, `agent/` | Use cases: collect from the current PC, build the USB drive, set up the new Windows |
 | `ui/`, `studio/`, `agent/ui/` | macOS-style interface (light/dark theme) |
-| `i18n/`, `data/` | Texts in three languages; versioned catalogs (known apps, tweaks with source and undo, bloatware, editions) |
+| `i18n/`, `data/` | Texts in three languages; versioned catalogs (known apps, tweaks with source and undo, bloatware, editions, Windows features, DNS and blocklists, quick profiles, game saves, recipe templates) |
 
 The project documentation (`docs/`) is written in Portuguese.
 
@@ -145,7 +168,7 @@ Before opening a PR, read [`CONTRIBUTING.md`](CONTRIBUTING.md) and run `scripts/
 
 **Pre-alpha version of a personal project.** WinKit was made for the author's own use, as an experiment, not as a released product. It is open to anyone who wants to use it, but whoever uses it is, in practice, a tester (beta tester), with all that this implies: features may be missing, things may change without notice and there is no guaranteed support.
 
-**WinKit is 100% vibe-coded.** All the code, tests and documentation were written by artificial intelligence, without a full human review. The automated tests pass, but they do not replace a real install, which has not been done yet.
+**WinKit is 100% vibe-coded.** All the code, tests, documentation and the English and Spanish translations were written by artificial intelligence, without a full human review. The automated tests pass, but they do not replace a real install, which has not been done yet. "Apply to this PC" changes the Windows you use every day: use the preview and check the restore point first.
 
 By downloading, building or using WinKit, you agree that:
 

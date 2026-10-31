@@ -26,3 +26,17 @@ Cada marco que depende disso ganha um roteiro `Mx.md` nesta pasta. Você executa
 ## Arquivos para anexar
 - `WinKit\Logs\<pc>_<data>\` do pendrive
 ```
+
+## Ordem sugerida
+
+Prepare a VM uma vez com [`AMBIENTE_VM.md`](AMBIENTE_VM.md) e siga os roteiros em ordem. Os da v1 (M2 a M10) cobrem o fluxo básico do pendrive Ventoy; os da v2 cobrem as funções novas:
+
+| Roteiro | O que valida | Hipóteses |
+|---|---|---|
+| [M11](M11.md) | Inglês e espanhol | H12 |
+| [M12](M12.md) | Aplicar neste PC, prévia e ponto de restauração | H13, H14, H15 |
+| [M13](M13.md) | Pendrive do Rufus ou da Microsoft | H16, H17, H18 |
+| [M14](M14.md) | Wi-Fi, recursos, drivers que faltam, DNS, unidades de rede, manutenção, variáveis | H19 a H24 |
+| [M15](M15.md) | Perfis rápidos, fontes, apps padrão, aparência, navegadores, Iniciar e barra | H25 a H31, H35 |
+| [M16](M16.md) | Pastas em outro disco, jogos, contas extras | H32, H33 |
+| [M17](M17.md) | Sugestões, modelos, exportação, atualização dos instaladores, comparação | H34 |

@@ -28,6 +28,26 @@
 
 ---
 
+## 2026-10-31 — M18 — Fechamento da v2 (0.9.0)
+**Tipo:** documentação
+**Resumo:** fecha a v2: documentos revisados e cruzados, traduções revisadas pelo glossário, README nos três idiomas com as funções novas, capturas novas, teste de fumaça com os comandos novos e versão 0.9.0. Dois ajustes pequenos no assistente de sugestões.
+
+### Adicionado
+- `docs/imagens/studio-sugestoes.png`, `docs/imagens/es/studio-sugerencias.png`, `docs/imagens/en/studio-templates.png`
+- `docs/validacao/README.md` — índice dos roteiros da v2 com as hipóteses de cada um
+- i18n: `suggest.app_used_yesterday` ("último uso ontem", em vez de "há 1 dias")
+
+### Alterado
+- `README.md`, `README.en.md`, `README.es.md` — funções da v2, pendrive comum, "Aplicar neste PC", comandos novos, estado do projeto e aviso
+- `packaging/smoke.ps1` — comandos novos com `--raiz`, conferindo que a exportação não leva dados pessoais
+- `packaging/NOTAS_DA_VERSAO.md` — notas da 0.9.0 com as hipóteses ainda não validadas; `src/winkit/__init__.py` — 0.9.0
+- `src/winkit/i18n/messages/en_us.py`, `es.py` — revisão pelo glossário (ex.: "primer inicio de sesión", "sin conexión", "agregar")
+- `src/winkit/collector/suggest.py` — pastas de saves vazias não viram sugestão
+- `docs/validacao/M14.md`, `M15.md` — hipóteses H19, H20 e H35
+
+### Documentos vivos atualizados
+- PLANO — §3.1, §20 e §24 com a v2; PLANO_V2 — H35; STATUS — M18 pronto, tabela de hipóteses completa e sem repetição
+
 ## 2026-10-31 — M17 — Fechamento do M17 (0.8.0)
 **Tipo:** documentação
 **Resumo:** fecha o M17 com o roteiro de validação na VM, as notas da versão e a versão 0.8.0.

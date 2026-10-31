@@ -7,7 +7,7 @@
 
 **Última atualização:** 2026-10-31
 **Versão do código:** 0.4.0 (pré-alpha, projeto pessoal)
-**Fase do projeto:** v1 implementada (M0–M10); falta a validação em VM/PC real pelos roteiros de `docs/validacao/`. v2 (M11–M18) aprovada e em implementação (`PLANO_V2.md`)
+**Fase do projeto:** v1 implementada (M0–M10); falta a validação em VM/PC real pelos roteiros de `docs/validacao/`. v2 (M11–M18) implementada (0.9.0, `PLANO_V2.md`); falta a validação na VM pelos roteiros M11–M17
 
 ## Resumo
 
@@ -32,7 +32,7 @@
 | M15 | Personalização (V2-04, 05, 06, 07, 12, 15) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M15.md`) |
 | M16 | Contas, pastas e jogos (V2-11, 13, 14) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M16.md`) |
 | M17 | Inteligência do pendrive (V2-19, 20, 21, 23) | ✅ código · validação na VM pendente | `docs/validacao/M17.md` |
-| M18 | Fechamento da v2 | ⬜ planejado | — |
+| M18 | Fechamento da v2 | ✅ | — |
 
 ## Detalhe por marco
 
@@ -222,6 +222,14 @@
 - ✅ V2-20 Assistente "o que levar": UserAssist (ROT13 + registro de 72 bytes, H34) cruzado com o inventário; configurações recomendadas que faltam; 13 saves de jogos conhecidos; pastas grandes na raiz do C: com limite de tempo; pontuação determinística por uso, recência e tamanho; "Adicionar" e "Ignorar" (ignoradas não voltam); Studio (Sugestões, primeira de O que levar) e CLI (`sugestoes listar [--json]|adicionar|ignorar`). A categoria "Outros" e o manifesto do Ludusavi ficaram para depois (DT-026)
 - ✅ Roteiro `docs/validacao/M17.md` e versão 0.8.0
 
+### M18 — Fechamento da v2 ✅
+- ✅ Revisão cruzada dos documentos: `PLANO.md` §3.1, §20 e §24 apontam para a v2; hipóteses renumeradas sem repetição (a do Firefox virou H35) e H19, H20 e H29 incluídas nesta tabela; índice dos roteiros M11–M17 em `docs/validacao/README.md`
+- ✅ Revisão das traduções pelo glossário (§6.6): termos e estilo uniformizados em inglês e espanhol (a revisão por falantes nativos continua fora do escopo)
+- ✅ Capturas novas (Sugestões em pt-BR e espanhol escuro, Modelos em inglês) e README nos três idiomas com as funções da v2, o pendrive comum, "Aplicar neste PC" e o aviso atualizado
+- ✅ `smoke.ps1` cobre os comandos novos (modelos, perfis rápidos, recursos, DNS, unidades, manutenção, variáveis, fontes, apps padrão, aparência, navegadores, pastas, jogos, contas, sugestões, exportar/importar)
+- ✅ Auditoria: `scripts/check.sh` OK; cobertura `core` 95%, `collector` 90%, `builder` 94%, `agent` 88% (R-38); nenhum TODO no código (R-50); teste AST da R-55 sem exceções novas
+- ✅ Versão 0.9.0 com notas trilíngues
+
 ## Hipóteses técnicas
 
 | # | Hipótese (resumo) | Estado | Onde foi validada |
@@ -244,17 +252,20 @@
 | H16 | `Get-WindowsImage` lê metadados de `.swm` pelo primeiro arquivo | ⬜ | — |
 | H17 | O Rufus grava respostas também em `sources\$OEM$\$$\Panther\unattend.xml` | ⬜ | — |
 | H18 | O instalador usa o `autounattend.xml` do pendrive de boot mesmo com outra mídia removível | ⬜ | — |
+| H19 | `WlanSvc` aceita `add profile` na Fase 1 | ⬜ | — |
+| H20 | O Windows conecta sozinho a um perfil Wi-Fi automático antes do login | ⬜ | — |
 | H21 | `Mount-DiskImage -Access ReadOnly` de uma ISO na partição exFAT do Ventoy funciona na Fase 1, como SYSTEM | ⬜ | — |
 | H22 | `Enable-WindowsOptionalFeature` funciona na Fase 1 sem o serviço Windows Update ativo | ⬜ | — |
+| H23 | `Set-DnsClientServerAddress` funciona na Fase 1 para adaptadores cujo driver acabou de ser instalado pelo `pnputil` | ⬜ | — |
+| H24 | Valores em `HKCU\Network` gravados no perfil Default são reconectados no primeiro login do usuário novo | ⬜ | — |
 | H25 | `/Import-DefaultAppAssociations` na Fase 1 vale para a conta criada no primeiro login, para apps já instalados | ⬜ | — |
 | H26 | O Windows 11 mantém o papel de parede e a cor gravados no perfil Default no primeiro login | ⬜ | — |
-| H30 | Extensões externas por registro continuam aceitas no Chrome e no Edge estáveis para usuários não gerenciados | ⬜ | — |
-| H31 | O Brave aceita as políticas do Chromium em `HKLM\SOFTWARE\Policies\BraveSoftware\Brave` | ⬜ | — |
-| H32 | O endereço `addons.mozilla.org/.../latest/<id>/latest.xpi` aceita o id da extensão quando não há nome curto | ⬜ | — |
 | H27 | Copiar `start2.bin` para o perfil Default reproduz o Iniciar na conta nova (mesma versão) | ⬜ | — |
 | H28 | `LayoutModification.json` no perfil Default é respeitado pelo Windows 11 atual | ⬜ | — |
+| H29 | Os fixados da barra podem ser recriados ao vivo sem API privada | ⬜ | — |
+| H30 | Extensões externas por registro continuam aceitas no Chrome e no Edge estáveis para usuários não gerenciados | ⬜ | — |
+| H31 | O Brave aceita as políticas do Chromium em `HKLM\SOFTWARE\Policies\BraveSoftware\Brave` | ⬜ | — |
 | H32 | `REG_EXPAND_SZ` com `%USERNAME%` em `User Shell Folders` do perfil Default é expandido no primeiro login de cada conta | ⬜ | — |
 | H33 | Acrescentar a biblioteca no `libraryfolders.vdf` com a Steam fechada basta para ela reconhecer os jogos | ⬜ | — |
 | H34 | A estrutura do UserAssist (72 bytes, contador em `+4`, FILETIME em `+60`) continua igual no Windows 11 atual | ⬜ | — |
-| H24 | Valores em `HKCU\Network` gravados no perfil Default são reconectados no primeiro login do usuário novo | ⬜ | — |
-| H23 | `Set-DnsClientServerAddress` funciona na Fase 1 para adaptadores cujo driver acabou de ser instalado pelo `pnputil` | ⬜ | — |
+| H35 | O endereço `addons.mozilla.org/.../latest/<id>/latest.xpi` aceita o id da extensão quando não há nome curto | ⬜ | — |
