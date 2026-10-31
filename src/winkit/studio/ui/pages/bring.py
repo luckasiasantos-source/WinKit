@@ -12,7 +12,7 @@ from winkit.core.recipe.models import AppItem
 from winkit.i18n import t, tn
 from winkit.i18n.format import format_size
 from winkit.studio.ui.base import Page
-from winkit.studio.ui.pages.common import choice_row, empty
+from winkit.studio.ui.pages.common import choice_row, empty, toggle
 from winkit.ui.widgets import Card, Row, button, kind_icon, section
 
 
@@ -177,6 +177,21 @@ class DriversPage(Page):
                 card if card.rows else empty(t("studio.drivers.none")),
             )
         )
+        fix = Card()
+        fix.add_row(
+            Row(
+                t("studio.drivers.fix_missing"),
+                t("studio.drivers.fix_missing_hint"),
+                accessory=toggle(r.updates.fix_missing_drivers, self._set_fix),
+                icon=kind_icon("driver_report"),
+            )
+        )
+        self.content.addWidget(section("", fix))
+
+    def _set_fix(self, value: bool) -> None:
+        if self.ctl.recipe is not None:
+            self.ctl.recipe.updates.fix_missing_drivers = value
+            self.save()
 
     def _set_driver(self, d: Any, value: bool) -> None:
         d.selected = value

@@ -36,6 +36,7 @@ def test_implicit_tweaks_can_be_turned_off() -> None:
     r.bloatware.disable_consumer_content = False
     r.updates.windows_update_after_install = False
     r.restore_point.enabled = False
+    r.updates.fix_missing_drivers = False
     assert P(r).ids() == ["finalize:summary"]
 
 
@@ -224,8 +225,14 @@ def test_rename_and_update_and_finalize_order() -> None:
     r = recipe()
     r.windows.computer_name_decide_at_runtime = True
     ids = P(r).phase(2)
-    tail = [s.kind for s in ids][-4:]
-    assert tail == ["rename_computer", "windows_update", "restore_point", "finalize"]  # R30
+    tail = [s.kind for s in ids][-5:]
+    assert tail == [
+        "rename_computer",
+        "windows_update",
+        "driver_report",  # R28: depois do Windows Update
+        "restore_point",  # R30
+        "finalize",
+    ]
 
 
 def test_fallback_moves_phase1_to_phase2_first() -> None:  # D-012

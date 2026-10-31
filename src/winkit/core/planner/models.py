@@ -20,6 +20,7 @@ StepKind = Literal[
     "shortcut",
     "rename_computer",
     "windows_update",
+    "driver_report",
     "restore_point",
     "finalize",
 ]

@@ -11,6 +11,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from winkit.core.devices import ProblemDevice, problem_text
 from winkit.core.planner.models import Plan
 from winkit.core.recipe.models import Recipe
 from winkit.core.state.models import AgentState
@@ -41,6 +42,9 @@ class Summary(BaseModel):
     pending: int
     items: tuple[SummaryItem, ...]
     warnings: tuple[Msg, ...]
+    #: V2-09: dispositivos que ficaram sem driver e drivers achados no Windows Update.
+    devices: tuple[ProblemDevice, ...] = ()
+    drivers_found: tuple[str, ...] = ()
 
     @property
     def failures(self) -> list[SummaryItem]:
@@ -89,6 +93,8 @@ def build_summary(
         pending=counts["pending"],
         items=tuple(items),
         warnings=tuple(_unique(warnings)),
+        devices=tuple(state.devices),
+        drivers_found=tuple(state.drivers_found),
     )
 
 
@@ -136,6 +142,29 @@ tr.done td:last-child { color: var(--ok); }
 """
 
 
+def _devices_html(summary: Summary) -> str:
+    """Seção "Dispositivos sem driver" (V2-09): o que fazer com o que sobrou."""
+    e = html.escape
+    parts: list[str] = []
+    if summary.drivers_found:
+        found = "".join(f"<li>{e(x)}</li>" for x in summary.drivers_found)
+        parts.append(f"<h2>{e(t('summary.drivers_found'))}</h2><ul>{found}</ul>")
+    if summary.devices:
+        rows = []
+        for d in summary.devices:
+            ids = ", ".join(d.hardware_ids[:2]) or d.device_id
+            rows.append(
+                f"<tr class='failed'><td>{d.code}</td><td>{e(d.name)}"
+                f"<div class='d'>{e(render(problem_text(d.code)))}</div>"
+                f"<div class='d'>{e(ids)}</div></td></tr>"
+            )
+        parts.append(
+            f"<h2>{e(t('summary.devices'))}</h2><p>{e(t('summary.devices_hint'))}</p>"
+            f"<table>{''.join(rows)}</table>"
+        )
+    return "\n".join(parts)
+
+
 def render_html(summary: Summary, *, log_path: str) -> str:
     """HTML autocontido, com todo texto escapado."""
     e = html.escape
@@ -170,6 +199,7 @@ def render_html(summary: Summary, *, log_path: str) -> str:
     )
     fail_block = f"<h2>{e(t('summary.failures'))}</h2><table>{failures}</table>" if failures else ""
     warn_block = f"<h2>{e(t('summary.warnings'))}</h2><ul>{warnings}</ul>" if warnings else ""
+    device_block = _devices_html(summary)
     generated = e(t("summary.generated_at", when=format_datetime(summary.generated_at)))
     lang = current_language()
     return (
@@ -177,7 +207,7 @@ def render_html(summary: Summary, *, log_path: str) -> str:
         f"<title>{title}</title>\n<style>{_CSS}</style></head><body>\n"
         f"<h1>{title} — {e(summary.computer)}</h1>\n"
         f"<p>{times}</p>\n<p><strong>{counts}</strong></p>\n"
-        f"{fail_block}\n{warn_block}\n"
+        f"{fail_block}\n{warn_block}\n{device_block}"
         f"<h2>{e(t('summary.everything'))}</h2>\n<table>{rows()}</table>\n"
         f'<p class="mut">{e(t("summary.full_log", path=log_path))}<br>{generated}</p>\n'
         "</body></html>\n"

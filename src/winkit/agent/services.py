@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from winkit.platform.accounts import Accounts, WindowsAccounts
 from winkit.platform.appx import AppxManager, WindowsAppxManager
 from winkit.platform.copy import Copier, RobocopyCopier
+from winkit.platform.devices import DeviceInspector, WindowsDeviceInspector
 from winkit.platform.drivers import DriverManager, WindowsDriverManager
 from winkit.platform.environment import Environment, WindowsEnvironment
 from winkit.platform.features import SystemFeatures, WindowsSystemFeatures
@@ -48,6 +49,7 @@ class AgentServices:
     restore: RestorePoints
     wifi: WifiManager
     iso: IsoMounter
+    devices: DeviceInspector
 
 
 def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windows
@@ -75,4 +77,5 @@ def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windo
         restore=WindowsRestorePoints(ps),
         wifi=WindowsWifi(runner),
         iso=WindowsIsoMounter(ps),
+        devices=WindowsDeviceInspector(ps),
     )

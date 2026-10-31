@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from winkit.core.devices import ProblemDevice
 from winkit.core.errors import PlatformError
 from winkit.platform.appx import AppxRemoval
 from winkit.platform.features import FeatureResult
@@ -100,9 +102,36 @@ class FakeUpdater:
     result: UpdateResult = field(default_factory=lambda: UpdateResult(2, 2, True, ("KB1", "KB2")))
     calls: list[bool] = field(default_factory=list)
 
+    #: Ids de hardware que o "Windows Update" conhece (V2-09).
+    driver_catalog: set[str] = field(default_factory=set)
+    driver_searches: list[list[str]] = field(default_factory=list)
+    #: Chamado com os ids instalados (o teste "conserta" os dispositivos).
+    on_driver_install: Callable[[list[str]], None] | None = None
+
     def install_all(self, *, include_drivers: bool, log: Path | None) -> UpdateResult:
         self.calls.append(include_drivers)
         return self.result
+
+    def install_drivers_for(self, hardware_ids: list[str], *, log: Path | None) -> UpdateResult:
+        self.driver_searches.append(list(hardware_ids))
+        hits = [
+            h for h in hardware_ids if h.casefold() in {x.casefold() for x in self.driver_catalog}
+        ]
+        if hits and self.on_driver_install is not None:
+            self.on_driver_install(hits)
+        return UpdateResult(len(hits), 2, False, tuple(f"driver {h}" for h in hits))
+
+
+@dataclass
+class FakeDevices:
+    devices: list[ProblemDevice] = field(default_factory=list)
+
+    def problem_devices(self) -> list[ProblemDevice]:
+        return list(self.devices)
+
+    def fix(self, hardware_ids: list[str]) -> None:
+        ids = {h.casefold() for h in hardware_ids}
+        self.devices = [d for d in self.devices if not ids & {h.casefold() for h in d.hardware_ids}]
 
 
 @dataclass

@@ -140,6 +140,7 @@ Por que isso importa:
 | `agent/steps/restore.py`, `platform/restore.py` | Ponto de restauração (V2-10) por CIM `SystemRestore` e `Win32_ShadowStorage` |
 | `core/live.py` | Modelos da prévia (`PreviewItem`, `LivePreview`) |
 | `data/features.yaml`, `platform/features.py`, `platform/iso_mount.py`, `collector/features.py`, `agent/steps/feature.py` | Recursos do Windows (V2-08): catálogo, liga recursos e capacidades, monta a ISO só para leitura (D-043) |
+| `core/devices.py`, `platform/devices.py`, `agent/steps/driver_report.py` | Dispositivos sem driver (V2-09): tabela de códigos, CIM `Win32_PnPEntity`, busca dirigida no Windows Update, seção do resumo |
 | `core/secrets.py` | Registro único de segredos do processo (R-53); `runner` e `EventLog` mascaram |
 | `core/wifi.py`, `collector/wifi.py`, `platform/wifi.py`, `agent/steps/wifi.py` | Wi-Fi (V2-02): XML do perfil, coleta, `netsh` só por código de saída e arquivos, etapa antes do login |
 | `core/media.py` | Pendrive comum (D-034): reconhecer a mídia de instalação, marcar o `autounattend.xml` do WinKit |

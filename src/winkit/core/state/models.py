@@ -14,6 +14,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from winkit.core.devices import ProblemDevice
 from winkit.core.errors import StateError
 from winkit.core.planner.models import Plan
 from winkit.core.state.migrations import migrate_state
@@ -62,6 +63,10 @@ class AgentState(_Model):
     postponed: bool = False
     #: Nome escolhido na janela da Fase 2 (item 33, "decidir na hora").
     computer_name_choice: str | None = None
+    #: V2-09: dispositivos que continuaram com problema depois da busca de drivers.
+    devices: list[ProblemDevice] = Field(default_factory=list)
+    #: V2-09: drivers instalados pela busca dirigida no Windows Update.
+    drivers_found: list[str] = Field(default_factory=list)
 
     def step(self, step_id: str) -> StepState:
         try:

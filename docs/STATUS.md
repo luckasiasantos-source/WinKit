@@ -192,7 +192,8 @@
 - ✅ R-53: registro de segredos (`core/secrets.py`) mascarado pelo `runner` e pelo `EventLog`
 - ✅ V2-02 Wi-Fi: coleta (`netsh wlan export key=clear`, só arquivos), opção sem senha, etapa antes do login logo após os drivers (R17), cópia temporária apagada, teste de proteção da senha; Studio (grupo Rede) e CLI (`coletar wifi`, `wifi listar|marcar|desmarcar --sem-senha`)
 - ✅ V2-08 Recursos do Windows: catálogo `features.yaml` (WSL, Sandbox, Hyper-V, .NET 3.5, OpenSSH, Telnet, TFTP, IIS) com filtro de edição; sem internet antes do login, com internet depois (R19); .NET 3.5 sem internet pela mídia de instalação (`sources\sxs` ou ISO montada só para leitura, D-043); operações `capability_add`/`capability_remove` para os ajustes; Studio (grupo Sistema) e CLI (`recursos listar|marcar|desmarcar`, `coletar recursos`)
-- ⬜ V2-09 Diagnóstico de drivers · V2-16 DNS e hosts · V2-17 Unidades de rede · V2-18 Manutenção · V2-22 Variáveis de ambiente
+- ✅ V2-09 Diagnóstico de drivers: lista os dispositivos com problema (CIM, código traduzido por tabela), procura no Windows Update só os drivers deles (`DriverHardwareID`), seção "Dispositivos sem driver" no resumo com os ids de hardware; chave no Studio (Drivers), ligada por padrão; a prévia do modo ao vivo só consulta
+- ⬜ V2-16 DNS e hosts · V2-17 Unidades de rede · V2-18 Manutenção · V2-22 Variáveis de ambiente
 
 ## Hipóteses técnicas
 

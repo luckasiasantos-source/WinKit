@@ -6,6 +6,7 @@ from winkit.agent.steps.app import AppStep, ShortcutStep
 from winkit.agent.steps.backup import BackupStep
 from winkit.agent.steps.base import StepBase, StepContext, StepHandler, StepResult
 from winkit.agent.steps.driver import DriverStep
+from winkit.agent.steps.driver_report import DriverReportStep
 from winkit.agent.steps.feature import FeatureStep
 from winkit.agent.steps.finalize import FinalizeStep
 from winkit.agent.steps.restore import RestorePointStep
@@ -44,5 +45,6 @@ def default_handlers() -> dict[StepKind, StepHandler]:
     handlers["restore_point"] = RestorePointStep()
     handlers["wifi"] = WifiStep()
     handlers["feature"] = FeatureStep()
+    handlers["driver_report"] = DriverReportStep()
     handlers["finalize"] = FinalizeStep()
     return handlers

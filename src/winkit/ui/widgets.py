@@ -373,6 +373,7 @@ KIND_STYLE: dict[str, tuple[str, str]] = {
     "restore_point": ("check", "#FF9500"),
     "wifi": ("dot", "#32ADE6"),
     "feature": ("chip", "#5AC8FA"),
+    "driver_report": ("check", "#636366"),
     "finalize": ("check", "#34C759"),
 }
 

@@ -45,6 +45,7 @@ _G2 = {
     "shortcut": 50,
     "rename_computer": 60,
     "windows_update": 70,
+    "driver_report": 75,  # R28: depois do Windows Update, que já resolve muitos drivers
     "restore_point": 80,
     "finalize": 99,
 }
@@ -461,6 +462,17 @@ def _plan_tail(recipe: Recipe, ask: Ask, out: list[_Draft]) -> None:
                 needs_network=True,
                 user_choice=ask(True),
                 sort=(_G2["windows_update"], 0, "all"),
+            )
+        )
+    if recipe.updates.fix_missing_drivers:  # R28
+        out.append(
+            _Draft(
+                "driver_report",
+                "devices",
+                2,
+                t("plan.driver_report"),
+                "machine",
+                sort=(_G2["driver_report"], 0, "devices"),
             )
         )
     out.append(

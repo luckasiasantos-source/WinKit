@@ -28,6 +28,24 @@
 
 ---
 
+## 2026-10-31 — M14 — Diagnóstico de drivers (V2-09)
+**Tipo:** implementação
+**Resumo:** no fim da instalação, o Agente lista os dispositivos que ficaram sem driver, procura no Windows Update só os drivers deles e mostra o que sobrou no resumo, com os ids de hardware para procurar no site do fabricante.
+
+### Adicionado
+- `src/winkit/core/devices.py` (tabela de códigos `ConfigManagerErrorCode`), `src/winkit/platform/devices.py`, `src/winkit/agent/steps/driver_report.py`
+- `WindowsUpdater.install_drivers_for` (só drivers cujo `DriverHardwareID` casa)
+- Receita: `updates.fix_missing_drivers` (ligado); estado: `devices`, `drivers_found` (aditivos); plano: tipo `driver_report` depois do Windows Update (R28)
+- Resumo: seções "Drivers instalados pelo Windows Update" e "Dispositivos sem driver"
+- Studio: chave na página Drivers; textos dos 21 códigos nos três idiomas
+- Testes: `tests/agent/test_driver_report.py`
+
+### Alterado
+- `tests/core/test_planner.py`, `tests/agent/test_live.py` — contam com a etapa nova
+
+### Documentos vivos atualizados
+- ARQUITETURA — módulos; STATUS — V2-09
+
 ## 2026-10-31 — M14 — Recursos do Windows (V2-08)
 **Tipo:** implementação
 **Resumo:** a receita liga recursos do Windows já na instalação (WSL, Área Restrita, Hyper-V, .NET 3.5, OpenSSH, Telnet, TFTP, IIS). Os que não precisam de internet entram antes do login; o .NET 3.5 instala sem internet pela mídia de instalação, montando a ISO original só para leitura (D-043).

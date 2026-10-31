@@ -97,6 +97,8 @@ class Updates(_Model):
     windows_update_after_install: bool = True
     include_drivers_from_windows_update: bool = False
     block_wu_driver_replacement: bool = True
+    #: V2-09: no fim, procurar no Windows Update os drivers dos dispositivos que ficaram sem.
+    fix_missing_drivers: bool = True
 
 
 class DriverItem(_Model):
