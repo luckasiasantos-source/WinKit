@@ -903,4 +903,48 @@ MESSAGES: dict[str, Entry] = {
     "cli.h.storage_sense": "activa o desactiva el Sensor de almacenamiento",
     "cli.h.defrag": "asegura la optimización semanal del disco",
     "cli.h.maintenance_remove": "quita de este PC las tareas de mantenimiento de WinKit",
+    "plan.env_var": "Variable de entorno {name}",
+    "plan.env_path_user": Plural(
+        one="PATH del usuario: +{n} carpeta", other="PATH del usuario: +{n} carpetas"
+    ),
+    "plan.env_path_machine": Plural(
+        one="PATH del sistema: +{n} carpeta", other="PATH del sistema: +{n} carpetas"
+    ),
+    "preview.env_var": "crear {name} = {value}",
+    "preview.env_path": "agregar al final del PATH: {entries}",
+    "preview.env_conflict": "{name} ya existe con otro valor y no se cambiará (ahora: {current}; en la receta: {new})",
+    "step.env.set": "{name} definida",
+    "step.env.exists": "{name} ya existe con otro valor; no se cambió nada",
+    "step.env.path_added": Plural(
+        one="{n} carpeta agregada al PATH", other="{n} carpetas agregadas al PATH"
+    ),
+    "recipe.env_protected": "la variable {name} es de Windows y no se puede llevar",
+    "recipe.env_duplicate": "variable repetida: {name}",
+    "studio.env.title": "Variables de entorno",
+    "studio.env.subtitle": "Lleva las variables (JAVA_HOME, GOPATH…) y las carpetas extra del PATH sin copiar a mano.",
+    "studio.env.read": "Leer de este PC",
+    "studio.env.reading": "Leyendo las variables de entorno…",
+    "studio.env.read_done": Plural(
+        one="Se encontró {n} elemento nuevo (desmarcado; marca lo que quieras llevar).",
+        other="Se encontraron {n} elementos nuevos (desmarcados; marca lo que quieras llevar).",
+    ),
+    "studio.env.scope_user": "Del usuario",
+    "studio.env.scope_machine": "Del sistema",
+    "studio.env.none": "Nada aquí todavía.",
+    "studio.env.replace": "reemplazar",
+    "studio.env.path_entry": "carpeta en el PATH",
+    "studio.env.rules_title": "Cómo escribe WinKit",
+    "studio.env.rules": 'Una variable que ya exista con otro valor no se cambia, a menos que actives "reemplazar". El PATH solo gana carpetas al final, sin repetir y sin perder ninguna.',
+    "studio.keywords.env": "variables de entorno path java_home gopath programación desarrollador",
+    "studio.live.kind.env": "Variables de entorno",
+    "cli.env_hint": "Los elementos nuevos vienen desmarcados: usa 'variaveis marcar NOMBRE'.",
+    "cli.env_bad_name": "Nombre de variable no válido: {name}",
+    "cli.h.env": "variables de entorno y PATH de la receta",
+    "cli.h.collect_env": "lee las variables de entorno de este PC (sin las de Windows)",
+    "cli.h.env_names": "nombres de las variables o carpetas del PATH",
+    "cli.h.env_name": "nombre de la variable (o PATH para agregar una carpeta)",
+    "cli.h.env_value": "valor (acepta %USERPROFILE% y similares)",
+    "cli.h.env_machine": "variable del sistema (todos los usuarios)",
+    "cli.h.env_replace": "reemplaza si ya existe con otro valor",
+    "cli.env_path_item": "PATH += {value}",
 }

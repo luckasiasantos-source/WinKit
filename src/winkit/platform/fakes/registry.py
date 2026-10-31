@@ -15,6 +15,8 @@ class FakeRegistry:
     data: dict[tuple[str, str], dict[str, tuple[str, Any]]] = field(default_factory=dict)
     mounted: dict[str, Path] = field(default_factory=dict)
     fail_on: set[str] = field(default_factory=set)  # trechos de chave que geram erro
+    #: Nome do valor como foi gravado (o Windows compara sem maiúsculas, mas devolve a grafia).
+    spelled: dict[tuple[str, str, str], str] = field(default_factory=dict)
 
     @staticmethod
     def _k(hive: str, key: str) -> tuple[str, str]:
@@ -34,7 +36,9 @@ class FakeRegistry:
 
     def set(self, hive: str, key: str, value: str, reg_type: RegType, data: Any) -> None:
         self._check(key)
-        self.data.setdefault(self._k(hive, key), {})[value.lower()] = (reg_type, data)
+        k = self._k(hive, key)
+        self.data.setdefault(k, {})[value.lower()] = (reg_type, data)
+        self.spelled.setdefault((*k, value.lower()), value)
 
     def delete_value(self, hive: str, key: str, value: str) -> bool:
         self._check(key)
@@ -71,7 +75,10 @@ class FakeRegistry:
         return sorted(names)
 
     def values(self, hive: str, key: str) -> dict[str, Any]:
-        return {name: v[1] for name, v in self.data.get(self._k(hive, key), {}).items()}
+        k = self._k(hive, key)
+        return {
+            self.spelled.get((*k, name), name): v[1] for name, v in self.data.get(k, {}).items()
+        }
 
     def load_hive(self, mount: str, file: Path) -> None:
         if mount in self.mounted:

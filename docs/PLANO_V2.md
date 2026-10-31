@@ -325,10 +325,14 @@ class EnvVar(_Model):               # M14 — V2-22
     scope: Literal["user", "machine"] = "user"
     kind: Literal["sz", "expand_sz"] = "expand_sz"
 
+class EnvPathEntry(_Model):         # M14 — V2-22 (implementado assim: cada pasta com escopo e marca)
+    value: str
+    scope: Literal["user", "machine"] = "user"
+    selected: bool = True
+
 class Environment(_Model):          # M14 — V2-22
-    variables: list[EnvVar] = []
-    path_append_user: list[str] = []
-    path_append_machine: list[str] = []
+    variables: list[EnvVar] = []       # EnvVar também ganhou `selected`
+    path_entries: list[EnvPathEntry] = []
 
 class DefaultApps(_Model):          # M15 — V2-05
     enabled: bool = False

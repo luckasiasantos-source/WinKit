@@ -1,0 +1,53 @@
+# Variáveis de ambiente que o WinKit nunca leva nem grava (V2-22, M14): são do próprio
+# Windows, do hardware ou da conta, e levá-las quebraria o sistema novo.
+names:
+  - ALLUSERSPROFILE
+  - APPDATA
+  - CommonProgramFiles
+  - CommonProgramFiles(x86)
+  - CommonProgramW6432
+  - COMPUTERNAME
+  - ComSpec
+  - DriverData
+  - HOMEDRIVE
+  - HOMEPATH
+  - LOCALAPPDATA
+  - LOGONSERVER
+  - NUMBER_OF_PROCESSORS
+  - OneDrive
+  - OneDriveCommercial
+  - OneDriveConsumer
+  - OS
+  - Path
+  - PATHEXT
+  - POWERSHELL_DISTRIBUTION_CHANNEL
+  - PROCESSOR_ARCHITECTURE
+  - PROCESSOR_IDENTIFIER
+  - PROCESSOR_LEVEL
+  - PROCESSOR_REVISION
+  - ProgramData
+  - ProgramFiles
+  - ProgramFiles(x86)
+  - ProgramW6432
+  - PSModulePath
+  - PUBLIC
+  - SESSIONNAME
+  - SystemDrive
+  - SystemRoot
+  - TEMP
+  - TMP
+  - USERDOMAIN
+  - USERDOMAIN_ROAMINGPROFILE
+  - USERNAME
+  - USERPROFILE
+  - windir
+  - ZES_ENABLE_SYSMAN
+# Pastas do PATH que o Windows já cria sozinho (comparadas sem maiúsculas e sem a barra final).
+default_path_entries:
+  - '%SystemRoot%\system32'
+  - '%SystemRoot%'
+  - '%SystemRoot%\System32\Wbem'
+  - '%SystemRoot%\System32\WindowsPowerShell\v1.0'
+  - '%SystemRoot%\System32\OpenSSH'
+  - '%USERPROFILE%\AppData\Local\Microsoft\WindowsApps'
+  - '%LOCALAPPDATA%\Microsoft\WindowsApps'

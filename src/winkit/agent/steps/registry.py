@@ -7,6 +7,7 @@ from winkit.agent.steps.backup import BackupStep
 from winkit.agent.steps.base import StepBase, StepContext, StepHandler, StepResult
 from winkit.agent.steps.driver import DriverStep
 from winkit.agent.steps.driver_report import DriverReportStep
+from winkit.agent.steps.env import EnvStep
 from winkit.agent.steps.feature import FeatureStep
 from winkit.agent.steps.finalize import FinalizeStep
 from winkit.agent.steps.maintenance import MaintenanceStep
@@ -51,6 +52,7 @@ def default_handlers() -> dict[StepKind, StepHandler]:
     handlers["hosts"] = HostsStep()
     handlers["network_drive"] = NetworkDriveStep()
     handlers["maintenance"] = MaintenanceStep()
+    handlers["env"] = EnvStep()
     handlers["feature"] = FeatureStep()
     handlers["driver_report"] = DriverReportStep()
     handlers["finalize"] = FinalizeStep()

@@ -39,6 +39,7 @@ _G1 = {
     "tweak": 40,
     "network_drive": 45,
     "maintenance": 47,
+    "env": 48,
     "backup": 50,
     "app": 60,
 }
@@ -105,6 +106,7 @@ def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> 
     _plan_network_privacy(recipe, catalogs, drafts)
     _plan_network_drives(recipe, drafts)
     _plan_maintenance(recipe, drafts)
+    _plan_env(recipe, drafts)
     _plan_power(recipe, drafts)
     _plan_bloat(recipe, catalogs, ctx, drafts, excluded)
     _plan_features(recipe, catalogs, ctx, drafts, excluded)
@@ -213,6 +215,25 @@ def _plan_maintenance(recipe: Recipe, out: list[_Draft]) -> None:  # R27
                 sort=(_G2["maintenance"], 0, "winget"),
             )
         )
+
+
+def _plan_env(recipe: Recipe, out: list[_Draft]) -> None:  # R26
+    env = recipe.environment
+
+    def target(scope: str) -> Target:
+        return "machine" if scope == "machine" else "default_profile"
+
+    for v in env.variables:
+        if v.selected:
+            ref = f"var.{v.scope}.{v.name}"
+            title = t("plan.env_var", name=v.name)
+            out.append(_Draft("env", ref, 1, title, target(v.scope), sort=(_G1["env"], 0, ref)))
+    for scope in ("machine", "user"):
+        n = sum(1 for p in env.path_entries if p.selected and p.scope == scope)
+        if n:
+            ref = f"path.{scope}"
+            title = tn(f"plan.env_path_{scope}", n)
+            out.append(_Draft("env", ref, 1, title, target(scope), sort=(_G1["env"], 1, ref)))
 
 
 def _plan_power(recipe: Recipe, out: list[_Draft]) -> None:  # R5

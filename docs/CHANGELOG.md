@@ -28,6 +28,27 @@
 
 ---
 
+## 2026-10-31 — M14 — Variáveis de ambiente e PATH (V2-22) e fechamento do M14 (0.5.0)
+**Tipo:** implementação
+**Resumo:** quem programa leva as variáveis de ambiente e as pastas extras do PATH. Uma variável que já existe com outro valor nunca é trocada sem pedir, e o PATH só ganha entradas. Fecha o M14 com o roteiro de validação e a versão 0.5.0.
+
+### Adicionado
+- `src/winkit/data/protected_env.yaml`, `src/winkit/core/env.py`, `src/winkit/collector/env.py`, `src/winkit/agent/steps/env.py`
+- `Environment.broadcast_env_change` (`WM_SETTINGCHANGE`)
+- Receita: `environment` (`variables`, `path_entries`; aditivo); validação de nomes protegidos e repetidos; plano: tipo `env` (R26)
+- Studio: seção "Variáveis de ambiente" (grupo Sistema); CLI: `coletar variaveis`, `variaveis listar|marcar|desmarcar|definir`
+- `docs/validacao/M14.md`
+- Testes: `tests/agent/test_env.py`
+
+### Alterado
+- `src/winkit/platform/fakes/registry.py` — o dublê devolve o nome do valor com a grafia gravada, como o Windows
+- `src/winkit/__init__.py` — versão 0.5.0
+- `packaging/NOTAS_DA_VERSAO.md` — novidades do M14 nos três idiomas
+- `docs/PLANO_V2.md` — modelo do PATH com escopo e marca por pasta
+
+### Documentos vivos atualizados
+- STATUS — M14 ✅ código; PLANO_V2 — §5.1
+
 ## 2026-10-31 — M14 — Tarefas de manutenção (V2-18)
 **Tipo:** implementação
 **Resumo:** o Windows novo se mantém sozinho: uma tarefa do usuário atualiza os apps pelo winget, a otimização semanal do disco é garantida e o Sensor de Armazenamento pode ser ligado.

@@ -900,4 +900,48 @@ MESSAGES: dict[str, Entry] = {
     "cli.h.storage_sense": "liga ou desliga o Sensor de Armazenamento",
     "cli.h.defrag": "garante a otimização semanal do disco",
     "cli.h.maintenance_remove": "remove deste PC as tarefas de manutenção do WinKit",
+    "plan.env_var": "Variável de ambiente {name}",
+    "plan.env_path_user": Plural(
+        one="PATH do usuário: +{n} pasta", other="PATH do usuário: +{n} pastas"
+    ),
+    "plan.env_path_machine": Plural(
+        one="PATH do sistema: +{n} pasta", other="PATH do sistema: +{n} pastas"
+    ),
+    "preview.env_var": "criar {name} = {value}",
+    "preview.env_path": "acrescentar ao fim do PATH: {entries}",
+    "preview.env_conflict": "{name} já existe com outro valor e não será trocado (agora: {current}; na receita: {new})",
+    "step.env.set": "{name} definida",
+    "step.env.exists": "{name} já existe com outro valor; nada foi trocado",
+    "step.env.path_added": Plural(
+        one="{n} pasta acrescentada ao PATH", other="{n} pastas acrescentadas ao PATH"
+    ),
+    "recipe.env_protected": "a variável {name} é do Windows e não pode ser levada",
+    "recipe.env_duplicate": "variável repetida: {name}",
+    "studio.env.title": "Variáveis de ambiente",
+    "studio.env.subtitle": "Leve as variáveis (JAVA_HOME, GOPATH…) e as pastas extras do PATH, sem copiar à mão.",
+    "studio.env.read": "Ler deste PC",
+    "studio.env.reading": "Lendo as variáveis de ambiente…",
+    "studio.env.read_done": Plural(
+        one="{n} item novo encontrado (desmarcado; marque o que quiser levar).",
+        other="{n} itens novos encontrados (desmarcados; marque o que quiser levar).",
+    ),
+    "studio.env.scope_user": "Do usuário",
+    "studio.env.scope_machine": "Do sistema",
+    "studio.env.none": "Nada aqui ainda.",
+    "studio.env.replace": "substituir",
+    "studio.env.path_entry": "pasta no PATH",
+    "studio.env.rules_title": "Como o WinKit grava",
+    "studio.env.rules": 'Uma variável que já exista com outro valor não é trocada, a menos que você ligue "substituir". O PATH só ganha pastas no fim, sem repetir e sem nunca perder nenhuma.',
+    "studio.keywords.env": "variáveis de ambiente path java_home gopath programação desenvolvedor",
+    "studio.live.kind.env": "Variáveis de ambiente",
+    "cli.env_hint": "Os itens novos vêm desmarcados: use 'variaveis marcar NOME'.",
+    "cli.env_bad_name": "Nome de variável inválido: {name}",
+    "cli.h.env": "variáveis de ambiente e PATH da receita",
+    "cli.h.collect_env": "lê as variáveis de ambiente deste PC (sem as do Windows)",
+    "cli.h.env_names": "nomes das variáveis ou pastas do PATH",
+    "cli.h.env_name": "nome da variável (ou PATH para acrescentar uma pasta)",
+    "cli.h.env_value": "valor (aceita %USERPROFILE% e afins)",
+    "cli.h.env_machine": "variável do sistema (todos os usuários)",
+    "cli.h.env_replace": "substitui se já existir com outro valor",
+    "cli.env_path_item": "PATH += {value}",
 }

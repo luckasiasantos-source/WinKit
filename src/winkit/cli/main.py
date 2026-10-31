@@ -37,6 +37,7 @@ from winkit.builder.validate import validate_pendrive
 from winkit.collector import apps as app_collector
 from winkit.collector import backups as backup_collector
 from winkit.collector import drivers as driver_collector
+from winkit.collector import env as env_collector
 from winkit.collector import features as feature_collector
 from winkit.collector import netdrives as netdrive_collector
 from winkit.collector import wifi as wifi_collector
@@ -48,7 +49,7 @@ from winkit.core.maintenance import DAYS, TASK_FOLDER
 from winkit.core.planner.models import PlanContext
 from winkit.core.planner.planner import plan
 from winkit.core.recipe.io import new_recipe
-from winkit.core.recipe.models import Recipe
+from winkit.core.recipe.models import EnvScope, EnvVar, Recipe
 from winkit.core.recipe.validation import validate_recipe
 from winkit.core.text import human_size
 from winkit.core.winget_manifest import split_args
@@ -832,6 +833,96 @@ def _add_maintenance_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     ).set_defaults(func=cmd_manutencao_remover)
 
 
+# ------------------------------------------------------------------ variáveis de ambiente (V2-22)
+def cmd_coletar_variaveis(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    if services.registry is None:
+        out(t("cli.registry_unavailable"))
+        return 1
+    f = services.folders
+    new_vars, new_paths = env_collector.collect_env(
+        services.registry,
+        recipe,
+        default_catalogs().protected_env,
+        {**f.machine(), **f.current_user()},
+        f.windows_dir(),
+    )
+    _save(tgt, recipe)
+    out(tn("studio.env.read_done", len(new_vars) + len(new_paths)))
+    out(t("cli.env_hint"))
+    return cmd_variaveis_listar(args, services, out)
+
+
+def cmd_variaveis_listar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    env = load_profile_recipe(tgt.root, args.perfil).environment
+    for v in env.variables:
+        flag = f" ({t('studio.env.replace')})" if v.on_conflict == "replace" else ""
+        scope = t(f"studio.env.scope_{v.scope}")
+        out(f"  [{'x' if v.selected else ' '}] {v.name} = {v.value}  [{scope}]{flag}")
+    for p in env.path_entries:
+        scope = t(f"studio.env.scope_{p.scope}")
+        line = t("cli.env_path_item", value=p.value)
+        out(f"  [{'x' if p.selected else ' '}] {line}  [{scope}]")
+    return 0
+
+
+def cmd_variaveis_marcar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    missing = env_collector.select(recipe, args.nomes, selected=args.command_value)
+    _save(tgt, recipe)
+    if missing:
+        out(t("cli.not_found", ids=", ".join(missing)))
+        return 1
+    return cmd_variaveis_listar(args, services, out)
+
+
+def cmd_variaveis_definir(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    scope: EnvScope = "machine" if args.sistema else "user"
+    catalogs = default_catalogs()
+    if args.nome.casefold() == "path":
+        env_collector.add_path(recipe, args.valor, scope)
+    elif catalogs.protected_env.is_protected(args.nome):
+        out(t("recipe.env_protected", name=args.nome))
+        return 1
+    else:
+        try:
+            var = EnvVar(
+                name=args.nome,
+                value=args.valor,
+                scope=scope,
+                on_conflict="replace" if args.substituir else "skip",
+            )
+        except ValueError:
+            out(t("cli.env_bad_name", name=args.nome))
+            return 1
+        env_collector.set_variable(recipe, var)
+    _save(tgt, recipe)
+    return cmd_variaveis_listar(args, services, out)
+
+
+def _add_env_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    va = sub.add_parser("variaveis", aliases=["env"], help=t("cli.h.env"))
+    va_sub = va.add_subparsers(dest="action", required=True)
+    va_sub.add_parser("listar", aliases=["list"], parents=[common]).set_defaults(
+        func=cmd_variaveis_listar
+    )
+    for name, alias, value in (("marcar", "select", True), ("desmarcar", "deselect", False)):
+        vm = va_sub.add_parser(name, aliases=[alias], parents=[common])
+        vm.add_argument("nomes", nargs="+", help=t("cli.h.env_names"))
+        vm.set_defaults(func=cmd_variaveis_marcar, command_value=value)
+    vd = va_sub.add_parser("definir", aliases=["set"], parents=[common])
+    vd.add_argument("nome", help=t("cli.h.env_name"))
+    vd.add_argument("valor", help=t("cli.h.env_value"))
+    vd.add_argument("--sistema", action="store_true", help=t("cli.h.env_machine"))
+    vd.add_argument("--substituir", action="store_true", help=t("cli.h.env_replace"))
+    vd.set_defaults(func=cmd_variaveis_definir)
+
+
 def _add_dns_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     dns = sub.add_parser("dns", help=t("cli.h.dns"))
     dns_sub = dns.add_subparsers(dest="action", required=True)
@@ -951,6 +1042,10 @@ def _add_collect_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
         "unidades", aliases=["drives"], parents=[common], help=t("cli.h.collect_drives")
     )
     cun.set_defaults(func=cmd_coletar_unidades)
+    cva = col_sub.add_parser(
+        "variaveis", aliases=["env"], parents=[common], help=t("cli.h.collect_env")
+    )
+    cva.set_defaults(func=cmd_coletar_variaveis)
 
     capp = col_sub.add_parser("apps", parents=[common], help=t("cli.h.collect_apps"))
     capp.add_argument(
@@ -1063,6 +1158,7 @@ def _add_system_and_network_parsers(sub: Any, common: argparse.ArgumentParser) -
     _add_dns_parsers(sub, common)
     _add_drive_parsers(sub, common)
     _add_maintenance_parsers(sub, common)
+    _add_env_parsers(sub, common)
 
 
 def build_parser() -> argparse.ArgumentParser:

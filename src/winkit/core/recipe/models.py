@@ -242,6 +242,34 @@ class Maintenance(_Model):
     ensure_defrag_schedule: bool = True
 
 
+EnvScope = Literal["user", "machine"]
+
+
+class EnvVar(_Model):
+    """V2-22: variável de ambiente; o valor usa ``%USERPROFILE%`` etc. quando aponta para perfis."""
+
+    name: Annotated[str, Field(pattern=r"^[A-Za-z_][A-Za-z0-9_.()-]{0,99}$")]
+    value: str
+    scope: EnvScope = "user"
+    kind: Literal["sz", "expand_sz"] = "expand_sz"
+    #: R-21: por padrão nunca sobrescreve um valor diferente que já exista.
+    on_conflict: Literal["skip", "replace"] = "skip"
+    selected: bool = True
+
+
+class EnvPathEntry(_Model):
+    """Pasta a acrescentar no fim do PATH (nunca remove nada)."""
+
+    value: Annotated[str, Field(min_length=2)]
+    scope: EnvScope = "user"
+    selected: bool = True
+
+
+class Environment(_Model):
+    variables: list[EnvVar] = Field(default_factory=list)
+    path_entries: list[EnvPathEntry] = Field(default_factory=list)
+
+
 class RestorePoint(_Model):
     """V2-10: ponto de restauração "Windows pronto" no fim da instalação (M12)."""
 
@@ -272,6 +300,7 @@ class Recipe(_Model):
     dns: Dns = Field(default_factory=Dns)
     network_drives: list[NetworkDrive] = Field(default_factory=list)
     maintenance: Maintenance = Field(default_factory=Maintenance)
+    environment: Environment = Field(default_factory=Environment)
 
     # ---- consultas de conveniência (sem efeito colateral)
     def app(self, app_id: str) -> AppItem | None:

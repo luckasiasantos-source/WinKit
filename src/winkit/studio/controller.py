@@ -31,6 +31,7 @@ from winkit.builder.validate import PendriveReport, validate_pendrive
 from winkit.collector import apps as app_collector
 from winkit.collector import backups as backup_collector
 from winkit.collector import drivers as driver_collector
+from winkit.collector import env as env_collector
 from winkit.collector import features as feature_collector
 from winkit.collector import netdrives as netdrive_collector
 from winkit.collector import wifi as wifi_collector
@@ -47,6 +48,8 @@ from winkit.core.recipe.models import (
     AppItem,
     BackupItem,
     ConflictPolicy,
+    EnvPathEntry,
+    EnvVar,
     NetworkDrive,
     Recipe,
     Scope,
@@ -335,6 +338,23 @@ class StudioController:
         drive = netdrive_collector.add_drive(self.require_recipe(), letter, path)
         self.save()
         return drive
+
+    def collect_env(self) -> tuple[list[EnvVar], list[EnvPathEntry]]:
+        """Variáveis e pastas do PATH deste PC que não são padrão do Windows (V2-22)."""
+        recipe = self.require_recipe()
+        if self.services.registry is None:
+            return [], []
+        f = self.services.folders
+        found = env_collector.collect_env(
+            self.services.registry,
+            recipe,
+            self.catalogs.protected_env,
+            {**f.machine(), **f.current_user()},
+            f.windows_dir(),
+        )
+        if found[0] or found[1]:
+            self.save()
+        return found
 
     def remove_hosts_block(self) -> bool:
         """Desfazer (V2-16): tira o bloco do WinKit do ``hosts`` deste PC."""

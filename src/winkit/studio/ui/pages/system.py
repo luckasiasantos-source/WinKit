@@ -4,20 +4,22 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from functools import partial
+from typing import Any
 
-from PySide6.QtWidgets import QMessageBox, QSpinBox
+from PySide6.QtWidgets import QHBoxLayout, QLineEdit, QMessageBox, QSpinBox, QWidget
 
 from winkit.core.maintenance import DAYS
 from winkit.core.recipe.models import Recipe, TweakSelection
 from winkit.i18n import t, tn
 from winkit.studio.ui.base import Page
-from winkit.studio.ui.pages.common import choice_row, combo, toggle
+from winkit.studio.ui.pages.common import choice_row, combo, empty, toggle
 from winkit.ui.widgets import (
     Card,
     Row,
     SegmentedControl,
     button,
     kind_icon,
+    label,
     section,
     symbol_icon,
 )
@@ -395,3 +397,78 @@ class MaintenancePage(Page):
             self.save()
             if refresh:
                 self.refresh()
+
+
+class EnvPage(Page):
+    """V2-22: variáveis de ambiente e pastas do PATH (nunca sobrescreve sem você pedir)."""
+
+    title_key = "studio.env.title"
+    subtitle_key = "studio.env.subtitle"
+
+    def refresh(self) -> None:
+        self.clear_content()
+        if self.needs_recipe():
+            return
+        r = self.ctl.recipe
+        assert r is not None  # noqa: S101
+        self.content.addLayout(self.toolbar(button(t("studio.env.read"), "Primary", self._read)))
+        env = r.environment
+        for scope in ("user", "machine"):
+            card = Card()
+            for v in env.variables:
+                if v.scope != scope:
+                    continue
+                edit = QLineEdit(v.value)
+                edit.setMinimumWidth(260)
+                edit.editingFinished.connect(partial(self._set_value, v, edit))
+                acc = QWidget()
+                lay = QHBoxLayout(acc)
+                lay.setContentsMargins(0, 0, 0, 0)
+                lay.setSpacing(8)
+                lay.addWidget(edit)
+                lay.addWidget(label(t("studio.env.replace"), "Caption", wrap=False))
+                lay.addWidget(toggle(v.on_conflict == "replace", partial(self._set_replace, v)))
+                lay.addWidget(toggle(v.selected, partial(self._set_selected, v)))
+                card.add_row(Row(v.name, None, accessory=acc, icon=kind_icon("env")))
+            for p in env.path_entries:
+                if p.scope != scope:
+                    continue
+                card.add_row(
+                    choice_row(
+                        p.value,
+                        t("studio.env.path_entry"),
+                        icon_kind="env",
+                        selected=p.selected,
+                        on_select=partial(self._set_selected, p),
+                    )
+                )
+            self.content.addWidget(
+                section(
+                    t(f"studio.env.scope_{scope}"),
+                    card if card.rows else empty(t("studio.env.none")),
+                )
+            )
+        foot = Card()
+        foot.add_row(Row(t("studio.env.rules_title"), t("studio.env.rules")))
+        self.content.addWidget(section("", foot))
+
+    def _set_value(self, v: Any, edit: QLineEdit) -> None:
+        if edit.text() != v.value:
+            v.value = edit.text()
+            self.save()
+
+    def _set_replace(self, v: Any, value: bool) -> None:
+        v.on_conflict = "replace" if value else "skip"
+        self.save()
+
+    def _set_selected(self, v: Any, value: bool) -> None:
+        v.selected = value
+        self.save()
+
+    def _read(self) -> None:
+        def done(found: tuple[list[Any], list[Any]]) -> None:
+            self.refresh()
+            n = len(found[0]) + len(found[1])
+            QMessageBox.information(self, t("app.name"), tn("studio.env.read_done", n))
+
+        self.tasks.run(t("studio.env.reading"), self.ctl.collect_env, done)

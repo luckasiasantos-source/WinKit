@@ -28,6 +28,10 @@ class Environment(Protocol):
 
     def computer_name(self) -> str: ...
 
+    def broadcast_env_change(self) -> None:
+        """Avisa os programas abertos que as variáveis mudaram (``WM_SETTINGCHANGE``)."""
+        ...
+
 
 class WindowsEnvironment:
     def drive_roots(self) -> list[Path]:
@@ -55,6 +59,21 @@ class WindowsEnvironment:
 
     def computer_name(self) -> str:
         return os.environ.get("COMPUTERNAME") or socket.gethostname()
+
+    def broadcast_env_change(self) -> None:
+        if sys.platform != "win32":
+            return
+        hwnd_broadcast, wm_settingchange, smto_abortifhung = 0xFFFF, 0x001A, 0x0002
+        result = ctypes.c_ulong()
+        ctypes.windll.user32.SendMessageTimeoutW(  # type: ignore[attr-defined,unused-ignore]
+            hwnd_broadcast,
+            wm_settingchange,
+            0,
+            "Environment",
+            smto_abortifhung,
+            5000,
+            ctypes.byref(result),
+        )
 
 
 @contextlib.contextmanager

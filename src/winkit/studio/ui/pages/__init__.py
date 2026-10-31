@@ -7,6 +7,7 @@ from winkit.studio.ui.pages.prepare import AccountPage, PendrivePage
 from winkit.studio.ui.pages.system import (
     BloatPage,
     EnergyPage,
+    EnvPage,
     FeaturesPage,
     MaintenancePage,
     TweaksPage,
@@ -21,6 +22,7 @@ __all__ = [
     "DnsPage",
     "DriversPage",
     "EnergyPage",
+    "EnvPage",
     "ExecutionPage",
     "FeaturesPage",
     "LivePage",

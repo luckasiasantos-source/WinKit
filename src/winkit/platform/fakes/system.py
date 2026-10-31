@@ -92,6 +92,11 @@ class FakeEnvironment:
     def computer_name(self) -> str:
         return self.name
 
+    broadcasts: int = 0
+
+    def broadcast_env_change(self) -> None:
+        self.broadcasts += 1
+
 
 @dataclass
 class FakeKnownFolders:

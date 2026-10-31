@@ -27,6 +27,7 @@ FILES: dict[str, str] = {
     "features": "features.yaml",
     "dns_providers": "dns_providers.yaml",
     "hosts_blocklists": "hosts_blocklists.yaml",
+    "protected_env": "protected_env.yaml",
 }
 
 

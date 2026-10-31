@@ -187,6 +187,14 @@ def _validate_ids_and_paths(recipe: Recipe, err: Sink) -> None:
 def _validate_catalog_refs(recipe: Recipe, catalogs: Catalogs, err: Sink) -> None:
     for problem in dns_problems(recipe.dns, catalogs):
         err(render(problem))
+    seen_vars: set[tuple[str, str]] = set()
+    for var in recipe.environment.variables:
+        key = (var.scope, var.name.casefold())
+        if catalogs.protected_env.is_protected(var.name):
+            err(t("recipe.env_protected", name=var.name))
+        elif key in seen_vars:
+            err(t("recipe.env_duplicate", name=var.name))
+        seen_vars.add(key)
     for feature_id in recipe.windows.optional_features:
         if catalogs.feature(feature_id) is None:
             err(t("recipe.unknown_feature", id=feature_id))

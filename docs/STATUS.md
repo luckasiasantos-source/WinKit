@@ -28,7 +28,7 @@
 | M11 | Inglês e espanhol (V2-00) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M11.md`) |
 | M12 | Aplicar neste PC + ponto de restauração (V2-03, V2-10) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M12.md`) |
 | M13 | Pendrive comum: Rufus/Microsoft (V2-01) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M13.md`) |
-| M14 | Rede e sistema (V2-02, 08, 09, 16, 17, 18, 22) | 🟨 em andamento | — |
+| M14 | Rede e sistema (V2-02, 08, 09, 16, 17, 18, 22) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M14.md`) |
 | M15 | Personalização (V2-04, 05, 06, 07, 12, 15) | ⬜ planejado | — |
 | M16 | Contas, pastas e jogos (V2-11, 13, 14) | ⬜ planejado | — |
 | M17 | Inteligência do pendrive (V2-19, 20, 21, 23) | ⬜ planejado | — |
@@ -188,7 +188,7 @@
 - ✅ Validação do modo comum; Studio e CLI mostram o tipo de cada pendrive
 - ✅ `docs/RUFUS.md` com as configurações recomendadas
 
-### M14 — Rede e sistema 🟨
+### M14 — Rede e sistema ✅ (código) · validação na VM pendente
 - ✅ R-53: registro de segredos (`core/secrets.py`) mascarado pelo `runner` e pelo `EventLog`
 - ✅ V2-02 Wi-Fi: coleta (`netsh wlan export key=clear`, só arquivos), opção sem senha, etapa antes do login logo após os drivers (R17), cópia temporária apagada, teste de proteção da senha; Studio (grupo Rede) e CLI (`coletar wifi`, `wifi listar|marcar|desmarcar --sem-senha`)
 - ✅ V2-08 Recursos do Windows: catálogo `features.yaml` (WSL, Sandbox, Hyper-V, .NET 3.5, OpenSSH, Telnet, TFTP, IIS) com filtro de edição; sem internet antes do login, com internet depois (R19); .NET 3.5 sem internet pela mídia de instalação (`sources\sxs` ou ISO montada só para leitura, D-043); operações `capability_add`/`capability_remove` para os ajustes; Studio (grupo Sistema) e CLI (`recursos listar|marcar|desmarcar`, `coletar recursos`)
@@ -196,7 +196,8 @@
 - ✅ V2-16 DNS e bloqueios: Cloudflare, Cloudflare para Famílias, Quad9, Google, AdGuard, NextDNS (id pessoal) ou personalizado; DoH com política `DoHPolicy` no Windows 11 (só servidores no 10); bloqueio de anúncios e rastreadores por listas curadas no `hosts`, num bloco marcado, sem domínios da Microsoft; desfazer pelo Studio e pela CLI (`dns bloqueios remover-do-pc`)
 - ✅ V2-17 Unidades de rede: coleta do `HKCU\Network` (sem o usuário do servidor), gravação no perfil Default na Fase 1 com o `ProviderName` lido do Windows novo; ao vivo mapeia na hora ou grava para reconectar; letra ocupada nunca é substituída; Studio (grupo Rede) e CLI (`coletar unidades`, `unidades listar|adicionar|remover`)
 - ✅ V2-18 Manutenção: tarefa do usuário que roda `winget upgrade --all` toda semana ou a cada 4 semanas (dia e hora escolhidos, log em `ProgramData\WinKit\Manutencao`); otimização semanal nativa do disco garantida (ligada por padrão); Sensor de Armazenamento como ajuste `maintenance.storage_sense` com desfazer; Studio (grupo Sistema) e CLI (`manutencao mostrar|definir|remover-do-pc`)
-- ⬜ V2-22 Variáveis de ambiente
+- ✅ V2-22 Variáveis de ambiente e PATH: coleta só do que não é padrão (`protected_env.yaml`), valores com pastas do perfil viram moldes `%USERPROFILE%\…`, itens lidos chegam desmarcados; máquina no `HKLM` e usuário no perfil Default na Fase 1, `HKCU` + aviso aos programas ao vivo; nunca sobrescreve sem "substituir" (R-21); o PATH só ganha entradas no fim, sem duplicar; Studio (grupo Sistema) e CLI (`coletar variaveis`, `variaveis listar|marcar|desmarcar|definir`)
+- ✅ Versão 0.5.0 e roteiro `docs/validacao/M14.md`
 
 ## Hipóteses técnicas
 

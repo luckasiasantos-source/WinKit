@@ -296,6 +296,16 @@ class HostsBlocklist(_Model):
         return self
 
 
+# ------------------------------------------------------------------ variáveis de ambiente (V2-22)
+class ProtectedEnv(_Model):
+    names: list[str] = Field(default_factory=list)
+    default_path_entries: list[str] = Field(default_factory=list)
+
+    def is_protected(self, name: str) -> bool:
+        key = name.casefold()
+        return any(n.casefold() == key for n in self.names)
+
+
 # ------------------------------------------------------------------ outros
 class EditionEntry(_Model):
     id: str
@@ -339,6 +349,7 @@ class Catalogs(_Model):
     features: list[FeatureEntry] = Field(default_factory=list)
     dns_providers: list[DnsProvider] = Field(default_factory=list)
     hosts_blocklists: list[HostsBlocklist] = Field(default_factory=list)
+    protected_env: ProtectedEnv = Field(default_factory=ProtectedEnv)
 
     def dns_provider(self, provider_id: str) -> DnsProvider | None:
         return next((x for x in self.dns_providers if x.id == provider_id), None)

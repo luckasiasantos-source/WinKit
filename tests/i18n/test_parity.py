@@ -78,6 +78,7 @@ SAME_AS_BASE: dict[str, set[str]] = {
         "studio.dns.custom",
         "step.network_drive.mapped",
         "studio.drives.letter",
+        "step.env.set",
     },
 }
 ALWAYS_SAME = {
@@ -93,6 +94,7 @@ ALWAYS_SAME = {
     "studio.wifi.security.enterprise",
     "summary.backup_warning",
     "cli.dns_servers",
+    "cli.env_path_item",
 }
 
 
