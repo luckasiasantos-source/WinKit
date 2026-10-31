@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from winkit.platform.accounts import Accounts, WindowsAccounts
+from winkit.platform.drivers import DriverManager, WindowsDriverManager
 from winkit.platform.environment import Environment, WindowsEnvironment
 from winkit.platform.known_folders import KnownFolders, WindowsKnownFolders
 from winkit.platform.powershell import PowerShell
@@ -22,6 +23,7 @@ class AgentServices:
     accounts: Accounts
     env: Environment
     folders: KnownFolders
+    drivers: DriverManager
 
 
 def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windows
@@ -36,4 +38,5 @@ def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windo
         accounts=WindowsAccounts(ps),
         env=WindowsEnvironment(),
         folders=WindowsKnownFolders(registry),
+        drivers=WindowsDriverManager(runner, ps),
     )

@@ -56,6 +56,19 @@ class FakeRegistry:
         h, k = self._k(hive, key)
         return any(x[0] == h and (x[1] == k or x[1].startswith(k + "\\")) for x in self.data)
 
+    def subkeys(self, hive: str, key: str) -> list[str]:
+        h, k = self._k(hive, key)
+        prefix = k + "\\" if k else ""
+        names = {
+            x[1][len(prefix) :].split("\\")[0]
+            for x in self.data
+            if x[0] == h and x[1].startswith(prefix) and x[1] != k
+        }
+        return sorted(names)
+
+    def values(self, hive: str, key: str) -> dict[str, Any]:
+        return {name: v[1] for name, v in self.data.get(self._k(hive, key), {}).items()}
+
     def load_hive(self, mount: str, file: Path) -> None:
         if mount in self.mounted:
             raise RegistryError(f"{mount} já montado")

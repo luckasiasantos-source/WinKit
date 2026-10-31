@@ -7,16 +7,14 @@ import pytest
 
 from winkit.cli.main import main
 from winkit.core import layout
-from winkit.platform.fakes.disks import FakeDiskInspector, windows_iso
-from winkit.platform.fakes.runner import FakeRunner
+from winkit.platform.fakes.disks import FakeDiskInspector
+from winkit.platform.fakes.services import fake_services
 from winkit.platform.services import Services
 
 
 @pytest.fixture
 def services() -> Services:
-    return Services(
-        runner=FakeRunner(), disks=FakeDiskInspector(isos={"Windows11.iso": windows_iso()})
-    )
+    return fake_services()
 
 
 def run(argv: list[str], services: Services) -> tuple[int, str]:
@@ -78,7 +76,7 @@ def test_plan_flags(tmp_path: Path, services: Services) -> None:
 def test_pendrive_listar(services: Services) -> None:
     code, text = run(["pendrive", "listar"], services)
     assert code == 0 and "E:" in text and "exFAT" in text
-    empty = Services(runner=FakeRunner(), disks=FakeDiskInspector(rows=[]))
+    empty = fake_services(disks=FakeDiskInspector(rows=[]))
     code, text = run(["pendrive", "listar"], empty)
     assert code == 1
 
@@ -92,3 +90,17 @@ def test_version(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit):
         main(["--version"])
     assert "WinKit" in capsys.readouterr().out
+
+
+def test_coletar_drivers(tmp_path: Path, services: Services) -> None:
+    raiz = ["--raiz", str(tmp_path)]
+    run(["receita", "nova", *raiz, "--usuario", "Samuel"], services)
+    code, text = run(["coletar", "drivers", *raiz, "--listar"], services)
+    assert code == 0 and "[x]" in text and "[ ] Impressora" in text
+    assert not (tmp_path / "WinKit" / "Drivers").exists()
+    code, text = run(["coletar", "drivers", *raiz], services)
+    assert code == 0 and "3 driver(s)" in text
+    code, text = run(["coletar", "drivers", *raiz, "--classe", "Printer"], services)
+    assert "1 driver(s)" in text
+    code, text = run(["construir", *raiz], services)
+    assert "Manifesto:" in text and "Drivers" in text

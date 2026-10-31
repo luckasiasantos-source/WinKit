@@ -18,7 +18,7 @@
 | M1 | Núcleo puro | ✅ | — |
 | M2 | Construtor mínimo + primeira instalação real | ✅ código | ⬜ roteiro pronto (`docs/validacao/M2.md`), aguardando execução na VM |
 | M3 | Esqueleto do Agente | ✅ código | ⬜ roteiro pronto (`docs/validacao/M3.md`) |
-| M4 | Drivers | ⬜ | ⬜ pendente |
+| M4 | Drivers | ✅ código | ⬜ roteiro pronto (`docs/validacao/M4.md`) |
 | M5 | Aplicativos | ⬜ | ⬜ pendente |
 | M6 | Backups | ⬜ | ⬜ pendente |
 | M7 | Bloatware e ajustes | ⬜ | ⬜ pendente |
@@ -88,7 +88,14 @@
 
 **Testes:** 417 passando; teste de proteção "Fase 1 não carrega Qt" agora ativo; CLI congelada testada localmente.
 
-### M4 — Drivers ⬜
+### M4 — Drivers ✅ (código) · validação na VM pendente
+- ✅ `platform/drivers.py` — `Get-WindowsDriver -Online` (JSON), `pnputil /export-driver`, `pnputil /add-driver /subdirs /install` (só código de saída: 0, 3010, 259)
+- ✅ `collector/drivers.py` — classificação pelo catálogo (recomendados, prioridade), exportação idempotente para `WinKit/Drivers/<classe>/...`, itens na receita
+- ✅ `agent/steps/driver.py` + `agent/integrity.py` — verificação SHA-256 da pasta contra o manifesto antes de instalar (falha definitiva se adulterado ou sem manifesto)
+- ✅ `construir` grava `WinKit/manifesto.json` (reaproveita hashes) e mostra espaço por categoria (item 25)
+- ✅ `construir` agora é idempotente também no manifesto (`write_if_changed`)
+- ✅ CLI: `winkit coletar drivers [--listar] [--todos] [--classe X]`
+- ✅ Roteiro `docs/validacao/M4.md`
 ### M5 — Aplicativos ⬜
 ### M6 — Backups ⬜
 ### M7 — Bloatware e ajustes ⬜

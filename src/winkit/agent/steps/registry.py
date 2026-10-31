@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from winkit.agent.steps.base import StepContext, StepHandler, StepResult
+from winkit.agent.steps.driver import DriverStep
 from winkit.agent.steps.finalize import FinalizeStep
 from winkit.core.planner.models import StepKind
 
 PLACEHOLDER_KINDS: tuple[StepKind, ...] = (
-    "driver",
     "bloat",
     "tweak",
     "power",
@@ -32,5 +32,6 @@ class NotImplementedStep:
 def default_handlers() -> dict[StepKind, StepHandler]:
     placeholder = NotImplementedStep()
     handlers: dict[StepKind, StepHandler] = dict.fromkeys(PLACEHOLDER_KINDS, placeholder)
+    handlers["driver"] = DriverStep()
     handlers["finalize"] = FinalizeStep()
     return handlers

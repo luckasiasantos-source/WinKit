@@ -34,3 +34,11 @@ def atomic_write_bytes(path: Path, data: bytes) -> None:
     except BaseException:
         Path(tmp).unlink(missing_ok=True)
         raise
+
+
+def write_if_changed(path: Path, data: bytes) -> bool:
+    """Grava só se o conteúdo mudou (preserva a data e o manifesto). Devolve se gravou."""
+    if path.is_file() and path.read_bytes() == data:
+        return False
+    atomic_write_bytes(path, data)
+    return True

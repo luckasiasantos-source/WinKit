@@ -36,6 +36,10 @@ class Registry(Protocol):
 
     def key_exists(self, hive: str, key: str) -> bool: ...
 
+    def subkeys(self, hive: str, key: str) -> list[str]: ...
+
+    def values(self, hive: str, key: str) -> dict[str, Any]: ...
+
     def load_hive(self, mount: str, file: Path) -> None: ...
 
     def unload_hive(self, mount: str) -> None: ...
@@ -149,6 +153,39 @@ class WindowsRegistry:  # pragma: no cover — exercitado no CI Windows
                 return True
         except FileNotFoundError:
             return False
+
+    def subkeys(self, hive: str, key: str) -> list[str]:
+        w = self._w
+        out: list[str] = []
+        try:
+            with w.OpenKey(self._root(hive), key, 0, w.KEY_READ | w.KEY_WOW64_64KEY) as k:
+                i = 0
+                while True:
+                    try:
+                        out.append(w.EnumKey(k, i))
+                    except OSError:
+                        break
+                    i += 1
+        except FileNotFoundError:
+            return []
+        return out
+
+    def values(self, hive: str, key: str) -> dict[str, Any]:
+        w = self._w
+        out: dict[str, Any] = {}
+        try:
+            with w.OpenKey(self._root(hive), key, 0, w.KEY_READ | w.KEY_WOW64_64KEY) as k:
+                i = 0
+                while True:
+                    try:
+                        name, data, _ = w.EnumValue(k, i)
+                    except OSError:
+                        break
+                    out[name] = data
+                    i += 1
+        except FileNotFoundError:
+            return {}
+        return out
 
     def load_hive(self, mount: str, file: Path) -> None:
         res = self._runner.run(

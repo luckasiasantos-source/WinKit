@@ -30,6 +30,7 @@ from winkit.builder.build import (
     save_profile_recipe,
 )
 from winkit.builder.validate import validate_pendrive
+from winkit.collector import drivers as driver_collector
 from winkit.core import layout
 from winkit.core.catalog.loader import default_catalogs
 from winkit.core.errors import RecipeError, WinKitError
@@ -37,6 +38,7 @@ from winkit.core.planner.models import PlanContext
 from winkit.core.planner.planner import plan
 from winkit.core.recipe.io import new_recipe
 from winkit.core.recipe.validation import validate_recipe
+from winkit.core.text import human_size
 from winkit.i18n import t
 from winkit.platform.services import Services, real_services
 from winkit.platform.session import is_admin
@@ -180,6 +182,14 @@ def cmd_construir(args: argparse.Namespace, services: Services, out: Out) -> int
         out(t("validate.warnings", count=len(report.warnings)))
         for w in report.warnings:
             out(f"  ! {w}")
+    if report.sizes:
+        used = ", ".join(f"{k} {human_size(v)}" for k, v in report.sizes.items())
+        out(f"Espaço usado no pendrive: {used}; livre: {human_size(tgt.free)}")
+    if report.manifest_files:
+        a, c, r = report.manifest_changes
+        out(
+            f"Manifesto: {report.manifest_files} arquivos ({a} novos, {c} alterados, {r} removidos)"
+        )
     out(t("builder.done", root=tgt.root))
     return 0
 
@@ -200,6 +210,36 @@ def cmd_validar(args: argparse.Namespace, services: Services, out: Out) -> int:
     for p in rep.problems:
         out(f"  x {p}")
     return 1
+
+
+def cmd_coletar_drivers(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    _require_admin()
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    catalogs = default_catalogs()
+    candidates = driver_collector.list_candidates(services.drivers, catalogs)
+    out(t("collect.drivers_found", count=len(candidates)))
+    wanted_classes = {c.casefold() for c in args.classe or []}
+    chosen = []
+    for c in candidates:
+        if args.todos:
+            pick = True
+        elif wanted_classes:
+            pick = c.driver.class_name.casefold() in wanted_classes
+        else:
+            pick = c.recommended
+        mark = "x" if pick else " "
+        d = c.driver
+        out(f"  [{mark}] {c.label:38} {d.provider} {d.version} ({d.published_name})")
+        if pick:
+            chosen.append(c)
+    if args.listar:
+        return 0
+    added = driver_collector.export_drivers(services.drivers, chosen, root=tgt.root, recipe=recipe)
+    recipe.meta.updated_at = _now()
+    save_profile_recipe(tgt.root, recipe)
+    out(f"{len(added)} driver(s) exportado(s) para o pendrive e incluído(s) na receita.")
+    return 0
 
 
 # ------------------------------------------------------------------ parser
@@ -241,6 +281,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     cons.add_argument("--agente", help="pasta do Agente compilado (winkit-agent)")
     cons.set_defaults(func=cmd_construir)
+
+    col = sub.add_parser("coletar", help="coleta do PC atual: drivers, apps, backups")
+    col_sub = col.add_subparsers(dest="what", required=True)
+    cdrv = col_sub.add_parser("drivers", parents=[common], help="exporta drivers de terceiros")
+    cdrv.add_argument("--listar", action="store_true", help="só mostra, não exporta")
+    cdrv.add_argument(
+        "--todos", action="store_true", help="todas as classes, não só as recomendadas"
+    )
+    cdrv.add_argument("--classe", action="append", help="só estas classes (ex.: Net, Display)")
+    cdrv.set_defaults(func=cmd_coletar_drivers)
 
     val = sub.add_parser("validar", parents=[common], help="confere o pendrive sem alterar nada")
     val.set_defaults(func=cmd_validar)

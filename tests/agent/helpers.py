@@ -8,6 +8,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from winkit.agent.executor import Waits
+from winkit.agent.fakes import fake_agent_services
 from winkit.agent.paths import AgentPaths
 from winkit.agent.phases import Runtime
 from winkit.agent.progress import NullUi
@@ -19,14 +20,8 @@ from winkit.core.catalog.loader import default_catalogs
 from winkit.core.recipe.io import dump_recipe, new_recipe
 from winkit.core.recipe.models import Recipe
 from winkit.platform.fakes.disks import FakeDiskInspector, windows_iso
-from winkit.platform.fakes.powershell import FakePowerShell
-from winkit.platform.fakes.registry import FakeRegistry
-from winkit.platform.fakes.runner import FakeRunner
 from winkit.platform.fakes.system import (
-    FakeAccounts,
     FakeEnvironment,
-    FakeKnownFolders,
-    FakeScheduler,
 )
 
 START = datetime(2026, 11, 3, 10, 0, tzinfo=UTC)
@@ -110,16 +105,7 @@ def make_world(tmp: Path) -> World:
     (system / "Windows" / "Setup" / "Scripts").mkdir(parents=True)
     (system / "Windows" / "Panther").mkdir(parents=True)
     (system / "Users" / "Samuel" / "Desktop").mkdir(parents=True)
-    runner = FakeRunner()
-    services = AgentServices(
-        runner=runner,
-        ps=FakePowerShell(),  # type: ignore[arg-type]
-        registry=FakeRegistry(),
-        scheduler=FakeScheduler(),
-        accounts=FakeAccounts(),
-        env=FakeEnvironment(roots=[pendrive]),
-        folders=FakeKnownFolders(system),
-    )
+    services = fake_agent_services(pendrive=pendrive, system=system)
     world = World(tmp=tmp, pendrive=pendrive, system=system, services=services)
     world.bootstrap()
     return world

@@ -28,6 +28,34 @@
 
 ---
 
+## 2026-10-31 — M4 — Drivers
+**Tipo:** implementação + testes + documentação
+**Resumo:** coleta e exportação de drivers de terceiros no PC atual, instalação com `pnputil` na Fase 1 com verificação de integridade, e manifesto do pendrive gravado pelo `construir`.
+
+### Adicionado
+- `src/winkit/platform/drivers.py` — `WindowsDriverManager`, `InstalledDriver`, `DriverInstallResult`
+- `src/winkit/platform/fakes/drivers.py`, `platform/fakes/services.py` (`fake_services`)
+- `src/winkit/collector/drivers.py` — `list_candidates`, `export_drivers`, `DriverCandidate`
+- `src/winkit/agent/integrity.py` — `verify_payload`
+- `src/winkit/agent/steps/driver.py` — `DriverStep`
+- `src/winkit/agent/fakes.py` — `fake_agent_services`
+- `src/winkit/core/text.py` — `slugify`, `human_size`
+- `src/winkit/core/fsutil.py` — `write_if_changed`
+- Registro: `subkeys` e `values` (real e falso)
+- CLI: `winkit coletar drivers`
+- Testes: `tests/collector/test_drivers.py`, `tests/agent/test_driver_step.py`, novo caso em `tests/cli/test_cli.py`
+- `docs/validacao/M4.md`
+
+### Alterado
+- `src/winkit/builder/build.py` — manifesto (fora do `--somente-xml`), tamanhos por categoria, gravação só quando o conteúdo muda
+- `src/winkit/agent/services.py`, `platform/services.py` — campo `drivers`
+- `src/winkit/agent/steps/registry.py` — `driver` deixa de ser "não implementada"
+
+### Documentos vivos atualizados
+- STATUS — M4; ARQUITETURA — tabela de módulos
+
+---
+
 ## 2026-10-31 — M3 — Correções vindas do CI Windows
 **Tipo:** correção
 **Resumo:** o CI Windows revelou dois problemas reais no `bootstrap.ps1` (codificação e erro silencioso) e um de quebras de linha no snapshot. Corrigidos com testes.

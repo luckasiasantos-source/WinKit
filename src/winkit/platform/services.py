@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from winkit.platform.disks import DiskInspector, WindowsDiskInspector
+from winkit.platform.drivers import DriverManager, WindowsDriverManager
 from winkit.platform.powershell import PowerShell
 from winkit.platform.runner import CommandRunner, SubprocessRunner
 
@@ -13,9 +14,14 @@ from winkit.platform.runner import CommandRunner, SubprocessRunner
 class Services:
     runner: CommandRunner
     disks: DiskInspector
+    drivers: DriverManager
 
 
 def real_services() -> Services:
     runner = SubprocessRunner()
     ps = PowerShell(runner)
-    return Services(runner=runner, disks=WindowsDiskInspector(ps))
+    return Services(
+        runner=runner,
+        disks=WindowsDiskInspector(ps),
+        drivers=WindowsDriverManager(runner, ps),
+    )

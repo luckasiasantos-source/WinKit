@@ -87,7 +87,8 @@ Por que isso importa:
 | `core/unattend/` | Geração do `autounattend.xml` e da linha de bootstrap | `(Recipe, IsoInfo)` → `bytes` (XML) |
 | `core/installers/` | Detecção do tipo de instalador por bytes | `bytes` (cabeçalho/conteúdo) → `InstallerType` |
 | `core/errors.py` | Hierarquia de exceções | — |
-| `core/fsutil.py` | Escrita atômica de arquivos (R-16) | `(Path, texto/bytes)` → arquivo |
+| `core/fsutil.py` | Escrita atômica (R-16) e `write_if_changed` (preserva data e manifesto) | `(Path, texto/bytes)` → arquivo |
+| `core/text.py` | `slugify`, `human_size` | texto → texto |
 
 ### 3.2 `platform/` — Windows
 
@@ -100,7 +101,7 @@ Por que isso importa:
 | `fs.py` | Caminhos longos (`\\?\`), escrita atômica, espaço livre | `FileSystem` |
 | `copy.py` | robocopy (captura e restauração) | `Copier` |
 | `vss.py` | Cópias de sombra | `ShadowCopies` |
-| `drivers.py` | Listagem, exportação e instalação de drivers | `DriverManager` |
+| `drivers.py` | Listagem (`Get-WindowsDriver`), exportação e instalação (`pnputil`) de drivers | `DriverManager` |
 | `appx.py` | Pacotes MSIX: remoção e bloqueio de reinstalação | `AppxManager` |
 | `winget.py` | export, download, install | `Winget` |
 | `installers.py` | Execução de instaladores com tempo limite e códigos de saída | `InstallerRunner` |
@@ -117,7 +118,7 @@ Por que isso importa:
 | Módulo | Responsabilidade |
 |---|---|
 | `collector/apps.py` | Inventário de apps (fontes, filtros, classificação) |
-| `collector/drivers.py` | Seleção e exportação de drivers |
+| `collector/drivers.py` | Candidatos (classe, prioridade, recomendado) e exportação idempotente para o pendrive |
 | `collector/backups.py` | Sugestão de pastas, captura com VSS, avisos DPAPI |
 | `builder/target.py` | Escolha do pendrive e checagens (sistema de arquivos, espaço) |
 | `builder/isos.py` | Leitura e cache das ISOs |
@@ -128,6 +129,8 @@ Por que isso importa:
 | `agent/phases.py` | Abre a sessão (receita, estado, plano), redes de segurança, Fase 1, Fase 2, fallback |
 | `agent/paths.py`, `store.py`, `eventlog.py`, `pendrive.py`, `progress.py`, `cleanup.py`, `services.py`, `ui_select.py` | Caminhos locais, estado atômico, logs, localização do pendrive, protocolo de UI sem Qt, limpeza, serviços, escolha da UI |
 | `agent/executor.py` | Executa um `Plan`, persiste `State`, trata reinicialização e pendrive ausente |
+| `agent/integrity.py` | Confere arquivo ou pasta do pendrive contra o `manifesto.json` (R-22) |
+| `agent/fakes.py`, `platform/fakes/services.py` | Fábricas de serviços falsos (um lugar só para acrescentar campos) |
 | `agent/steps/*.py` | Uma classe por tipo de etapa: `DriverStep`, `BloatStep`, `TweakStep`, `BackupStep`, `AppStep`, `ShortcutStep`, `WindowsUpdateStep`, `CleanupStep` |
 | `agent/ui/` | Janela da Fase 2, bandeja, resumo (import tardio) |
 

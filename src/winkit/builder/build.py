@@ -20,9 +20,10 @@ from winkit.builder.isos import scan_isos
 from winkit.builder.target import Target
 from winkit.core import layout
 from winkit.core.catalog.models import Catalogs
-from winkit.core.errors import PendriveError, RecipeError
-from winkit.core.fsutil import atomic_write_bytes, atomic_write_text
+from winkit.core.errors import PendriveError, RecipeError, WinKitError
+from winkit.core.fsutil import atomic_write_text, write_if_changed
 from winkit.core.isos import IsoInfo
+from winkit.core.manifest.manifest import Manifest, diff, dump_manifest, load_manifest, scan
 from winkit.core.recipe.io import dump_recipe, load_recipe
 from winkit.core.recipe.models import Recipe
 from winkit.core.recipe.validation import ensure_valid
@@ -55,6 +56,9 @@ class BuildReport:
     removed_templates: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     agent_copied: bool = False
+    manifest_files: int = 0
+    manifest_changes: tuple[int, int, int] = (0, 0, 0)  # adicionados, alterados, removidos
+    sizes: dict[str, int] = field(default_factory=dict)
 
 
 def ensure_marker(root: Path, now: datetime) -> layout.Marker:
@@ -129,7 +133,7 @@ def _write_templates(
             pendrive_id=pendrive_id,
         )
         name = template_name(recipe.meta.profile_id, lang, arch)
-        atomic_write_bytes(script_dir / name, xml)
+        write_if_changed(script_dir / name, xml)
         written.add(name)
         report.templates.append(f"/{layout.SCRIPT_DIR}/{name}")
         for iso in members:
@@ -170,8 +174,8 @@ def _update_ventoy_json(root: Path, recipe: Recipe, entries: list[AutoInstallEnt
 
 def _copy_agent(root: Path, options: BuildOptions, report: BuildReport) -> None:
     bootstrap = resources.files("winkit.builder").joinpath("assets/bootstrap.ps1").read_bytes()
-    atomic_write_bytes(root / layout.BOOTSTRAP, bootstrap)
-    atomic_write_text(root / layout.AGENT_VERSION, __version__ + "\n")
+    write_if_changed(root / layout.BOOTSTRAP, bootstrap)
+    write_if_changed(root / layout.AGENT_VERSION, (__version__ + "\n").encode("utf-8"))
     if options.agent_source is None:
         return
     exe = options.agent_source / layout.AGENT_EXE_NAME
@@ -224,4 +228,38 @@ def build(
     )
     _update_ventoy_json(root, recipe, entries)
     _copy_agent(root, options, report)
+    if not options.xml_only:
+        _write_manifest(root, report)
+    report.sizes = payload_sizes(root, recipe.meta.profile_id)
     return report
+
+
+def _write_manifest(root: Path, report: BuildReport) -> None:
+    path = root / layout.MANIFEST
+    previous: Manifest | None = None
+    if path.is_file():
+        try:
+            previous = load_manifest(path.read_text(encoding="utf-8"))
+        except WinKitError:
+            previous = None
+    manifest = scan(root, layout.MANIFEST_SUBDIRS, previous)
+    d = diff(previous or Manifest(), manifest)
+    report.manifest_files = len(manifest.files)
+    report.manifest_changes = (len(d.added), len(d.changed), len(d.removed))
+    atomic_write_text(path, dump_manifest(manifest))
+
+
+def _tree_size(path: Path) -> int:
+    if not path.exists():
+        return 0
+    return sum(p.stat().st_size for p in path.rglob("*") if p.is_file())
+
+
+def payload_sizes(root: Path, profile_id: str) -> dict[str, int]:
+    """Espaço ocupado por categoria no pendrive (item 25)."""
+    return {
+        "Agente": _tree_size(root / layout.AGENT_DIR),
+        "Apps": _tree_size(root / layout.APPS),
+        "Drivers": _tree_size(root / layout.DRIVERS),
+        "Backups": _tree_size(root / layout.backups_dir(profile_id)),
+    }
