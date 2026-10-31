@@ -123,7 +123,7 @@ class ChoosePage(QWidget):
             accessory: QWidget
             if step.kind == "rename_computer" and step.user_choice:
                 self._name_edit = QLineEdit(default_name or "")
-                self._name_edit.setPlaceholderText("PC-NOVO")
+                self._name_edit.setPlaceholderText(t("ui.agent.pc_placeholder"))
                 self._name_edit.setMaxLength(15)
                 self._name_edit.setFixedWidth(180)
                 self._name_edit.textEdited.connect(self.pause_countdown)

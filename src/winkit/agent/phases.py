@@ -29,7 +29,7 @@ from winkit.core.planner.planner import plan as make_plan
 from winkit.core.recipe.io import load_recipe, recipe_hash
 from winkit.core.recipe.models import Recipe
 from winkit.core.state import models as st
-from winkit.i18n import msg
+from winkit.i18n import msg, normalize, set_language
 from winkit.platform.environment import single_instance
 
 INSTANCE_NAME = "WinKitAgent"
@@ -45,6 +45,14 @@ class Runtime:
     ui_factory: Callable[[Recipe], AgentUi] = field(default=lambda recipe: NullUi())
     handlers: dict[StepKind, StepHandler] = field(default_factory=default_handlers)
     waits: Waits = field(default_factory=Waits)
+    #: Idioma do Windows atual (para ``execution.language = auto``, D-030).
+    detect_language: Callable[[], str] = lambda: "pt-BR"
+
+
+def apply_language(rt: Runtime, recipe: Recipe) -> None:
+    """Janela, notificações, resumo e motivos no idioma da receita."""
+    choice = recipe.execution.language
+    set_language(normalize(rt.detect_language()) if choice == "auto" else choice)
 
 
 @dataclass
@@ -89,6 +97,13 @@ class Session:
 
 # ------------------------------------------------------------------ carga
 def load_agent_recipe(rt: Runtime, log: EventLog) -> Recipe | None:
+    recipe = _find_recipe(rt, log)
+    if recipe is not None:
+        apply_language(rt, recipe)
+    return recipe
+
+
+def _find_recipe(rt: Runtime, log: EventLog) -> Recipe | None:
     if rt.paths.recipe.is_file():
         try:
             return load_recipe(rt.paths.recipe.read_text(encoding="utf-8-sig"))

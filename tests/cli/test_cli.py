@@ -99,9 +99,9 @@ def test_coletar_drivers(tmp_path: Path, services: Services) -> None:
     assert code == 0 and "[x]" in text and "[ ] Impressora" in text
     assert not (tmp_path / "WinKit" / "Drivers").exists()
     code, text = run(["coletar", "drivers", *raiz], services)
-    assert code == 0 and "3 driver(s)" in text
+    assert code == 0 and "3 drivers exportados" in text
     code, text = run(["coletar", "drivers", *raiz, "--classe", "Printer"], services)
-    assert "1 driver(s)" in text
+    assert "1 driver exportado" in text
     code, text = run(["construir", *raiz], services)
     assert "Manifesto:" in text and "Drivers" in text
 
@@ -116,7 +116,7 @@ def test_apps_flow(tmp_path: Path, services: Services) -> None:
     code, text = run(["coletar", "apps", *raiz], services)
     assert code == 0 and "discord" in text and "[ ]" in text
     code, text = run(["apps", "marcar", "discord", "7zip", *raiz, "--ordem", "5"], services)
-    assert code == 0 and "2 app(s) marcado(s)" in text
+    assert code == 0 and "2 apps marcados" in text
     code, text = run(["apps", "marcar", "nao-existe", *raiz], services)
     assert code == 1
     winget = services.winget
@@ -164,7 +164,7 @@ def test_backup_flow(tmp_path: Path) -> None:
     run(["coletar", "apps", *raiz], services)
     run(["apps", "marcar", "discord", *raiz], services)
     code, text = run(["coletar", "backups", *raiz, "--adicionar-recomendados"], services)
-    assert code == 0 and "[x] Discord" in text and "1 backup(s)" in text
+    assert code == 0 and "[x] Discord" in text and "1 backup recomendado" in text
     code, text = run(
         [
             "backup",
@@ -208,3 +208,46 @@ def test_backup_flow(tmp_path: Path) -> None:
     assert not (pen / "WinKit" / "Perfis" / "padrao" / "Backups" / "discord-inteiro").exists()
     code, text = run(["backup", "remover", "nao-existe", *raiz], services)
     assert code == 1
+
+
+def test_language_option_and_english_aliases(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """D-030/D-032: ``--idioma`` traduz ajuda e saída; os apelidos em inglês funcionam."""
+    from winkit.cli.main import main
+    from winkit.i18n import current_language
+
+    raiz = ["--raiz", str(tmp_path / "pen")]
+    out: list[str] = []
+    services = fake_services()
+    assert (
+        main(
+            ["--idioma", "en-US", "recipe", "new", *raiz, "--usuario", "Sam"],
+            services=services,
+            out=out.append,
+        )
+        == 0
+    )
+    assert current_language() == "en-US" and out[-1].startswith("Recipe created at")
+    out.clear()
+    assert main(["--idioma=es", "plan", *raiz], services=services, out=out.append) == 0
+    assert out[0].startswith("Fase 1") and "pasos" in out[0]
+    with pytest.raises(SystemExit):
+        main(["--idioma", "en-US", "build", "--help"], services=services, out=out.append)
+    help_text = capsys.readouterr().out
+    assert "prepare the USB drive" not in help_text or "--agente" in help_text
+    assert "folder of the compiled Agent" in help_text
+
+
+def test_winkit_lang_environment(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from winkit.cli.main import main
+    from winkit.i18n import current_language
+
+    monkeypatch.setenv("WINKIT_LANG", "es-MX")
+    out: list[str] = []
+    main(
+        ["receita", "nova", "--raiz", str(tmp_path / "p"), "--usuario", "Ana"],
+        services=fake_services(),
+        out=out.append,
+    )
+    assert current_language() == "es" and out[-1].startswith("Receta creada")

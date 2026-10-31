@@ -306,6 +306,9 @@ runner.run(
 | R-11 | contrato "subprocess só em platform.runner" + teste AST de `shell=` |
 | R-35 | `test_phase1_does_not_import_qt` |
 | R-50 | `test_todo_requires_debt_entry` |
+| R-51 | `tests/i18n/test_parity.py` (chaves, marcadores, plurais) e `tests/i18n/test_usage.py` (toda chave usada existe; toda chave existente é usada) |
+| R-55 | `tests/i18n/test_usage.py::test_no_loose_ui_strings` (AST em `studio`, `agent/ui`, `ui`, `cli`) |
+| Empacotamento | `test_no_dynamic_imports_in_package` (IN-013) |
 
 ---
 

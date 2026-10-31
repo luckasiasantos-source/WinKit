@@ -6,11 +6,11 @@ from winkit.i18n import Msg, current_language, legacy, msg, render, set_language
 
 
 def test_t_formats_in_current_language() -> None:
-    assert t("paths.drive_missing", drive="D:") == "A unidade D: não existe neste PC."
+    assert t("step.drive_missing", drive="D:") == "a unidade D: não existe"
     set_language("en-US")
-    assert t("paths.drive_missing", drive="D:") == "Drive D: does not exist on this PC."
+    assert t("step.drive_missing", drive="D:") == "drive D: does not exist"
     set_language("es")
-    assert t("paths.drive_missing", drive="D:") == "La unidad D: no existe en este PC."
+    assert t("step.drive_missing", drive="D:") == "la unidad D: no existe"
     assert current_language() == "es"
 
 
@@ -35,10 +35,10 @@ def test_t_rejects_plural_and_tn_rejects_simple() -> None:
 
 
 def test_render_msg_follows_language() -> None:
-    m = msg("step.exit_code", code=1603)
-    assert render(m) == "o instalador retornou o código 1603"
+    m = msg("step.pnputil_code", code=5)
+    assert render(m) == "o pnputil retornou o código 5"
     set_language("es")
-    assert render(m) == "el instalador devolvió el código 1603"
+    assert render(m) == "pnputil devolvió el código 5"
 
 
 def test_render_tolerates_unknown_key_and_none() -> None:

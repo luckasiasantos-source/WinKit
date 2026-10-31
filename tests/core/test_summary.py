@@ -20,7 +20,7 @@ def _summary():  # type: ignore[no-untyped-def]
     p = plan(r, default_catalogs())
     s = st.new_state(p, "h", NOW)
     st.mark_running(s, "app:a", 1, NOW)
-    st.mark_failed(s, "app:a", NOW, msg("step.exit_code", code=1603))
+    st.mark_failed(s, "app:a", NOW, msg("step.installer_failed", code=1603, path="x"))
     st.mark_running(s, "app:b", 1, NOW)
     st.mark_done(s, "app:b", NOW, reason=msg("step.already_done"))
     return build_summary(p, s, r, computer="PC-TESTE", now=NOW)
@@ -29,7 +29,7 @@ def _summary():  # type: ignore[no-untyped-def]
 def test_summary_keeps_messages_untranslated() -> None:
     summary = _summary()
     failed = next(i for i in summary.items if i.id == "app:a")
-    assert failed.detail is not None and failed.detail.key == "step.exit_code"
+    assert failed.detail is not None and failed.detail.key == "step.installer_failed"
     keys = {w.key for w in summary.warnings}
     assert {"summary.backup_warning", "summary.set_password"} <= keys
 

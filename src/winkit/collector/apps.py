@@ -22,6 +22,7 @@ from winkit.core.manifest.manifest import hash_file
 from winkit.core.recipe.models import AppItem, InstallerSpec, Recipe, Scope
 from winkit.core.text import slugify
 from winkit.core.winget_manifest import parse_download_dir
+from winkit.i18n import t
 from winkit.platform.inventory import AppInventory
 from winkit.platform.winget import Winget
 
@@ -60,11 +61,9 @@ def download_app(  # noqa: PLR0911 — cada retorno é um motivo diferente para 
 ) -> DownloadResult:
     """``winget download`` para ``WinKit/Apps/<id>/<versão>/`` e torna o app offline (§7.1.4)."""
     if not item.winget_id or item.winget_source == "msstore":
-        return DownloadResult(
-            item.id, False, "sem ID do winget comunitário (apps da Loja não baixam)"
-        )
+        return DownloadResult(item.id, False, t("collect.no_winget_id"))
     if free_bytes < MIN_FREE_BYTES:
-        return DownloadResult(item.id, False, "menos de 2 GB livres no pendrive")
+        return DownloadResult(item.id, False, t("collect.low_space"))
     staging = layout.payload(root, f"Apps/{item.id}/.baixando")
     shutil.rmtree(staging, ignore_errors=True)
     code = winget.download(item.winget_id, staging)
@@ -78,13 +77,11 @@ def download_app(  # noqa: PLR0911 — cada retorno é um motivo diferente para 
         return DownloadResult(item.id, False, str(exc))
     if pkg.installer_type is None:
         shutil.rmtree(staging, ignore_errors=True)
-        return DownloadResult(
-            item.id, False, f'tipo "{pkg.raw_type}" não instala offline; ficará pelo winget online'
-        )
+        return DownloadResult(item.id, False, t("collect.not_offline", type=pkg.raw_type))
     args = list(pkg.silent_args) or default_args(pkg.installer_type, catalogs.installer_signatures)
     if pkg.installer_type == "exe_custom" and not args:
         shutil.rmtree(staging, ignore_errors=True)
-        return DownloadResult(item.id, False, "instalador sem parâmetro silencioso conhecido")
+        return DownloadResult(item.id, False, t("collect.no_silent_args"))
     final_rel = f"Apps/{item.id}/{slugify(pkg.version) if pkg.version else 'atual'}"
     final = layout.payload(root, final_rel)
     shutil.rmtree(final, ignore_errors=True)

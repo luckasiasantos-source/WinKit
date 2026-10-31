@@ -851,7 +851,7 @@ Cada linha é um commit (ou poucos), sempre com `scripts/check.sh` verde e o `CH
    - Dividir `pages.py` em pacote (§5.9) **sem mudar comportamento**, num commit separado e só de refatoração.
    - Em seguida, extrair os textos para `studio.*`.
 6. **Extração da janela do Agente** (`agent/ui/qt.py`).
-7. **Extração da CLI.** Dividir em `cli/commands/` (refatoração isolada), depois extrair os textos, criar `--idioma` e os apelidos.
+7. **Extração da CLI.** Extrair os textos, criar `--idioma` e os apelidos. *(Feito no M11 sem dividir `cli/main.py` em pacote: a divisão fica para quando os comandos novos do M12–M17 forem entrando, um módulo por grupo.)*
 8. **Teste AST da R-55**, ligado depois dos passos 5 a 7, quando não sobrar texto solto.
 9. **Traduções**:
    - `en_us.py`, `es.py`, `catalogs/en_us.yaml`, `catalogs/es.yaml`;

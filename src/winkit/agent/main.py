@@ -19,6 +19,7 @@ from winkit.agent.phases import Runtime
 from winkit.agent.services import real_agent_services
 from winkit.agent.ui_select import select_ui
 from winkit.core.catalog.loader import default_catalogs
+from winkit.platform.locale import detect_language
 from winkit.platform.system import winkit_program_data
 
 
@@ -58,6 +59,7 @@ def build_runtime() -> Runtime:
         catalogs=default_catalogs(),
         clock=_now,
         ui_factory=select_ui,
+        detect_language=detect_language,
     )
 
 

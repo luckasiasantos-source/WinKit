@@ -45,7 +45,8 @@ from winkit.core.recipe.models import Recipe
 from winkit.core.recipe.validation import validate_recipe
 from winkit.core.text import human_size
 from winkit.core.winget_manifest import split_args
-from winkit.i18n import t, tn
+from winkit.i18n import CHOICES, normalize, set_language, t, tn
+from winkit.platform.locale import detect_language
 from winkit.platform.services import Services, real_services
 from winkit.platform.session import is_admin
 from winkit.platform.system import is_windows
@@ -103,7 +104,7 @@ def cmd_pendrive_listar(args: argparse.Namespace, services: Services, out: Out) 
     for v in found:
         out(
             f"{v.data_letter}  {v.disk_name} ({v.bus_type})  {v.file_system}  "
-            f"{_gib(v.free)} livres de {_gib(v.size)}"
+            + t("cli.free_of", free=_gib(v.free), size=_gib(v.size))
         )
     return 0
 
@@ -112,7 +113,7 @@ def cmd_receita_nova(args: argparse.Namespace, services: Services, out: Out) -> 
     tgt = _target(args, services)
     path = tgt.root / layout.recipe_file(args.perfil)
     if path.exists() and not args.sobrescrever:
-        out(f"Já existe uma receita em {path}. Use --sobrescrever para trocar.")
+        out(t("cli.recipe_exists", path=path))
         return 1
     marker = ensure_marker(tgt.root, _now())
     recipe = new_recipe(
@@ -129,7 +130,7 @@ def cmd_receita_nova(args: argparse.Namespace, services: Services, out: Out) -> 
         out(t("recipe.invalid", problems="\n".join(report.errors)))
         return 1
     saved = save_profile_recipe(tgt.root, recipe)
-    out(f"Receita criada em {saved}")
+    out(t("cli.recipe_created", path=saved))
     return 0
 
 
@@ -140,19 +141,19 @@ def cmd_plano(args: argparse.Namespace, services: Services, out: Out) -> int:
     p = plan(recipe, default_catalogs(), ctx)
     for phase in (1, 2):
         steps = p.phase(phase)
-        out(f"Fase {phase} ({len(steps)} etapas):")
+        out(tn("cli.plan_phase", len(steps), phase=phase))
         for s in steps:
             flags = []
             if s.user_choice:
-                flags.append("decidir na hora")
+                flags.append(t("cli.flag_ask"))
             if s.moved_from_phase1:
-                flags.append("veio da Fase 1")
+                flags.append(t("cli.flag_from_phase1"))
             if s.needs_network:
-                flags.append("internet")
+                flags.append(t("cli.flag_internet"))
             suffix = f"  [{', '.join(flags)}]" if flags else ""
             out(f"  - {s.title}{suffix}")
     if p.excluded:
-        out("Fora do plano:")
+        out(t("cli.excluded"))
         for e in p.excluded:
             out(f"  - {e.kind} {e.ref}: {e.reason}")
     return 0
@@ -160,7 +161,7 @@ def cmd_plano(args: argparse.Namespace, services: Services, out: Out) -> int:
 
 def cmd_construir(args: argparse.Namespace, services: Services, out: Out) -> int:
     tgt = _target(args, services)
-    out(f"Pendrive: {tgt.description}")
+    out(t("cli.pendrive", description=tgt.description))
     options = BuildOptions(
         profile_id=args.perfil,
         xml_only=args.somente_xml,
@@ -180,23 +181,21 @@ def cmd_construir(args: argparse.Namespace, services: Services, out: Out) -> int
             )
         )
     for image, reason in report.skipped:
-        out(f"Ignorada: {image} — {reason}")
+        out(t("cli.iso_ignored", image=image, reason=reason))
     for tpl in report.templates:
-        out(f"Modelo gravado: {tpl}")
+        out(t("cli.template_written", name=tpl))
     for name in report.removed_templates:
-        out(f"Modelo antigo removido: {name}")
+        out(t("cli.template_removed", name=name))
     if report.warnings:
         out(t("validate.warnings", count=len(report.warnings)))
         for w in report.warnings:
             out(f"  ! {w}")
     if report.sizes:
         used = ", ".join(f"{t(f'size.{k}')} {human_size(v)}" for k, v in report.sizes.items())
-        out(f"Espaço usado no pendrive: {used}; livre: {human_size(tgt.free)}")
+        out(t("cli.space_used", used=used, free=human_size(tgt.free)))
     if report.manifest_files:
         a, c, r = report.manifest_changes
-        out(
-            f"Manifesto: {report.manifest_files} arquivos ({a} novos, {c} alterados, {r} removidos)"
-        )
+        out(t("cli.manifest", files=report.manifest_files, added=a, changed=c, removed=r))
     out(t("builder.done", root=tgt.root))
     return 0
 
@@ -245,7 +244,7 @@ def cmd_coletar_drivers(args: argparse.Namespace, services: Services, out: Out) 
     added = driver_collector.export_drivers(services.drivers, chosen, root=tgt.root, recipe=recipe)
     recipe.meta.updated_at = _now()
     save_profile_recipe(tgt.root, recipe)
-    out(f"{len(added)} driver(s) exportado(s) para o pendrive e incluído(s) na receita.")
+    out(tn("cli.drivers_exported", len(added)))
     return 0
 
 
@@ -258,8 +257,8 @@ def _source_label(source: str, winget_id: str | None) -> str:
     if source == "winget_online":
         return f"winget ({winget_id})"
     if source == "portable":
-        return "portátil"
-    return "instalador offline"
+        return t("cli.src_portable")
+    return t("cli.src_offline")
 
 
 def cmd_coletar_apps(args: argparse.Namespace, services: Services, out: Out) -> int:
@@ -272,10 +271,7 @@ def cmd_coletar_apps(args: argparse.Namespace, services: Services, out: Out) -> 
         recipe, apps, catalogs, include_redist=args.incluir_redistribuiveis
     )
     _save(tgt, recipe)
-    out(
-        f"{len(added)} app(s) novos na receita (todos desmarcados). Marque com: "
-        "winkit apps marcar <id>"
-    )
+    out(tn("cli.apps_added", len(added)))
     return cmd_apps_listar(args, services, out)
 
 
@@ -284,7 +280,7 @@ def cmd_apps_listar(args: argparse.Namespace, services: Services, out: Out) -> i
     recipe = load_profile_recipe(tgt.root, args.perfil)
     for a in sorted(recipe.apps, key=lambda x: (not x.selected, x.order, x.name.casefold())):
         mark = "x" if a.selected else " "
-        where = "por usuário" if a.scope == "user" else "máquina"
+        where = t("cli.scope_user") if a.scope == "user" else t("cli.scope_machine")
         label = _source_label(a.source, a.winget_id)
         out(f"  [{mark}] {a.id:28} {a.name[:36]:36} {where:11} {label}")
     return 0
@@ -307,9 +303,9 @@ def cmd_apps_marcar(args: argparse.Namespace, services: Services, out: Out) -> i
             item.decide_at_runtime = args.decidir_na_hora
     _save(tgt, recipe)
     if missing:
-        out(f"Não encontrados na receita: {', '.join(missing)}")
+        out(t("cli.not_found", ids=", ".join(missing)))
         return 1
-    out(f"{len(args.ids)} app(s) {'marcado(s)' if value else 'desmarcado(s)'}.")
+    out(tn("cli.apps_selected" if value else "cli.apps_deselected", len(args.ids)))
     return 0
 
 
@@ -326,13 +322,13 @@ def cmd_apps_baixar(args: argparse.Namespace, services: Services, out: Out) -> i
             if a.source == "winget_online" and a.winget_source == "winget"
         ]
     if not services.winget.available():
-        out("O winget não está disponível neste PC.")
+        out(t("cli.winget_missing"))
         return 1
     failures = 0
     for item in items:
         free = targets.from_folder(tgt.root).free if args.raiz else tgt.free
         res = app_collector.download_app(services.winget, tgt.root, item, catalogs, free_bytes=free)
-        out(f"  {'ok ' if res.ok else 'não'} {item.id}: {res.message}")
+        out(f"  {t('cli.ok') if res.ok else t('cli.no')} {item.id}: {res.message}")
         failures += 0 if res.ok else 1
     _save(tgt, recipe)
     return 0 if failures == 0 else 1
@@ -353,11 +349,15 @@ def cmd_apps_adicionar(args: argparse.Namespace, services: Services, out: Out) -
     _save(tgt, recipe)
     assert item.installer is not None  # noqa: S101
     out(
-        f'App "{item.name}" adicionado: tipo {item.installer.type}, '
-        f"argumentos {' '.join(item.installer.args) or '(nenhum)'}"
+        t(
+            "cli.app_added",
+            name=item.name,
+            type=item.installer.type,
+            args=" ".join(item.installer.args) or t("cli.none"),
+        )
     )
     if item.installer.type == "unknown" and not item.installer.args:
-        out("Atenção: tipo desconhecido. Informe os argumentos silenciosos com --args.")
+        out(t("cli.unknown_type"))
         return 1
     return 0
 
@@ -383,16 +383,13 @@ def cmd_coletar_backups(args: argparse.Namespace, services: Services, out: Out) 
         recipe, catalogs, _old_folders(services), services.volume_root
     )
     if not suggestions:
-        out(
-            "Nenhuma sugestão: marque apps primeiro (winkit apps marcar ...) ou adicione "
-            "pastas com 'winkit backup adicionar'."
-        )
+        out(t("cli.no_suggestions"))
         return 0
     added = 0
     for sug in suggestions:
         pick = sug.recommended and sug.exists
         mark = "x" if pick else " "
-        size = human_size(sug.size) if sug.exists else "não existe neste PC"
+        size = human_size(sug.size) if sug.exists else t("studio.backups.missing_here")
         out(f"  [{mark}] {sug.app_name}: {sug.template}  ({size})")
         if sug.warning:
             out(f"        ! {sug.warning}")
@@ -401,7 +398,7 @@ def cmd_coletar_backups(args: argparse.Namespace, services: Services, out: Out) 
             added += 1
     if args.adicionar_recomendados:
         _save(tgt, recipe)
-        out(f"{added} backup(s) recomendados incluídos. Capture com: winkit backup capturar")
+        out(tn("cli.backups_added", added))
     return 0
 
 
@@ -423,10 +420,10 @@ def cmd_backup_adicionar(args: argparse.Namespace, services: Services, out: Out)
         decide_at_runtime=args.decidir_na_hora,
     )
     _save(tgt, recipe)
-    out(f'Backup "{item.name}" ({item.id}) → {item.template}')
+    out(t("cli.backup_added", name=item.name, id=item.id, template=item.template))
     if warning:
         out(f"  ! {warning}")
-    out("Capture com: winkit backup capturar " + item.id)
+    out(t("cli.capture_hint", id=item.id))
     return 0
 
 
@@ -436,7 +433,7 @@ def cmd_backup_listar(args: argparse.Namespace, services: Services, out: Out) ->
     for b in recipe.backups:
         mark = "x" if b.selected else " "
         data = layout.payload(tgt.root, b.data_path)
-        state = "capturado" if data.exists() else "ainda não capturado"
+        state = t("studio.backups.captured") if data.exists() else t("studio.backups.not_captured")
         out(f"  [{mark}] {b.id:30} {b.template}  [{b.on_conflict}] {state}")
         for w in b.warnings:
             out(f"        ! {w}")
@@ -472,8 +469,8 @@ def _capture(
     for note in report.notes:
         out(f"  ! {note}")
     for item in report.items:
-        flag = "ok " if item.ok else "não"
-        vss = " (cópia de sombra)" if item.used_vss else ""
+        flag = t("cli.ok") if item.ok else t("cli.no")
+        vss = f" ({t('cli.shadow_copy')})" if item.used_vss else ""
         out(f"  {flag} {item.backup_id}: {item.message}{vss}")
         for w in item.warnings:
             out(f"        ! {w}")
@@ -493,14 +490,14 @@ def cmd_backup_remover(args: argparse.Namespace, services: Services, out: Out) -
     recipe = load_profile_recipe(tgt.root, args.perfil)
     item = recipe.backup(args.id)
     if item is None:
-        out(f"Backup não encontrado: {args.id}")
+        out(t("cli.backup_not_found", id=args.id))
         return 1
     recipe.backups = [b for b in recipe.backups if b.id != args.id]
     folder = layout.payload(tgt.root, item.data_path).parent
     if folder.is_dir() and folder.parent.name == "Backups":
         shutil.rmtree(folder)
     _save(tgt, recipe)
-    out(f"Backup {args.id} removido da receita e do pendrive.")
+    out(t("cli.backup_removed", id=args.id))
     return 0
 
 
@@ -517,8 +514,8 @@ def cmd_apps_portatil(args: argparse.Namespace, services: Services, out: Out) ->
         windows_dir=services.folders.windows_dir(),
     )
     _save(tgt, recipe)
-    out(f'App portátil "{app.name}": pasta {item.template}, atalho para {args.exe}.')
-    out("Capture com: winkit backup capturar " + item.id)
+    out(t("cli.portable_added", name=app.name, template=item.template, exe=args.exe))
+    out(t("cli.capture_hint", id=item.id))
     return 0
 
 
@@ -526,7 +523,7 @@ def cmd_sincronizar(args: argparse.Namespace, services: Services, out: Out) -> i
     tgt = _target(args, services)
     if not args.sem_backups:
         recipe = load_profile_recipe(tgt.root, args.perfil)
-        out("Recapturando backups...")
+        out(t("cli.recapturing"))
         _capture(args, services, tgt, recipe, out, only=None)
     args.somente_xml = False
     args.agente = None
@@ -535,141 +532,172 @@ def cmd_sincronizar(args: argparse.Namespace, services: Services, out: Out) -> i
 
 # ------------------------------------------------------------------ parser
 def _add_collect_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
-    col = sub.add_parser("coletar", help="coleta do PC atual: drivers, apps, backups")
+    col = sub.add_parser("coletar", aliases=["collect"], help=t("cli.h.collect"))
     col_sub = col.add_subparsers(dest="what", required=True)
-    cdrv = col_sub.add_parser("drivers", parents=[common], help="exporta drivers de terceiros")
-    cdrv.add_argument("--listar", action="store_true", help="só mostra, não exporta")
-    cdrv.add_argument(
-        "--todos", action="store_true", help="todas as classes, não só as recomendadas"
-    )
-    cdrv.add_argument("--classe", action="append", help="só estas classes (ex.: Net, Display)")
+    cdrv = col_sub.add_parser("drivers", parents=[common], help=t("cli.h.collect_drivers"))
+    cdrv.add_argument("--listar", action="store_true", help=t("cli.h.list_only"))
+    cdrv.add_argument("--todos", action="store_true", help=t("cli.h.all_classes"))
+    cdrv.add_argument("--classe", action="append", help=t("cli.h.classes"))
     cdrv.set_defaults(func=cmd_coletar_drivers)
 
-    cbk = col_sub.add_parser(
-        "backups", parents=[common], help="sugere pastas de configuração dos apps marcados"
-    )
+    cbk = col_sub.add_parser("backups", parents=[common], help=t("cli.h.collect_backups"))
     cbk.add_argument("--adicionar-recomendados", action="store_true")
     cbk.set_defaults(func=cmd_coletar_backups)
 
-    capp = col_sub.add_parser("apps", parents=[common], help="lê os apps instalados neste PC")
+    capp = col_sub.add_parser("apps", parents=[common], help=t("cli.h.collect_apps"))
     capp.add_argument(
         "--incluir-redistribuiveis",
         action="store_true",
-        help="inclui Visual C++, .NET etc. (normalmente vêm junto com os apps)",
+        help=t("cli.h.redist"),
     )
     capp.set_defaults(func=cmd_coletar_apps)
 
 
 def _add_apps_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
-    apps = sub.add_parser("apps", help="escolher e preparar os aplicativos da receita")
+    apps = sub.add_parser("apps", help=t("cli.h.apps"))
     apps_sub = apps.add_subparsers(dest="action", required=True)
-    apps_sub.add_parser("listar", parents=[common]).set_defaults(func=cmd_apps_listar)
-    for name, value in (("marcar", True), ("desmarcar", False)):
-        mk = apps_sub.add_parser(name, parents=[common])
-        mk.add_argument("ids", nargs="+", help="ids dos apps (veja 'winkit apps listar')")
-        mk.add_argument("--ordem", type=int, help="ordem de instalação (menor primeiro)")
+    apps_sub.add_parser("listar", aliases=["list"], parents=[common]).set_defaults(
+        func=cmd_apps_listar
+    )
+    for name, alias, value in (("marcar", "select", True), ("desmarcar", "deselect", False)):
+        mk = apps_sub.add_parser(name, aliases=[alias], parents=[common])
+        mk.add_argument("ids", nargs="+", help=t("cli.h.app_ids"))
+        mk.add_argument("--ordem", type=int, help=t("cli.h.order"))
         mk.add_argument(
             "--decidir-na-hora",
             action=argparse.BooleanOptionalAction,
             default=None,
-            help="mostrar na janela do primeiro login para confirmar",
+            help=t("cli.h.decide_later"),
         )
         mk.set_defaults(func=cmd_apps_marcar, command_value=value)
     bx = apps_sub.add_parser(
-        "baixar", parents=[common], help="baixa para o pendrive (offline) com winget download"
+        "baixar", aliases=["download"], parents=[common], help=t("cli.h.download")
     )
-    bx.add_argument("ids", nargs="*", help="padrão: todos os marcados que usam o winget")
+    bx.add_argument("ids", nargs="*", help=t("cli.h.download_ids"))
     bx.set_defaults(func=cmd_apps_baixar)
-    ad = apps_sub.add_parser("adicionar", parents=[common], help="usa um instalador seu")
-    ad.add_argument("--instalador", required=True, help="caminho do .exe/.msi/.msix")
-    ad.add_argument("--nome", required=True, help="nome do app")
-    ad.add_argument("--args", help="argumentos silenciosos (padrão: detectados pelo tipo)")
+    ad = apps_sub.add_parser(
+        "adicionar", aliases=["add"], parents=[common], help=t("cli.h.add_app")
+    )
+    ad.add_argument("--instalador", required=True, help=t("cli.h.installer"))
+    ad.add_argument("--nome", required=True, help=t("cli.h.app_name"))
+    ad.add_argument("--args", help=t("cli.h.silent_args"))
     ad.add_argument("--escopo", choices=["machine", "user"], default="machine")
     ad.set_defaults(func=cmd_apps_adicionar)
-    pt = apps_sub.add_parser("portatil", parents=[common], help="app sem instalador (só a pasta)")
-    pt.add_argument("--pasta", required=True, help="pasta do programa neste PC")
+    pt = apps_sub.add_parser(
+        "portatil", aliases=["portable"], parents=[common], help=t("cli.h.portable")
+    )
+    pt.add_argument("--pasta", required=True, help=t("cli.h.portable_folder"))
     pt.add_argument("--nome", required=True)
-    pt.add_argument("--exe", required=True, help="executável dentro da pasta (ex.: app.exe)")
+    pt.add_argument("--exe", required=True, help=t("cli.h.portable_exe"))
     pt.set_defaults(func=cmd_apps_portatil)
 
 
 def _add_backup_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
-    bk = sub.add_parser("backup", help="pastas e arquivos de configuração")
+    bk = sub.add_parser("backup", help=t("cli.h.backup"))
     bk_sub = bk.add_subparsers(dest="action", required=True)
-    add = bk_sub.add_parser("adicionar", parents=[common], help="inclui uma pasta ou arquivo")
-    add.add_argument("caminho", help=r"ex.: C:\Users\Voce\AppData\Roaming\discord")
+    add = bk_sub.add_parser(
+        "adicionar", aliases=["add"], parents=[common], help=t("cli.h.backup_add")
+    )
+    add.add_argument("caminho", help=t("cli.h.backup_path"))
     add.add_argument("--nome")
     add.add_argument(
         "--conflito",
         choices=["merge", "overwrite", "skip"],
         default="merge",
-        help="se já existir no PC novo: mesclar (padrão), sobrescrever ou pular",
+        help=t("cli.h.conflict"),
     )
     add.add_argument("--decidir-na-hora", action="store_true")
     add.set_defaults(func=cmd_backup_adicionar)
-    bk_sub.add_parser("listar", parents=[common]).set_defaults(func=cmd_backup_listar)
-    cap = bk_sub.add_parser("capturar", parents=[common], help="copia para o pendrive")
+    bk_sub.add_parser("listar", aliases=["list"], parents=[common]).set_defaults(
+        func=cmd_backup_listar
+    )
+    cap = bk_sub.add_parser(
+        "capturar", aliases=["capture"], parents=[common], help=t("cli.h.capture")
+    )
     cap.add_argument("ids", nargs="*")
-    cap.add_argument("--sem-vss", action="store_true", help="não usar cópia de sombra")
+    cap.add_argument("--sem-vss", action="store_true", help=t("cli.h.no_vss"))
     cap.set_defaults(func=cmd_backup_capturar)
-    rm = bk_sub.add_parser("remover", parents=[common])
+    rm = bk_sub.add_parser("remover", aliases=["remove"], parents=[common])
     rm.add_argument("id")
     rm.set_defaults(func=cmd_backup_remover)
 
     sync = sub.add_parser(
         "sincronizar",
+        aliases=["sync"],
         parents=[common],
-        help="recaptura backups e atualiza o pendrive (só o que mudou)",
+        help=t("cli.h.sync"),
     )
     sync.add_argument("--sem-backups", action="store_true")
     sync.add_argument("--sem-vss", action="store_true")
     sync.set_defaults(func=cmd_sincronizar)
 
 
+def choose_language(argv: Sequence[str]) -> None:
+    """Idioma antes de montar o parser, para a ajuda já sair traduzida (D-030, D-032).
+
+    Ordem: ``--idioma`` → ``WINKIT_LANG`` → idioma do Windows.
+    """
+    chosen = None
+    for i, arg in enumerate(argv):
+        if arg == "--idioma" and i + 1 < len(argv):
+            chosen = argv[i + 1]
+        elif arg.startswith("--idioma="):
+            chosen = arg.split("=", 1)[1]
+    if chosen and chosen != "auto" and chosen in CHOICES:
+        set_language(normalize(chosen))
+    else:
+        set_language(detect_language())
+
+
 def build_parser() -> argparse.ArgumentParser:
     common = argparse.ArgumentParser(add_help=False)
-    common.add_argument("--pendrive", help="letra da unidade do pendrive Ventoy (ex.: E:)")
-    common.add_argument("--raiz", help="usar uma pasta como se fosse o pendrive (simulação)")
+    common.add_argument("--pendrive", help=t("cli.h.pendrive"))
+    common.add_argument("--raiz", help=t("cli.h.root"))
     common.add_argument("--sistema-arquivos", default="exFAT", help=argparse.SUPPRESS)
-    common.add_argument("--perfil", default="padrao", help="perfil da receita (padrão: padrao)")
+    common.add_argument("--perfil", default="padrao", help=t("cli.h.profile"))
 
-    parser = argparse.ArgumentParser(prog="winkit", description="WinKit Studio")
+    parser = argparse.ArgumentParser(prog="winkit", description=t("cli.h.description"))
     parser.add_argument("--version", action="version", version=f"WinKit {__version__}")
-    parser.add_argument("-v", "--verbose", action="store_true", help="mostra detalhes técnicos")
+    parser.add_argument("-v", "--verbose", action="store_true", help=t("cli.h.verbose"))
+    parser.add_argument("--idioma", choices=CHOICES, default="auto", help=t("cli.h.language"))
     sub = parser.add_subparsers(dest="command", required=True)
 
-    pend = sub.add_parser("pendrive", help="pendrives Ventoy conectados")
+    pend = sub.add_parser("pendrive", aliases=["drive"], help=t("cli.h.pendrive_cmd"))
     pend_sub = pend.add_subparsers(dest="action", required=True)
-    pend_sub.add_parser("listar", parents=[common]).set_defaults(func=cmd_pendrive_listar)
+    pend_sub.add_parser("listar", aliases=["list"], parents=[common]).set_defaults(
+        func=cmd_pendrive_listar
+    )
 
-    rec = sub.add_parser("receita", help="criar e consultar a receita")
+    rec = sub.add_parser("receita", aliases=["recipe"], help=t("cli.h.recipe"))
     rec_sub = rec.add_subparsers(dest="action", required=True)
-    nova = rec_sub.add_parser("nova", parents=[common], help="cria uma receita nova")
-    nova.add_argument("--usuario", required=True, help="nome da conta local do Windows novo")
-    nova.add_argument("--nome-pc", help="nome do computador")
+    nova = rec_sub.add_parser("nova", aliases=["new"], parents=[common], help=t("cli.h.recipe_new"))
+    nova.add_argument("--usuario", required=True, help=t("cli.h.user"))
+    nova.add_argument("--nome-pc", help=t("cli.h.pc_name"))
     nova.add_argument("--sobrescrever", action="store_true")
     nova.set_defaults(func=cmd_receita_nova)
 
-    pl = sub.add_parser("plano", parents=[common], help="mostra o que o Agente vai fazer")
+    pl = sub.add_parser("plano", aliases=["plan"], parents=[common], help=t("cli.h.plan"))
     pl.add_argument("--windows", type=int, choices=[10, 11], default=11)
     pl.add_argument("--build", type=int, default=None)
-    pl.add_argument("--sem-fase1", action="store_true", help="simula a Fase 1 não ter rodado")
+    pl.add_argument("--sem-fase1", action="store_true", help=t("cli.h.no_phase1"))
     pl.set_defaults(func=cmd_plano)
 
-    cons = sub.add_parser("construir", parents=[common], help="prepara o pendrive")
+    cons = sub.add_parser("construir", aliases=["build"], parents=[common], help=t("cli.h.build"))
     cons.add_argument(
         "--somente-xml",
         action="store_true",
-        help="só XMLs, ventoy.json e bootstrap (sem apps, drivers e backups)",
+        help=t("cli.h.xml_only"),
     )
-    cons.add_argument("--agente", help="pasta do Agente compilado (winkit-agent)")
+    cons.add_argument("--agente", help=t("cli.h.agent_folder"))
     cons.set_defaults(func=cmd_construir)
 
     _add_collect_parsers(sub, common)
     _add_apps_parsers(sub, common)
     _add_backup_parsers(sub, common)
 
-    val = sub.add_parser("validar", parents=[common], help="confere o pendrive sem alterar nada")
+    val = sub.add_parser(
+        "validar", aliases=["validate"], parents=[common], help=t("cli.h.validate")
+    )
     val.set_defaults(func=cmd_validar)
     return parser
 
@@ -677,6 +705,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main(
     argv: Sequence[str] | None = None, *, services: Services | None = None, out: Out = _out
 ) -> int:
+    choose_language(sys.argv[1:] if argv is None else argv)
     parser = build_parser()
     args = parser.parse_args(argv)
     logging.basicConfig(
@@ -691,7 +720,7 @@ def main(
         out(str(exc))
         return 2
     except WinKitError as exc:
-        out(f"Erro: {exc}")
+        out(t("cli.error", detail=exc))
         return 2
 
 

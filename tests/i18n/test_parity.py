@@ -57,7 +57,12 @@ def test_every_entry_formats(lang: str) -> None:
 
 #: Textos que coincidem de verdade com o português (nomes, siglas e palavras iguais).
 SAME_AS_BASE: dict[str, set[str]] = {
-    "en-US": {"plan.driver", "studio.pendrive.iso_detail", "studio.apps.src_winget"},
+    "en-US": {
+        "plan.driver",
+        "studio.pendrive.iso_detail",
+        "studio.apps.src_winget",
+        "cli.backup_added",
+    },
     "es": {
         "validate.warnings",
         "ui.agent.progress_title",
@@ -67,6 +72,8 @@ SAME_AS_BASE: dict[str, set[str]] = {
         "studio.keywords.pendrive",
         "studio.keywords.apps",
         "studio.backups.recommended",
+        "cli.iso_ignored",
+        "collect.portable_name",
     },
 }
 ALWAYS_SAME = {

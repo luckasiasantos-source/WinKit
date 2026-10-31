@@ -14,6 +14,7 @@ from winkit.core.manifest.manifest import load_manifest, verify_tree
 from winkit.core.recipe.validation import validate_recipe
 from winkit.core.unattend.generator import check_safety
 from winkit.core.ventoy.config import winkit_entries
+from winkit.i18n import t
 
 FAT32_LIMIT = 4 * 1024**3 - 1
 
@@ -38,7 +39,7 @@ def validate_pendrive(
         rep.problems.append(str(exc))
         return rep
     if marker is None:
-        rep.problems.append("pendrive sem WinKit\\winkit.marker (rode 'winkit construir')")
+        rep.problems.append(t("validate.no_marker"))
         return rep
 
     _check_recipe(root, catalogs, profile_id, marker.pendrive_id, rep)
@@ -48,7 +49,7 @@ def validate_pendrive(
     if file_system.upper() in ("FAT32", "FAT"):
         for path in (root / layout.WINKIT).rglob("*"):
             if path.is_file() and path.stat().st_size > FAT32_LIMIT:
-                rep.problems.append(f"arquivo acima de 4 GB em FAT32: {path}")
+                rep.problems.append(t("pendrive.fat32_big_file", path=path))
     return rep
 
 
@@ -64,37 +65,37 @@ def _check_recipe(
     rep.problems.extend(result.errors)
     rep.warnings.extend(result.warnings)
     if recipe.meta.pendrive_id != pendrive_id:
-        rep.warnings.append("a receita tem o identificador de outro pendrive (rode 'construir')")
+        rep.warnings.append(t("validate.other_pendrive"))
     for d in recipe.selected_drivers():
         if not layout.payload(root, d.path).exists():
-            rep.problems.append(f"driver {d.id}: pasta ausente ({d.path})")
+            rep.problems.append(t("validate.driver_missing", id=d.id, path=d.path))
     for a in recipe.selected_apps():
         if a.installer and a.installer.path and not layout.payload(root, a.installer.path).exists():
-            rep.problems.append(f"app {a.id}: instalador ausente ({a.installer.path})")
+            rep.problems.append(t("validate.installer_missing", id=a.id, path=a.installer.path))
     for b in recipe.selected_backups():
         if not layout.payload(root, b.data_path).exists():
-            rep.problems.append(f"backup {b.id}: pasta ausente ({b.data_path})")
+            rep.problems.append(t("validate.backup_missing", id=b.id, path=b.data_path))
 
 
 def _check_ventoy(root: Path, rep: PendriveReport) -> None:
     path = root / layout.VENTOY_JSON
     if not path.is_file():
-        rep.problems.append("ventoy/ventoy.json não existe")
+        rep.problems.append(t("validate.no_ventoy_json"))
         return
     try:
         entries = winkit_entries(path.read_text(encoding="utf-8-sig"))
     except VentoyConfigError as exc:
-        rep.problems.append(f"ventoy.json inválido: {exc}")
+        rep.problems.append(t("validate.ventoy_json_invalid", detail=exc))
         return
     if not entries:
-        rep.warnings.append("nenhuma ISO associada a um modelo do WinKit no ventoy.json")
+        rep.warnings.append(t("validate.no_iso_entries"))
     for e in entries:
         iso = root / e.image.lstrip("/")
         xml = root / e.template.lstrip("/")
         if not iso.is_file():
-            rep.warnings.append(f"ventoy.json cita uma ISO que não existe: {e.image}")
+            rep.warnings.append(t("validate.iso_missing", image=e.image))
         if not xml.is_file():
-            rep.problems.append(f"modelo ausente: {e.template}")
+            rep.problems.append(t("validate.template_missing", name=e.template))
             continue
         try:
             check_safety(xml.read_bytes())
@@ -109,13 +110,9 @@ def _check_agent(root: Path, rep: PendriveReport) -> None:
     if version_file.is_file():
         version = version_file.read_text(encoding="utf-8").strip()
         if version != __version__:
-            rep.warnings.append(
-                f"Agente no pendrive é a versão {version}; o Studio é {__version__}"
-            )
+            rep.warnings.append(t("validate.agent_version", agent=version, studio=__version__))
     if not (root / layout.AGENT_BIN_DIR / layout.AGENT_EXE_NAME).is_file():
-        rep.warnings.append(
-            "o executável do Agente não está no pendrive: a instalação só fará a parte do XML"
-        )
+        rep.warnings.append(t("validate.no_agent_exe"))
 
 
 def _check_manifest(root: Path, rep: PendriveReport) -> None:

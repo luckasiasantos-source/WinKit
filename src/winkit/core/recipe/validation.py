@@ -74,13 +74,13 @@ def username_problem(name: str) -> str | None:
 def payload_path_problem(path: str, profile_id: str) -> str | None:
     """Caminhos dentro do pendrive: relativos, com '/', sem '..', em pastas permitidas."""
     if "\\" in path or path.startswith("/") or ":" in path:
-        return f"caminho do pendrive deve ser relativo e usar '/': {path!r}"
+        return t("recipe.path_relative", path=repr(path))
     if any(part in ("..", ".") or not part for part in path.split("/")):
-        return f"caminho do pendrive inválido: {path!r}"
+        return t("recipe.path_invalid", path=repr(path))
     if path.startswith("Perfis/") and not path.startswith(f"Perfis/{profile_id}/"):
-        return f"caminho de outro perfil: {path!r}"
+        return t("recipe.path_other_profile", path=repr(path))
     if not path.startswith(_ALLOWED_PAYLOAD_ROOTS):
-        return f"caminho fora de Apps/, Drivers/ ou Perfis/: {path!r}"
+        return t("recipe.path_outside", path=repr(path))
     return None
 
 
@@ -131,7 +131,7 @@ def validate_recipe(recipe: Recipe, catalogs: Catalogs | None = None) -> Validat
         except PathTemplateError as exc:
             err(f"backup {b.id}: {exc}")
         if b.related_app and b.related_app not in app_ids:
-            warn(f'backup {b.id}: app relacionado "{b.related_app}" não está na receita')
+            warn(t("recipe.related_app_missing", id=b.id, app=b.related_app))
     for a in recipe.apps:
         _validate_app(a, backup_ids, app_ids, err, warn)
     cycle = find_cycle({a.id: list(a.depends_on) for a in recipe.apps})
@@ -158,7 +158,7 @@ def _validate_windows(recipe: Recipe, catalogs: Catalogs | None, err: Sink, warn
             err(t("recipe.password_missing"))
         warn(t("recipe.password_stored_warning"))
     if catalogs is not None and catalogs.edition(win.edition) is None:
-        err(f"edição desconhecida: {win.edition}")
+        err(t("recipe.unknown_edition", edition=win.edition))
 
 
 def _validate_ids_and_paths(recipe: Recipe, err: Sink) -> None:
@@ -204,10 +204,7 @@ def _validate_silent(recipe: Recipe, warn: Sink) -> None:
     if recipe.windows.computer_name_decide_at_runtime:
         asking.append("computer_name")
     if asking:
-        warn(
-            "No modo silencioso nada é perguntado; estes itens usarão a escolha padrão: "
-            + ", ".join(asking)
-        )
+        warn(t("recipe.silent_asks", ids=", ".join(asking)))
 
 
 def _validate_app(
@@ -236,7 +233,7 @@ def _validate_app(
     elif a.source == "portable" and (not a.portable_backup or a.portable_backup not in backup_ids):
         err(t("recipe.portable_needs_backup", id=a.id))
     if a.winget_source == "msstore" and a.source == "offline":
-        warn(f"app {a.id}: apps da Microsoft Store não podem ser baixados para uso offline")
+        warn(t("recipe.store_offline", id=a.id))
 
 
 def ensure_valid(recipe: Recipe, catalogs: Catalogs | None = None) -> ValidationReport:

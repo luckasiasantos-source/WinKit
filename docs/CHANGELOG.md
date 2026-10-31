@@ -28,6 +28,28 @@
 
 ---
 
+## 2026-10-31 — M11 — Agente, CLI e mensagens do motor em três idiomas
+**Tipo:** implementação + testes
+**Resumo:** o Agente passa a falar o idioma da receita (`auto` = idioma do Windows novo); a CLI ganha `--idioma`, `WINKIT_LANG` e apelidos em inglês (`build`, `recipe new`…); os avisos do Construtor, da validação e do Coletor saem traduzidos. Dois testes de proteção garantem que nenhuma chave falta, nenhuma sobra e nenhum texto de interface fica solto no código.
+
+### Adicionado
+- `tests/i18n/test_usage.py` — R-51 (uso das chaves) e R-55 (AST: nada de texto solto em interface, ajuda e saída)
+- `tests/agent/test_language.py` — Agente em inglês (automático) e em espanhol (explícito)
+- `tests/cli/test_cli.py` — `--idioma`, apelidos em inglês e `WINKIT_LANG`
+- ~120 chaves `cli.*`, `validate.*`, `builder.*`, `collect.*`, `recipe.*`
+
+### Alterado
+- `src/winkit/agent/phases.py`, `src/winkit/agent/main.py` — `apply_language` com o idioma da receita
+- `src/winkit/cli/main.py` — textos por chave, `choose_language`, `--idioma`, apelidos
+- `src/winkit/builder/{build,validate}.py`, `src/winkit/collector/{apps,backups}.py`, `src/winkit/core/recipe/validation.py` — mensagens por chave
+- `src/winkit/agent/ui/qt.py` — exemplo de nome de PC traduzido
+
+### Removido
+- 15 chaves que não eram mais usadas, nas três tabelas
+
+### Documentos vivos atualizados
+- ARQUITETURA — §5.12 com R-51, R-55 e IN-013; STATUS — itens do M11; PLANO_V2 — nota sobre a CLI
+
 ## 2026-10-31 — M11 — Studio em três idiomas, com grupos, busca e preferências
 **Tipo:** implementação + refatoração
 **Resumo:** todos os textos do Studio passam a vir das tabelas de tradução. As páginas saem de um arquivo único e viram um pacote por grupo. A barra lateral ganha grupos (Preparar, O que levar, Sistema, Concluir), busca por título e palavras-chave, e um botão de Preferências para idioma e tema que reconstrói a janela sem reiniciar (D-042).

@@ -73,9 +73,7 @@ def ensure_marker(root: Path, now: datetime) -> layout.Marker:
 def load_profile_recipe(root: Path, profile_id: str) -> Recipe:
     path = root / layout.recipe_file(profile_id)
     if not path.is_file():
-        raise RecipeError(
-            f"receita não encontrada em {path}. Crie com: winkit receita nova --usuario <nome>"
-        )
+        raise RecipeError(t("builder.recipe_missing", path=path))
     return load_recipe(path.read_text(encoding="utf-8-sig"))
 
 
@@ -102,10 +100,10 @@ def _group_isos(
                     recipe_arch=recipe.windows.architecture,
                 )
             )
-            report.skipped.append((iso.image, "arquitetura diferente da receita"))
+            report.skipped.append((iso.image, t("builder.skip_arch")))
             continue
         if iso.os_major is not None and iso.os_major not in recipe.windows.target_os:
-            report.skipped.append((iso.image, f"receita não marcada para Windows {iso.os_major}"))
+            report.skipped.append((iso.image, t("builder.skip_os", os=iso.os_major)))
             continue
         lang = iso.default_language or FALLBACK_LANGUAGE
         groups[(lang, iso.architecture)].append(iso)
@@ -180,7 +178,7 @@ def _copy_agent(root: Path, options: BuildOptions, report: BuildReport) -> None:
         return
     exe = options.agent_source / layout.AGENT_EXE_NAME
     if not exe.is_file():
-        raise PendriveError(f"Agente não encontrado em {options.agent_source}")
+        raise PendriveError(t("builder.agent_missing", path=options.agent_source))
     dest = root / layout.AGENT_BIN_DIR
     if dest.exists():
         shutil.rmtree(dest)
@@ -203,9 +201,7 @@ def build(
 
     recipe = load_profile_recipe(root, options.profile_id)
     if recipe.meta.pendrive_id != marker.pendrive_id:
-        report.warnings.append(
-            "A receita foi criada para outro pendrive; o identificador foi atualizado."
-        )
+        report.warnings.append(t("builder.pendrive_id_updated"))
         recipe.meta.pendrive_id = marker.pendrive_id
         recipe.meta.updated_at = now
         save_profile_recipe(root, recipe)

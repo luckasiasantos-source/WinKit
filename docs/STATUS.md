@@ -164,7 +164,9 @@
 - ✅ `winkit/i18n`: idiomas, `t`/`tn` com plural, `Msg`, formatação por idioma, tabelas pt-BR/en-US/es com paridade testada (R-51); contrato de pureza no import-linter
 - ✅ `Msg` no estado (schema 2, com migração da v1), nas etapas, no executor e no resumo (HTML com `lang` e datas por idioma)
 - ✅ Studio: textos por chave nos três idiomas; páginas divididas em `studio/ui/pages/`; barra lateral agrupada com busca; Preferências (idioma e tema) com troca sem reiniciar (D-042)
-- ⬜ Extração dos textos da janela do Agente e da CLI; teste AST (R-55)
+- ✅ Janela do Agente, resumo e notificações no idioma da receita (`execution.language`; `auto` = idioma do Windows novo)
+- ✅ CLI: textos por chave, `--idioma`, `WINKIT_LANG`, apelidos em inglês (D-032); avisos do Construtor, da validação e do Coletor traduzidos
+- ✅ Testes de proteção: uso das chaves (R-51) e nenhum texto de interface solto (R-55)
 - ⬜ Catálogos traduzidos, detecção do idioma, troca no Studio, idioma do Agente pela receita
 - ⬜ README, NOTICE, LEIA-ME e notas da release trilíngues; capturas; roteiro `M11.md`
 

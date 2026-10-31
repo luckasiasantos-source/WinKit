@@ -25,7 +25,7 @@ from winkit.core.recipe.models import (
     ShortcutSpec,
 )
 from winkit.core.text import human_size, slugify
-from winkit.i18n import t
+from winkit.i18n import t, tn
 from winkit.platform.copy import Copier, tree_stats
 from winkit.platform.vss import PendingSnapshots, ShadowCopies, Snapshot
 
@@ -190,7 +190,7 @@ def add_portable_app(
     item, _ = add_backup(
         recipe,
         catalogs,
-        name=f"{name} (programa portátil)",
+        name=t("collect.portable_name", name=name),
         literal=literal_folder,
         old_folders=old_folders,
         windows_dir=windows_dir,
@@ -283,7 +283,7 @@ class _Snapshots:
                 self.vss.delete(snap.id)
                 self.pending.remove(snap.id)
             except Exception as exc:  # noqa: BLE001 — fica pendente para a próxima execução
-                self.notes.append(f"cópia de sombra {snap.id} não foi apagada: {exc}")
+                self.notes.append(t("collect.vss_not_deleted", id=snap.id, detail=exc))
         self.active.clear()
 
 
@@ -331,7 +331,7 @@ def capture(
         src = local_source(volume_root(literal[:2].upper()), literal)
         if not src.exists():
             report.items.append(
-                CaptureItemReport(b.id, False, message=f"não existe neste PC: {literal}")
+                CaptureItemReport(b.id, False, message=t("collect.source_missing", path=literal))
             )
             continue
         needed += tree_stats(src, b.exclude).bytes
@@ -413,5 +413,5 @@ def _capture_one(
         size=stats.bytes,
         used_vss=vss_root is not None,
         warnings=warnings,
-        message=f"{stats.files} arquivos, {human_size(stats.bytes)}",
+        message=tn("collect.captured", stats.files, size=human_size(stats.bytes)),
     )
