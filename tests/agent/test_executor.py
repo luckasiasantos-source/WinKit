@@ -10,6 +10,7 @@ from tests.factories import app, backup
 from winkit.agent.eventlog import EventLog
 from winkit.agent.phases import open_session
 from winkit.agent.steps.base import StepContext, StepResult
+from winkit.i18n import legacy, render
 
 
 @dataclass
@@ -60,7 +61,7 @@ def test_failure_is_isolated_and_dependents_skipped(world: World) -> None:
     s.executor(world.ui).run_phase(1)
     states = {k: v.status for k, v in s.state.steps.items()}
     assert states["app:a"] == "failed"
-    assert "boom" in (s.state.step("app:a").error or "")
+    assert "boom" in render(s.state.step("app:a").error)
     assert states["app:c"] == "done"  # seguiu adiante (P4)
     assert states["backup:bk"] == "done"
     # b depende de a; a falhou mas ainda pode ser tentado de novo → b espera
@@ -68,11 +69,11 @@ def test_failure_is_isolated_and_dependents_skipped(world: World) -> None:
 
 
 def test_dependency_with_final_failure_skips(world: World) -> None:
-    scripted = Scripted(results={"app:a": StepResult.failed("hash", recoverable=False)})
+    scripted = Scripted(results={"app:a": StepResult.failed(legacy("hash"), recoverable=False)})
     s = session(world, scripted)
     s.executor(world.ui).run_phase(1)
     assert s.state.step("app:b").status == "skipped"
-    assert "app:a" in (s.state.step("app:b").reason or "")
+    assert "app:a" in render(s.state.step("app:b").reason)
 
 
 def test_check_marks_done_without_running(world: World) -> None:
@@ -81,7 +82,7 @@ def test_check_marks_done_without_running(world: World) -> None:
     s.executor(world.ui).run_phase(1)
     assert "app:c" not in scripted.ran
     assert s.state.step("app:c").status == "done"
-    assert s.state.step("app:c").reason == "já estava feito"
+    assert render(s.state.step("app:c").reason) == "já estava feito"
 
 
 def test_missing_pendrive_defers_without_spending_attempts(world: World) -> None:
@@ -91,7 +92,7 @@ def test_missing_pendrive_defers_without_spending_attempts(world: World) -> None
     s.executor(world.ui).run_phase(1)
     st_a = s.state.step("app:a")
     assert st_a.status == "pending" and st_a.attempts == 0
-    assert "pendrive" in (st_a.reason or "").lower()
+    assert "pendrive" in render(st_a.reason).lower()
     assert world.sleeps  # esperou antes de desistir
     assert ("waiting", ("pendrive", True)) in world.ui.events
     assert scripted.ran == []
@@ -120,11 +121,11 @@ def test_no_network_defers_winget(world: World) -> None:
     s = session(world, scripted, phase=2)
     s.executor(world.ui).run_phase(2)
     assert s.state.step("app:w").status == "pending"
-    assert "internet" in (s.state.step("app:w").reason or "")
+    assert "internet" in render(s.state.step("app:w").reason)
 
 
 def test_deferred_result_returns_to_pending(world: World) -> None:
-    scripted = Scripted(results={"app:c": StepResult.deferred("esperando")})
+    scripted = Scripted(results={"app:c": StepResult.deferred(legacy("esperando"))})
     s = session(world, scripted)
     out = s.executor(world.ui).run_phase(1)
     assert out.deferred >= 1
@@ -146,7 +147,7 @@ def test_unselected_user_choice_is_skipped(world: World) -> None:
     s = session(world, scripted, phase=2)
     s.executor(world.ui).run_phase(2, selection=frozenset())
     assert s.state.step("app:c").status == "skipped"
-    assert s.state.step("app:c").reason == "desmarcado na janela"
+    assert render(s.state.step("app:c").reason) == "desmarcado na janela"
 
 
 def test_state_is_persisted_after_each_step(world: World) -> None:

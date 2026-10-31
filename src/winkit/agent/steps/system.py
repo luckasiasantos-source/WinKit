@@ -5,6 +5,7 @@ from __future__ import annotations
 from winkit.agent.steps.base import StepContext, StepResult
 from winkit.core.errors import WinKitError
 from winkit.core.recipe.validation import validate_computer_name
+from winkit.i18n import msg
 from winkit.platform.appx import DEPROVISIONED
 from winkit.platform.system import system32
 
@@ -35,16 +36,16 @@ class BloatStep:
         try:
             res = ctx.services.appx.remove(name)
         except WinKitError as exc:
-            return StepResult.failed(str(exc))
+            return StepResult.failed(msg("step.failed_generic", detail=str(exc)))
         if ctx.recipe.bloatware.block_reinstall:  # item 37
             entry = ctx.catalogs.bloat(name)
             family = res.family or (entry.family_name if entry else None)
             if family:
                 ctx.services.registry.create_key("HKLM", f"{DEPROVISIONED}\\{family}")
         if res.provisioned == 0 and res.installed == 0:
-            return StepResult.ok("não estava instalado")
+            return StepResult.ok(msg("step.bloat_absent"))
         return StepResult.ok(
-            f"removido ({res.provisioned} provisionado, {res.installed} instalado)"
+            msg("step.bloat_removed", provisioned=res.provisioned, installed=res.installed)
         )
 
 
@@ -71,7 +72,7 @@ class PowerStep:
 
     def run(self, ctx: StepContext) -> StepResult:
         p = ctx.recipe.power
-        problems: list[str] = []
+        scheme_failed = hibernate_failed = False
         if p.scheme != "unchanged":
             source, copy = {
                 "balanced": (BALANCED, None),
@@ -79,16 +80,20 @@ class PowerStep:
                 "ultimate": (ULTIMATE, WINKIT_ULTIMATE),
             }[p.scheme]
             if not self._activate(ctx, source, copy):
-                problems.append(f"plano {p.scheme} não pôde ser ativado")
+                scheme_failed = True
         hibernate_arg = None if p.hibernate is None else ("on" if p.hibernate else "off")
         if hibernate_arg and self._powercfg(ctx, "/hibernate", hibernate_arg) != 0:
-            problems.append("hibernação não pôde ser alterada")
+            hibernate_failed = True
         if p.fast_startup is not None:
             ctx.services.registry.set(
                 "HKLM", POWER_KEY, "HiberbootEnabled", "dword", 1 if p.fast_startup else 0
             )
-        if problems:
-            return StepResult.failed("; ".join(problems))
+        if scheme_failed and hibernate_failed:
+            return StepResult.failed(msg("step.power_both_failed", scheme=p.scheme))
+        if scheme_failed:
+            return StepResult.failed(msg("step.power_scheme_failed", scheme=p.scheme))
+        if hibernate_failed:
+            return StepResult.failed(msg("step.hibernate_failed"))
         return StepResult.ok()
 
 
@@ -99,13 +104,13 @@ class RenameComputerStep:
     def run(self, ctx: StepContext) -> StepResult:
         name = ctx.state.computer_name_choice or ctx.recipe.windows.computer_name
         if not name:
-            return StepResult.skipped("nenhum nome escolhido")
+            return StepResult.skipped(msg("step.no_name_chosen"))
         if not validate_computer_name(name):
-            return StepResult.failed(f"nome inválido: {name}", recoverable=False)
+            return StepResult.failed(msg("step.invalid_name", name=name), recoverable=False)
         try:
             renamed = ctx.services.features.rename_computer(name)
         except WinKitError as exc:
-            return StepResult.failed(str(exc))
+            return StepResult.failed(msg("step.failed_generic", detail=str(exc)))
         if not renamed:
-            return StepResult.ok("o computador já tinha esse nome")
-        return StepResult.ok(f"renomeado para {name}", reboot=True)
+            return StepResult.ok(msg("step.same_name"))
+        return StepResult.ok(msg("step.renamed", name=name), reboot=True)

@@ -15,6 +15,7 @@ from winkit.core.catalog.loader import default_catalogs
 from winkit.core.inventory import InstalledApp
 from winkit.core.recipe.models import AfterInstall, AppItem, AutostartEntry, ShortcutSpec
 from winkit.core.state.models import AgentState
+from winkit.i18n import render
 from winkit.platform.fakes.apps import FakeInstallerRunner, FakeInventory, FakeShortcuts, FakeWinget
 from winkit.platform.fakes.disks import FakeDiskInspector, windows_iso
 from winkit.platform.fakes.registry import FakeRegistry
@@ -104,14 +105,14 @@ def test_installer_exit_codes(world: World) -> None:
 def test_installer_failure_hint(world: World) -> None:
     installers(world).exit_code = 1603
     run_phase1(world.runtime())
-    err = state(world).step("app:ferramenta").error or ""
+    err = render(state(world).step("app:ferramenta").error)
     assert "1603" in err and "Instale manualmente" in err
 
 
 def test_installer_timeout(world: World) -> None:
     installers(world).timed_out = True
     run_phase1(world.runtime())
-    assert "tempo limite" in (state(world).step("app:ferramenta").error or "")
+    assert "tempo limite" in render(state(world).step("app:ferramenta").error)
 
 
 def test_tampered_installer(world: World) -> None:
@@ -128,7 +129,7 @@ def test_already_installed_is_detected(world: World) -> None:
     inv.apps = [InstalledApp(name="Ferramenta", scope="machine")]
     run_phase1(world.runtime())
     assert installers(world).ran == []
-    assert state(world).step("app:ferramenta").reason == "já estava feito"
+    assert render(state(world).step("app:ferramenta").reason) == "já estava feito"
 
 
 def test_winget_registers_and_waits(world: World) -> None:
@@ -147,7 +148,7 @@ def test_winget_never_available_defers(world: World) -> None:
     run_phase1(world.runtime())
     run_phase2(world.runtime())
     st = state(world).step("app:discord")
-    assert st.status == "pending" and "winget" in (st.reason or "")
+    assert st.status == "pending" and "winget" in render(st.reason)
     assert ("waiting", ("winget", True)) in world.ui.events
 
 
@@ -155,7 +156,7 @@ def test_winget_failure_code(world: World) -> None:
     winget(world).install_code = 0x8A150011
     run_phase1(world.runtime())
     run_phase2(world.runtime())
-    assert "0x8A150011" in (state(world).step("app:discord").error or "")
+    assert "0x8A150011" in render(state(world).step("app:discord").error)
 
 
 def test_winget_already_installed_check(world: World) -> None:

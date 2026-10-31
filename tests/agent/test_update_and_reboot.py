@@ -8,6 +8,7 @@ from tests.agent.helpers import World, make_world
 from winkit.agent.phases import run_phase1, run_phase2
 from winkit.agent.store import StateStore
 from winkit.core.state.models import AgentState
+from winkit.i18n import render
 from winkit.platform.fakes.apps import FakeShortcuts
 from winkit.platform.fakes.system_tweaks import FakeSession, FakeUpdater
 from winkit.platform.windows_update import UpdateResult
@@ -45,7 +46,7 @@ def run_all(w: World) -> None:
     ("res", "status", "note"),
     [
         (UpdateResult(0, 2, False), "done", "nenhuma atualização"),
-        (UpdateResult(3, 2, True, ("KB1",)), "done", "3 atualização"),
+        (UpdateResult(3, 2, True, ("KB1",)), "done", "3 atualizações instaladas"),
         (UpdateResult(3, 3, False), "done", "algumas com erro"),
         (UpdateResult(3, 4, False), "failed", "código 4"),
     ],
@@ -55,7 +56,7 @@ def test_windows_update_results(world: World, res: UpdateResult, status: str, no
     run_all(world)
     st = state(world).step("windows_update:all")
     assert st.status == status
-    assert note in ((st.reason or "") + (st.error or ""))
+    assert note in (render(st.reason) + render(st.error))
 
 
 def test_windows_update_drivers_flag_and_disabled(world: World) -> None:

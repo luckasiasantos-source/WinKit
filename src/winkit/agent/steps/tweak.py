@@ -17,6 +17,7 @@ from pathlib import Path
 from winkit.agent.steps.base import StepContext, StepResult, local_path
 from winkit.core.catalog.models import Tweak, TweakOp
 from winkit.core.errors import WinKitError
+from winkit.i18n import msg
 from winkit.platform.registry import DEFAULT_HIVE_MOUNT, mounted_hive
 from winkit.platform.system import system32
 
@@ -124,12 +125,12 @@ class TweakStep:
     def run(self, ctx: StepContext) -> StepResult:
         tweak = ctx.catalogs.tweak(ctx.step.ref)
         if tweak is None:
-            return StepResult.skipped("ajuste desconhecido no catálogo")
+            return StepResult.skipped(msg("plan.excluded_unknown_tweak"))
         reboot = False
         try:
             with registry_scope(ctx, tweak):
                 for op in tweak.apply:
                     reboot = apply_op(ctx, tweak, op) or reboot
         except WinKitError as exc:
-            return StepResult.failed(str(exc))
+            return StepResult.failed(msg("step.failed_generic", detail=str(exc)))
         return StepResult.ok(reboot=reboot)

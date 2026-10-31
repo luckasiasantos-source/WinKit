@@ -10,6 +10,7 @@ from winkit.agent.phases import run_phase1, run_phase2
 from winkit.agent.store import StateStore
 from winkit.core import layout
 from winkit.core.state.models import AgentState
+from winkit.i18n import render
 
 
 def state(w: World) -> AgentState:
@@ -59,7 +60,7 @@ def test_absolute_path_with_missing_drive_is_skipped(world: World) -> None:
     run_phase1(world.runtime())
     run_phase2(world.runtime())
     st = state(world).step("backup:jogo")
-    assert st.status == "skipped" and "Z:" in (st.reason or "")
+    assert st.status == "skipped" and "Z:" in render(st.reason)
 
 
 def test_merge_keeps_existing_and_overwrite_replaces(world: World) -> None:
@@ -89,6 +90,6 @@ def test_skip_policy_and_missing_backup(world: World) -> None:
     default.mkdir(parents=True)
     run_phase1(world.runtime())
     s = state(world)
-    assert s.step("backup:discord").reason == "já estava feito"
+    assert render(s.step("backup:discord").reason) == "já estava feito"
     assert not (default / "settings.json").exists()
     assert s.step("backup:sumiu").status == "failed"

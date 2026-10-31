@@ -11,7 +11,7 @@ from winkit.agent.steps.base import StepContext, StepResult, local_path
 from winkit.core.errors import IntegrityError, PathTemplateError, WinKitError
 from winkit.core.paths import templates
 from winkit.core.recipe.models import AppItem, ShortcutSpec
-from winkit.i18n import t
+from winkit.i18n import msg
 from winkit.platform import winget as wg
 
 START_MENU = r"Microsoft\Windows\Start Menu\Programs"
@@ -80,24 +80,24 @@ class AppStep:
     def run(self, ctx: StepContext) -> StepResult:
         item = _item(ctx)
         if item is None:
-            return StepResult.skipped("app não está mais na receita")
+            return StepResult.skipped(msg("step.not_in_recipe"))
         if item.requires_non_elevated:
             ctx.log.warning("este instalador prefere rodar sem elevação (DT-002)", step=ctx.step.id)
         if item.source == "winget_online":
             return self._winget(ctx, item)
         if item.source == "offline":
             return self._offline(ctx, item)
-        return StepResult.skipped("app portátil: tratado pela etapa de atalhos")
+        return StepResult.skipped(msg("step.portable_by_shortcut"))
 
     # ------------------------------------------------------------------ offline
     def _offline(self, ctx: StepContext, item: AppItem) -> StepResult:
         spec = item.installer
         if spec is None or not spec.path or ctx.pendrive is None:
-            return StepResult.failed(t("recipe.missing_installer", id=item.id), recoverable=False)
+            return StepResult.failed(msg("recipe.missing_installer", id=item.id), recoverable=False)
         try:
             verify_payload(ctx.pendrive, spec.path, tree=False)
         except IntegrityError as exc:
-            return StepResult.failed(t("step.hash_mismatch", path=str(exc)), recoverable=False)
+            return StepResult.failed(msg("step.hash_mismatch", path=str(exc)), recoverable=False)
         source = ctx.payload(spec.path)
         cache = ctx.paths.base / "cache" / item.id
         try:
@@ -110,26 +110,27 @@ class AppStep:
         finally:
             shutil.rmtree(cache, ignore_errors=True)
         if outcome.timed_out:
-            return StepResult.failed(t("step.timeout", minutes=spec.timeout_minutes))
+            return StepResult.failed(msg("step.timeout", minutes=spec.timeout_minutes))
         code = outcome.exit_code
         if code in spec.success_codes or code in spec.reboot_codes:
             after_install(ctx, item)
             return StepResult.ok(reboot=code in spec.reboot_codes)
-        hint = t("step.manual_install_hint", path=f"WinKit\\{spec.path}")
-        return StepResult.failed(f"{t('step.exit_code', code=code)}. {hint}")
+        return StepResult.failed(
+            msg("step.installer_failed", code=code, path=f"WinKit\\{spec.path}")
+        )
 
     # ------------------------------------------------------------------ winget
     def _winget(self, ctx: StepContext, item: AppItem) -> StepResult:
         w = ctx.services.winget
         if not item.winget_id:
-            return StepResult.failed(t("recipe.missing_winget_id", id=item.id), recoverable=False)
+            return StepResult.failed(msg("recipe.missing_winget_id", id=item.id), recoverable=False)
         if not w.available():
             try:
                 w.register()
             except WinKitError as exc:
                 ctx.log.warning(f"registro do App Installer falhou: {exc}", step=ctx.step.id)
             if not ctx.wait(w.available, ctx.winget_wait_seconds, "winget"):
-                return StepResult.deferred(t("step.winget_unavailable"))
+                return StepResult.deferred(msg("step.winget_unavailable"))
         code = w.install(
             item.winget_id,
             scope=item.scope,
@@ -137,13 +138,13 @@ class AppStep:
             log=ctx.log.step_log(ctx.step.id),
         )
         if code == -1:
-            return StepResult.deferred(t("step.winget_unavailable"))
+            return StepResult.deferred(msg("step.winget_unavailable"))
         if code == -2:
-            return StepResult.failed(t("step.timeout", minutes=60))
+            return StepResult.failed(msg("step.timeout", minutes=60))
         if code in wg.SUCCESS_CODES or code in wg.REBOOT_CODES:
             after_install(ctx, item)
             return StepResult.ok(reboot=code in wg.REBOOT_CODES)
-        return StepResult.failed(f"o winget retornou o código 0x{code:08X}")
+        return StepResult.failed(msg("step.winget_code", code=f"0x{code:08X}"))
 
 
 class ShortcutStep:
@@ -158,11 +159,11 @@ class ShortcutStep:
     def run(self, ctx: StepContext) -> StepResult:
         item = _item(ctx)
         if item is None:
-            return StepResult.skipped("app não está mais na receita")
+            return StepResult.skipped(msg("step.not_in_recipe"))
         if not item.after_install.shortcuts:
-            return StepResult.skipped("nenhum atalho definido")
+            return StepResult.skipped(msg("step.no_shortcuts"))
         try:
             create_shortcuts(ctx, item.after_install.shortcuts)
         except (PathTemplateError, WinKitError) as exc:
-            return StepResult.failed(str(exc))
+            return StepResult.failed(msg("step.failed_generic", detail=str(exc)))
         return StepResult.ok()

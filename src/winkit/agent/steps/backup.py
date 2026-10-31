@@ -12,7 +12,7 @@ from winkit.agent.steps.base import StepContext, StepResult, local_path
 from winkit.core.errors import PathTemplateError, WinKitError
 from winkit.core.paths import templates
 from winkit.core.recipe.models import BackupItem
-from winkit.i18n import t
+from winkit.i18n import msg
 
 
 def _item(ctx: StepContext) -> BackupItem | None:
@@ -36,18 +36,18 @@ class BackupStep:
     def run(self, ctx: StepContext) -> StepResult:  # noqa: PLR0911 — um motivo por saída
         item = _item(ctx)
         if item is None:
-            return StepResult.skipped("backup não está mais na receita")
+            return StepResult.skipped(msg("step.not_in_recipe"))
         parsed = templates.parse(item.template)
         if parsed.is_absolute and parsed.drive and not local_path(parsed.drive + "\\").exists():
-            return StepResult.skipped(t("step.drive_missing", drive=parsed.drive))
+            return StepResult.skipped(msg("step.drive_missing", drive=parsed.drive))
         try:
             dest_str = destination(ctx, item)
         except PathTemplateError as exc:
-            return StepResult.failed(str(exc), recoverable=False)
+            return StepResult.failed(msg("step.failed_generic", detail=str(exc)), recoverable=False)
         src = ctx.payload(item.data_path)
         if not src.is_dir():
             return StepResult.failed(
-                f"backup ausente no pendrive: {item.data_path}", recoverable=False
+                msg("step.backup_missing", path=item.data_path), recoverable=False
             )
         dest = local_path(dest_str)
         copier = ctx.services.copier
@@ -58,12 +58,12 @@ class BackupStep:
                 source_file = src / name
                 if not source_file.is_file():
                     return StepResult.failed(
-                        f"arquivo {name} não está no backup", recoverable=False
+                        msg("step.backup_file_missing", name=name), recoverable=False
                     )
                 copied = copier.copy_file(source_file, dest, policy=item.on_conflict)
-                note = None if copied else "já existia no destino (mantido)"
+                note = None if copied else msg("step.kept_existing")
                 return StepResult.ok(note)
             copier.restore_tree(src, dest, policy=item.on_conflict, log=log)
         except (OSError, WinKitError) as exc:
-            return StepResult.failed(str(exc))
-        return StepResult.ok(f"restaurado em {dest_str}")
+            return StepResult.failed(msg("step.failed_generic", detail=str(exc)))
+        return StepResult.ok(msg("step.restored_to", path=dest_str))

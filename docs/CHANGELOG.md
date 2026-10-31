@@ -28,6 +28,25 @@
 
 ---
 
+## 2026-10-31 — M11 — Mensagens estruturadas no estado, nas etapas e no resumo
+**Tipo:** implementação
+**Resumo:** motivos e erros das etapas, avisos do Agente e itens do resumo passam a ser guardados como `Msg` (chave + parâmetros) e só viram texto na hora de mostrar, no idioma atual (D-031). O `estado.json` sobe para a versão 2, com migração da v1.
+
+### Adicionado
+- `src/winkit/core/state/migrations.py` — migração v1 → v2 (texto antigo vira `legacy.text`)
+- `tests/core/test_state_migration.py`, `tests/core/test_summary.py` — migração e resumo nos três idiomas
+- ~40 chaves novas (`step.*`, `summary.*`, `agent.recipe_changed`) nos três idiomas
+
+### Alterado
+- `src/winkit/agent/steps/*.py`, `src/winkit/agent/executor.py`, `src/winkit/agent/phases.py` — `StepResult` e motivos com `Msg`
+- `src/winkit/core/state/models.py` — `error`, `reason` e `warnings` com `Msg`; `schema_version: 2`
+- `src/winkit/core/summary.py` — `Msg` nos itens e avisos; HTML com `lang`, rótulos de status e data por idioma
+- `src/winkit/i18n/core.py` — `render` escolhe o plural pelo parâmetro `n`
+- Testes do Agente e do estado comparam o texto montado (`render`)
+
+### Documentos vivos atualizados
+- STATUS — item do M11 concluído
+
 ## 2026-10-31 — M11 — Base da tradução (pt-BR, en-US, es)
 **Tipo:** implementação + documentação
 **Resumo:** plano da v2 aprovado. Decisões e regras novas registradas; o módulo de tradução passa a ter três idiomas, plural, mensagens estruturadas e formatação por idioma.

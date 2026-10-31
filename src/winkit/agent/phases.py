@@ -29,6 +29,7 @@ from winkit.core.planner.planner import plan as make_plan
 from winkit.core.recipe.io import load_recipe, recipe_hash
 from winkit.core.recipe.models import Recipe
 from winkit.core.state import models as st
+from winkit.i18n import msg
 from winkit.platform.environment import single_instance
 
 INSTANCE_NAME = "WinKitAgent"
@@ -135,7 +136,7 @@ def open_session(rt: Runtime, log: EventLog, *, phase: int) -> Session | None:
     if state is None:
         state = st.new_state(plan, recipe_hash(recipe), rt.clock())
     elif state.recipe_hash != recipe_hash(recipe):
-        state.warnings.append("A receita mudou depois do início; etapas novas foram acrescentadas.")
+        state.warnings.append(msg("agent.recipe_changed"))
         state.recipe_hash = recipe_hash(recipe)
     added = st.sync_with_plan(state, plan)
     if added:

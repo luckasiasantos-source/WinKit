@@ -11,6 +11,7 @@ from winkit.agent.steps.system import BloatStep, PowerStep, RenameComputerStep
 from winkit.agent.steps.tweak import TweakStep
 from winkit.agent.steps.windows_update import WindowsUpdateStep
 from winkit.core.planner.models import StepKind
+from winkit.i18n import msg
 
 PLACEHOLDER_KINDS: tuple[StepKind, ...] = ()
 
@@ -22,7 +23,7 @@ class NotImplementedStep:
         return False
 
     def run(self, ctx: StepContext) -> StepResult:
-        return StepResult.skipped(f'etapa do tipo "{ctx.step.kind}" ainda não implementada')
+        return StepResult.skipped(msg("step.not_implemented", kind=ctx.step.kind))
 
 
 def default_handlers() -> dict[StepKind, StepHandler]:

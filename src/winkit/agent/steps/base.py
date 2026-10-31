@@ -19,6 +19,7 @@ from winkit.core.paths import templates
 from winkit.core.planner.models import Plan, PlannedStep
 from winkit.core.recipe.models import Recipe
 from winkit.core.state.models import AgentState
+from winkit.i18n import Msg
 
 Outcome = Literal["done", "skipped", "failed", "deferred"]
 
@@ -26,24 +27,24 @@ Outcome = Literal["done", "skipped", "failed", "deferred"]
 @dataclass(frozen=True)
 class StepResult:
     outcome: Outcome
-    message: str | None = None
+    message: Msg | None = None
     reboot_required: bool = False
     recoverable: bool = True
 
     @classmethod
-    def ok(cls, message: str | None = None, *, reboot: bool = False) -> StepResult:
+    def ok(cls, message: Msg | None = None, *, reboot: bool = False) -> StepResult:
         return cls("done", message, reboot_required=reboot)
 
     @classmethod
-    def skipped(cls, reason: str) -> StepResult:
+    def skipped(cls, reason: Msg) -> StepResult:
         return cls("skipped", reason)
 
     @classmethod
-    def failed(cls, error: str, *, recoverable: bool = True) -> StepResult:
+    def failed(cls, error: Msg, *, recoverable: bool = True) -> StepResult:
         return cls("failed", error, recoverable=recoverable)
 
     @classmethod
-    def deferred(cls, reason: str) -> StepResult:
+    def deferred(cls, reason: Msg) -> StepResult:
         return cls("deferred", reason)
 
 

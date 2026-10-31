@@ -24,7 +24,7 @@ from winkit.core.catalog.models import Catalogs
 from winkit.core.planner.models import Plan, PlannedStep, StepKind
 from winkit.core.recipe.models import Recipe
 from winkit.core.state import models as st
-from winkit.i18n import t
+from winkit.i18n import msg, render
 
 
 @dataclass
@@ -111,7 +111,7 @@ class Executor:
             self.ui.progress(index, total, step.title)
             result = self._run_one(step, phase, selection)
             final = self.state.step(step.id)
-            self.ui.step_result(step.id, final.status, final.error or final.reason)
+            self.ui.step_result(step.id, final.status, render(final.error or final.reason))
             if result == "ran":
                 outcome.ran += 1
             elif result == "deferred":
@@ -140,7 +140,7 @@ class Executor:
         if not st.should_run(sst):
             return "noop"
         if step.user_choice and selection is not None and step.id not in selection:
-            st.mark_skipped(state, step.id, now, t("step.not_selected"))
+            st.mark_skipped(state, step.id, now, msg("step.not_selected"))
             self.log.info("desmarcado na janela", step=step.id)
             self.store.save(state)
             return "noop"
@@ -149,25 +149,25 @@ class Executor:
         if problem is not None:
             kind, dep = problem
             if kind == "skip":
-                st.mark_skipped(state, step.id, now, t("step.dependency_failed", dep=dep))
+                st.mark_skipped(state, step.id, now, msg("step.dependency_failed", dep=dep))
                 self.log.warning(f"pulada: dependência {dep} falhou", step=step.id)
                 self.store.save(state)
                 return "noop"
-            sst.reason = f"aguardando {dep}"
+            sst.reason = msg("step.waiting_dependency", dep=dep)
             self.store.save(state)
             return "deferred"
 
         if step.needs_pendrive and not self._wait_for(
             lambda: self.pendrive() is not None, self.waits.pendrive_seconds, "pendrive"
         ):
-            sst.reason = t("agent.reconnect_pendrive")
+            sst.reason = msg("agent.reconnect_pendrive")
             self.log.warning("pendrive ausente; etapa adiada", step=step.id)
             self.store.save(state)
             return "deferred"
         if step.needs_network and not self._wait_for(
             self.services.env.has_internet, self.waits.network_seconds, "network"
         ):
-            sst.reason = t("step.no_network")
+            sst.reason = msg("step.no_network")
             self.log.warning("sem internet; etapa adiada", step=step.id)
             self.store.save(state)
             return "deferred"
@@ -194,12 +194,12 @@ class Executor:
         self.log.info(f"início: {step.title}", step=step.id)
         try:
             if handler.check(ctx):
-                result = StepResult.ok(t("step.already_done"))
+                result = StepResult.ok(msg("step.already_done"))
             else:
                 result = handler.run(ctx)
         except Exception as exc:  # noqa: BLE001 — P4: nenhuma etapa derruba o Agente
             self.log.error(f"erro inesperado: {exc}", step=step.id, exc=exc)
-            result = StepResult.failed(t("step.failed_generic", detail=str(exc)))
+            result = StepResult.failed(msg("step.failed_generic", detail=str(exc)))
         self._apply(step, result)
         return "deferred" if result.outcome == "deferred" else "ran"
 
@@ -214,18 +214,21 @@ class Executor:
                     reboot_required=result.reboot_required,
                     reason=result.message,
                 )
-                self.log.info(
-                    "concluída" + (f": {result.message}" if result.message else ""), step=step.id
-                )
+                text = render(result.message)
+                self.log.info("concluída" + (f": {text}" if text else ""), step=step.id)
             case "skipped":
-                st.mark_skipped(state, step.id, now, result.message or "")
-                self.log.info(f"pulada: {result.message}", step=step.id)
+                st.mark_skipped(state, step.id, now, result.message or msg("legacy.text", text=""))
+                self.log.info(f"pulada: {render(result.message)}", step=step.id)
             case "failed":
                 st.mark_failed(
-                    state, step.id, now, result.message or "falhou", recoverable=result.recoverable
+                    state,
+                    step.id,
+                    now,
+                    result.message or msg("step.failed_unknown"),
+                    recoverable=result.recoverable,
                 )
-                self.log.error(f"falhou: {result.message}", step=step.id)
+                self.log.error(f"falhou: {render(result.message)}", step=step.id)
             case "deferred":
-                st.mark_deferred(state, step.id, result.message or "")
-                self.log.info(f"adiada: {result.message}", step=step.id)
+                st.mark_deferred(state, step.id, result.message or msg("legacy.text", text=""))
+                self.log.info(f"adiada: {render(result.message)}", step=step.id)
         self.store.save(state)

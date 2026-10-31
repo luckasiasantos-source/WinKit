@@ -9,7 +9,7 @@ from winkit.agent.steps.base import StepContext, StepResult, local_path
 from winkit.core.fsutil import atomic_write_text
 from winkit.core.state.models import should_run
 from winkit.core.summary import build_summary, render_html
-from winkit.i18n import t, tn
+from winkit.i18n import msg, t, tn
 
 
 def _pending_others(ctx: StepContext) -> list[str]:
@@ -75,7 +75,7 @@ class FinalizeStep:
         if pending:
             # resumo parcial gravado; a limpeza espera o resto (próximo login)
             return StepResult.deferred(
-                f"{len(pending)} etapa(s) pendente(s): {', '.join(pending[:5])}"
+                msg("step.pending_others", n=len(pending), ids=", ".join(pending[:5]))
             )
         failures = [k for k, v in ctx.state.steps.items() if v.status == "failed"]
         report = cleanup(ctx.services, ctx.paths, remove_agent=not failures)
@@ -88,10 +88,12 @@ class FinalizeStep:
         counts = ctx.state.counts()
         if ctx.recipe.execution.notify_on_finish:
             if failures:
-                msg = tn("agent.finished_with_failures", len(failures))
+                text = tn("agent.finished_with_failures", len(failures))
             elif ctx.state.warnings:
-                msg = tn("agent.finished_with_warnings", len(ctx.state.warnings))
+                text = tn("agent.finished_with_warnings", len(ctx.state.warnings))
             else:
-                msg = t("agent.finished")
-            ctx.ui.notify(t("app.name"), msg)
-        return StepResult.ok(f"{counts['done']} feitas, {counts['failed']} com falha")
+                text = t("agent.finished")
+            ctx.ui.notify(t("app.name"), text)
+        return StepResult.ok(
+            msg("step.finalize_counts", done=counts["done"], failed=counts["failed"])
+        )

@@ -16,11 +16,13 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from winkit.core.errors import StateError
 from winkit.core.planner.models import Plan
+from winkit.core.state.migrations import migrate_state
+from winkit.core.text import Msg, msg
 
 StepStatus = Literal["pending", "running", "done", "failed", "skipped"]
 PhaseStatus = Literal["pending", "running", "done"]
 MAX_ATTEMPTS = 3
-STATE_SCHEMA_VERSION: Literal[1] = 1
+STATE_SCHEMA_VERSION: Literal[2] = 2
 
 
 class _Model(BaseModel):
@@ -33,8 +35,8 @@ class StepState(_Model):
     phase_ran: int | None = None
     started_at: datetime | None = None
     finished_at: datetime | None = None
-    error: str | None = None
-    reason: str | None = None
+    error: Msg | None = None
+    reason: Msg | None = None
     recoverable: bool = True
     reboot_required: bool = False
     #: Escolha feita na janela da Fase 2 (None = não perguntado).
@@ -49,14 +51,14 @@ class PhaseState(_Model):
 
 
 class AgentState(_Model):
-    schema_version: Literal[1] = STATE_SCHEMA_VERSION
+    schema_version: Literal[2] = STATE_SCHEMA_VERSION
     recipe_hash: str
     created_at: datetime
     phase1: PhaseState = Field(default_factory=PhaseState)
     phase2: PhaseState = Field(default_factory=PhaseState)
     steps: dict[str, StepState] = Field(default_factory=dict)
     reboot_pending: bool = False
-    warnings: list[str] = Field(default_factory=list)
+    warnings: list[Msg] = Field(default_factory=list)
     postponed: bool = False
     #: Nome escolhido na janela da Fase 2 (item 33, "decidir na hora").
     computer_name_choice: str | None = None
@@ -99,7 +101,7 @@ def recover_interrupted(state: AgentState) -> list[str]:
         st = state.steps[k]
         if st.attempts >= MAX_ATTEMPTS:
             st.status = "failed"
-            st.error = "interrompida repetidamente (reinício ou queda de energia)"
+            st.error = msg("step.interrupted_repeatedly")
             st.recoverable = False
         else:
             st.status = "pending"
@@ -143,7 +145,7 @@ def mark_done(
     now: datetime,
     *,
     reboot_required: bool = False,
-    reason: str | None = None,
+    reason: Msg | None = None,
 ) -> StepState:
     st = _require_running(state, step_id)
     st.status = "done"
@@ -156,7 +158,7 @@ def mark_done(
 
 
 def mark_failed(
-    state: AgentState, step_id: str, now: datetime, error: str, *, recoverable: bool = True
+    state: AgentState, step_id: str, now: datetime, error: Msg, *, recoverable: bool = True
 ) -> StepState:
     st = _require_running(state, step_id)
     st.status = "failed"
@@ -166,7 +168,7 @@ def mark_failed(
     return st
 
 
-def mark_deferred(state: AgentState, step_id: str, reason: str) -> StepState:
+def mark_deferred(state: AgentState, step_id: str, reason: Msg) -> StepState:
     """Etapa que não pôde rodar agora (sem pendrive/internet): volta a pendente.
 
     A tentativa não é contada.
@@ -178,7 +180,7 @@ def mark_deferred(state: AgentState, step_id: str, reason: str) -> StepState:
     return st
 
 
-def mark_skipped(state: AgentState, step_id: str, now: datetime, reason: str) -> StepState:
+def mark_skipped(state: AgentState, step_id: str, now: datetime, reason: Msg) -> StepState:
     """Pular não exige ``running``: dependência falhou, desmarcado na janela etc."""
     st = state.step(step_id)
     if st.status == "done":
@@ -217,7 +219,7 @@ def dump_state(state: AgentState) -> str:
 
 def load_state(text: str) -> AgentState:
     try:
-        data = json.loads(text)
+        data = migrate_state(json.loads(text))
         return AgentState.model_validate(data)
     except (ValueError, ValidationError) as exc:
         raise StateError(f"estado corrompido: {exc}") from exc

@@ -11,6 +11,7 @@ from winkit.agent.progress import Choice
 from winkit.agent.store import StateStore
 from winkit.core.catalog.loader import default_catalogs
 from winkit.core.state.models import AgentState
+from winkit.i18n import render
 from winkit.platform.appx import DEPROVISIONED
 from winkit.platform.fakes.registry import FakeRegistry
 from winkit.platform.fakes.runner import FakeRunner, result
@@ -105,7 +106,7 @@ def test_already_applied_is_checked(world: World) -> None:
     r.tweaks = [tweak("privacy.telemetry_minimum")]
     world.save_recipe(r)
     run_phase1(world.runtime())
-    assert state(world).step("tweak:privacy.telemetry_minimum").reason == "já estava feito"
+    assert render(state(world).step("tweak:privacy.telemetry_minimum").reason) == "já estava feito"
 
 
 def test_optional_feature_and_failure(world: World) -> None:
@@ -138,10 +139,10 @@ def test_bloat_removed_and_deprovisioned(world: World) -> None:
     assert rg.key_exists("HKLM", rf"{DEPROVISIONED}\Microsoft.BingNews_8wekyb3d8bbwe")
     assert rg.key_exists("HKLM", rf"{DEPROVISIONED}\Clipchamp.Clipchamp_yxz26nhyzhsrt")
     s = state(world)
-    assert s.step("bloat:Clipchamp.Clipchamp").reason == "já estava feito" or "não estava" in (
-        s.step("bloat:Clipchamp.Clipchamp").reason or ""
-    )
-    assert "removido" in (s.step("bloat:Microsoft.BingNews").reason or "")
+    assert render(
+        s.step("bloat:Clipchamp.Clipchamp").reason
+    ) == "já estava feito" or "não estava" in (render(s.step("bloat:Clipchamp.Clipchamp").reason))
+    assert "removido" in render(s.step("bloat:Microsoft.BingNews").reason)
 
 
 def test_bloat_without_block_reinstall(world: World) -> None:
@@ -196,7 +197,7 @@ def test_power_failure(world: World) -> None:
     r.power.scheme = "balanced"
     world.save_recipe(r)
     run_phase1(world.runtime())
-    assert "balanced" in (state(world).step("power:settings").error or "")
+    assert "balanced" in render(state(world).step("power:settings").error)
 
 
 def test_rename_computer_decided_at_runtime(world: World) -> None:

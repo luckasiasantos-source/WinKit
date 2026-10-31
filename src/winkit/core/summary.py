@@ -7,14 +7,17 @@ atalho da área de trabalho mesmo depois que o Agente for removido (D-024).
 from __future__ import annotations
 
 import html
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
 from winkit.core.planner.models import Plan
 from winkit.core.recipe.models import Recipe
 from winkit.core.state.models import AgentState
-from winkit.i18n import t
+from winkit.core.text import Msg, msg
+from winkit.i18n import current_language, render, t
+from winkit.i18n.format import format_datetime
+from winkit.i18n.format import format_duration as _format_duration
 
 
 class SummaryItem(BaseModel):
@@ -23,7 +26,7 @@ class SummaryItem(BaseModel):
     title: str
     phase: int
     status: str
-    detail: str | None = None
+    detail: Msg | None = None
 
 
 class Summary(BaseModel):
@@ -37,7 +40,7 @@ class Summary(BaseModel):
     skipped: int
     pending: int
     items: tuple[SummaryItem, ...]
-    warnings: tuple[str, ...]
+    warnings: tuple[Msg, ...]
 
     @property
     def failures(self) -> list[SummaryItem]:
@@ -68,9 +71,9 @@ def build_summary(
         )
     warnings = list(state.warnings)
     for b in recipe.selected_backups():
-        warnings.extend(f"{b.name}: {w}" for w in b.warnings)
+        warnings.extend(msg("summary.backup_warning", name=b.name, warning=w) for w in b.warnings)
     if recipe.windows.account.password_mode == "empty":  # noqa: S105 — modo, não senha
-        warnings.append(t("summary.set_password"))
+        warnings.append(msg("summary.set_password"))
     counts = {
         k: sum(1 for i in items if i.status == k) for k in ("done", "failed", "skipped", "pending")
     }
@@ -85,26 +88,29 @@ def build_summary(
         skipped=counts["skipped"],
         pending=counts["pending"],
         items=tuple(items),
-        warnings=tuple(dict.fromkeys(warnings)),
+        warnings=tuple(_unique(warnings)),
     )
 
 
+def _unique(items: list[Msg]) -> list[Msg]:
+    seen: set[str] = set()
+    out: list[Msg] = []
+    for item in items:
+        key = item.model_dump_json()
+        if key not in seen:
+            seen.add(key)
+            out.append(item)
+    return out
+
+
 def format_duration(seconds: float | None) -> str:
-    if seconds is None:
-        return "—"
-    td = timedelta(seconds=round(seconds))
-    hours, rem = divmod(td.seconds + td.days * 86400, 3600)
-    minutes, secs = divmod(rem, 60)
-    return f"{hours} h {minutes:02d} min" if hours else f"{minutes} min {secs:02d} s"
+    return _format_duration(seconds)
 
 
-_STATUS_LABEL = {
-    "done": "feito",
-    "failed": "falhou",
-    "skipped": "pulado",
-    "pending": "pendente",
-    "running": "interrompido",
-}
+def _status_label(status: str) -> str:
+    if status in ("done", "failed", "skipped", "pending", "running"):
+        return t(f"summary.status.{status}")
+    return status
 
 
 _CSS = """
@@ -139,16 +145,17 @@ def render_html(summary: Summary, *, log_path: str) -> str:
         for i in summary.items:
             if status and i.status != status:
                 continue
-            detail = f"<div class='d'>{e(i.detail)}</div>" if i.detail else ""
+            text = render(i.detail)
+            detail = f"<div class='d'>{e(text)}</div>" if text else ""
             out.append(
                 f"<tr class='{e(i.status)}'><td>{i.phase}</td><td>{e(i.title)}{detail}</td>"
-                f"<td>{e(_STATUS_LABEL.get(i.status, i.status))}</td></tr>"
+                f"<td>{e(_status_label(i.status))}</td></tr>"
             )
         return "\n".join(out)
 
     total = summary.phase1_seconds or 0.0
     total += summary.phase2_seconds or 0.0
-    warnings = "".join(f"<li>{e(w)}</li>" for w in summary.warnings)
+    warnings = "".join(f"<li>{e(render(w))}</li>" for w in summary.warnings)
     failures = rows("failed")
     title = e(t("summary.title"))
     times = " · ".join(
@@ -163,14 +170,15 @@ def render_html(summary: Summary, *, log_path: str) -> str:
     )
     fail_block = f"<h2>{e(t('summary.failures'))}</h2><table>{failures}</table>" if failures else ""
     warn_block = f"<h2>{e(t('summary.warnings'))}</h2><ul>{warnings}</ul>" if warnings else ""
-    generated = e(summary.generated_at.strftime("%d/%m/%Y %H:%M"))
+    generated = e(t("summary.generated_at", when=format_datetime(summary.generated_at)))
+    lang = current_language()
     return (
-        '<!doctype html>\n<html lang="pt-BR"><head><meta charset="utf-8">\n'
+        f'<!doctype html>\n<html lang="{lang}"><head><meta charset="utf-8">\n'
         f"<title>{title}</title>\n<style>{_CSS}</style></head><body>\n"
         f"<h1>{title} — {e(summary.computer)}</h1>\n"
         f"<p>{times}</p>\n<p><strong>{counts}</strong></p>\n"
         f"{fail_block}\n{warn_block}\n"
-        f"<h2>Tudo o que foi feito</h2>\n<table>{rows()}</table>\n"
-        f'<p class="mut">Log completo: {e(log_path)}<br>Gerado em {generated}</p>\n'
+        f"<h2>{e(t('summary.everything'))}</h2>\n<table>{rows()}</table>\n"
+        f'<p class="mut">{e(t("summary.full_log", path=log_path))}<br>{generated}</p>\n'
         "</body></html>\n"
     )

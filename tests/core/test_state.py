@@ -9,6 +9,7 @@ from winkit.core.catalog.loader import default_catalogs
 from winkit.core.errors import StateError
 from winkit.core.planner.planner import plan
 from winkit.core.state import models as st
+from winkit.i18n import legacy, render
 
 NOW = datetime(2026, 11, 2, 15, 0, tzinfo=UTC)
 
@@ -44,7 +45,7 @@ def test_invalid_transitions() -> None:
     with pytest.raises(StateError):
         st.mark_running(s, "app:a", 1, NOW)
     with pytest.raises(StateError):
-        st.mark_skipped(s, "app:a", NOW, "x")
+        st.mark_skipped(s, "app:a", NOW, legacy("x"))
     with pytest.raises(StateError):
         s.step("app:zzz")
 
@@ -54,7 +55,7 @@ def test_retry_until_max_attempts() -> None:
     for _ in range(st.MAX_ATTEMPTS):
         assert st.should_run(s.step("app:b"))
         st.mark_running(s, "app:b", 2, NOW)
-        st.mark_failed(s, "app:b", NOW, "código 1603")
+        st.mark_failed(s, "app:b", NOW, legacy("código 1603"))
     assert not st.should_run(s.step("app:b"))
     with pytest.raises(StateError):
         st.mark_running(s, "app:b", 2, NOW)
@@ -63,7 +64,7 @@ def test_retry_until_max_attempts() -> None:
 def test_non_recoverable_failure_is_not_retried() -> None:
     _, s = make()
     st.mark_running(s, "app:b", 2, NOW)
-    st.mark_failed(s, "app:b", NOW, "hash", recoverable=False)
+    st.mark_failed(s, "app:b", NOW, legacy("hash"), recoverable=False)
     assert not st.should_run(s.step("app:b"))
 
 
@@ -82,8 +83,8 @@ def test_recover_interrupted() -> None:
 
 def test_skip_and_reset_for_retry() -> None:
     _, s = make()
-    st.mark_skipped(s, "app:a", NOW, "desmarcado")
-    assert s.step("app:a").reason == "desmarcado"
+    st.mark_skipped(s, "app:a", NOW, legacy("desmarcado"))
+    assert render(s.step("app:a").reason) == "desmarcado"
     st.reset_for_retry(s, "app:a")
     assert s.step("app:a").status == "pending"
     with pytest.raises(StateError):

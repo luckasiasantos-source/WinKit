@@ -11,6 +11,7 @@ from winkit.builder import target as targets
 from winkit.builder.build import BuildOptions, build
 from winkit.collector.drivers import export_drivers, list_candidates
 from winkit.core.catalog.loader import default_catalogs
+from winkit.i18n import render
 from winkit.platform.fakes.disks import FakeDiskInspector, windows_iso
 from winkit.platform.fakes.drivers import FakeDriverManager
 
@@ -82,7 +83,7 @@ def test_pnputil_failure_and_reboot(world: World) -> None:
     s2 = StateStore(world2.paths.state).load()
     assert s2 is not None
     assert any(
-        v.status == "failed" and "código 5" in (v.error or "")
+        v.status == "failed" and "código 5" in render(v.error)
         for k, v in s2.steps.items()
         if k.startswith("driver:")
     )

@@ -93,7 +93,10 @@ def render(message: Msg | str | None) -> str:
         entry = _entry(message.key)
     except KeyError:
         return message.key
-    template = entry.other if isinstance(entry, Plural) else entry
+    if isinstance(entry, Plural):
+        template = entry.one if message.params.get("n") == 1 else entry.other
+    else:
+        template = entry
     try:
         return template.format(**message.params)
     except (KeyError, IndexError, ValueError):

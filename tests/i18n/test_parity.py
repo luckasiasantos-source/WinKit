@@ -73,6 +73,7 @@ ALWAYS_SAME = {
     "agent.progress",
     "agent.tray_tip",
     "summary.phase_time",
+    "summary.backup_warning",
 }
 
 
