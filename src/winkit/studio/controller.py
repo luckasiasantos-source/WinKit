@@ -38,6 +38,7 @@ from winkit.collector import features as feature_collector
 from winkit.collector import fonts as font_collector
 from winkit.collector import netdrives as netdrive_collector
 from winkit.collector import personal as personal_collector
+from winkit.collector import start_layout as start_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import layout
 from winkit.core.browsers import suggested
@@ -68,8 +69,13 @@ from winkit.core.recipe.validation import ValidationReport, validate_recipe
 from winkit.core.winget_manifest import split_args
 from winkit.i18n import current_language
 from winkit.platform import hosts
+from winkit.platform.environment import WindowsEnvironment
 from winkit.platform.services import Services
 from winkit.platform.vss import PendingSnapshots
+
+
+def windows_build() -> int | None:
+    return WindowsEnvironment().windows_build()
 
 
 def _studio_dir() -> Path:
@@ -458,6 +464,19 @@ class StudioController:
             if sid == store_id and not any(e.id == sid for e in cfg.extensions):
                 cfg.extensions = [*cfg.extensions, BrowserExtension(id=sid, name=name, slug=slug)]
         self.save()
+
+    def collect_start_layout(self) -> tuple[int, list[str]]:
+        """Fixados do Iniciar e da barra deste PC (V2-04)."""
+        f = self.services.folders
+        result = start_collector.collect_start_layout(
+            self.require_recipe(),
+            self.root,
+            {**f.machine(), **f.current_user()},
+            self.services.volume_root,
+            build=windows_build(),
+        )
+        self.save()
+        return result
 
     def preset_preview(self, preset_id: str) -> PresetResult:
         preset = self.catalogs.preset(preset_id)

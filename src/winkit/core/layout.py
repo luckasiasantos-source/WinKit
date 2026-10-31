@@ -57,6 +57,10 @@ def appearance_dir(profile_id: str) -> str:
     return f"{profile_dir(profile_id)}/Aparencia"
 
 
+def start_dir(profile_id: str) -> str:
+    return f"{profile_dir(profile_id)}/Iniciar"
+
+
 def fonts_dir(profile_id: str) -> str:
     return f"{profile_dir(profile_id)}/Fontes"
 

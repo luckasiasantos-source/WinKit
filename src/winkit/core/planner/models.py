@@ -20,6 +20,7 @@ StepKind = Literal[
     "default_apps",
     "personal",
     "browser",
+    "start_layout",
     "bloat",
     "feature",
     "tweak",

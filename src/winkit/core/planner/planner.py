@@ -43,6 +43,7 @@ _G1 = {
     "font": 49,
     "personal": 42,  # R23: perfil Default, junto dos ajustes de aparência
     "browser": 44,  # R21: políticas antes dos apps; valem quando o navegador for instalado
+    "start_layout": 46,  # R20: perfil Default, antes do primeiro login
     "backup": 50,
     "default_apps": 65,  # depois dos apps offline, para que os ProgIds já existam
     "app": 60,
@@ -116,6 +117,7 @@ def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> 
     _plan_default_apps(recipe, ctx, drafts)
     _plan_personal(recipe, catalogs, drafts)
     _plan_browsers(recipe, catalogs, drafts)
+    _plan_start_layout(recipe, drafts)
     _plan_power(recipe, drafts)
     _plan_bloat(recipe, catalogs, ctx, drafts, excluded)
     _plan_features(recipe, catalogs, ctx, drafts, excluded)
@@ -329,6 +331,24 @@ def _plan_browsers(recipe: Recipe, catalogs: Catalogs, out: list[_Draft]) -> Non
                 sort=(_G1["browser"], 0, cfg.id),
             )
         )
+
+
+def _plan_start_layout(recipe: Recipe, out: list[_Draft]) -> None:  # R20
+    s = recipe.start_layout
+    wants = any(p.selected for p in s.taskbar_pins) or any(p.selected for p in s.start_pins)
+    if s.mode == "off" or not (wants or (s.mode == "exact" and s.start_file)):
+        return
+    out.append(
+        _Draft(
+            "start_layout",
+            "default",
+            1,
+            t("plan.start_layout"),
+            "default_profile",
+            needs_pendrive=s.mode == "exact",
+            sort=(_G1["start_layout"], 0, "default"),
+        )
+    )
 
 
 def _plan_power(recipe: Recipe, out: list[_Draft]) -> None:  # R5

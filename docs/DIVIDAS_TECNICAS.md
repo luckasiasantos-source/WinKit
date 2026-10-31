@@ -222,3 +222,12 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Impacto: se H26 for falsa, o papel de parede e a cor podem voltar ao padrão no primeiro login; quem usa ponteiro baixado da internet precisa reinstalar.
 - Plano: validar H26; se falsa, uma etapa de conferência na Fase 2 no `HKCU`. Cursores próprios: copiar para `%SystemRoot%\Cursors\WinKit\` e reescrever os caminhos.
 - Prioridade: média
+
+### DT-024 — Iniciar e barra: apps da Store fixados na barra e modo ao vivo
+- Estado: aberta
+- Origem: M15 (V2-04)
+- Onde: `collector/start_layout.py`, `agent/steps/start_layout.py`
+- Descrição: apps da Store fixados na barra (Calculadora, Terminal…) não deixam atalho em `User Pinned\TaskBar` e não são lidos; atalhos especiais (Explorador de Arquivos) aparecem como "sem atalho no menu Iniciar". O modo ao vivo não mexe no Iniciar nem na barra (H29).
+- Impacto: esses ícones precisam ser fixados à mão; o Studio lista os que ficaram de fora.
+- Plano: ler a lista `Taskband` do registro (formato binário não documentado) só se a validação na VM mostrar que vale o risco; caso contrário, oferecer a escolha de apps da Store por AUMID na tela.
+- Prioridade: baixa

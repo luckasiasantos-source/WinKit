@@ -15,7 +15,15 @@ from winkit.i18n import t, tn
 from winkit.i18n.format import format_size
 from winkit.studio.ui.base import Page
 from winkit.studio.ui.pages.common import choice_row, empty, toggle
-from winkit.ui.widgets import Card, Row, button, kind_icon, section, symbol_icon
+from winkit.ui.widgets import (
+    Card,
+    Row,
+    SegmentedControl,
+    button,
+    kind_icon,
+    section,
+    symbol_icon,
+)
 
 
 def app_subtitle(a: AppItem) -> str:
@@ -498,3 +506,81 @@ class AppearancePage(Page):
             QMessageBox.information(self, t("app.name"), "\n".join(lines))
 
         self.tasks.run(t("studio.appearance.reading"), self.ctl.collect_personal, done)
+
+
+class StartLayoutPage(Page):
+    """V2-04: fixados do Iniciar e da barra de tarefas."""
+
+    title_key = "studio.start.title"
+    subtitle_key = "studio.start.subtitle"
+
+    def refresh(self) -> None:
+        self.clear_content()
+        if self.needs_recipe():
+            return
+        r = self.ctl.recipe
+        assert r is not None  # noqa: S101
+        s = r.start_layout
+        self.content.addLayout(self.toolbar(button(t("studio.start.read"), "Primary", self._read)))
+        modes = SegmentedControl(
+            [
+                ("off", t("studio.start.mode_off")),
+                ("list", t("studio.start.mode_list")),
+                ("exact", t("studio.start.mode_exact")),
+            ],
+            s.mode,
+        )
+        modes.changed.connect(self._mode)
+        top = Card()
+        top.add_row(Row(t("studio.start.mode"), t("studio.start.mode_hint"), accessory=modes))
+        self.content.addWidget(section("", top))
+        if s.mode == "off":
+            return
+        bar = Card()
+        for pin in s.taskbar_pins:
+            bar.add_row(self._pin_row(pin))
+        self.content.addWidget(
+            section(
+                t("studio.start.taskbar"),
+                bar if bar.rows else empty(t("studio.start.none")),
+                footer=t("studio.start.footer"),
+            )
+        )
+        if s.mode == "list":
+            start = Card()
+            for pin in s.start_pins:
+                start.add_row(self._pin_row(pin))
+            self.content.addWidget(
+                section(
+                    t("studio.start.start"), start if start.rows else empty(t("studio.start.none"))
+                )
+            )
+
+    def _pin_row(self, pin: Any) -> Any:
+        return choice_row(
+            pin.name,
+            pin.value,
+            icon_kind="start_layout",
+            selected=pin.selected,
+            on_select=partial(self._select, pin),
+        )
+
+    def _select(self, pin: Any, value: bool) -> None:
+        pin.selected = value
+        self.save()
+
+    def _mode(self, value: str) -> None:
+        if self.ctl.recipe is not None:
+            self.ctl.recipe.start_layout.mode = value  # type: ignore[assignment]
+            self.save()
+            self.refresh()
+
+    def _read(self) -> None:
+        def done(result: tuple[int, list[str]]) -> None:
+            self.refresh()
+            lines = [tn("studio.start.read_done", result[0])]
+            if result[1]:
+                lines.append(t("studio.start.orphans", names=", ".join(result[1])))
+            QMessageBox.information(self, t("app.name"), "\n".join(lines))
+
+        self.tasks.run(t("studio.start.reading"), self.ctl.collect_start_layout, done)

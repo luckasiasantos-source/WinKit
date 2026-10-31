@@ -7,15 +7,14 @@
 
 ## Novidades desta versão
 
-- **Wi-Fi já conectado:** as redes salvas neste PC conectam no Windows novo antes do primeiro login (com opção de levar sem a senha). A senha nunca vai para os logs, mas fica legível no pendrive: guarde-o bem.
-- **Recursos do Windows:** WSL, Área Restrita, Hyper-V, .NET 3.5, OpenSSH e outros ligados na instalação. O .NET 3.5 instala sem internet, pela ISO original montada só para leitura.
-- **Dispositivos sem driver:** no fim, o WinKit procura no Windows Update só os drivers que faltaram e mostra no resumo o que sobrou.
-- **DNS e bloqueios:** Cloudflare, Quad9, Google, AdGuard ou NextDNS, com DNS criptografado no Windows 11, e bloqueio opcional de anúncios e rastreadores pelo arquivo `hosts` (dá para desfazer).
-- **Unidades de rede** do PC antigo reaparecem no novo.
-- **Manutenção:** apps atualizados pelo winget toda semana, Sensor de Armazenamento e otimização do disco.
-- **Variáveis de ambiente e PATH:** leve `JAVA_HOME`, `GOPATH` e pastas do PATH; nada que já exista é sobrescrito sem você pedir.
+- **Perfis rápidos:** Gamer, Privacidade máxima, Escritório e Programador. Um clique mostra o que vai mudar e soma à receita, sem desmarcar nada.
+- **Fontes:** as fontes que você instalou chegam ao Windows novo, para todas as contas.
+- **Apps padrão:** navegador, leitor de PDF, players e compactador iguais aos do PC antigo.
+- **Aparência:** papel de parede, cor de destaque, tema, mouse, ponteiro e teclado.
+- **Navegadores prontos:** Chrome, Edge, Brave e Firefox com as extensões de sempre, página inicial e buscador (sem senhas nem cookies).
+- **Iniciar e barra de tarefas:** os mesmos ícones fixados.
 
-Versões anteriores: pendrive do Rufus ou da Microsoft, "Aplicar neste PC" com prévia e ponto de restauração, e o aplicativo em português, inglês e espanhol.
+Versões anteriores: Wi-Fi, recursos do Windows, drivers que faltam, DNS e bloqueios, unidades de rede, manutenção e variáveis de ambiente (0.5.0); pendrive do Rufus ou da Microsoft, "Aplicar neste PC" com prévia e ponto de restauração, e o aplicativo em português, inglês e espanhol.
 
 ## Como usar
 
@@ -39,7 +38,7 @@ Requisitos: Windows 10 ou 11 (64 bits) no PC onde você monta o pendrive; pendri
 > [!CAUTION]
 > **Pre-alpha, 100% vibe-coded, personal project. Use at your own risk.** WinKit was made for the author's own use as an experiment; anyone using this version is, in practice, a tester. All code was written by AI without a full human review, and this version **has not yet been validated on a real Windows install**. It may have bugs and security flaws that cause data loss or an unusable Windows. **All responsibility lies with whoever downloads and uses it**; the author accepts no liability (sections 7 and 8 of the Apache 2.0 license and the `NOTICE` file). Test it in a virtual machine first and back up beforehand.
 
-**New in this version:** saved **Wi-Fi** networks connect on the new Windows before the first sign-in (optionally without the password; passwords never go to logs but are readable on the USB drive); **Windows features** such as WSL, Sandbox, Hyper-V, .NET 3.5 (installed offline from the original ISO mounted read-only) and OpenSSH; **devices without drivers** are looked up on Windows Update and listed in the summary; **DNS and blocking** (Cloudflare, Quad9, Google, AdGuard, NextDNS, encrypted DNS on Windows 11, optional ad and tracker blocking in `hosts`, undoable); **network drives**; **maintenance** (weekly winget updates, Storage Sense, disk optimization); **environment variables and PATH** (never overwritten without asking). Earlier versions added Rufus/Microsoft USB drives, **Apply to this PC** with preview and restore point, and Portuguese, English and Spanish.
+**New in this version:** **quick profiles** (Gamer, Maximum privacy, Office, Developer) that show what will change and only add to the recipe; your installed **fonts** for every account; **default apps** (browser, PDF reader, players, archiver); **appearance** (wallpaper, accent color, theme, mouse, pointer, keyboard); **ready browsers** (Chrome, Edge, Brave and Firefox with your extensions, home page and search engine — no passwords or cookies); **Start and taskbar** pins. Version 0.5.0 added Wi-Fi, Windows features, missing drivers, DNS and blocking, network drives, maintenance and environment variables.
 
 **How to use:** download `WinKit-…-windows-x64.zip` below, extract it, open `winkit-studio\winkit-studio.exe` (it asks for administrator), follow the sidebar and click **Build USB drive** at the end. Boot from Ventoy, choose the original Windows 11 ISO and the `winkit-…` template. The executables are not signed: if SmartScreen warns you, click "More info" → "Run anyway". Check the download against the `.sha256` file.
 
@@ -50,6 +49,6 @@ Requisitos: Windows 10 ou 11 (64 bits) no PC onde você monta o pendrive; pendri
 > [!CAUTION]
 > **Pre-alfa, 100% hecho con vibe coding, proyecto personal. Úsalo bajo tu propio riesgo.** WinKit se hizo para uso propio, como una prueba; quien use esta versión es, en la práctica, un probador. Todo el código lo escribió IA sin auditoría humana completa, y esta versión **aún no se validó en una instalación real de Windows**. Puede tener errores y fallas de seguridad que causen pérdida de datos o un Windows inutilizable. **Toda la responsabilidad es de quien lo descarga y lo usa**; el autor no se responsabiliza por nada (secciones 7 y 8 de la licencia Apache 2.0 y archivo `NOTICE`). Pruébalo primero en una máquina virtual y haz una copia de seguridad antes.
 
-**Novedades de esta versión:** las redes **Wi-Fi** guardadas se conectan en el Windows nuevo antes del primer inicio de sesión (opcionalmente sin la contraseña; nunca va a los registros, pero queda legible en la memoria USB); **características de Windows** como WSL, Sandbox, Hyper-V, .NET 3.5 (instalado sin internet desde la ISO original montada solo para lectura) y OpenSSH; los **dispositivos sin controlador** se buscan en Windows Update y se listan en el resumen; **DNS y bloqueos** (Cloudflare, Quad9, Google, AdGuard, NextDNS, DNS cifrado en Windows 11, bloqueo opcional de anuncios y rastreadores en `hosts`, reversible); **unidades de red**; **mantenimiento** (actualización semanal con winget, Sensor de almacenamiento, optimización del disco); **variables de entorno y PATH** (nunca se sobrescriben sin pedirlo). Las versiones anteriores agregaron memorias USB de Rufus/Microsoft, **Aplicar en este PC** con vista previa y punto de restauración, y portugués, inglés y español.
+**Novedades de esta versión:** **perfiles rápidos** (Gamer, Privacidad máxima, Oficina, Programador) que muestran lo que cambiará y solo suman a la receta; tus **fuentes** instaladas para todas las cuentas; **aplicaciones predeterminadas** (navegador, lector de PDF, reproductores, compresor); **apariencia** (fondo, color de énfasis, tema, mouse, puntero, teclado); **navegadores listos** (Chrome, Edge, Brave y Firefox con tus extensiones, página de inicio y buscador, sin contraseñas ni cookies); anclados de **Inicio y barra de tareas**. La versión 0.5.0 agregó Wi-Fi, características de Windows, controladores que faltan, DNS y bloqueos, unidades de red, mantenimiento y variables de entorno.
 
 **Cómo usarlo:** descarga `WinKit-…-windows-x64.zip` abajo, descomprímelo, abre `winkit-studio\winkit-studio.exe` (pide permisos de administrador), sigue la barra lateral y haz clic en **Preparar memoria USB** al final. Arranca desde Ventoy, elige la ISO original de Windows 11 y la plantilla `winkit-…`. Los ejecutables no están firmados: si SmartScreen avisa, haz clic en "Más información" → "Ejecutar de todas formas". Compara la descarga con el archivo `.sha256`.

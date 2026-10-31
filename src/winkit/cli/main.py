@@ -44,6 +44,7 @@ from winkit.collector import features as feature_collector
 from winkit.collector import fonts as font_collector
 from winkit.collector import netdrives as netdrive_collector
 from winkit.collector import personal as personal_collector
+from winkit.collector import start_layout as start_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import dns as dns_rules
 from winkit.core import layout
@@ -62,6 +63,7 @@ from winkit.core.winget_manifest import split_args
 from winkit.i18n import CHOICES, current_language, normalize, render, set_language, t, tn
 from winkit.platform import browsers as browser_policies
 from winkit.platform import hosts
+from winkit.platform.environment import WindowsEnvironment
 from winkit.platform.locale import detect_language
 from winkit.platform.services import Services, real_services
 from winkit.platform.session import is_admin
@@ -1238,6 +1240,36 @@ def _add_browser_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     nr.set_defaults(func=cmd_navegador_remover)
 
 
+# ------------------------------------------------------------------ Iniciar e barra (V2-04)
+def cmd_coletar_iniciar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    f = services.folders
+    pinned, orphans = start_collector.collect_start_layout(
+        recipe,
+        tgt.root,
+        {**f.machine(), **f.current_user()},
+        services.volume_root,
+        build=WindowsEnvironment().windows_build(),
+    )
+    recipe.start_layout.mode = args.modo
+    _save(tgt, recipe)
+    out(tn("studio.start.read_done", pinned))
+    if orphans:
+        out(t("studio.start.orphans", names=", ".join(orphans)))
+    for pin in recipe.start_layout.taskbar_pins:
+        out(f"  [x] {pin.name}")
+    return 0
+
+
+def _add_start_parsers(col_sub: Any, common: argparse.ArgumentParser) -> None:
+    ci = col_sub.add_parser(
+        "iniciar", aliases=["start"], parents=[common], help=t("cli.h.collect_start")
+    )
+    ci.add_argument("--modo", choices=["list", "exact"], default="list", help=t("cli.h.start_mode"))
+    ci.set_defaults(func=cmd_coletar_iniciar)
+
+
 def _add_dns_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     dns = sub.add_parser("dns", help=t("cli.h.dns"))
     dns_sub = dns.add_subparsers(dest="action", required=True)
@@ -1377,6 +1409,7 @@ def _add_collect_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
         "navegadores", aliases=["browsers"], parents=[common], help=t("cli.h.collect_browsers")
     )
     cnv.set_defaults(func=cmd_coletar_navegadores)
+    _add_start_parsers(col_sub, common)
 
     capp = col_sub.add_parser("apps", parents=[common], help=t("cli.h.collect_apps"))
     capp.add_argument(

@@ -329,6 +329,26 @@ class BrowserConfig(_Model):
     selected: bool = True
 
 
+class PinRef(_Model):
+    """Um ícone fixado: atalho do menu Iniciar (molde ``%APPDATA%\\…\\X.lnk``) ou app da Store."""
+
+    kind: Literal["desktop_link", "packaged_app"]
+    value: str
+    name: str
+    selected: bool = True
+
+
+class StartLayout(_Model):
+    """V2-04: Iniciar e barra de tarefas. ``exact`` copia o ``start2.bin`` (mesma versão)."""
+
+    mode: Literal["off", "list", "exact"] = "off"
+    start_file: PayloadPath | None = None
+    #: Build do Windows de onde veio o ``start2.bin`` (o modo exato só vale no mesmo build).
+    source_build: int | None = None
+    start_pins: list[PinRef] = Field(default_factory=list)
+    taskbar_pins: list[PinRef] = Field(default_factory=list)
+
+
 class RestorePoint(_Model):
     """V2-10: ponto de restauração "Windows pronto" no fim da instalação (M12)."""
 
@@ -366,6 +386,7 @@ class Recipe(_Model):
     default_apps: DefaultApps = Field(default_factory=DefaultApps)
     personal: Personal = Field(default_factory=Personal)
     browsers: list[BrowserConfig] = Field(default_factory=list)
+    start_layout: StartLayout = Field(default_factory=StartLayout)
 
     # ---- consultas de conveniência (sem efeito colateral)
     def app(self, app_id: str) -> AppItem | None:

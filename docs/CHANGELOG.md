@@ -28,6 +28,23 @@
 
 ---
 
+## 2026-10-31 — M15 — Iniciar e barra de tarefas (V2-04) e fechamento do M15 (0.6.0)
+**Tipo:** implementação
+**Resumo:** os ícones fixados na barra e no Iniciar chegam ao Windows novo, no modo lista (entre versões) ou como cópia exata do Iniciar (mesma versão, experimental). Fecha o M15 com o roteiro de validação e a versão 0.6.0.
+
+### Adicionado
+- `src/winkit/core/start_layout.py`, `src/winkit/collector/start_layout.py`, `src/winkit/agent/steps/start_layout.py`
+- Receita: `start_layout` (aditivo); plano: tipo `start_layout` no perfil Default (R20)
+- Studio: seção "Iniciar e barra"; CLI: `coletar iniciar --modo list|exact`
+- Testes: `tests/agent/test_start_layout.py` com snapshots em `tests/fixtures/start_layout/`
+- `docs/validacao/M15.md`
+
+### Alterado
+- `src/winkit/__init__.py` — versão 0.6.0; `packaging/NOTAS_DA_VERSAO.md` — novidades do M15
+
+### Documentos vivos atualizados
+- ARQUITETURA — módulos e verificação R-42; STATUS — M15 ✅ código, H27, H28; DIVIDAS — DT-024
+
 ## 2026-10-31 — M15 — Navegadores prontos (V2-12)
 **Tipo:** implementação
 **Resumo:** Chrome, Edge, Brave e Firefox chegam com as extensões de sempre, página inicial e buscador, pelas políticas oficiais e no modo "sugerir" por padrão (D-038). Senhas, cookies e login nunca são lidos nem levados.

@@ -384,6 +384,7 @@ KIND_STYLE: dict[str, tuple[str, str]] = {
     "default_apps_verify": ("check", "#007AFF"),
     "personal": ("pencil", "#5856D6"),
     "browser": ("dot", "#FF9500"),
+    "start_layout": ("sliders", "#0A84FF"),
     "finalize": ("check", "#34C759"),
 }
 
