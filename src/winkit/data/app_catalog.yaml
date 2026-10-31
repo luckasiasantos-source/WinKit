@@ -1,0 +1,133 @@
+# Apps conhecidos (PLANO.md §15.1): como reconhecer no inventário, como instalar em
+# silêncio, o que fazer depois e quais pastas de configuração sugerir (item 28).
+# `config_paths[].warning` referencia um id de dpapi_patterns.yaml.
+
+- id: discord
+  name: Discord
+  match: {display_name_regex: "^Discord$", winget_ids: [Discord.Discord]}
+  scope: user
+  installer: {type: squirrel, args: [-s]}
+  after_install:
+    kill_processes: [Discord.exe, Update.exe]
+    disable_autostart:
+      - {hive: HKCU, value: Discord}
+  close_before_capture: true
+  config_paths:
+    - {template: '{APPDATA}\discord\settings.json', kind: file, recommended: true}
+    - {template: '{APPDATA}\discord\Local Storage', recommended: false, warning: electron_token}
+
+- id: spotify
+  name: Spotify
+  match: {display_name_regex: "^Spotify", winget_ids: [Spotify.Spotify]}
+  scope: user
+  requires_non_elevated: true
+  installer: {type: exe_custom, args: [/silent]}
+  after_install:
+    kill_processes: [Spotify.exe]
+    disable_autostart:
+      - {hive: HKCU, value: Spotify}
+  close_before_capture: true
+  config_paths:
+    - {template: '{APPDATA}\Spotify\prefs', kind: file, recommended: true}
+
+- id: steam
+  name: Steam
+  match: {display_name_regex: "^Steam$", winget_ids: [Valve.Steam]}
+  scope: machine
+  installer: {type: nsis, args: [/S], timeout_minutes: 20}
+  after_install:
+    kill_processes: [steam.exe, steamwebhelper.exe]
+    disable_autostart:
+      - {hive: HKCU, value: Steam}
+  close_before_capture: true
+  config_paths:
+    - {template: '{PROGRAMFILESX86}\Steam\config', recommended: true, exclude: [htmlcache, avatarcache]}
+    - {template: '{PROGRAMFILESX86}\Steam\userdata', recommended: true}
+
+- id: 7zip
+  name: 7-Zip
+  match: {display_name_regex: "^7-Zip", winget_ids: [7zip.7zip]}
+  scope: machine
+  installer: {type: nsis, args: [/S]}
+
+- id: winrar
+  name: WinRAR
+  match: {display_name_regex: "^WinRAR", winget_ids: [RARLab.WinRAR]}
+  scope: machine
+  installer: {type: exe_custom, args: [/S]}
+  config_paths:
+    - {template: '{PROGRAMFILES}\WinRAR\rarreg.key', kind: file, recommended: true}
+    - {template: '{APPDATA}\WinRAR', recommended: true}
+
+- id: vscode
+  name: Visual Studio Code
+  match: {display_name_regex: "^Microsoft Visual Studio Code", winget_ids: [Microsoft.VisualStudioCode]}
+  scope: user
+  installer: {type: inno, args: [/VERYSILENT, /SUPPRESSMSGBOXES, /NORESTART, "/MERGETASKS=!runcode"]}
+  after_install:
+    kill_processes: [Code.exe]
+  close_before_capture: true
+  config_paths:
+    - {template: '{APPDATA}\Code\User', recommended: true, exclude: [workspaceStorage, globalStorage, History]}
+    - {template: '{USERPROFILE}\.vscode\extensions', recommended: false}
+
+- id: notepadplusplus
+  name: Notepad++
+  match: {display_name_regex: "^Notepad\\+\\+", winget_ids: [Notepad++.Notepad++]}
+  scope: machine
+  installer: {type: nsis, args: [/S]}
+  config_paths:
+    - {template: '{APPDATA}\Notepad++', recommended: true, exclude: [backup, session.xml]}
+
+- id: vlc
+  name: VLC media player
+  match: {display_name_regex: "^VLC media player", winget_ids: [VideoLAN.VLC]}
+  scope: machine
+  installer: {type: nsis, args: [/S]}
+  config_paths:
+    - {template: '{APPDATA}\vlc', recommended: true, exclude: [art, ml.xspf]}
+
+- id: obs-studio
+  name: OBS Studio
+  match: {display_name_regex: "^OBS Studio", winget_ids: [OBSProject.OBSStudio]}
+  scope: machine
+  installer: {type: nsis, args: [/S]}
+  close_before_capture: true
+  config_paths:
+    - {template: '{APPDATA}\obs-studio', recommended: true, exclude: [logs, crashes, updates, plugin_config\obs-browser\Cache]}
+
+- id: google-chrome
+  name: Google Chrome
+  match: {display_name_regex: "^Google Chrome$", winget_ids: [Google.Chrome]}
+  scope: machine
+  installer: {type: msi, args: [/qn, /norestart]}
+  close_before_capture: true
+  config_paths:
+    - {template: '{LOCALAPPDATA}\Google\Chrome\User Data', recommended: false, warning: chromium_login_data}
+
+- id: brave
+  name: Brave
+  match: {display_name_regex: "^Brave", winget_ids: [Brave.Brave]}
+  scope: machine
+  installer: {type: exe_custom, args: [--system-level, --do-not-launch-chrome]}
+  close_before_capture: true
+  config_paths:
+    - {template: '{LOCALAPPDATA}\BraveSoftware\Brave-Browser\User Data', recommended: false, warning: chromium_login_data}
+
+- id: firefox
+  name: Mozilla Firefox
+  match: {display_name_regex: "^Mozilla Firefox", winget_ids: [Mozilla.Firefox, Mozilla.Firefox.pt-BR]}
+  scope: machine
+  installer: {type: nsis, args: [/S]}
+  close_before_capture: true
+  config_paths:
+    - {template: '{APPDATA}\Mozilla\Firefox', recommended: false, warning: firefox_logins}
+
+- id: qbittorrent
+  name: qBittorrent
+  match: {display_name_regex: "^qBittorrent", winget_ids: [qBittorrent.qBittorrent]}
+  scope: machine
+  installer: {type: nsis, args: [/S]}
+  config_paths:
+    - {template: '{APPDATA}\qBittorrent', recommended: true}
+    - {template: '{LOCALAPPDATA}\qBittorrent\BT_backup', recommended: true}

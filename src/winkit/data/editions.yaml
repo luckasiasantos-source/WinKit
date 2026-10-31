@@ -1,0 +1,11 @@
+# Chaves GENÉRICAS de instalação publicadas pela Microsoft (D-016). Não ativam o Windows:
+# só selecionam a edição no instalador. Se a máquina tiver licença digital ou chave no
+# firmware, o Windows ativa sozinho depois.
+# Fonte: chaves de instalação padrão do Windows 10/11 (as mesmas para as duas versões).
+- {id: home, name: Home, generic_key: YTMG3-N6DKC-DKB77-7M9GH-8HVX7}
+- {id: home_single_language, name: Home Single Language, generic_key: BT79Q-G7N6G-PGBYW-4YWX6-6F4BT}
+- {id: pro, name: Pro, generic_key: VK7JG-NPHTM-C97JM-9MPGT-3V66T}
+- {id: pro_n, name: Pro N, generic_key: 2B87N-8KFHP-DKV6R-Y2C8J-PKCKT}
+- {id: pro_workstations, name: Pro for Workstations, generic_key: DXG7C-N36C4-C4HTG-X4T3X-2YV77}
+- {id: education, name: Education, generic_key: YNMGQ-8RYV3-4PGQ3-C8XTP-7CFBY}
+- {id: enterprise, name: Enterprise, generic_key: XGVPP-NMH47-7TTHJ-W3FW7-8HV2C}

@@ -1,0 +1,12 @@
+# Dados protegidos por DPAPI ou presos à conta/máquina (PLANO.md §7.4.6). Geram AVISO na
+# captura; o backup continua sendo feito. `glob` é relativo à pasta capturada.
+- {id: electron_token, glob: "**/Local Storage/leveldb/*", what: "contém o token de login; você terá que entrar de novo"}
+- {id: chromium_login_data, glob: "**/Login Data", what: "senhas salvas do navegador não funcionarão"}
+- {id: chromium_cookies, glob: "**/Network/Cookies", what: "cookies (sessões abertas) não funcionarão"}
+- {id: chromium_cookies_legacy, glob: "**/Cookies", what: "cookies (sessões abertas) não funcionarão"}
+- {id: chromium_local_state, glob: "**/Local State", what: "a chave que protege senhas e cookies é presa a esta conta"}
+- {id: chromium_web_data, glob: "**/Web Data", what: "cartões e dados de preenchimento automático não funcionarão"}
+- {id: firefox_logins, glob: "**/logins.json", what: "senhas do Firefox podem não abrir se houver senha principal"}
+- {id: windows_credentials, glob: "**/Microsoft/Credentials/*", what: "credenciais do Windows não são transferíveis"}
+- {id: windows_protect, glob: "**/Microsoft/Protect/*", what: "chaves DPAPI do Windows não são transferíveis"}
+- {id: dpapi_generic, glob: "**/*.dpapi", what: "arquivo protegido pelo Windows; não funcionará em outra máquina"}

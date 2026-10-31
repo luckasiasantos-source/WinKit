@@ -1,1 +1,1 @@
-"""Pacote."""
+"""Estado do Agente."""

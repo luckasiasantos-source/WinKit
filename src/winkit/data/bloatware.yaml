@@ -1,0 +1,64 @@
+# Apps pré-instalados do Windows (PLANO.md §14.1).
+# risk: safe = pode ser pré-selecionado; caution = desmarcado, mostra o efeito colateral;
+# blocked = não pode ser removido (o Studio mostra o motivo).
+# `id` é o nome do pacote Appx; `publisher_id` compõe o PackageFamilyName (id_publisher).
+
+# ------------------------------------------------------------------ seguros
+- {id: Clipchamp.Clipchamp, name: Clipchamp (editor de vídeo), risk: safe, publisher_id: yxz26nhyzhsrt, recommended: true}
+- {id: Microsoft.BingNews, name: Notícias, risk: safe, recommended: true}
+- {id: Microsoft.BingWeather, name: Clima, risk: safe, recommended: true}
+- {id: Microsoft.BingSearch, name: Pesquisa do Bing, risk: safe, recommended: true}
+- {id: Microsoft.GetHelp, name: Obter Ajuda, risk: safe, recommended: true}
+- {id: Microsoft.Getstarted, name: Dicas, risk: safe, recommended: true}
+- {id: Microsoft.MicrosoftSolitaireCollection, name: Microsoft Solitaire Collection, risk: safe, recommended: true}
+- {id: Microsoft.MicrosoftOfficeHub, name: Microsoft 365 (Office) — atalho de assinatura, risk: safe, recommended: true}
+- {id: Microsoft.PowerAutomateDesktop, name: Power Automate, risk: safe, recommended: true}
+- {id: Microsoft.Todos, name: Microsoft To Do, risk: safe, recommended: true}
+- {id: Microsoft.WindowsFeedbackHub, name: Hub de Comentários, risk: safe, recommended: true}
+- {id: Microsoft.WindowsMaps, name: Mapas, risk: safe, recommended: true}
+- {id: MSTeams, name: Microsoft Teams (pessoal), risk: safe, recommended: true}
+- {id: Microsoft.ZuneVideo, name: Filmes e TV, risk: safe, recommended: true}
+- {id: Microsoft.Windows.DevHome, name: Dev Home, risk: safe, recommended: true, windows: {os: [11]}}
+- {id: Microsoft.549981C3F5F10, name: Cortana, risk: safe, recommended: true, windows: {os: [10, 11]}}
+- {id: Microsoft.People, name: Pessoas, risk: safe, recommended: true, windows: {os: [10]}}
+- {id: Microsoft.MixedReality.Portal, name: Portal de Realidade Misturada, risk: safe, recommended: true, windows: {os: [10]}}
+- {id: Microsoft.SkypeApp, name: Skype, risk: safe, recommended: true, windows: {os: [10]}}
+- {id: Microsoft.Microsoft3DViewer, name: Visualizador 3D, risk: safe, recommended: true, windows: {os: [10]}}
+- {id: Microsoft.Wallet, name: Carteira, risk: safe, recommended: true, windows: {os: [10]}}
+
+# ------------------------------------------------------------------ cuidado
+- {id: Microsoft.Copilot, name: Copilot, risk: caution, side_effect: "O assistente Copilot deixa de existir; pode ser reinstalado pela Microsoft Store."}
+- {id: MicrosoftWindows.Client.WebExperience, name: Widgets, risk: caution, publisher_id: cw5n1h2txyewy, windows: {os: [11]}, side_effect: "O painel de Widgets e o clima na barra de tarefas somem."}
+- {id: Microsoft.OutlookForWindows, name: Outlook (novo), risk: caution, windows: {os: [11]}, side_effect: "O app de e-mail e calendário padrão some."}
+- {id: Microsoft.YourPhone, name: Vincular ao Celular, risk: caution, side_effect: "Deixa de espelhar notificações e fotos do celular."}
+- {id: Microsoft.XboxGamingOverlay, name: Xbox Game Bar, risk: caution, side_effect: "Win+G e a gravação de jogos param de funcionar."}
+- {id: Microsoft.GamingApp, name: Xbox (app), risk: caution, side_effect: "Game Pass para PC deixa de funcionar."}
+- {id: Microsoft.XboxIdentityProvider, name: Xbox Identity Provider, risk: caution, side_effect: "Jogos que exigem login Xbox (Game Pass, Minecraft) podem falhar."}
+- {id: Microsoft.XboxSpeechToTextOverlay, name: Xbox — transcrição de voz, risk: caution, side_effect: "Recursos de acessibilidade do chat do Xbox param."}
+- {id: Microsoft.Xbox.TCUI, name: Xbox TCUI, risk: caution, side_effect: "Telas de amigos/convites do Xbox dentro de jogos param."}
+- {id: Microsoft.ZuneMusic, name: Media Player, risk: caution, side_effect: "O player de música e vídeo padrão some."}
+- {id: Microsoft.Windows.Photos, name: Fotos, risk: caution, side_effect: "O visualizador de imagens padrão some."}
+- {id: Microsoft.ScreenSketch, name: Ferramenta de Captura, risk: caution, side_effect: "Win+Shift+S (captura de tela) para de funcionar."}
+- {id: Microsoft.WindowsCalculator, name: Calculadora, risk: caution, side_effect: "A calculadora some."}
+- {id: Microsoft.WindowsAlarms, name: Relógio, risk: caution, side_effect: "Alarmes, timer e sessões de foco somem."}
+- {id: Microsoft.WindowsCamera, name: Câmera, risk: caution, side_effect: "O app de câmera some (a webcam continua funcionando em outros apps)."}
+- {id: Microsoft.WindowsSoundRecorder, name: Gravador de Som, risk: caution, side_effect: "O gravador de áudio some."}
+- {id: Microsoft.MicrosoftStickyNotes, name: Notas Autoadesivas, risk: caution, side_effect: "Notas existentes ficam inacessíveis neste PC."}
+- {id: Microsoft.Paint, name: Paint, risk: caution, side_effect: "O Paint some."}
+- {id: Microsoft.WindowsNotepad, name: Bloco de Notas, risk: caution, side_effect: "O Bloco de Notas some; arquivos .txt ficam sem programa padrão."}
+- {id: Microsoft.WindowsTerminal, name: Terminal, risk: caution, side_effect: "O terminal padrão do Windows 11 some; o prompt clássico volta a abrir."}
+- {id: MicrosoftCorporationII.QuickAssist, name: Assistência Rápida, risk: caution, side_effect: "Não será possível receber ajuda remota por ela."}
+
+# ------------------------------------------------------------------ bloqueados
+- {id: Microsoft.WindowsStore, name: Microsoft Store, risk: blocked, reason: "Sem a Store não dá para instalar nem atualizar apps da loja, nem o winget."}
+- {id: Microsoft.DesktopAppInstaller, name: Instalador de Aplicativo (winget), risk: blocked, reason: "É o winget: sem ele a instalação dos seus apps falha."}
+- {id: Microsoft.StorePurchaseApp, name: Compras da Store, risk: blocked, reason: "Necessário para a Store funcionar."}
+- {id: Microsoft.SecHealthUI, name: Segurança do Windows, risk: blocked, reason: "É a interface do antivírus e do firewall."}
+- {id: Microsoft.VCLibs.140.00, name: Bibliotecas Visual C++ (UWP), risk: blocked, reason: "Biblioteca usada por vários apps; removê-la quebra outros programas."}
+- {id: Microsoft.VCLibs.140.00.UWPDesktop, name: Bibliotecas Visual C++ (Desktop Bridge), risk: blocked, reason: "Biblioteca usada pelo winget e por vários apps."}
+- {id: Microsoft.UI.Xaml.2.8, name: WinUI 2.8, risk: blocked, reason: "Biblioteca de interface usada por vários apps."}
+- {id: Microsoft.NET.Native.Framework.2.2, name: .NET Native Framework, risk: blocked, reason: "Biblioteca usada por vários apps."}
+- {id: Microsoft.NET.Native.Runtime.2.2, name: .NET Native Runtime, risk: blocked, reason: "Biblioteca usada por vários apps."}
+- {id: Microsoft.WindowsAppRuntime.1.5, name: Windows App Runtime, risk: blocked, reason: "Biblioteca usada por vários apps do Windows 11."}
+- {id: Microsoft.HEIFImageExtension, name: Extensão de imagens HEIF, risk: blocked, reason: "Codec: sem ele fotos do celular (.heic) não abrem."}
+- {id: Microsoft.WebMediaExtensions, name: Extensões de mídia da Web, risk: blocked, reason: "Codec usado por navegadores e players."}

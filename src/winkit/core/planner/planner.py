@@ -1,0 +1,421 @@
+"""Planejador de fases (PLANO.md §11.2, regras R1–R15).
+
+Função pura e determinística: a mesma receita e o mesmo contexto produzem exatamente o
+mesmo plano. Não executa nada.
+"""
+
+from __future__ import annotations
+
+import heapq
+from collections.abc import Callable
+from dataclasses import dataclass, field
+
+from winkit.core.catalog.models import Catalogs
+from winkit.core.errors import PathTemplateError, PlanError
+from winkit.core.paths import templates
+from winkit.core.planner.models import (
+    ExcludedItem,
+    Phase,
+    Plan,
+    PlanContext,
+    PlannedStep,
+    StepKind,
+    Target,
+)
+from winkit.core.recipe.models import AppItem, BackupItem, Recipe
+from winkit.core.recipe.validation import find_cycle
+from winkit.i18n import t
+
+# Ordem dos grupos dentro de cada fase (PLANO.md §11.2, tabela "Ordem dentro de cada fase").
+_G1 = {"driver": 10, "power": 20, "bloat": 30, "tweak": 40, "backup": 50, "app": 60}
+_G2 = {
+    "backup": 20,
+    "app": 30,
+    "tweak": 40,
+    "shortcut": 50,
+    "rename_computer": 60,
+    "windows_update": 70,
+    "finalize": 99,
+}
+_FALLBACK_GROUP = 5
+
+#: Ajustes ligados por campos da receita, não pela lista ``tweaks``.
+TWEAK_WU_DRIVERS = "system.wu_no_driver_replacement"
+TWEAK_CONSUMER_CONTENT = "system.consumer_content"
+
+#: Decide se um item marcado como "decidir na hora" vai para a janela (R1, R2).
+Ask = Callable[[bool], bool]
+
+
+@dataclass
+class _Draft:
+    kind: StepKind
+    ref: str
+    phase: Phase
+    title: str
+    target: Target
+    needs_pendrive: bool = False
+    needs_network: bool = False
+    depends_on: list[str] = field(default_factory=list)
+    user_choice: bool = False
+    sort: tuple[int, int, str] = (0, 0, "")
+
+    @property
+    def id(self) -> str:
+        return f"{self.kind}:{self.ref}"
+
+
+def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> Plan:
+    ctx = ctx or PlanContext()
+    mode = recipe.execution.mode
+    interactive = mode != "silent"  # R1
+
+    def ask(flag: bool) -> bool:  # R2
+        return interactive and flag
+
+    drafts: list[_Draft] = []
+    excluded: list[ExcludedItem] = []
+
+    _plan_drivers(recipe, drafts)
+    _plan_power(recipe, drafts)
+    _plan_bloat(recipe, catalogs, ctx, drafts, excluded)
+    _plan_tweaks(recipe, catalogs, ctx, ask, out=drafts, excluded=excluded)
+    post_install = {b for a in recipe.selected_apps() for b in a.restore_backups_after_install}
+    _plan_backups(recipe, ask, post_install, drafts)
+    _plan_apps(recipe, ask, post_install, drafts)
+    _plan_tail(recipe, ask, drafts)
+
+    steps = _finalize(drafts, ctx)
+    return Plan(mode=mode, steps=tuple(steps), excluded=tuple(excluded))
+
+
+# ------------------------------------------------------------------ etapas por tipo
+def _plan_drivers(recipe: Recipe, out: list[_Draft]) -> None:  # R3
+    for d in recipe.selected_drivers():
+        name = f"{d.class_name} {d.provider}".strip()
+        out.append(
+            _Draft(
+                "driver",
+                d.id,
+                1,
+                t("plan.driver", name=name),
+                "machine",
+                needs_pendrive=True,
+                sort=(_G1["driver"], d.priority, d.id),
+            )
+        )
+
+
+def _plan_power(recipe: Recipe, out: list[_Draft]) -> None:  # R5
+    p = recipe.power
+    if p.scheme != "unchanged" or p.hibernate is not None or p.fast_startup is not None:
+        out.append(
+            _Draft(
+                "power",
+                "settings",
+                1,
+                t("plan.power"),
+                "machine",
+                sort=(_G1["power"], 0, "settings"),
+            )
+        )
+
+
+def _plan_bloat(
+    recipe: Recipe,
+    catalogs: Catalogs,
+    ctx: PlanContext,
+    out: list[_Draft],
+    excluded: list[ExcludedItem],
+) -> None:  # R4
+    for pkg in sorted(set(recipe.bloatware.remove)):
+        entry = catalogs.bloat(pkg)
+        if entry is None or entry.risk == "blocked":
+            reason = t("plan.excluded_unknown_bloat")
+            excluded.append(ExcludedItem(kind="bloat", ref=pkg, reason=reason))
+            continue
+        if not entry.windows.applies(ctx.os_major, ctx.build):
+            excluded.append(ExcludedItem(kind="bloat", ref=pkg, reason=t("plan.excluded_os")))
+            continue
+        out.append(
+            _Draft(
+                "bloat",
+                pkg,
+                1,
+                t("plan.bloat", name=entry.name),
+                "machine",
+                sort=(_G1["bloat"], 0, pkg),
+            )
+        )
+
+
+def _plan_tweaks(
+    recipe: Recipe,
+    catalogs: Catalogs,
+    ctx: PlanContext,
+    ask: Ask,
+    *,
+    out: list[_Draft],
+    excluded: list[ExcludedItem],
+) -> None:  # R5, R6
+    selections = [(s.id, s.decide_at_runtime) for s in recipe.enabled_tweaks()]
+    implicit = []
+    if recipe.updates.block_wu_driver_replacement:
+        implicit.append(TWEAK_WU_DRIVERS)
+    if recipe.bloatware.disable_consumer_content:
+        implicit.append(TWEAK_CONSUMER_CONTENT)
+    chosen = {tid for tid, _ in selections}
+    selections += [(tid, False) for tid in implicit if tid not in chosen]
+
+    for tweak_id, decide in selections:
+        tweak = catalogs.tweak(tweak_id)
+        if tweak is None:
+            reason = t("plan.excluded_unknown_tweak")
+            excluded.append(ExcludedItem(kind="tweak", ref=tweak_id, reason=reason))
+            continue
+        if tweak.stage == "specialize":
+            reason = t("plan.excluded_specialize")
+            excluded.append(ExcludedItem(kind="tweak", ref=tweak_id, reason=reason))
+            continue
+        if not tweak.windows.applies(ctx.os_major, ctx.build):
+            excluded.append(ExcludedItem(kind="tweak", ref=tweak_id, reason=t("plan.excluded_os")))
+            continue
+        title = t("plan.tweak", name=tweak.title)
+        if ask(decide):
+            target: Target = "user_profile" if tweak.scope == "user" else "machine"
+            out.append(
+                _Draft(
+                    "tweak",
+                    tweak_id,
+                    2,
+                    title,
+                    target,
+                    user_choice=True,
+                    sort=(_G2["tweak"], 0, tweak_id),
+                )
+            )
+        else:
+            target = "default_profile" if tweak.scope == "user" else "machine"
+            out.append(
+                _Draft("tweak", tweak_id, 1, title, target, sort=(_G1["tweak"], 0, tweak_id))
+            )
+
+
+def _backup_phase(b: BackupItem, ask: Ask) -> tuple[Phase, Target, bool]:
+    try:
+        parsed = templates.parse(b.template)
+    except PathTemplateError as exc:
+        raise PlanError(f"backup {b.id}: {exc}") from exc
+    if parsed.is_absolute:  # R8
+        return 2, "machine", ask(b.decide_at_runtime)
+    if ask(b.decide_at_runtime):  # R2
+        return 2, ("user_profile" if parsed.is_profile else "machine"), True
+    if parsed.is_profile:  # R7
+        return 1, "default_profile", False
+    return 1, "machine", False  # R8
+
+
+def _plan_backups(recipe: Recipe, ask: Ask, post_install: set[str], out: list[_Draft]) -> None:
+    for b in recipe.selected_backups():
+        if b.id in post_install:
+            continue  # R13: planejado junto com o app
+        phase, target, choice = _backup_phase(b, ask)
+        group = (_G1 if phase == 1 else _G2)["backup"]
+        out.append(
+            _Draft(
+                "backup",
+                b.id,
+                phase,
+                t("plan.backup", name=b.name),
+                target,
+                needs_pendrive=True,
+                user_choice=choice,
+                sort=(group, 0, b.id),
+            )
+        )
+
+
+def _app_phase(a: AppItem, ask: Ask) -> Phase:
+    if ask(a.decide_at_runtime):  # R2
+        return 2
+    if a.source == "winget_online":  # R10
+        return 2
+    if a.scope == "user":  # R11
+        return 2
+    return 1  # R9
+
+
+def _plan_apps(recipe: Recipe, ask: Ask, post_install: set[str], out: list[_Draft]) -> None:
+    apps = {a.id: a for a in recipe.selected_apps()}
+    portable = {i: a for i, a in apps.items() if a.source == "portable"}
+    installable = {i: a for i, a in apps.items() if a.source != "portable"}
+
+    phases: dict[str, Phase] = {i: _app_phase(a, ask) for i, a in installable.items()}
+    deps = {i: [d for d in a.depends_on if d in installable] for i, a in installable.items()}
+    cycle = find_cycle(deps)
+    if cycle:
+        raise PlanError(t("recipe.dependency_cycle", ids=" → ".join(cycle)))
+    changed = True
+    while changed:  # dependência na Fase 2 puxa o dependente para a Fase 2
+        changed = False
+        for i, ds in deps.items():
+            if phases[i] == 1 and any(phases[d] == 2 for d in ds):
+                phases[i] = 2
+                changed = True
+
+    for phase in (1, 2):
+        ids = [i for i in installable if phases[i] == phase]
+        group = (_G1 if phase == 1 else _G2)["app"]
+        for seq, app_id in enumerate(_topo_order(ids, deps, installable)):
+            a = installable[app_id]
+            out.append(
+                _Draft(
+                    "app",
+                    app_id,
+                    phase,
+                    t("plan.app", name=a.name),
+                    "user_profile" if a.scope == "user" else "machine",
+                    needs_pendrive=a.source == "offline",
+                    needs_network=a.source == "winget_online",
+                    depends_on=[f"app:{d}" for d in deps[app_id]],
+                    user_choice=ask(a.decide_at_runtime),
+                    sort=(group, seq * 100, app_id),
+                )
+            )
+            for k, backup_id in enumerate(a.restore_backups_after_install):  # R13
+                b = recipe.backup(backup_id)
+                if b is None or not b.selected or backup_id not in post_install:
+                    continue
+                parsed = templates.parse(b.template)
+                if parsed.is_profile:
+                    target: Target = "default_profile" if phase == 1 else "user_profile"
+                else:
+                    target = "machine"
+                out.append(
+                    _Draft(
+                        "backup",
+                        backup_id,
+                        phase,
+                        t("plan.backup", name=b.name),
+                        target,
+                        needs_pendrive=True,
+                        depends_on=[f"app:{app_id}"],
+                        sort=(group, seq * 100 + 1 + k, backup_id),
+                    )
+                )
+                post_install.discard(backup_id)  # um backup só é planejado uma vez
+
+    for app_id in sorted(portable):  # R12
+        a = portable[app_id]
+        deps_ids = [f"backup:{a.portable_backup}"] if a.portable_backup else []
+        out.append(
+            _Draft(
+                "shortcut",
+                app_id,
+                2,
+                t("plan.shortcut", name=a.name),
+                "user_profile",
+                depends_on=deps_ids,
+                sort=(_G2["shortcut"], 0, app_id),
+            )
+        )
+
+
+def _topo_order(ids: list[str], deps: dict[str, list[str]], apps: dict[str, AppItem]) -> list[str]:
+    """Kahn com prioridade (order, id) — determinístico."""
+    present = set(ids)
+    pending = {i: {d for d in deps[i] if d in present} for i in ids}
+    heap = [(apps[i].order, i) for i in ids if not pending[i]]
+    heapq.heapify(heap)
+    order: list[str] = []
+    while heap:
+        _, node = heapq.heappop(heap)
+        order.append(node)
+        for other in ids:
+            if node in pending[other]:
+                pending[other].discard(node)
+                if not pending[other]:
+                    heapq.heappush(heap, (apps[other].order, other))
+    if len(order) != len(ids):
+        raise PlanError("dependências entre apps não puderam ser ordenadas")
+    return order
+
+
+def _plan_tail(recipe: Recipe, ask: Ask, out: list[_Draft]) -> None:
+    if ask(recipe.windows.computer_name_decide_at_runtime):
+        out.append(
+            _Draft(
+                "rename_computer",
+                "computer",
+                2,
+                t("plan.rename_computer"),
+                "machine",
+                user_choice=True,
+                sort=(_G2["rename_computer"], 0, "computer"),
+            )
+        )
+    if recipe.updates.windows_update_after_install:  # R14
+        out.append(
+            _Draft(
+                "windows_update",
+                "all",
+                2,
+                t("plan.windows_update"),
+                "machine",
+                needs_network=True,
+                user_choice=ask(True),
+                sort=(_G2["windows_update"], 0, "all"),
+            )
+        )
+    out.append(
+        _Draft(
+            "finalize",
+            "summary",
+            2,
+            t("plan.finalize"),
+            "machine",
+            sort=(_G2["finalize"], 0, "summary"),
+        )
+    )
+
+
+# ------------------------------------------------------------------ montagem final
+def _finalize(drafts: list[_Draft], ctx: PlanContext) -> list[PlannedStep]:
+    ids = [d.id for d in drafts]
+    dupes = {i for i in ids if ids.count(i) > 1}
+    if dupes:
+        raise PlanError(f"etapas repetidas: {sorted(dupes)}")
+    known = set(ids)
+
+    steps: list[tuple[tuple[int, int, int, str], PlannedStep]] = []
+    for d in drafts:
+        phase, target, moved = d.phase, d.target, False
+        if not ctx.phase1_ran and d.phase == 1:  # fallback (D-012)
+            phase, moved = 2, True
+            if target == "default_profile":
+                target = "user_profile"
+        group, sub, name = d.sort
+        if moved:
+            key = (phase, _FALLBACK_GROUP, group * 10000 + sub, name)
+        else:
+            key = (phase, group, sub, name)
+        steps.append(
+            (
+                key,
+                PlannedStep(
+                    id=d.id,
+                    kind=d.kind,
+                    ref=d.ref,
+                    phase=phase,
+                    title=d.title,
+                    target=target,
+                    needs_pendrive=d.needs_pendrive,
+                    needs_network=d.needs_network,
+                    depends_on=tuple(x for x in d.depends_on if x in known),
+                    user_choice=d.user_choice,
+                    moved_from_phase1=moved,
+                ),
+            )
+        )
+    steps.sort(key=lambda item: item[0])
+    return [s for _, s in steps]

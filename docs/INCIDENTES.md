@@ -18,7 +18,14 @@
 
 ## Incidentes
 
-(nenhum até o momento — o desenvolvimento ainda não começou)
+### IN-001 — CI falhou na instalação: pasta `data/` inexistente
+- Data: 2026-10-31
+- Marco: M0
+- O que aconteceu: o primeiro CI (Linux e Windows) falhou em `uv sync` com `FileNotFoundError: Forced include not found: .../data`.
+- Causa raiz: o `pyproject.toml` mandava o hatchling incluir `data/` no pacote, mas a pasta estava vazia; o git não versiona pastas vazias, então ela não existia no checkout do CI. Localmente ela existia, então os testes locais passaram.
+- Impacto: nenhum teste rodou no CI do M0 (incluindo os testes de Windows real).
+- Correção: catálogos movidos para `src/winkit/data/` e `force-include` removido (D-021).
+- Prevenção: antes de cada commit, rodar `uv sync --locked` a partir de um clone limpo (`git clone` local para uma pasta temporária) quando mexer em empacotamento.
 
 ## Lições da fase de desenho
 

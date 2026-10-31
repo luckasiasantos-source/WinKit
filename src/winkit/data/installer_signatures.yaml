@@ -1,0 +1,10 @@
+# Detecção do tipo de instalador por conteúdo (PLANO.md §13.3). A ORDEM importa: a primeira
+# assinatura que casar vence (WiX Burn antes de todos, Inno antes de NSIS).
+# `markers` são trechos ASCII procurados nos bytes do arquivo.
+- {type: msix, extensions: [.msix, .appx, .msixbundle, .appxbundle], args: []}
+- {type: msi, extensions: [.msi], args: [/qn, /norestart]}
+- {type: wix_burn, pe_section: .wixburn, args: [/quiet, /norestart]}
+- {type: inno, markers: ["Inno Setup Setup Data", "Inno Setup"], args: [/VERYSILENT, /SUPPRESSMSGBOXES, /NORESTART, /SP-]}
+- {type: nsis, markers: ["Nullsoft.NSIS", "NullsoftInst", "Nullsoft Install System"], args: [/S]}
+- {type: squirrel, markers: ["SquirrelSetup", "Squirrel.Windows", "Squirrel installer"], args: [-s], scope_hint: user}
+- {type: installshield, markers: ["InstallShield"], args: [/s, '/v"/qn /norestart"'], needs_confirmation: true}

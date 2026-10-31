@@ -95,6 +95,24 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Plano: documentar o procedimento se acontecer.
 - Prioridade: baixa
 
+### DT-010 — Valores dos catálogos não validados em Windows real
+- Estado: aberta
+- Origem: M1
+- Onde: `src/winkit/data/tweaks.yaml`, `bloatware.yaml`, `editions.yaml`, `app_catalog.yaml`
+- Descrição: valores de registro, nomes de pacote, publisher ids, chaves genéricas e caminhos de configuração vieram de documentação e conhecimento prévio; nenhum foi aplicado ainda num Windows real.
+- Impacto: um ajuste pode não ter efeito, ou um pacote pode ter outro nome numa build específica. Como cada etapa falha isolada (P4), o efeito é um item "falhou" no resumo.
+- Plano: validar no roteiro de VM do M7 e no CI Windows (ajustes aplicados num hive de teste).
+- Prioridade: média
+
+### DT-011 — Ajustes do registro protegidos pelo Windows (UCPD)
+- Estado: aberta
+- Origem: M1
+- Onde: `visual.hide_widgets_button` (`TaskbarDa`)
+- Descrição: versões recentes do Windows 11 bloqueiam a escrita de alguns valores do Explorer no `HKCU` do usuário logado. Aplicar no perfil Default (Fase 1, hive offline) deve funcionar; aplicar na Fase 2 pode falhar.
+- Impacto: o ajuste aparece como falha quando decidido na hora.
+- Plano: confirmar na VM; se falhar, marcar o ajuste como "só Fase 1" no catálogo.
+- Prioridade: baixa
+
 ## Quitadas
 
 (nenhuma)

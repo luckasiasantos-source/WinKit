@@ -15,7 +15,7 @@
 |---|---|---|---|
 | — | Planejamento e documentação | ✅ | — |
 | M0 | Fundação | ✅ | — |
-| M1 | Núcleo puro | ⬜ | — |
+| M1 | Núcleo puro | ✅ | — |
 | M2 | Construtor mínimo + primeira instalação real | ⬜ | ⬜ pendente |
 | M3 | Esqueleto do Agente | ⬜ | ⬜ pendente |
 | M4 | Drivers | ⬜ | ⬜ pendente |
@@ -48,13 +48,19 @@
 
 **Testes:** 130 passando no Linux, 4 pulados (3 exigem Windows real — rodam no CI Windows; 1 aguarda o Agente).
 
-### M1 — Núcleo puro ⬜
-- ⬜ Modelos da receita + validação + estrutura de migração
-- ⬜ Moldes de caminho (tradução e resolução)
-- ⬜ Esquemas dos catálogos + YAMLs iniciais
-- ⬜ Planejador (R1–R15)
-- ⬜ Modelo de estado e transições
-- ⬜ Manifesto e diff incremental
+### M1 — Núcleo puro ✅
+- ✅ `core/recipe/models.py` — receita completa (Pydantic, `extra=forbid`, validação na atribuição)
+- ✅ `core/recipe/io.py` — carregar/gravar, hash estável, criação, cadeia de migrações
+- ✅ `core/recipe/validation.py` — regras do §6.2 + caminhos do pendrive (sem `..`, só `Apps/`, `Drivers/`, `Perfis/<perfil>/`) + referências aos catálogos
+- ✅ `core/paths/templates.py` — tradução por prefixo mais longo, resolução, perfil Default, redirecionamento
+- ✅ `core/catalog/` — modelos + carregador com checagem de ids repetidos
+- ✅ `winkit/data/*.yaml` — 13 apps, 26 ajustes (todos com `source` e `undo`), 54 pacotes de bloatware, 7 edições, 7 assinaturas de instalador, 10 padrões DPAPI, 19 exclusões, 24 classes de driver
+- ✅ `core/planner/` — planejador R1–R15 com fallback, ordem topológica determinística, itens excluídos com motivo
+- ✅ `core/state/` — estado, transições, retomada, limite de tentativas, tentar de novo
+- ✅ `core/manifest/` — varredura com reaproveitamento de hash, diff, verificação de integridade
+- ✅ `core/fsutil.py` — escrita atômica (R-16)
+
+**Testes:** 300 passando; cobertura do `core` = 98%.
 
 ### M2 — Construtor mínimo ⬜
 - ⬜ Detecção do Ventoy

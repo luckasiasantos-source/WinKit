@@ -1,0 +1,26 @@
+# Classes de driver (ClassName do Windows). `priority` menor instala antes: rede e
+# armazenamento primeiro (a Fase 2 depende de internet). `recommended` = pré-selecionado.
+- {name: Net, label: Rede (Ethernet/Wi-Fi), priority: 0, recommended: true}
+- {name: SCSIAdapter, label: Controladora de armazenamento (NVMe/RAID), priority: 0, recommended: true}
+- {name: HDC, label: Controladora de disco (SATA/AHCI), priority: 0, recommended: true}
+- {name: System, label: Chipset e dispositivos do sistema, priority: 1, recommended: true}
+- {name: USB, label: Controladoras USB, priority: 1, recommended: true}
+- {name: Display, label: Placa de vídeo, priority: 3, recommended: true}
+- {name: MEDIA, label: Áudio, priority: 5, recommended: true}
+- {name: AudioProcessingObject, label: Efeitos de áudio, priority: 5, recommended: true}
+- {name: Bluetooth, label: Bluetooth, priority: 5, recommended: true}
+- {name: HIDClass, label: Dispositivos de entrada (HID), priority: 5, recommended: true}
+- {name: Mouse, label: Mouse e touchpad, priority: 5, recommended: true}
+- {name: Keyboard, label: Teclado, priority: 5, recommended: true}
+- {name: Camera, label: Câmera, priority: 5, recommended: true}
+- {name: Image, label: Câmera/scanner (imagem), priority: 5, recommended: true}
+- {name: Biometric, label: Leitor biométrico, priority: 5, recommended: true}
+- {name: Sensor, label: Sensores, priority: 5, recommended: true}
+- {name: SmartCardReader, label: Leitor de cartão inteligente, priority: 5, recommended: true}
+- {name: SecurityDevices, label: Dispositivos de segurança (TPM), priority: 5, recommended: true}
+- {name: Ports, label: Portas (COM/LPT), priority: 5, recommended: false}
+- {name: Monitor, label: Monitor, priority: 9, recommended: false}
+- {name: Printer, label: Impressora, priority: 9, recommended: false}
+- {name: SoftwareComponent, label: Componente de software, priority: 9, recommended: false}
+- {name: Extension, label: Extensão de driver, priority: 9, recommended: false}
+- {name: Firmware, label: Firmware (atualização de BIOS/dispositivo), priority: 9, recommended: false}

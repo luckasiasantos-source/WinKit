@@ -1,0 +1,218 @@
+"""Modelo da receita (PLANO.md §6).
+
+A receita é a única entrada do Agente. Campos e valores padrão aqui são o contrato
+entre o Studio e o Agente; mudança incompatível exige nova ``schema_version`` e
+migração em ``migrations.py`` (R-47).
+"""
+
+from __future__ import annotations
+
+from datetime import datetime
+from typing import Annotated, Literal
+
+from pydantic import BaseModel, ConfigDict, Field
+
+#: Identificadores de itens: minúsculas, números, ponto, hífen e sublinhado (R-05).
+ItemId = Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9._-]{0,79}$")]
+#: Caminho relativo à pasta ``WinKit`` do pendrive, sempre com barras normais.
+PayloadPath = Annotated[str, Field(min_length=1, max_length=400)]
+
+ExecutionMode = Literal["silent", "countdown", "interactive"]
+RebootPolicy = Literal["ask", "auto_if_idle", "never"]
+Edition = Literal[
+    "home", "home_single_language", "pro", "pro_n", "pro_workstations", "education", "enterprise"
+]
+Architecture = Literal["amd64", "arm64"]
+AppSource = Literal["offline", "winget_online", "portable"]
+Scope = Literal["machine", "user"]
+InstallerType = Literal[
+    "msi", "msix", "inno", "nsis", "wix_burn", "installshield", "squirrel", "exe_custom", "unknown"
+]
+ConflictPolicy = Literal["merge", "overwrite", "skip"]
+BackupKind = Literal["folder", "file"]
+PowerScheme = Literal["unchanged", "balanced", "high_performance", "ultimate"]
+OsMajor = Literal[10, 11]
+
+SCHEMA_VERSION: Literal[1] = 1
+
+
+def _only_11() -> list[OsMajor]:
+    return [11]
+
+
+class _Model(BaseModel):
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, validate_assignment=True)
+
+
+class Meta(_Model):
+    profile_id: Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9_-]{0,39}$")] = "padrao"
+    pendrive_id: Annotated[str, Field(min_length=8, max_length=64)]
+    created_at: datetime
+    updated_at: datetime
+    winkit_version: str
+    source_pc: str | None = None
+
+
+class Execution(_Model):
+    mode: ExecutionMode = "countdown"
+    countdown_seconds: Annotated[int, Field(ge=5, le=600)] = 30
+    show_tray_icon: bool = True
+    notify_on_finish: bool = True
+    desktop_summary_shortcut: bool = True
+    reboot_policy: RebootPolicy = "ask"
+
+
+class Account(_Model):
+    username: Annotated[str, Field(min_length=1, max_length=20)]
+    display_name: str | None = None
+    password_mode: Literal["empty", "stored"] = "empty"  # noqa: S105 — modo, não senha
+    password: str | None = Field(default=None, repr=False)
+    auto_logon: bool = True
+
+
+class WindowsSettings(_Model):
+    target_os: list[OsMajor] = Field(default_factory=_only_11)
+    edition: Edition = "pro"
+    architecture: Architecture = "amd64"
+    ui_language: str = "auto"
+    input_locale: str = "0416:00010416"
+    user_locale: str = "pt-BR"
+    system_locale: str = "pt-BR"
+    time_zone: str = "E. South America Standard Time"
+    computer_name: str | None = None
+    computer_name_decide_at_runtime: bool = False
+    #: D-020: ligado por padrão — o Windows não criptografa o disco sozinho.
+    prevent_device_encryption: bool = True
+    account: Account
+
+
+class Updates(_Model):
+    during_setup: bool = False
+    windows_update_after_install: bool = True
+    include_drivers_from_windows_update: bool = False
+    block_wu_driver_replacement: bool = True
+
+
+class DriverItem(_Model):
+    id: ItemId
+    selected: bool = True
+    path: PayloadPath
+    class_name: str = Field(alias="class")
+    provider: str = ""
+    version: str = ""
+    original_inf: str = ""
+    priority: Annotated[int, Field(ge=0, le=9)] = 5
+
+
+class InstallerSpec(_Model):
+    path: PayloadPath | None = None
+    type: InstallerType = "unknown"
+    args: list[str] = Field(default_factory=list)
+    success_codes: list[int] = Field(default_factory=lambda: [0])
+    reboot_codes: list[int] = Field(default_factory=lambda: [3010, 1641])
+    timeout_minutes: Annotated[int, Field(ge=1, le=240)] = 30
+    sha256: str | None = None
+
+
+class AutostartEntry(_Model):
+    hive: Literal["HKCU", "HKLM"] = "HKCU"
+    key: str = r"Software\Microsoft\Windows\CurrentVersion\Run"
+    value: str
+
+
+class ShortcutSpec(_Model):
+    name: str
+    target: str  # molde de caminho, ex.: {LOCALAPPDATA}\App\app.exe
+    arguments: str = ""
+    location: Literal["desktop", "start_menu"] = "start_menu"
+
+
+class AfterInstall(_Model):
+    kill_processes: list[str] = Field(default_factory=list)
+    disable_autostart: list[AutostartEntry] = Field(default_factory=list)
+    shortcuts: list[ShortcutSpec] = Field(default_factory=list)
+
+
+class AppItem(_Model):
+    id: ItemId
+    name: str
+    selected: bool = True
+    source: AppSource = "offline"
+    scope: Scope = "machine"
+    installer: InstallerSpec | None = None
+    winget_id: str | None = None
+    winget_source: Literal["winget", "msstore"] = "winget"
+    #: Para ``source=portable``: id do backup que contém a pasta do programa.
+    portable_backup: ItemId | None = None
+    #: O instalador recusa rodar elevado (ex.: Spotify) — DT-002.
+    requires_non_elevated: bool = False
+    after_install: AfterInstall = Field(default_factory=AfterInstall)
+    order: Annotated[int, Field(ge=0, le=9999)] = 100
+    depends_on: list[ItemId] = Field(default_factory=list)
+    restore_backups_after_install: list[ItemId] = Field(default_factory=list)
+    decide_at_runtime: bool = False
+
+
+class BackupItem(_Model):
+    id: ItemId
+    name: str
+    selected: bool = True
+    kind: BackupKind = "folder"
+    template: str
+    data_path: PayloadPath
+    exclude: list[str] = Field(default_factory=list)
+    on_conflict: ConflictPolicy = "merge"
+    related_app: ItemId | None = None
+    decide_at_runtime: bool = False
+    warnings: list[str] = Field(default_factory=list)
+
+
+class Bloatware(_Model):
+    remove: list[str] = Field(default_factory=list)
+    block_reinstall: bool = True
+    disable_consumer_content: bool = True
+
+
+class TweakSelection(_Model):
+    id: str
+    enabled: bool = True
+    decide_at_runtime: bool = False
+
+
+class Power(_Model):
+    scheme: PowerScheme = "unchanged"
+    hibernate: bool | None = None
+    fast_startup: bool | None = None
+
+
+class Recipe(_Model):
+    schema_version: Literal[1] = SCHEMA_VERSION
+    meta: Meta
+    execution: Execution = Field(default_factory=Execution)
+    windows: WindowsSettings
+    updates: Updates = Field(default_factory=Updates)
+    drivers: list[DriverItem] = Field(default_factory=list)
+    apps: list[AppItem] = Field(default_factory=list)
+    backups: list[BackupItem] = Field(default_factory=list)
+    bloatware: Bloatware = Field(default_factory=Bloatware)
+    tweaks: list[TweakSelection] = Field(default_factory=list)
+    power: Power = Field(default_factory=Power)
+
+    # ---- consultas de conveniência (sem efeito colateral)
+    def app(self, app_id: str) -> AppItem | None:
+        return next((a for a in self.apps if a.id == app_id), None)
+
+    def backup(self, backup_id: str) -> BackupItem | None:
+        return next((b for b in self.backups if b.id == backup_id), None)
+
+    def selected_apps(self) -> list[AppItem]:
+        return [a for a in self.apps if a.selected]
+
+    def selected_backups(self) -> list[BackupItem]:
+        return [b for b in self.backups if b.selected]
+
+    def selected_drivers(self) -> list[DriverItem]:
+        return [d for d in self.drivers if d.selected]
+
+    def enabled_tweaks(self) -> list[TweakSelection]:
+        return [t for t in self.tweaks if t.enabled]

@@ -206,7 +206,7 @@ Coletor e Construtor são o mesmo executável (**WinKit Studio**). O Agente é u
         │  core/  (puro, testável │  platform/ (Windows:   │
         │  no Linux)              │  registro, VSS, ...)   │
         └───────────────────────┴──────────────────────┘
-                     data/  (catálogos YAML versionados)
+                     src/winkit/data/  (catálogos YAML versionados)
 ```
 
 Regra de dependência: uma camada só importa as que estão **abaixo** dela. `core` não importa nada do projeto além de si mesmo. `platform` só importa `core`. Detalhes em `ARQUITETURA.md`.
@@ -286,6 +286,8 @@ A receita é um único arquivo JSON (`Perfis\<perfil>\receita.json`) que descrev
 
 ### 6.1 Estrutura
 
+> **Fonte autoritativa:** `src/winkit/core/recipe/models.py`. O exemplo abaixo é ilustrativo; campos acrescentados na implementação (M1): `windows.computer_name_decide_at_runtime`, `windows.prevent_device_encryption` (D-020), `apps[].requires_non_elevated`, `apps[].winget_source`, `apps[].installer.timeout_minutes`, `apps[].installer.sha256`, `power.scheme = "unchanged"` (padrão: não mexer no plano de energia). O modo de execução padrão é `countdown`.
+
 ```jsonc
 {
   "schema_version": 1,
@@ -317,6 +319,8 @@ A receita é um único arquivo JSON (`Perfis\<perfil>\receita.json`) que descrev
     "system_locale": "pt-BR",
     "time_zone": "E. South America Standard Time",
     "computer_name": "PC-SAMUEL",     // item 33; null = Windows gera um nome
+    "prevent_device_encryption": true, // PADRÃO true (D-020): Windows não criptografa sozinho,
+                                       // nem depois de entrar com conta Microsoft
     "account": {
       "username": "Samuel",
       "display_name": "Samuel",
@@ -528,7 +532,7 @@ Aviso exibido: driver de vídeo exportado assim instala o driver, mas **não** o
 
 ### 7.3 Sugestão de pastas de configuração (item 28)
 
-Para cada app marcado, o Coletor consulta `data/app_catalog.yaml` (seção 15) e verifica, **na máquina atual**, quais pastas conhecidas existem e quanto ocupam (já descontando os filtros de exclusão). Mostra como sugestões:
+Para cada app marcado, o Coletor consulta `src/winkit/data/app_catalog.yaml` (seção 15) e verifica, **na máquina atual**, quais pastas conhecidas existem e quanto ocupam (já descontando os filtros de exclusão). Mostra como sugestões:
 
 ```
 Discord
@@ -612,7 +616,7 @@ Dados protegidos por DPAPI estão presos à conta e à máquina de origem. O Col
 | `Login Data`, `Cookies`, `Local State`, `Web Data` (Chromium) | "Senhas e cookies salvos não funcionarão" |
 | `logins.json` + `key4.db` (Firefox) | Funciona só se não houver senha mestra ligada ao Windows — aviso genérico |
 | Arquivos `*.dpapi`, pastas `Credentials`, `Protect` | "Credenciais do Windows não são transferíveis" |
-| Regras extras por app | Vindas de `data/app_catalog.yaml` |
+| Regras extras por app | Vindas de `src/winkit/data/app_catalog.yaml` |
 
 O aviso **não impede** a captura. Fica em `warnings` no item e aparece no resumo final.
 
@@ -723,7 +727,7 @@ Gerado por `core/unattend/` (lógica pura, testável no Linux) e gravado pelo `b
 | `windowsPE` | `Microsoft-Windows-Setup` | `UserData/ProductKey/Key` (chave genérica da edição, 9.4), `WillShowUI=OnError`; `AcceptEula=true`; `DynamicUpdate/Enable` conforme `updates.during_setup`; `RunSynchronous` com as chaves `LabConfig` (`BypassTPMCheck`, `BypassSecureBootCheck`, `BypassRAMCheck`) — redundante com o Ventoy, mas mantém o XML válido fora dele |
 | `windowsPE` | — | **Sem `DiskConfiguration` e sem `ImageInstall/InstallTo`**: o usuário escolhe o disco (P3) |
 | `specialize` | `Microsoft-Windows-Shell-Setup` | `ComputerName` (se definido), `TimeZone` |
-| `specialize` | `Microsoft-Windows-Deployment` | `RunSynchronous`: (1) desativar criptografia automática do dispositivo, se escolhido (14.3); (2) **bootstrap** (seção 10) |
+| `specialize` | `Microsoft-Windows-Deployment` | `RunSynchronous`: (1) desativar a criptografia automática do dispositivo — **padrão ligado** (D-020, 14.3); (2) **bootstrap** (seção 10) |
 | `oobeSystem` | `Microsoft-Windows-International-Core` | `InputLocale`, `SystemLocale`, `UILanguage`, `UserLocale` |
 | `oobeSystem` | `Microsoft-Windows-Shell-Setup` | `OOBE` (`HideEULAPage`, `HideOnlineAccountScreens`, `HideWirelessSetupInOOBE`, `ProtectYourPC=3`, `HideOEMRegistrationScreen`), `UserAccounts/LocalAccounts` (conta local, grupo `Administrators`), `AutoLogon` (`LogonCount=1`, conforme 16.3) |
 
@@ -751,7 +755,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "
 
 ### 9.4 Edição
 
-A edição é escolhida pela **chave genérica de instalação** pública da Microsoft (não ativa o Windows; só seleciona a edição). As chaves ficam em `data/editions.yaml`. Se a máquina tiver licença digital ou chave no firmware, o Windows ativa sozinho depois.
+A edição é escolhida pela **chave genérica de instalação** pública da Microsoft (não ativa o Windows; só seleciona a edição). As chaves ficam em `src/winkit/data/editions.yaml`. Se a máquina tiver licença digital ou chave no firmware, o Windows ativa sozinho depois.
 
 ### 9.5 Idioma
 
@@ -841,6 +845,13 @@ Regras, aplicadas nesta ordem:
 | R13 | Backup listado em `restore_backups_after_install` de um app → mesma fase do app, **depois** dele. |
 | R14 | Windows Update → **última etapa da Fase 2**. |
 | R15 | Etapa da Fase 1 que falhou com erro recuperável → nova tentativa na Fase 2 (uma vez). |
+
+Detalhes fixados na implementação (M1, `core/planner/planner.py`):
+- `updates.block_wu_driver_replacement` e `bloatware.disable_consumer_content` viram etapas de ajuste implícitas (`tweak:system.wu_no_driver_replacement` e `tweak:system.consumer_content`), na Fase 1.
+- Ajustes com `stage: specialize` (hoje só a criptografia, D-020) não viram etapa do Agente: vão no XML e aparecem em `plan.excluded`.
+- Bloatware ou ajuste que não se aplica à versão do Windows (`windows.os`, `min_build`, `max_build`) também vai para `plan.excluded`, com o motivo.
+- Uma dependência de app que não foi selecionada é ignorada.
+- No fallback (Fase 1 não rodou), as etapas da Fase 1 vão para o começo da Fase 2 mantendo a ordem relativa, e `default_profile` vira `user_profile`.
 
 Ordem **dentro** de cada fase:
 
@@ -1058,7 +1069,7 @@ Ponto único para `subprocess`. Ver as regras em ARQUITETURA.md. PowerShell semp
 
 ### 14.1 Bloatware (itens 11 e 37)
 
-Lista em `data/bloatware.yaml`, cada entrada com: nome do pacote, nome amigável em pt-BR, nível de risco, efeitos colaterais, versões de Windows em que existe.
+Lista em `src/winkit/data/bloatware.yaml`, cada entrada com: nome do pacote, nome amigável em pt-BR, nível de risco, efeitos colaterais, versões de Windows em que existe.
 
 | Nível | Comportamento no Studio | Exemplos |
 |---|---|---|
@@ -1074,7 +1085,7 @@ O Construtor mostra só os pacotes presentes nas ISOs do pendrive (lidos em 8.2 
 
 ### 14.2 Ajustes (itens 31, 32, 34)
 
-Definidos em `data/tweaks.yaml` (formato em 15.2). Lista inicial:
+Definidos em `src/winkit/data/tweaks.yaml` (formato em 15.2). Lista inicial:
 
 **Privacidade (31)**
 
@@ -1112,22 +1123,22 @@ Definidos em `data/tweaks.yaml` (formato em 15.2). Lista inicial:
 
 | id | Escopo | Por quê |
 |---|---|---|
-| `system.prevent_device_encryption` | machine, na etapa *specialize* | Windows 11 recente liga a criptografia automática do dispositivo; com conta local, a chave de recuperação pode não ser salva em lugar nenhum. Desligado = `PreventDeviceEncryption=1`. **Recomendado.** |
+| `windows.prevent_device_encryption` (campo da receita, não um ajuste opcional) | machine, na etapa *specialize* | **Ligado por padrão (D-020).** O Windows 11 liga a criptografia automática do dispositivo, inclusive no momento em que uma conta Microsoft é adicionada depois. Com `PreventDeviceEncryption=1` gravado antes da OOBE, o Windows não criptografa o disco sozinho em nenhum desses casos. O BitLocker continua disponível para ser ligado manualmente. |
 | `system.wu_no_driver_replacement` | machine | Impede o Windows Update de trocar os drivers que você instalou (`updates.block_wu_driver_replacement`) |
 
-**Os valores exatos de registro não estão neste plano de propósito**: eles vão no `data/tweaks.yaml`, cada um com o campo `source` (link para a documentação ou referência que justifica o valor), e são cobertos por teste de esquema.
+**Os valores exatos de registro não estão neste plano de propósito**: eles vão no `src/winkit/data/tweaks.yaml`, cada um com o campo `source` (link para a documentação ou referência que justifica o valor), e são cobertos por teste de esquema.
 
 ### 14.3 Ajustes que rodam fora das fases
 
-`system.prevent_device_encryption` precisa rodar **antes** de a criptografia começar, por isso é um `RunSynchronous` na etapa *specialize* do XML, e não uma etapa do Agente.
+`windows.prevent_device_encryption` precisa rodar **antes** de a criptografia começar, por isso é um `RunSynchronous` na etapa *specialize* do XML, e não uma etapa do Agente.
 
 ---
 
 ## 15. Dados versionados (catálogos)
 
-Todos em `data/`, em YAML, cada um com esquema Pydantic em `core/catalog/` e teste que valida o arquivo no CI.
+Todos em `src/winkit/data/`, em YAML, cada um com esquema Pydantic em `core/catalog/` e teste que valida o arquivo no CI.
 
-### 15.1 `data/app_catalog.yaml`
+### 15.1 `src/winkit/data/app_catalog.yaml`
 
 ```yaml
 - id: discord
@@ -1156,7 +1167,7 @@ Todos em `data/`, em YAML, cada um com esquema Pydantic em `core/catalog/` e tes
   installer_wipes_config: false          # se true → backup vai em restore_backups_after_install
 ```
 
-### 15.2 `data/tweaks.yaml`
+### 15.2 `src/winkit/data/tweaks.yaml`
 
 ```yaml
 - id: visual.show_extensions
@@ -1181,12 +1192,12 @@ Operações permitidas em `apply`/`undo`: `reg_set`, `reg_delete_value`, `reg_de
 
 | Arquivo | Conteúdo |
 |---|---|
-| `data/bloatware.yaml` | 14.1 |
-| `data/editions.yaml` | Edição → chave genérica de instalação pública, por sistema (10/11) |
-| `data/installer_signatures.yaml` | Assinaturas e switches da tabela 13.3 |
-| `data/dpapi_patterns.yaml` | Padrões da tabela 7.4.6 |
-| `data/default_excludes.yaml` | Exclusões de 7.4.4 |
-| `data/driver_classes.yaml` | Classes de driver, prioridade e se é recomendada |
+| `src/winkit/data/bloatware.yaml` | 14.1 |
+| `src/winkit/data/editions.yaml` | Edição → chave genérica de instalação pública, por sistema (10/11) |
+| `src/winkit/data/installer_signatures.yaml` | Assinaturas e switches da tabela 13.3 |
+| `src/winkit/data/dpapi_patterns.yaml` | Padrões da tabela 7.4.6 |
+| `src/winkit/data/default_excludes.yaml` | Exclusões de 7.4.4 |
+| `src/winkit/data/driver_classes.yaml` | Classes de driver, prioridade e se é recomendada |
 
 ---
 
@@ -1260,10 +1271,11 @@ Iso-Modify-Win11/
 │   ├── INCIDENTES.md               o que deu errado
 │   ├── CHANGELOG.md                mapa de todas as mudanças
 │   └── validacao/                  roteiros de teste manual em hardware real (um por marco)
-├── data/                           catálogos YAML (seção 15)
+├── src/winkit/data/                           catálogos YAML (seção 15)
 ├── src/winkit/
 │   ├── __init__.py                 versão
 │   ├── i18n/pt_br.py               todos os textos exibidos ao usuário
+│   ├── data/                       catálogos YAML (seção 15), empacotados junto com o código (D-021)
 │   ├── core/                       PURO — sem Windows, sem Qt, sem subprocess
 │   │   ├── recipe/                 modelos Pydantic, validação, migrações
 │   │   ├── catalog/                modelos dos catálogos + carregamento
@@ -1309,7 +1321,7 @@ Iso-Modify-Win11/
     ├── collector/                  roda no Linux com fakes
     ├── agent/                      roda no Linux com fakes
     ├── platform/                   só Windows (marcador pytest "windows")
-    ├── data/                       valida todos os YAML
+    ├── src/winkit/data/                       valida todos os YAML
     └── fixtures/                   amostras: ventoy.json, instaladores mínimos, saídas JSON gravadas
 ```
 

@@ -1,0 +1,352 @@
+# Ajustes do sistema (PLANO.md §14.2). Cada item tem `source` e `undo` (R-33) e só usa
+# operações tipadas (R-34). Escopo `user` = HKCU (aplicado ao perfil Default na Fase 1
+# ou ao usuário logado na Fase 2); ops com `hive: HKLM` explícito sempre vão para a máquina.
+
+# ------------------------------------------------------------------ privacidade (item 31)
+- id: privacy.telemetry_minimum
+  title: Telemetria no mínimo permitido
+  description: Envia à Microsoft só os dados de diagnóstico obrigatórios.
+  category: privacy
+  scope: machine
+  recommended: true
+  source: https://learn.microsoft.com/windows/privacy/configure-windows-diagnostic-data-in-your-organization
+  apply:
+    - reg_set: {key: 'SOFTWARE\Policies\Microsoft\Windows\DataCollection', value: AllowTelemetry, type: dword, data: 1}
+  undo:
+    - reg_delete_value: {key: 'SOFTWARE\Policies\Microsoft\Windows\DataCollection', value: AllowTelemetry}
+
+- id: privacy.advertising_id
+  title: Desativar ID de anúncios
+  description: Os apps deixam de usar um identificador para anúncios personalizados.
+  category: privacy
+  scope: user
+  recommended: true
+  source: https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#181-general
+  apply:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo', value: Enabled, type: dword, data: 0}
+  undo:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo', value: Enabled, type: dword, data: 1}
+
+- id: privacy.activity_history
+  title: Desativar histórico de atividades
+  description: O Windows não registra nem envia o histórico de atividades.
+  category: privacy
+  scope: machine
+  recommended: true
+  source: https://learn.microsoft.com/windows/client-management/mdm/policy-csp-privacy#enableactivityfeed
+  apply:
+    - reg_set: {key: 'SOFTWARE\Policies\Microsoft\Windows\System', value: EnableActivityFeed, type: dword, data: 0}
+    - reg_set: {key: 'SOFTWARE\Policies\Microsoft\Windows\System', value: PublishUserActivities, type: dword, data: 0}
+    - reg_set: {key: 'SOFTWARE\Policies\Microsoft\Windows\System', value: UploadUserActivities, type: dword, data: 0}
+  undo:
+    - reg_delete_value: {key: 'SOFTWARE\Policies\Microsoft\Windows\System', value: EnableActivityFeed}
+    - reg_delete_value: {key: 'SOFTWARE\Policies\Microsoft\Windows\System', value: PublishUserActivities}
+    - reg_delete_value: {key: 'SOFTWARE\Policies\Microsoft\Windows\System', value: UploadUserActivities}
+
+- id: privacy.tailored_experiences
+  title: Desativar experiências personalizadas
+  description: A Microsoft não usa seus dados de diagnóstico para dicas e anúncios.
+  category: privacy
+  scope: user
+  recommended: true
+  source: https://learn.microsoft.com/windows/client-management/mdm/policy-csp-experience#allowtailoredexperienceswithdiagnosticdata
+  apply:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Privacy', value: TailoredExperiencesWithDiagnosticDataEnabled, type: dword, data: 0}
+  undo:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Privacy', value: TailoredExperiencesWithDiagnosticDataEnabled, type: dword, data: 1}
+
+- id: privacy.start_bing_search
+  title: Pesquisa do Iniciar sem resultados da web (Bing)
+  description: A pesquisa do menu Iniciar procura só no computador.
+  category: privacy
+  scope: user
+  recommended: true
+  source: https://learn.microsoft.com/windows/client-management/mdm/policy-csp-search#disablesearchboxsuggestions
+  apply:
+    - reg_set: {key: 'Software\Policies\Microsoft\Windows\Explorer', value: DisableSearchBoxSuggestions, type: dword, data: 1}
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Search', value: BingSearchEnabled, type: dword, data: 0}
+  undo:
+    - reg_delete_value: {key: 'Software\Policies\Microsoft\Windows\Explorer', value: DisableSearchBoxSuggestions}
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\Search', value: BingSearchEnabled}
+
+- id: privacy.start_suggestions
+  title: Sem sugestões de apps no Iniciar e em Configurações
+  description: Remove "sugestões" (propaganda) do menu Iniciar e do app Configurações.
+  category: privacy
+  scope: user
+  recommended: true
+  source: https://learn.microsoft.com/windows/configuration/windows-spotlight
+  apply:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SubscribedContent-338388Enabled, type: dword, data: 0}
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SubscribedContent-338393Enabled, type: dword, data: 0}
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SubscribedContent-353694Enabled, type: dword, data: 0}
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SystemPaneSuggestionsEnabled, type: dword, data: 0}
+  undo:
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SubscribedContent-338388Enabled}
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SubscribedContent-338393Enabled}
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SubscribedContent-353694Enabled}
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SystemPaneSuggestionsEnabled}
+
+- id: privacy.copilot
+  title: Desativar o Copilot
+  description: Esconde o botão e desliga o Copilot do Windows (o app pode ser removido na lista de bloatware).
+  category: privacy
+  scope: user
+  windows: {os: [11]}
+  source: https://learn.microsoft.com/windows/client-management/mdm/policy-csp-windowsai#turnoffwindowscopilot
+  apply:
+    - reg_set: {key: 'Software\Policies\Microsoft\Windows\WindowsCopilot', value: TurnOffWindowsCopilot, type: dword, data: 1}
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: ShowCopilotButton, type: dword, data: 0}
+  undo:
+    - reg_delete_value: {key: 'Software\Policies\Microsoft\Windows\WindowsCopilot', value: TurnOffWindowsCopilot}
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: ShowCopilotButton}
+
+- id: privacy.recall
+  title: Desativar o Recall
+  description: Desliga o recurso que tira capturas de tela periódicas (só existe em PCs Copilot+).
+  category: privacy
+  scope: machine
+  recommended: true
+  windows: {os: [11], min_build: 26100}
+  source: https://learn.microsoft.com/windows/client-management/manage-recall
+  apply:
+    - reg_set: {key: 'SOFTWARE\Policies\Microsoft\Windows\WindowsAI', value: DisableAIDataAnalysis, type: dword, data: 1}
+    - optional_feature_disable: {feature: Recall}
+  undo:
+    - reg_delete_value: {key: 'SOFTWARE\Policies\Microsoft\Windows\WindowsAI', value: DisableAIDataAnalysis}
+    - optional_feature_enable: {feature: Recall}
+
+- id: privacy.widgets
+  title: Desativar Widgets (notícias e interesses)
+  description: Desliga o painel de Widgets e as notícias na barra de tarefas.
+  category: privacy
+  scope: machine
+  windows: {os: [11]}
+  source: https://learn.microsoft.com/windows/client-management/mdm/policy-csp-newsandinterests
+  apply:
+    - reg_set: {key: 'SOFTWARE\Policies\Microsoft\Dsh', value: AllowNewsAndInterests, type: dword, data: 0}
+  undo:
+    - reg_delete_value: {key: 'SOFTWARE\Policies\Microsoft\Dsh', value: AllowNewsAndInterests}
+
+- id: privacy.welcome_experience
+  title: Sem tela de "boas-vindas" e "vamos terminar de configurar"
+  description: O Windows para de mostrar telas de oferta de serviços depois de atualizações.
+  category: privacy
+  scope: user
+  recommended: true
+  source: https://learn.microsoft.com/windows/configuration/windows-spotlight
+  apply:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SubscribedContent-310093Enabled, type: dword, data: 0}
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement', value: ScoobeSystemSettingEnabled, type: dword, data: 0}
+  undo:
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SubscribedContent-310093Enabled}
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement', value: ScoobeSystemSettingEnabled}
+
+- id: privacy.lock_screen_tips
+  title: Sem dicas e curiosidades na tela de bloqueio
+  description: A tela de bloqueio mostra só a imagem e o relógio.
+  category: privacy
+  scope: user
+  source: https://learn.microsoft.com/windows/configuration/windows-spotlight
+  apply:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: RotatingLockScreenOverlayEnabled, type: dword, data: 0}
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SubscribedContent-338387Enabled, type: dword, data: 0}
+  undo:
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: RotatingLockScreenOverlayEnabled}
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SubscribedContent-338387Enabled}
+
+# ------------------------------------------------------------------ visual (item 32)
+- id: visual.dark_theme
+  title: Tema escuro
+  description: Janelas e apps no modo escuro.
+  category: visual
+  scope: user
+  source: https://learn.microsoft.com/windows/apps/desktop/modernize/ui/apply-windows-themes
+  apply:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: AppsUseLightTheme, type: dword, data: 0}
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: SystemUsesLightTheme, type: dword, data: 0}
+  undo:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: AppsUseLightTheme, type: dword, data: 1}
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: SystemUsesLightTheme, type: dword, data: 1}
+
+- id: visual.taskbar_left
+  title: Barra de tarefas alinhada à esquerda
+  description: Botão Iniciar e ícones à esquerda, como no Windows 10.
+  category: visual
+  scope: user
+  windows: {os: [11]}
+  source: https://learn.microsoft.com/windows/configuration/taskbar/policy-settings
+  apply:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: TaskbarAl, type: dword, data: 0}
+  undo:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: TaskbarAl, type: dword, data: 1}
+
+- id: visual.show_extensions
+  title: Mostrar extensões de arquivo
+  description: Exibe ".exe", ".pdf" etc. no Explorador de Arquivos.
+  category: visual
+  scope: user
+  recommended: true
+  source: https://learn.microsoft.com/windows/win32/shell/folder-options
+  apply:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: HideFileExt, type: dword, data: 0}
+  undo:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: HideFileExt, type: dword, data: 1}
+
+- id: visual.show_hidden_files
+  title: Mostrar arquivos ocultos
+  description: Exibe arquivos e pastas ocultos (como AppData) no Explorador.
+  category: visual
+  scope: user
+  source: https://learn.microsoft.com/windows/win32/shell/folder-options
+  apply:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: Hidden, type: dword, data: 1}
+  undo:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: Hidden, type: dword, data: 2}
+
+- id: visual.classic_context_menu
+  title: Menu de contexto clássico (botão direito completo)
+  description: O botão direito volta a mostrar o menu completo do Windows 10, sem "Mostrar mais opções".
+  category: visual
+  scope: user
+  windows: {os: [11]}
+  source: https://learn.microsoft.com/windows/apps/desktop/modernize/integrate-packaged-app-with-file-explorer
+  apply:
+    - reg_set: {key: 'Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32', value: '', type: sz, data: ''}
+  undo:
+    - reg_delete_key: {key: 'Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}'}
+
+- id: visual.explorer_this_pc
+  title: Explorador abre em "Este Computador"
+  description: O Explorador de Arquivos abre mostrando os discos, em vez da página inicial.
+  category: visual
+  scope: user
+  source: https://learn.microsoft.com/windows/win32/shell/folder-options
+  apply:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: LaunchTo, type: dword, data: 1}
+  undo:
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: LaunchTo}
+
+- id: visual.hide_task_view_button
+  title: Esconder o botão Visão de Tarefas
+  description: Remove o botão de áreas de trabalho virtuais da barra de tarefas (o atalho Win+Tab continua).
+  category: visual
+  scope: user
+  source: https://learn.microsoft.com/windows/configuration/taskbar/policy-settings
+  apply:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: ShowTaskViewButton, type: dword, data: 0}
+  undo:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: ShowTaskViewButton, type: dword, data: 1}
+
+- id: visual.hide_widgets_button
+  title: Esconder o botão de Widgets
+  description: Remove o botão de Widgets/clima da barra de tarefas.
+  category: visual
+  scope: user
+  windows: {os: [11]}
+  source: https://learn.microsoft.com/windows/configuration/taskbar/policy-settings
+  apply:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: TaskbarDa, type: dword, data: 0}
+  undo:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: TaskbarDa, type: dword, data: 1}
+
+- id: visual.hide_chat_button
+  title: Esconder o botão do Teams/Chat
+  description: Remove o botão de chat da barra de tarefas.
+  category: visual
+  scope: user
+  windows: {os: [11]}
+  source: https://learn.microsoft.com/windows/configuration/taskbar/policy-settings
+  apply:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: TaskbarMn, type: dword, data: 0}
+  undo:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: TaskbarMn, type: dword, data: 1}
+
+- id: visual.search_icon_only
+  title: Pesquisa da barra de tarefas só como ícone
+  description: Troca a caixa de pesquisa grande por um ícone de lupa.
+  category: visual
+  scope: user
+  source: https://learn.microsoft.com/windows/configuration/taskbar/policy-settings
+  apply:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Search', value: SearchboxTaskbarMode, type: dword, data: 1}
+  undo:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Search', value: SearchboxTaskbarMode, type: dword, data: 2}
+
+- id: visual.start_hide_recommended
+  title: Iniciar sem recomendações e arquivos recentes
+  description: Esconde dicas e arquivos recentes na seção "Recomendado" do Iniciar.
+  category: visual
+  risk: caution
+  scope: user
+  windows: {os: [11]}
+  source: https://learn.microsoft.com/windows/configuration/start/policy-settings
+  apply:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: Start_IrisRecommendations, type: dword, data: 0}
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: Start_TrackDocs, type: dword, data: 0}
+  undo:
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: Start_IrisRecommendations}
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: Start_TrackDocs}
+
+# ------------------------------------------------------------------ sistema
+- id: system.prevent_device_encryption
+  title: Não criptografar o disco automaticamente
+  description: Impede a criptografia automática do dispositivo, inclusive depois de entrar com conta Microsoft (D-020). O BitLocker manual continua disponível.
+  category: system
+  scope: machine
+  stage: specialize
+  recommended: true
+  source: https://learn.microsoft.com/windows-hardware/customize/desktop/unattend/microsoft-windows-securestartup-filterdriver-preventdeviceencryption
+  apply:
+    - reg_set: {key: 'SYSTEM\CurrentControlSet\Control\BitLocker', value: PreventDeviceEncryption, type: dword, data: 1}
+  undo:
+    - reg_delete_value: {key: 'SYSTEM\CurrentControlSet\Control\BitLocker', value: PreventDeviceEncryption}
+
+- id: system.wu_no_driver_replacement
+  title: Windows Update não troca os drivers
+  description: O Windows Update deixa de instalar drivers por cima dos que você instalou.
+  category: system
+  scope: machine
+  source: https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update#excludewudriversinqualityupdate
+  apply:
+    - reg_set: {key: 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', value: ExcludeWUDriversInQualityUpdate, type: dword, data: 1}
+  undo:
+    - reg_delete_value: {key: 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', value: ExcludeWUDriversInQualityUpdate}
+
+- id: system.consumer_content
+  title: Bloquear apps sugeridos instalados sozinhos
+  description: Impede o Windows de instalar jogos e apps "sugeridos" (Candy Crush, TikTok etc.).
+  category: system
+  scope: user
+  recommended: true
+  source: https://learn.microsoft.com/windows/client-management/mdm/policy-csp-experience#allowwindowsconsumerfeatures
+  apply:
+    - reg_set: {key: 'SOFTWARE\Policies\Microsoft\Windows\CloudContent', value: DisableWindowsConsumerFeatures, type: dword, data: 1, hive: HKLM}
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: ContentDeliveryAllowed, type: dword, data: 0}
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: OemPreInstalledAppsEnabled, type: dword, data: 0}
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: PreInstalledAppsEnabled, type: dword, data: 0}
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: PreInstalledAppsEverEnabled, type: dword, data: 0}
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SilentInstalledAppsEnabled, type: dword, data: 0}
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SubscribedContentEnabled, type: dword, data: 0}
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SoftLandingEnabled, type: dword, data: 0}
+  undo:
+    - reg_delete_value: {key: 'SOFTWARE\Policies\Microsoft\Windows\CloudContent', value: DisableWindowsConsumerFeatures, hive: HKLM}
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: ContentDeliveryAllowed}
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: OemPreInstalledAppsEnabled}
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: PreInstalledAppsEnabled}
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: PreInstalledAppsEverEnabled}
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SilentInstalledAppsEnabled}
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SubscribedContentEnabled}
+    - reg_delete_value: {key: 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: SoftLandingEnabled}
+
+- id: system.long_paths
+  title: Permitir caminhos longos
+  description: Programas compatíveis podem usar caminhos com mais de 260 caracteres.
+  category: system
+  scope: machine
+  recommended: true
+  source: https://learn.microsoft.com/windows/win32/fileio/maximum-file-path-limitation
+  apply:
+    - reg_set: {key: 'SYSTEM\CurrentControlSet\Control\FileSystem', value: LongPathsEnabled, type: dword, data: 1}
+  undo:
+    - reg_set: {key: 'SYSTEM\CurrentControlSet\Control\FileSystem', value: LongPathsEnabled, type: dword, data: 0}

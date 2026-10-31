@@ -1,0 +1,21 @@
+# Exclusões padrão de todo backup (PLANO.md §7.4.4). Nome de pasta ou padrão de arquivo,
+# no formato aceito pelo robocopy (/XD para pastas, /XF para arquivos com curinga).
+- Cache
+- Code Cache
+- GPUCache
+- DawnCache
+- DawnGraphiteCache
+- DawnWebGPUCache
+- ShaderCache
+- GrShaderCache
+- GraphiteDawnCache
+- Crashpad
+- CrashDumps
+- Crash Reports
+- logs
+- Temp
+- blob_storage
+- CacheStorage
+- "*.log"
+- "*.tmp"
+- "*.dmp"

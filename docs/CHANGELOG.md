@@ -28,6 +28,43 @@
 
 ---
 
+## 2026-10-31 — M1 — Núcleo puro + catálogos + criptografia desligada por padrão
+**Tipo:** implementação + correção + documentação
+**Resumo:** toda a lógica de decisão testável no Linux: receita, validação, moldes de caminho, catálogos de dados, planejador de fases, estado do Agente e manifesto. Corrige a falha de CI do M0 (IN-001) e registra o pedido do usuário de deixar a criptografia automática desligada por padrão (D-020).
+
+### Adicionado
+- `src/winkit/core/recipe/models.py` — `Recipe` e submodelos (`Meta`, `Execution`, `WindowsSettings`, `Account`, `Updates`, `DriverItem`, `InstallerSpec`, `AfterInstall`, `AppItem`, `BackupItem`, `Bloatware`, `TweakSelection`, `Power`); `prevent_device_encryption=True` por padrão
+- `src/winkit/core/recipe/io.py` — `load_recipe`, `dump_recipe`, `recipe_hash`, `new_recipe`, `migrate`
+- `src/winkit/core/recipe/validation.py` — `validate_recipe`, `ensure_valid`, `find_cycle`, `payload_path_problem`, `username_problem`, `validate_computer_name`
+- `src/winkit/core/paths/templates.py` — `to_template`, `parse`, `resolve`, `profile_folders`, `retarget`, `normalize`
+- `src/winkit/core/catalog/models.py` — modelos de ajuste (8 operações tipadas), bloatware, app, edição, assinatura de instalador, padrão DPAPI, classe de driver
+- `src/winkit/core/catalog/loader.py` — `load_catalogs`, `default_catalogs`
+- `src/winkit/data/` — `tweaks.yaml`, `bloatware.yaml`, `app_catalog.yaml`, `editions.yaml`, `installer_signatures.yaml`, `dpapi_patterns.yaml`, `default_excludes.yaml`, `driver_classes.yaml`
+- `src/winkit/core/planner/models.py`, `planner.py` — `Plan`, `PlannedStep`, `PlanContext`, `ExcludedItem`, `plan()`
+- `src/winkit/core/state/models.py` — `AgentState`, transições, `recover_interrupted`, `reset_for_retry`, `phase_complete`
+- `src/winkit/core/manifest/manifest.py` — `scan`, `diff`, `verify`, `verify_tree`
+- `src/winkit/core/fsutil.py` — `atomic_write_text`, `atomic_write_bytes`
+- `src/winkit/i18n/pt_br.py` — títulos de etapas e motivos de exclusão
+- Testes: `tests/factories.py`, `tests/core/test_recipe.py`, `test_validation.py`, `test_templates.py`, `test_planner.py`, `test_state.py`, `test_manifest.py`, `tests/data/test_catalogs.py`
+
+### Alterado
+- `pyproject.toml` — removido `force-include` de `data/` (IN-001); `A005` ignorado nos testes
+- `data/` → `src/winkit/data/` (D-021); referências atualizadas no PLANO e na ARQUITETURA
+
+### Documentos vivos atualizados
+- STATUS — M1 concluído
+- PLANO — D-020 na receita e no §14.2; notas de implementação no §6.1 e no §11.2
+- ARQUITETURA — D-020, D-021, D-022; tabela de módulos
+- DIVIDAS — DT-010 (catálogos não validados em Windows real), DT-011 (valores protegidos por UCPD)
+- INCIDENTES — IN-001
+
+### Decisões
+- D-020 (criptografia automática desligada por padrão — pedido do usuário)
+- D-021 (catálogos dentro do pacote)
+- D-022 (`core` pode ler/gravar arquivos comuns)
+
+---
+
 ## 2026-10-31 — M0 — Fundação do projeto
 **Tipo:** infraestrutura + implementação
 **Resumo:** projeto Python configurado (uv, ruff, mypy, pytest, import-linter), CI Linux + Windows, e os primeiros módulos de base: erros, textos pt-BR, executor de comandos e PowerShell.

@@ -49,7 +49,7 @@ nível 4   cli/           agent/main.py                      (pontos de entrada)
 nível 3   collector/     builder/     agent/ (exceto ui)    (casos de uso)
 nível 2   platform/                                          (efeitos colaterais no Windows)
 nível 1   core/                                              (puro)
-dados     data/*.yaml                                        (lidos via core/catalog)
+dados     src/winkit/data/*.yaml                                        (lidos via core/catalog)
 textos    i18n/                                              (importável por qualquer nível)
 ```
 
@@ -78,15 +78,16 @@ Por que isso importa:
 | Módulo | Responsabilidade | Entradas → saídas |
 |---|---|---|
 | `core/recipe/` | Modelos da receita, validação (regras 6.2 do plano), migrações por `schema_version` | JSON ↔ `Recipe` |
-| `core/catalog/` | Modelos e carregamento dos YAML de `data/` | YAML → `AppCatalog`, `TweakCatalog`, `BloatwareCatalog`... |
+| `core/catalog/` | Modelos e carregamento dos YAML de `src/winkit/data/` | YAML → `AppCatalog`, `TweakCatalog`, `BloatwareCatalog`... |
 | `core/paths/` | Moldes de caminho: tradução (literal → molde) e resolução (molde → literal) | `(caminho, KnownFolders)` → `PathTemplate` e vice-versa |
-| `core/planner/` | Decide fase e ordem de cada etapa (regras R1–R15 do plano) | `(Recipe, PlanContext)` → `Plan` |
+| `core/planner/` | Decide fase e ordem de cada etapa (regras R1–R15 do plano) | `(Recipe, Catalogs, PlanContext)` → `Plan` (etapas + itens excluídos com motivo) |
 | `core/state/` | Modelo do estado do Agente e transições válidas | `State` + evento → `State` |
 | `core/manifest/` | Manifesto de arquivos e cálculo do que mudou | `(Manifest, Manifest)` → `ManifestDiff` |
 | `core/ventoy/` | Mesclagem do `ventoy.json` | `(json existente, entradas WinKit)` → json novo |
 | `core/unattend/` | Geração do `autounattend.xml` e da linha de bootstrap | `(Recipe, IsoInfo)` → `bytes` (XML) |
 | `core/installers/` | Detecção do tipo de instalador por bytes | `bytes` (cabeçalho/conteúdo) → `InstallerType` |
 | `core/errors.py` | Hierarquia de exceções | — |
+| `core/fsutil.py` | Escrita atômica de arquivos (R-16) | `(Path, texto/bytes)` → arquivo |
 
 ### 3.2 `platform/` — Windows
 
@@ -164,7 +165,7 @@ para cada etapa do plano na fase atual, em ordem:
 
 ### 4.3 Planejador
 
-`plan(recipe: Recipe, ctx: PlanContext) -> Plan` — função pura e determinística: a mesma entrada gera exatamente o mesmo plano (ordenação estável por `order`, depois por `id`). `PlanContext` contém: modo de execução efetivo, se a Fase 1 rodou (para o fallback), build do Windows de destino.
+`plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext) -> Plan` — função pura e determinística: a mesma entrada gera exatamente o mesmo plano (ordenação estável por `order`, depois por `id`). `PlanContext` contém: modo de execução efetivo, se a Fase 1 rodou (para o fallback), build do Windows de destino.
 
 ### 4.4 Execução de comandos
 
@@ -233,7 +234,7 @@ runner.run(
 
 ### 5.7 Dados versus código
 
-- **R-32** Listas que mudam com o Windows ou com os apps (bloatware, ajustes, switches, pastas conhecidas, chaves genéricas, padrões DPAPI) ficam em `data/*.yaml`, nunca no código.
+- **R-32** Listas que mudam com o Windows ou com os apps (bloatware, ajustes, switches, pastas conhecidas, chaves genéricas, padrões DPAPI) ficam em `src/winkit/data/*.yaml`, nunca no código.
 - **R-33** Todo ajuste em `tweaks.yaml` tem `source` (referência) e `undo`.
 - **R-34** Ajustes só usam operações tipadas (`reg_set`, `reg_delete_value`, `reg_delete_key`, `service_start_type`, `optional_feature_disable`, `powercfg`, `appx_remove`). Não existe operação de comando arbitrário.
 
@@ -358,7 +359,7 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 
 ### D-016 — Edição escolhida por chave genérica de instalação
 2026-10-31 · aceita
-**Decisão:** a edição vem de `data/editions.yaml` (chaves públicas de instalação da Microsoft), não de `InstallFrom` com índice de imagem.
+**Decisão:** a edição vem de `src/winkit/data/editions.yaml` (chaves públicas de instalação da Microsoft), não de `InstallFrom` com índice de imagem.
 **Consequências:** não exige configuração de disco no XML (R-18); não ativa o Windows.
 
 ### D-017 — Nunca automatizar a escolha de disco
@@ -374,3 +375,20 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 2026-10-31 · aceita
 **Contexto:** pedido do usuário: a arquitetura, o andamento, as dívidas técnicas, o que deu errado e o mapa de mudanças devem estar sempre documentados.
 **Decisão:** `ARQUITETURA.md`, `STATUS.md`, `DIVIDAS_TECNICAS.md`, `INCIDENTES.md` e `CHANGELOG.md` são atualizados no mesmo commit da mudança (`CLAUDE.md`, R-49).
+
+### D-020 — Criptografia automática do dispositivo desligada por padrão
+2026-10-31 · aceita
+**Contexto:** pedido do usuário. O Windows 11 liga a criptografia automática do disco, inclusive quando uma conta Microsoft é adicionada depois da instalação; o usuário não quer isso por padrão.
+**Decisão:** `windows.prevent_device_encryption` é `true` por padrão em toda receita. O XML grava `HKLM\SYSTEM\CurrentControlSet\Control\BitLocker\PreventDeviceEncryption = 1` na etapa *specialize*, antes da OOBE.
+**Consequências:** o disco não é criptografado automaticamente em nenhum momento; o BitLocker manual continua disponível. Quem quiser o comportamento padrão do Windows desmarca a opção na receita.
+
+### D-021 — Catálogos dentro do pacote Python
+2026-10-31 · aceita
+**Contexto:** o plano previa `data/` na raiz do repositório, incluído no pacote por configuração do empacotador. O CI falhou porque a pasta vazia não existe no git (IN-001), e o PyInstaller exigiria a mesma configuração duplicada.
+**Decisão:** os catálogos ficam em `src/winkit/data/` e são lidos com `importlib.resources`.
+**Consequências:** um único lugar, funciona igual em desenvolvimento, no pacote instalado e no executável.
+
+### D-022 — `core` pode ler e gravar arquivos comuns
+2026-10-31 · aceita
+**Contexto:** "puro" foi definido como "sem Windows, sem Qt, sem subprocess". O manifesto (hashes) e a leitura dos catálogos precisam ler arquivos.
+**Decisão:** `core` pode usar `pathlib`/`hashlib`/`importlib.resources` para ler e gravar arquivos comuns, porque isso é portável e testável no Linux. Continua proibido: APIs específicas do Windows, registro, processos, Qt.
