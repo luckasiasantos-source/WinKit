@@ -195,7 +195,8 @@
 - ✅ V2-09 Diagnóstico de drivers: lista os dispositivos com problema (CIM, código traduzido por tabela), procura no Windows Update só os drivers deles (`DriverHardwareID`), seção "Dispositivos sem driver" no resumo com os ids de hardware; chave no Studio (Drivers), ligada por padrão; a prévia do modo ao vivo só consulta
 - ✅ V2-16 DNS e bloqueios: Cloudflare, Cloudflare para Famílias, Quad9, Google, AdGuard, NextDNS (id pessoal) ou personalizado; DoH com política `DoHPolicy` no Windows 11 (só servidores no 10); bloqueio de anúncios e rastreadores por listas curadas no `hosts`, num bloco marcado, sem domínios da Microsoft; desfazer pelo Studio e pela CLI (`dns bloqueios remover-do-pc`)
 - ✅ V2-17 Unidades de rede: coleta do `HKCU\Network` (sem o usuário do servidor), gravação no perfil Default na Fase 1 com o `ProviderName` lido do Windows novo; ao vivo mapeia na hora ou grava para reconectar; letra ocupada nunca é substituída; Studio (grupo Rede) e CLI (`coletar unidades`, `unidades listar|adicionar|remover`)
-- ⬜ V2-18 Manutenção · V2-22 Variáveis de ambiente
+- ✅ V2-18 Manutenção: tarefa do usuário que roda `winget upgrade --all` toda semana ou a cada 4 semanas (dia e hora escolhidos, log em `ProgramData\WinKit\Manutencao`); otimização semanal nativa do disco garantida (ligada por padrão); Sensor de Armazenamento como ajuste `maintenance.storage_sense` com desfazer; Studio (grupo Sistema) e CLI (`manutencao mostrar|definir|remover-do-pc`)
+- ⬜ V2-22 Variáveis de ambiente
 
 ## Hipóteses técnicas
 

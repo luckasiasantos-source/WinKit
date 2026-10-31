@@ -130,6 +130,7 @@ def test_second_preview_says_already_done(world: World) -> None:
         "tweak:system.wu_no_driver_replacement": "already_done",
         "tweak:system.consumer_content": "already_done",
         "driver_report:devices": "already_done",
+        "maintenance:defrag": "already_done",
     }
 
 

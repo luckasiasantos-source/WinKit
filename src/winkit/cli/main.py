@@ -44,6 +44,7 @@ from winkit.core import dns as dns_rules
 from winkit.core import layout
 from winkit.core.catalog.loader import default_catalogs
 from winkit.core.errors import RecipeError, WinKitError
+from winkit.core.maintenance import DAYS, TASK_FOLDER
 from winkit.core.planner.models import PlanContext
 from winkit.core.planner.planner import plan
 from winkit.core.recipe.io import new_recipe
@@ -748,6 +749,89 @@ def _add_drive_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     rm.set_defaults(func=cmd_unidades_remover)
 
 
+# ------------------------------------------------------------------ manutenção (V2-18)
+_WINGET_CHOICES = {
+    "nao": "off",
+    "off": "off",
+    "semanal": "weekly",
+    "weekly": "weekly",
+    "mensal": "monthly",
+    "monthly": "monthly",
+}
+
+
+def cmd_manutencao_mostrar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    m = load_profile_recipe(tgt.root, args.perfil).maintenance
+    choice = t(f"studio.maintenance.{m.winget_upgrade}")
+    out(t("cli.maintenance_winget", choice=choice))
+    if m.winget_upgrade != "off":
+        out(
+            t(
+                "cli.maintenance_when",
+                day=t(f"studio.maintenance.day.{m.winget_day}"),
+                time=m.winget_time,
+            )
+        )
+    yes, no = t("cli.yes"), t("cli.no")
+    out(t("cli.maintenance_storage_sense", value=yes if m.storage_sense else no))
+    out(t("cli.maintenance_defrag", value=yes if m.ensure_defrag_schedule else no))
+    return 0
+
+
+def cmd_manutencao_definir(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    m = recipe.maintenance
+    if args.winget is not None:
+        m.winget_upgrade = _WINGET_CHOICES[args.winget]  # type: ignore[assignment]
+    if args.dia is not None:
+        m.winget_day = args.dia
+    if args.hora is not None:
+        m.winget_time = args.hora
+    if args.sensor is not None:
+        m.storage_sense = args.sensor
+    if args.desfragmentar is not None:
+        m.ensure_defrag_schedule = args.desfragmentar
+    _save(tgt, recipe)
+    return cmd_manutencao_mostrar(args, services, out)
+
+
+def cmd_manutencao_remover(args: argparse.Namespace, services: Services, out: Out) -> int:
+    _require_admin()
+    if services.scheduler is None:
+        out(t("cli.scheduler_unavailable"))
+        return 1
+    n = services.scheduler.remove_folder(TASK_FOLDER)
+    out(tn("cli.maintenance_removed", n))
+    return 0
+
+
+def _add_maintenance_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    mt = sub.add_parser("manutencao", aliases=["maintenance"], help=t("cli.h.maintenance"))
+    mt_sub = mt.add_subparsers(dest="action", required=True)
+    mt_sub.add_parser("mostrar", aliases=["show"], parents=[common]).set_defaults(
+        func=cmd_manutencao_mostrar
+    )
+    df = mt_sub.add_parser("definir", aliases=["set"], parents=[common])
+    df.add_argument("--winget", choices=sorted(_WINGET_CHOICES), help=t("cli.h.maintenance_winget"))
+    df.add_argument("--dia", choices=list(DAYS), help=t("cli.h.maintenance_day"))
+    df.add_argument("--hora", help=t("cli.h.maintenance_time"))
+    df.add_argument(
+        "--sensor", action=argparse.BooleanOptionalAction, help=t("cli.h.storage_sense")
+    )
+    df.add_argument(
+        "--desfragmentar", action=argparse.BooleanOptionalAction, help=t("cli.h.defrag")
+    )
+    df.set_defaults(func=cmd_manutencao_definir)
+    mt_sub.add_parser(
+        "remover-do-pc",
+        aliases=["remove-from-pc"],
+        parents=[common],
+        help=t("cli.h.maintenance_remove"),
+    ).set_defaults(func=cmd_manutencao_remover)
+
+
 def _add_dns_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     dns = sub.add_parser("dns", help=t("cli.h.dns"))
     dns_sub = dns.add_subparsers(dest="action", required=True)
@@ -973,6 +1057,14 @@ def choose_language(argv: Sequence[str]) -> None:
         set_language(detect_language())
 
 
+def _add_system_and_network_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    """Comandos da v2 para o grupo Sistema e Rede (M14)."""
+    _add_feature_parsers(sub, common)
+    _add_dns_parsers(sub, common)
+    _add_drive_parsers(sub, common)
+    _add_maintenance_parsers(sub, common)
+
+
 def build_parser() -> argparse.ArgumentParser:
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--pendrive", help=t("cli.h.pendrive"))
@@ -1030,9 +1122,7 @@ def build_parser() -> argparse.ArgumentParser:
         wm.add_argument("--sem-senha", action="store_true", help=t("cli.h.wifi_no_key"))
         wm.set_defaults(func=cmd_wifi_marcar, command_value=value)
 
-    _add_feature_parsers(sub, common)
-    _add_dns_parsers(sub, common)
-    _add_drive_parsers(sub, common)
+    _add_system_and_network_parsers(sub, common)
 
     ap = sub.add_parser("aplicar", aliases=["apply"], parents=[common], help=t("cli.h.apply"))
     ap.add_argument("--simular", action="store_true", help=t("cli.h.simulate"))

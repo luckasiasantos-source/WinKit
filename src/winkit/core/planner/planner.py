@@ -38,6 +38,7 @@ _G1 = {
     "feature": 35,
     "tweak": 40,
     "network_drive": 45,
+    "maintenance": 47,
     "backup": 50,
     "app": 60,
 }
@@ -47,6 +48,7 @@ _G2 = {
     "feature": 35,
     "tweak": 40,
     "shortcut": 50,
+    "maintenance": 55,  # R27: a tarefa do winget é do usuário
     "rename_computer": 60,
     "windows_update": 70,
     "driver_report": 75,  # R28: depois do Windows Update, que já resolve muitos drivers
@@ -62,6 +64,7 @@ _FALLBACK_GROUP = 5
 #: Ajustes ligados por campos da receita, não pela lista ``tweaks``.
 TWEAK_WU_DRIVERS = "system.wu_no_driver_replacement"
 TWEAK_CONSUMER_CONTENT = "system.consumer_content"
+TWEAK_STORAGE_SENSE = "maintenance.storage_sense"
 
 #: Decide se um item marcado como "decidir na hora" vai para a janela (R1, R2).
 Ask = Callable[[bool], bool]
@@ -101,6 +104,7 @@ def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> 
     _plan_wifi(recipe, drafts)
     _plan_network_privacy(recipe, catalogs, drafts)
     _plan_network_drives(recipe, drafts)
+    _plan_maintenance(recipe, drafts)
     _plan_power(recipe, drafts)
     _plan_bloat(recipe, catalogs, ctx, drafts, excluded)
     _plan_features(recipe, catalogs, ctx, drafts, excluded)
@@ -181,6 +185,32 @@ def _plan_network_drives(recipe: Recipe, out: list[_Draft]) -> None:  # R25
                 title,
                 "default_profile",
                 sort=(_G1["network_drive"], 0, d.letter),
+            )
+        )
+
+
+def _plan_maintenance(recipe: Recipe, out: list[_Draft]) -> None:  # R27
+    m = recipe.maintenance
+    if m.ensure_defrag_schedule:
+        out.append(
+            _Draft(
+                "maintenance",
+                "defrag",
+                1,
+                t("plan.maintenance_defrag"),
+                "machine",
+                sort=(_G1["maintenance"], 0, "defrag"),
+            )
+        )
+    if m.winget_upgrade != "off":
+        out.append(
+            _Draft(
+                "maintenance",
+                "winget",
+                2,
+                t("plan.maintenance_winget"),
+                "user_profile",
+                sort=(_G2["maintenance"], 0, "winget"),
             )
         )
 
@@ -295,6 +325,8 @@ def _plan_tweaks(
         implicit.append(TWEAK_WU_DRIVERS)
     if recipe.bloatware.disable_consumer_content:
         implicit.append(TWEAK_CONSUMER_CONTENT)
+    if recipe.maintenance.storage_sense:
+        implicit.append(TWEAK_STORAGE_SENSE)
     chosen = {tid for tid, _ in selections}
     selections += [(tid, False) for tid in implicit if tid not in chosen]
 

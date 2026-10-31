@@ -132,7 +132,7 @@ class Tweak(_Model):
     id: Annotated[str, Field(pattern=r"^[a-z]+\.[a-z0-9_]+$")]
     title: str
     description: str
-    category: Literal["privacy", "visual", "power", "system"]
+    category: Literal["privacy", "visual", "power", "system", "maintenance"]
     risk: Literal["safe", "caution"] = "safe"
     scope: Scope
     windows: OsFilter = Field(default_factory=OsFilter)

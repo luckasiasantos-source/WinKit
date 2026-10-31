@@ -228,6 +228,20 @@ class NetworkDrive(_Model):
     selected: bool = True
 
 
+Weekday = Literal["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+
+
+class Maintenance(_Model):
+    """V2-18: o Windows novo se mantém sozinho."""
+
+    #: ``monthly`` = a cada 4 semanas (o agendador do PowerShell não tem gatilho mensal).
+    winget_upgrade: Literal["off", "weekly", "monthly"] = "off"
+    winget_day: Weekday = "sun"
+    winget_time: Annotated[str, Field(pattern=r"^([01][0-9]|2[0-3]):[0-5][0-9]$")] = "12:00"
+    storage_sense: bool = False
+    ensure_defrag_schedule: bool = True
+
+
 class RestorePoint(_Model):
     """V2-10: ponto de restauração "Windows pronto" no fim da instalação (M12)."""
 
@@ -257,6 +271,7 @@ class Recipe(_Model):
     wifi: Wifi = Field(default_factory=Wifi)
     dns: Dns = Field(default_factory=Dns)
     network_drives: list[NetworkDrive] = Field(default_factory=list)
+    maintenance: Maintenance = Field(default_factory=Maintenance)
 
     # ---- consultas de conveniência (sem efeito colateral)
     def app(self, app_id: str) -> AppItem | None:

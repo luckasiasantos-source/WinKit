@@ -1424,7 +1424,7 @@ O Studio e a CLI preparam um pendrive comum com as mesmas funções do Ventoy, o
 
 **Como se usa.**
 - **Studio**, seção **Manutenção** (grupo Sistema):
-  - "Atualizar apps automaticamente": Não, Toda semana, Todo mês, com dia e hora;
+  - "Atualizar apps automaticamente": Não, Toda semana, A cada 4 semanas, com dia e hora (o módulo `ScheduledTasks` do PowerShell não tem gatilho mensal; "mensal" vira semanal com intervalo de 4 semanas);
   - "Ligar o Sensor de Armazenamento";
   - "Garantir a otimização semanal do disco" (ligado).
 - **CLI:** `winkit manutencao definir --winget semanal --sensor`.

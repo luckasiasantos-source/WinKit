@@ -1,6 +1,9 @@
 # Traduções dos catálogos (inglês) — D-030, R-51.
 # Chave = id do item no catálogo base (pt-BR). `text` do bloatware = side_effect ou reason.
 tweaks:
+  maintenance.storage_sense:
+    title: Storage Sense
+    description: Windows deletes temporary files and empties the old Recycle Bin by itself when the disk fills up.
   privacy.telemetry_minimum:
     title: Minimum allowed telemetry
     description: Sends Microsoft only the required diagnostic data.

@@ -17,6 +17,7 @@ from winkit.platform.locale import read_regional
 from winkit.platform.powershell import PowerShell
 from winkit.platform.registry import Registry, WindowsRegistry
 from winkit.platform.runner import CommandRunner, SubprocessRunner
+from winkit.platform.scheduler import TaskScheduler, WindowsTaskScheduler
 from winkit.platform.vss import ShadowCopies, WindowsShadowCopies
 from winkit.platform.wifi import WifiManager, WindowsWifi
 from winkit.platform.winget import WindowsWinget, Winget
@@ -40,6 +41,7 @@ class Services:
     features: SystemFeatures | None = None
     #: Registro do PC atual (unidades de rede, variáveis de ambiente).
     registry: Registry | None = None
+    scheduler: TaskScheduler | None = None
 
 
 def real_services() -> Services:
@@ -59,4 +61,5 @@ def real_services() -> Services:
         wifi=WindowsWifi(runner),
         features=WindowsSystemFeatures(ps),
         registry=registry,
+        scheduler=WindowsTaskScheduler(ps),
     )

@@ -1,6 +1,9 @@
 # Traduções dos catálogos (espanhol) — D-030, R-51.
 # Chave = id do item no catálogo base (pt-BR). `text` do bloatware = side_effect ou reason.
 tweaks:
+  maintenance.storage_sense:
+    title: Sensor de almacenamiento
+    description: Windows borra por sí solo los archivos temporales y vacía la Papelera antigua cuando el disco se llena.
   privacy.telemetry_minimum:
     title: Telemetría al mínimo permitido
     description: Envía a Microsoft solo los datos de diagnóstico obligatorios.

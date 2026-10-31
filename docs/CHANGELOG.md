@@ -28,6 +28,25 @@
 
 ---
 
+## 2026-10-31 — M14 — Tarefas de manutenção (V2-18)
+**Tipo:** implementação
+**Resumo:** o Windows novo se mantém sozinho: uma tarefa do usuário atualiza os apps pelo winget, a otimização semanal do disco é garantida e o Sensor de Armazenamento pode ser ligado.
+
+### Adicionado
+- `src/winkit/core/maintenance.py` (especificação pura), `src/winkit/agent/steps/maintenance.py`
+- `TaskScheduler`: `ensure_user_task`, `user_task_matches`, `builtin_task`, `remove_folder`
+- Catálogo: ajuste `maintenance.storage_sense` (categoria nova `maintenance`)
+- Receita: `maintenance` (aditivo); plano: `maintenance:defrag` na Fase 1 e `maintenance:winget` na Fase 2 (R27)
+- Serviços do Studio: `scheduler`; Studio: seção "Manutenção" (grupo Sistema); CLI: `manutencao mostrar|definir|remover-do-pc`
+- Testes: `tests/agent/test_maintenance.py`
+
+### Alterado
+- `tests/core/test_planner.py`, `tests/agent/test_live.py` — contam com a otimização do disco, ligada por padrão
+- `docs/PLANO_V2.md` — "mensal" é a cada 4 semanas
+
+### Documentos vivos atualizados
+- ARQUITETURA — módulos; STATUS — V2-18; PLANO_V2 — §9.6
+
 ## 2026-10-31 — M14 — Unidades de rede mapeadas (V2-17)
 **Tipo:** implementação
 **Resumo:** as unidades de rede do PC antigo (ex.: `Z:` → `\\nas\filmes`) reaparecem no Windows novo. A senha do servidor nunca é levada; o Windows pede na primeira vez.

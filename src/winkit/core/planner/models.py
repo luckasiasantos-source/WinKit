@@ -14,6 +14,7 @@ StepKind = Literal[
     "dns",
     "hosts",
     "network_drive",
+    "maintenance",
     "bloat",
     "feature",
     "tweak",

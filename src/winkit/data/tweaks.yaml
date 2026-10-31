@@ -350,3 +350,14 @@
     - reg_set: {key: 'SYSTEM\CurrentControlSet\Control\FileSystem', value: LongPathsEnabled, type: dword, data: 1}
   undo:
     - reg_set: {key: 'SYSTEM\CurrentControlSet\Control\FileSystem', value: LongPathsEnabled, type: dword, data: 0}
+
+- id: maintenance.storage_sense
+  title: Sensor de Armazenamento
+  description: O Windows apaga sozinho arquivos temporários e esvazia a Lixeira antiga quando o disco enche.
+  category: maintenance
+  scope: user
+  source: https://learn.microsoft.com/windows/client-management/mdm/policy-csp-storage#allowstoragesenseglobal
+  apply:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy', value: '01', type: dword, data: 1}
+  undo:
+    - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy', value: '01', type: dword, data: 0}

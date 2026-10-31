@@ -5,7 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from winkit.core.maintenance import TaskSpec
 from winkit.core.paths.templates import profile_folders
+from winkit.platform.scheduler import BuiltinState
 
 
 @dataclass
@@ -23,6 +25,38 @@ class FakeScheduler:
         self.task_exe = None
         self.removed += 1
         return existed
+
+    # ---- tarefas de manutenção (V2-18)
+    user_tasks: dict[str, TaskSpec] = field(default_factory=dict)  # pasta+nome → spec
+    builtin: dict[str, bool] = field(default_factory=lambda: {"ScheduledDefrag": False})
+
+    def ensure_user_task(self, spec: TaskSpec) -> bool:
+        key = spec.folder + spec.name
+        current = self.user_tasks.get(key)
+        if current is not None and current.signature == spec.signature:
+            return False
+        self.user_tasks[key] = spec
+        return True
+
+    def user_task_matches(self, spec: TaskSpec) -> bool:
+        current = self.user_tasks.get(spec.folder + spec.name)
+        return current is not None and current.signature == spec.signature
+
+    def builtin_task(self, folder: str, name: str, *, enable: bool) -> BuiltinState:
+        if name not in self.builtin:
+            return "absent"
+        if self.builtin[name]:
+            return "enabled"
+        if enable:
+            self.builtin[name] = True
+            return "changed"
+        return "disabled"
+
+    def remove_folder(self, folder: str) -> int:
+        doomed = [k for k in self.user_tasks if k.startswith(folder)]
+        for k in doomed:
+            del self.user_tasks[k]
+        return len(doomed)
 
 
 @dataclass

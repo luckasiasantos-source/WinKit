@@ -7,6 +7,7 @@ from functools import partial
 
 from PySide6.QtWidgets import QMessageBox, QSpinBox
 
+from winkit.core.maintenance import DAYS
 from winkit.core.recipe.models import Recipe, TweakSelection
 from winkit.i18n import t, tn
 from winkit.studio.ui.base import Page
@@ -20,6 +21,8 @@ from winkit.ui.widgets import (
     section,
     symbol_icon,
 )
+
+DAY_IDS = tuple(DAYS)
 
 
 class BloatPage(Page):
@@ -100,6 +103,7 @@ class TweaksPage(Page):
             "system.prevent_device_encryption",
             "system.wu_no_driver_replacement",
             "system.consumer_content",
+            "maintenance.storage_sense",
         }
     )
     CATEGORIES: tuple[str, ...] = ("privacy", "visual", "system")
@@ -316,3 +320,78 @@ class FeaturesPage(Page):
             )
 
         self.tasks.run(t("studio.features.reading"), self.ctl.read_features, done)
+
+
+class MaintenancePage(Page):
+    """V2-18: atualizar apps, Sensor de Armazenamento e otimização do disco."""
+
+    title_key = "studio.maintenance.title"
+    subtitle_key = "studio.maintenance.subtitle"
+
+    def refresh(self) -> None:
+        self.clear_content()
+        if self.needs_recipe():
+            return
+        r = self.ctl.recipe
+        assert r is not None  # noqa: S101
+        m = r.maintenance
+        card = Card()
+        card.add_row(
+            Row(
+                t("studio.maintenance.winget"),
+                t("studio.maintenance.winget_hint"),
+                accessory=combo(
+                    [
+                        ("off", t("studio.maintenance.off")),
+                        ("weekly", t("studio.maintenance.weekly")),
+                        ("monthly", t("studio.maintenance.monthly")),
+                    ],
+                    m.winget_upgrade,
+                    lambda v: self._set("winget_upgrade", v, refresh=True),
+                ),
+                icon=kind_icon("maintenance"),
+            )
+        )
+        if m.winget_upgrade != "off":
+            days = [(d, t(f"studio.maintenance.day.{d}")) for d in DAY_IDS]
+            card.add_row(
+                Row(
+                    t("studio.maintenance.day"),
+                    None,
+                    accessory=combo(days, m.winget_day, lambda v: self._set("winget_day", v)),
+                )
+            )
+            hours = [(f"{h:02d}:00", f"{h:02d}:00") for h in range(24)]
+            card.add_row(
+                Row(
+                    t("studio.maintenance.time"),
+                    None,
+                    accessory=combo(hours, m.winget_time, lambda v: self._set("winget_time", v)),
+                )
+            )
+        card.add_row(
+            Row(
+                t("studio.maintenance.storage_sense"),
+                t("studio.maintenance.storage_sense_hint"),
+                accessory=toggle(m.storage_sense, lambda v: self._set("storage_sense", v)),
+                icon=symbol_icon("trash", "#34C759"),
+            )
+        )
+        card.add_row(
+            Row(
+                t("studio.maintenance.defrag"),
+                t("studio.maintenance.defrag_hint"),
+                accessory=toggle(
+                    m.ensure_defrag_schedule, lambda v: self._set("ensure_defrag_schedule", v)
+                ),
+                icon=symbol_icon("bolt", "#34C759"),
+            )
+        )
+        self.content.addWidget(section("", card, footer=t("studio.maintenance.footer")))
+
+    def _set(self, name: str, value: object, *, refresh: bool = False) -> None:
+        if self.ctl.recipe is not None:
+            setattr(self.ctl.recipe.maintenance, name, value)
+            self.save()
+            if refresh:
+                self.refresh()

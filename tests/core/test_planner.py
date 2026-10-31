@@ -37,6 +37,7 @@ def test_implicit_tweaks_can_be_turned_off() -> None:
     r.updates.windows_update_after_install = False
     r.restore_point.enabled = False
     r.updates.fix_missing_drivers = False
+    r.maintenance.ensure_defrag_schedule = False
     assert P(r).ids() == ["finalize:summary"]
 
 
