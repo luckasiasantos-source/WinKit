@@ -28,6 +28,36 @@
 
 ---
 
+## 2026-10-31 — M0 — Fundação do projeto
+**Tipo:** infraestrutura + implementação
+**Resumo:** projeto Python configurado (uv, ruff, mypy, pytest, import-linter), CI Linux + Windows, e os primeiros módulos de base: erros, textos pt-BR, executor de comandos e PowerShell.
+
+### Adicionado
+- `pyproject.toml` — metadados, dependências (pydantic, PyYAML, PySide6), grupos `dev` e `package`, configuração de ruff/mypy/pytest/coverage e 5 contratos do import-linter
+- `uv.lock` — versões travadas (R-45)
+- `.gitignore`
+- `.github/workflows/ci.yml` — matriz `ubuntu-latest` + `windows-latest`: ruff, mypy, import-linter, pytest com cobertura, artefatos de resultado
+- `src/winkit/__init__.py` — versão 0.1.0 (R-46)
+- Pacotes vazios da estrutura do `PLANO.md` §18 (`core/*`, `platform`, `collector`, `builder`, `agent`, `studio`, `cli`)
+- `src/winkit/core/errors.py` — `WinKitError` e subclasses (receita, catálogo, caminhos, plano, estado, Ventoy, XML, plataforma, comando, PowerShell, registro, VSS, pendrive, operação insegura, integridade, etapa)
+- `src/winkit/i18n/pt_br.py` — todos os textos ao usuário + `t(chave, **campos)`
+- `src/winkit/platform/system.py` — `system32()`, `powershell_exe()`, `winkit_program_data()`, `CREATE_NO_WINDOW`
+- `src/winkit/platform/runner.py` — `CommandResult`, protocolo `CommandRunner`, `SubprocessRunner`, máscara de segredos, decodificação de saída só para log
+- `src/winkit/platform/powershell.py` — `PowerShell.run_json()` / `run()`; parâmetros nunca interpolados (JSON→Base64→`$p`), script por `-EncodedCommand`
+- `src/winkit/platform/fakes/runner.py`, `fakes/powershell.py` — dublês para testes
+- `tests/conftest.py` — marcadores `windows`/`admin` pulados fora do Windows/sem administrador
+- `tests/platform/test_runner.py`, `tests/platform/test_powershell.py`, `tests/test_i18n.py`
+- `tests/test_architecture.py` — testes de proteção (§19.2 do plano)
+
+### Documentos vivos atualizados
+- STATUS — M0 concluído
+- ARQUITETURA — R-50 (formato `TODO(DT-nnn)`) e §5.12 (como cada regra é verificada)
+
+### Decisões
+- nenhuma nova
+
+---
+
 ## 2026-10-31 — Planejamento — documentação inicial do projeto
 **Tipo:** documentação
 **Resumo:** plano completo do produto, arquitetura, regras do código e documentos vivos. Nenhum código ainda.

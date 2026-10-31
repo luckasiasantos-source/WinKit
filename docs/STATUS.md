@@ -6,15 +6,15 @@
 > Legenda: ⬜ não iniciado · 🟨 em andamento · ✅ concluído · ⛔ bloqueado · ➖ fora do escopo atual
 
 **Última atualização:** 2026-10-31
-**Versão do código:** nenhuma (ainda não há código)
-**Fase do projeto:** Planejamento concluído — aguardando autorização para iniciar o M0
+**Versão do código:** 0.1.0 (em desenvolvimento)
+**Fase do projeto:** implementação em andamento (autorizada pelo usuário para seguir de ponta a ponta de forma autônoma)
 
 ## Resumo
 
 | Marco | Descrição | Estado | Validação em hardware |
 |---|---|---|---|
 | — | Planejamento e documentação | ✅ | — |
-| M0 | Fundação | ⬜ | — |
+| M0 | Fundação | ✅ | — |
 | M1 | Núcleo puro | ⬜ | — |
 | M2 | Construtor mínimo + primeira instalação real | ⬜ | ⬜ pendente |
 | M3 | Esqueleto do Agente | ⬜ | ⬜ pendente |
@@ -33,16 +33,20 @@
 - ✅ Decisões D-001 a D-019 (`ARQUITETURA.md`)
 - ✅ `PLANO.md`, `ARQUITETURA.md`, `STATUS.md`, `DIVIDAS_TECNICAS.md`, `INCIDENTES.md`, `CHANGELOG.md`, `CLAUDE.md`
 
-### M0 — Fundação ⬜
-- ⬜ `pyproject.toml` + uv + `uv.lock`
-- ⬜ ruff, mypy, pytest, import-linter configurados
-- ⬜ CI GitHub Actions (Linux + Windows)
-- ⬜ Estrutura de pastas (`PLANO.md` §18)
-- ⬜ `core/errors.py`
-- ⬜ `i18n/pt_br.py`
-- ⬜ `platform/runner.py` + testes
-- ⬜ `platform/powershell.py` + testes
-- ⬜ Testes de proteção de camadas ativos
+### M0 — Fundação ✅
+- ✅ `pyproject.toml` (hatchling, src layout) + uv + `uv.lock`
+- ✅ ruff, mypy (`--strict` em `core`), pytest, import-linter configurados
+- ✅ CI GitHub Actions (`.github/workflows/ci.yml`): Linux + Windows, lint, tipos, contratos, testes, cobertura
+- ✅ Estrutura de pastas (`PLANO.md` §18)
+- ✅ `core/errors.py` — hierarquia completa (R-25)
+- ✅ `i18n/pt_br.py` — catálogo de textos + `t()`; teste valida todos os formatos
+- ✅ `platform/system.py` — caminhos de ferramentas nativas (R-12)
+- ✅ `platform/runner.py` — `SubprocessRunner` (lista de args, timeout com encerramento da árvore, sem janela de console, máscara de segredos, log)
+- ✅ `platform/powershell.py` — parâmetros via JSON/Base64, `-EncodedCommand`, saída JSON
+- ✅ `platform/fakes/` — `FakeRunner`, `FakePowerShell`
+- ✅ Testes de proteção: contratos do import-linter, imports tardios no `core`, `subprocess` só no runner, `shell=` proibido, `TODO` exige `DT-nnn`, Fase 1 sem Qt (ativado no M3)
+
+**Testes:** 130 passando no Linux, 4 pulados (3 exigem Windows real — rodam no CI Windows; 1 aguarda o Agente).
 
 ### M1 — Núcleo puro ⬜
 - ⬜ Modelos da receita + validação + estrutura de migração

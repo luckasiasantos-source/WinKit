@@ -263,6 +263,18 @@ runner.run(
 - **R-47** `schema_version` de receita, estado e manifesto são inteiros independentes; mudança incompatível exige migração e teste da migração.
 - **R-48** Commits pequenos, mensagem em pt-BR no imperativo, citando o marco: `M1: adiciona planejador de fases`.
 - **R-49** Todo commit atualiza `docs/CHANGELOG.md`, e os demais documentos vivos quando aplicável (ver `CLAUDE.md`).
+- **R-50** Marcação de pendência no código só no formato `TODO(DT-nnn): ...`, citando uma entrada existente em `DIVIDAS_TECNICAS.md`. Um teste falha se encontrar `TODO` sem referência válida.
+
+### 5.12 Como as regras são verificadas automaticamente
+
+| Regra | Verificação |
+|---|---|
+| Camadas (seção 2) | import-linter (`pyproject.toml`, 5 contratos) + `tests/test_architecture.py` (pega imports dentro de funções) |
+| R-06 | `ruff check` e `ruff format --check` no CI |
+| R-07 | `mypy` no CI (`strict` em `winkit.core`) |
+| R-11 | contrato "subprocess só em platform.runner" + teste AST de `shell=` |
+| R-35 | `test_phase1_does_not_import_qt` |
+| R-50 | `test_todo_requires_debt_entry` |
 
 ---
 

@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+pytest-*.xml
+htmlcov/
+build/
+dist/
+*.egg-info/
+.import_linter_cache/

@@ -1,0 +1,162 @@
+[project]
+name = "winkit"
+dynamic = ["version"]
+description = "Prepara um pendrive Ventoy para instalar o Windows já configurado, sem modificar a ISO."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "Proprietary" }
+authors = [{ name = "Samuel Lucas" }]
+dependencies = [
+    "pydantic>=2.7,<3",
+    "PyYAML>=6.0,<7",
+    "PySide6>=6.7,<7",
+]
+
+[project.scripts]
+winkit = "winkit.cli.main:main"
+winkit-agent = "winkit.agent.main:main"
+
+[project.gui-scripts]
+winkit-studio = "winkit.studio.main:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-cov>=5",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "import-linter>=2.0",
+    "types-PyYAML>=6",
+]
+package = [
+    "pyinstaller>=6.6",
+]
+
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/winkit/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/winkit"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"data" = "winkit/_data"
+
+# ---------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "SIM", "RET", "PTH", "PL", "RUF", "S", "BLE", "T20"]
+ignore = [
+    "PLR0913",  # funções de orquestração recebem várias dependências injetadas
+    "PLR2004",  # números mágicos em testes e códigos de saída documentados
+    "S603",     # subprocess sem shell é o caso controlado em platform/runner
+    "S607",     # caminhos são resolvidos em platform/
+    "RUF001", "RUF002", "RUF003",  # textos em pt-BR usam caracteres não ASCII de propósito
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "S108", "PLR0915", "T20", "PLC0415"]
+"src/winkit/agent/ui/**" = ["N802"]
+"src/winkit/i18n/**" = ["E501"]           # textos longos ficam inteiros para facilitar a revisão
+"src/winkit/platform/powershell.py" = ["E501"]  # trechos de script PowerShell
+"src/winkit/studio/**" = ["N802"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["winkit"]
+
+# ---------------------------------------------------------------- mypy
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src"
+packages = ["winkit"]
+plugins = ["pydantic.mypy"]
+warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+module = "winkit.core.*"
+strict = true
+
+[[tool.mypy.overrides]]
+module = ["PySide6.*"]
+ignore_missing_imports = true
+
+# ---------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "windows: teste que toca o sistema Windows real (só roda no Windows)",
+    "admin: teste que exige administrador no Windows",
+    "ui: teste da interface Qt (roda com QT_QPA_PLATFORM=offscreen)",
+]
+
+[tool.coverage.run]
+source = ["winkit"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "\\.\\.\\.$",
+]
+
+# ---------------------------------------------------------------- import-linter
+[tool.importlinter]
+root_package = "winkit"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "core é puro: não depende de nada do projeto acima dele nem do sistema"
+type = "forbidden"
+source_modules = ["winkit.core"]
+forbidden_modules = [
+    "winkit.platform", "winkit.collector", "winkit.builder", "winkit.agent",
+    "winkit.cli", "winkit.studio", "PySide6", "winreg", "subprocess", "ctypes", "msvcrt", "_winapi",
+]
+
+[[tool.importlinter.contracts]]
+name = "platform não depende de casos de uso, CLI ou interface"
+type = "forbidden"
+source_modules = ["winkit.platform"]
+forbidden_modules = [
+    "winkit.collector", "winkit.builder", "winkit.agent", "winkit.cli", "winkit.studio", "PySide6",
+]
+
+[[tool.importlinter.contracts]]
+name = "casos de uso não importam Qt (a interface do Agente fica isolada em agent.ui)"
+type = "forbidden"
+source_modules = ["winkit.collector", "winkit.builder", "winkit.agent"]
+forbidden_modules = ["PySide6", "winkit.studio", "winkit.cli"]
+ignore_imports = [
+    "winkit.agent.ui.** -> PySide6",
+    "winkit.agent.ui -> PySide6",
+    "winkit.agent.main -> winkit.agent.ui.**",
+    "winkit.agent.main -> winkit.agent.ui",
+]
+unmatched_ignore_imports_alerting = "none"
+
+[[tool.importlinter.contracts]]
+name = "casos de uso são independentes entre si"
+type = "independence"
+modules = ["winkit.collector", "winkit.builder", "winkit.agent"]
+
+[[tool.importlinter.contracts]]
+name = "subprocess só em platform.runner"
+type = "forbidden"
+source_modules = ["winkit"]
+forbidden_modules = ["subprocess"]
+ignore_imports = ["winkit.platform.runner -> subprocess"]
+allow_indirect_imports = true
