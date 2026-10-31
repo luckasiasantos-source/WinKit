@@ -5,6 +5,7 @@ Usa exatamente os mesmos serviços e funções da linha de comando.
 
 from __future__ import annotations
 
+import logging
 import os
 import shutil
 import sys
@@ -28,7 +29,7 @@ from winkit.builder.build import (
 )
 from winkit.builder.isos import scan_isos
 from winkit.builder.validate import PendriveReport, validate_pendrive
-from winkit.collector import app_updates
+from winkit.collector import app_updates, snapshot
 from winkit.collector import apps as app_collector
 from winkit.collector import associations as assoc_collector
 from winkit.collector import backups as backup_collector
@@ -41,6 +42,7 @@ from winkit.collector import games as games_collector
 from winkit.collector import netdrives as netdrive_collector
 from winkit.collector import personal as personal_collector
 from winkit.collector import start_layout as start_collector
+from winkit.collector import suggest as suggest_collector
 from winkit.collector import user_folders as folders_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import layout, share
@@ -72,6 +74,7 @@ from winkit.core.recipe.models import (
 )
 from winkit.core.recipe.validation import ValidationReport, username_problem, validate_recipe
 from winkit.core.share import ShareableRecipe
+from winkit.core.suggest import Suggestion
 from winkit.core.user_folders import ORDER, default_folders
 from winkit.core.volumes import VolumeInfo
 from winkit.core.volumes import ref_for as volume_ref
@@ -83,6 +86,8 @@ from winkit.platform import hosts
 from winkit.platform.environment import WindowsEnvironment
 from winkit.platform.services import Services
 from winkit.platform.vss import PendingSnapshots
+
+log = logging.getLogger(__name__)
 
 
 def windows_build() -> int | None:
@@ -248,6 +253,29 @@ class StudioController:
         )
         self.save()
         return len(added)
+
+    # ------------------------------------------------------------------ sugestões (V2-20)
+    def suggestions(self) -> list[Suggestion]:
+        """Analisa este PC (local, nada sai daqui) e sugere o que levar."""
+        return suggest_collector.analyze(
+            self.require_recipe(),
+            self.catalogs,
+            inventory=self.services.inventory,
+            registry=self.services.registry,
+            folders=self.old_folders(),
+            volume_root=self.services.volume_root,
+            now=self.clock(),
+        )
+
+    def accept_suggestion(self, s: Suggestion) -> bool:
+        ok = suggest_collector.accept(self.require_recipe(), self.catalogs, s, self.old_folders())
+        if ok:
+            self.save()
+        return ok
+
+    def dismiss_suggestion(self, suggestion_id: str) -> None:
+        suggest_collector.dismiss(self.require_recipe(), suggestion_id)
+        self.save()
 
     # ------------------------------------------------------------------ backups
     def old_folders(self) -> dict[str, str]:
@@ -720,8 +748,26 @@ class StudioController:
             self.agent_runtime(), self._live_options(kinds, restore_point, simulate=False)
         )
 
+    def write_snapshot(self) -> None:
+        """V2-19: o inventário "antes" vai para o pendrive junto com a construção."""
+        recipe = self.require_recipe()
+        if not recipe.compare_after_install:
+            return
+        snap = snapshot.take_snapshot(
+            self.services.inventory,
+            self.services.devices,
+            self.services.features,
+            self.catalogs,
+            build=windows_build(),
+        )
+        snapshot.write_before(self.root, recipe, snap)
+
     def build(self) -> BuildReport:
         self.save()
+        try:
+            self.write_snapshot()
+        except WinKitError as exc:  # o relatório é opcional; a construção continua
+            log.warning("inventário para a comparação não gravado: %s", exc)
         report = build(
             self.target or targets.from_folder(self.root),
             self.services.disks,

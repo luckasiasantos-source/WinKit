@@ -65,6 +65,10 @@ def games_dir(profile_id: str) -> str:
     return f"{profile_dir(profile_id)}/Jogos"
 
 
+def snapshot_file(profile_id: str) -> str:
+    return f"{profile_dir(profile_id)}/Inventario/antes.json"
+
+
 def fonts_dir(profile_id: str) -> str:
     return f"{profile_dir(profile_id)}/Fontes"
 

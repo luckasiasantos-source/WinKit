@@ -118,6 +118,18 @@ class BuildPage(Page):
         for w in rep.warnings:
             check.add_row(Row(w, icon=symbol_icon("!", "#FF9500")))
         self.content.addWidget(section(t("studio.build.section_check"), check))
+        r = self.ctl.recipe
+        if r is not None:
+            cmp_card = Card()
+            cmp_card.add_row(
+                Row(
+                    t("studio.build.compare"),
+                    t("studio.build.compare_hint"),
+                    accessory=toggle(r.compare_after_install, self._set_compare),
+                    icon=kind_icon("compare"),
+                )
+            )
+            self.content.addWidget(section("", cmp_card))
         if rep.ok:
             plan = self.ctl.plan()
             for phase in (1, 2):
@@ -166,6 +178,11 @@ class BuildPage(Page):
             self.result.setText(text)
 
         self.tasks.run(t("studio.build.checking"), self.ctl.validate_pendrive, done)
+
+    def _set_compare(self, value: bool) -> None:
+        if self.ctl.recipe is not None:
+            self.ctl.recipe.compare_after_install = value
+            self.save()
 
 
 _STATUS_ICON = {

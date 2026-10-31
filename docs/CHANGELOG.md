@@ -28,6 +28,25 @@
 
 ---
 
+## 2026-10-31 — M17 — Relatório antes/depois (V2-19) e assistente "o que levar" (V2-20)
+**Tipo:** implementação
+**Resumo:** no fim da instalação, o resumo compara o Windows novo com o PC antigo (apps que faltaram, dispositivos sem driver, recursos não ligados). O Studio ganhou a seção Sugestões, que olha este PC e sugere apps usados, configurações, saves e pastas grandes, sempre explicando o porquê. A release 0.7.0 foi disparada antes deste commit.
+
+### Adicionado
+- `src/winkit/core/inventory_snapshot.py`, `core/compare.py`, `platform/snapshot.py`, `collector/snapshot.py`, `agent/steps/compare.py` — retrato e comparação; etapa `compare` na Fase 2 (só instalação)
+- `src/winkit/core/userassist.py`, `core/suggest.py`, `platform/usage.py`, `collector/suggest.py`, `data/game_saves.yaml` — assistente de sugestões
+- Receita: `compare_after_install` (ligado), `meta.dismissed_suggestions`; estado: `comparison` (aditivos); layout: `Perfis/<p>/Inventario/antes.json`
+- `platform/devices.py` — `all_devices()` (dispositivos funcionando também)
+- Studio: chave "Comparar com este PC" em Revisar e construir; seção Sugestões (O que levar); a construção grava o retrato. CLI: `construir` grava o retrato; `sugestoes listar [--json]|adicionar|ignorar`
+- Testes: `tests/agent/test_compare.py`, `tests/collector/test_suggest.py`, página de sugestões em `tests/ui/test_studio_ui.py`
+
+### Alterado
+- `src/winkit/core/planner/planner.py` — `compare:after` antes do `finalize`; `core/summary.py` — seção "Comparação com o PC antigo"
+- `tests/core/test_planner.py` — o plano padrão inclui a comparação
+
+### Documentos vivos atualizados
+- STATUS — V2-19 e V2-20 prontos, H34; ARQUITETURA — módulos e teste de proteção; PLANO_V2 — comandos da CLI; DIVIDAS — DT-026
+
 ## 2026-10-31 — Correção: pergunta de reiniciar perdida ao fechar o resumo (IN-019)
 **Tipo:** correção
 **Resumo:** fechar a janela do resumo antes do fim da Fase 2 deixava a pergunta "reiniciar agora?" sem resposta e a thread do Agente presa. Era também o que travava as releases (IN-017). A 0.7.0 passa a incluir as receitas compartilháveis e a atualização dos instaladores.

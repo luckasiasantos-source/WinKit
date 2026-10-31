@@ -125,9 +125,14 @@ class FakeUpdater:
 @dataclass
 class FakeDevices:
     devices: list[ProblemDevice] = field(default_factory=list)
+    #: Dispositivos funcionando (código 0), além dos com problema.
+    working: list[ProblemDevice] = field(default_factory=list)
 
     def problem_devices(self) -> list[ProblemDevice]:
         return list(self.devices)
+
+    def all_devices(self) -> list[ProblemDevice]:
+        return [*self.working, *self.devices]
 
     def fix(self, hardware_ids: list[str]) -> None:
         ids = {h.casefold() for h in hardware_ids}

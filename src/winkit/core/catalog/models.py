@@ -405,6 +405,13 @@ class SearchProvider(_Model):
     search_url: Annotated[str, Field(pattern=r"^https://.*\{searchTerms\}")]
 
 
+# ------------------------------------------------------------------ saves de jogos (V2-20)
+class GameSave(_Model):
+    id: Annotated[str, Field(pattern=r"^[a-z0-9_]+$")]
+    name: str
+    template: str
+
+
 # ------------------------------------------------------------------ outros
 class EditionEntry(_Model):
     id: str
@@ -455,6 +462,7 @@ class Catalogs(_Model):
     browsers: list[BrowserEntry] = Field(default_factory=list)
     extensions: list[ExtensionEntry] = Field(default_factory=list)
     search_providers: list[SearchProvider] = Field(default_factory=list)
+    game_saves: list[GameSave] = Field(default_factory=list)
 
     def browser(self, browser_id: str) -> BrowserEntry | None:
         return next((x for x in self.browsers if x.id == browser_id), None)

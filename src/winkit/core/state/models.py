@@ -14,6 +14,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from winkit.core.compare import Comparison
 from winkit.core.devices import ProblemDevice
 from winkit.core.errors import StateError
 from winkit.core.planner.models import Plan
@@ -67,6 +68,8 @@ class AgentState(_Model):
     devices: list[ProblemDevice] = Field(default_factory=list)
     #: V2-09: drivers instalados pela busca dirigida no Windows Update.
     drivers_found: list[str] = Field(default_factory=list)
+    #: V2-19: comparação com o PC antigo.
+    comparison: Comparison | None = None
 
     def step(self, step_id: str) -> StepState:
         try:

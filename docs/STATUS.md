@@ -218,7 +218,8 @@
 ### M17 — Inteligência do pendrive 🟨
 - ✅ V2-23 Receitas compartilháveis: exportar sem dados pessoais (o formato não tem os campos), importar com prévia e mescla (ids desconhecidos ignorados com motivo), cinco modelos prontos no pacote (Mínimo, Escritório, Programador, Gamer, Privacidade máxima); Studio (seção Modelos no grupo Preparar) e CLI (`receita exportar|importar|modelo`)
 - ✅ V2-21 Atualizar instaladores: comparação de versões tolerante; "Procurar atualizações" baixa e compara; troca só quando a versão é maior, salva a receita e só então apaga a pasta antiga; faixa no Studio depois de 30 dias; CLI `apps atualizar [--verificar]`
-- ⬜ V2-19 Relatório antes/depois · V2-20 Assistente "o que levar"
+- ✅ V2-19 Relatório antes/depois: na construção, o Studio e a CLI gravam `Perfis/<p>/Inventario/antes.json` (apps sem redistribuíveis, dispositivos com o primeiro HardwareID, recursos ligados, build); na Fase 2 a etapa `compare` (só instalação, `live_safe`) gera o mesmo retrato do Windows novo e o resumo ganha "Comparação com o PC antigo" (apps que faltaram, dispositivos sem driver que tinham driver, recursos que não foram ligados); hardware diferente (menos de 50% dos ids em comum) deixa de comparar drivers; chave em "Revisar e construir"
+- ✅ V2-20 Assistente "o que levar": UserAssist (ROT13 + registro de 72 bytes, H34) cruzado com o inventário; configurações recomendadas que faltam; 13 saves de jogos conhecidos; pastas grandes na raiz do C: com limite de tempo; pontuação determinística por uso, recência e tamanho; "Adicionar" e "Ignorar" (ignoradas não voltam); Studio (Sugestões, primeira de O que levar) e CLI (`sugestoes listar [--json]|adicionar|ignorar`). A categoria "Outros" e o manifesto do Ludusavi ficaram para depois (DT-026)
 
 ## Hipóteses técnicas
 
@@ -253,5 +254,6 @@
 | H28 | `LayoutModification.json` no perfil Default é respeitado pelo Windows 11 atual | ⬜ | — |
 | H32 | `REG_EXPAND_SZ` com `%USERNAME%` em `User Shell Folders` do perfil Default é expandido no primeiro login de cada conta | ⬜ | — |
 | H33 | Acrescentar a biblioteca no `libraryfolders.vdf` com a Steam fechada basta para ela reconhecer os jogos | ⬜ | — |
+| H34 | A estrutura do UserAssist (72 bytes, contador em `+4`, FILETIME em `+60`) continua igual no Windows 11 atual | ⬜ | — |
 | H24 | Valores em `HKCU\Network` gravados no perfil Default são reconectados no primeiro login do usuário novo | ⬜ | — |
 | H23 | `Set-DnsClientServerAddress` funciona na Fase 1 para adaptadores cujo driver acabou de ser instalado pelo `pnputil` | ⬜ | — |

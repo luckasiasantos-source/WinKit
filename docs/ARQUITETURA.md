@@ -155,6 +155,8 @@ Por que isso importa:
 | `core/vdf.py`, `core/games.py`, `collector/games.py`, `agent/steps/game_library.py` | Jogos sem baixar de novo (V2-13): `libraryfolders.vdf` da Steam e manifestos da Epic |
 | `agent/steps/account.py`, `platform/accounts.py` | Contas extras (V2-11): `LocalAccount` no XML, grupo conferido pelo SID, `PasswordExpired`; nunca ao vivo |
 | `core/share.py`, `data/templates/*.winkit.json` | Receitas compartilháveis e modelos (V2-23, D-040): formato sem campos pessoais (`extra="forbid"`), importar = mesclar com prévia |
+| `core/inventory_snapshot.py`, `core/compare.py`, `platform/snapshot.py`, `collector/snapshot.py`, `agent/steps/compare.py` | Relatório antes/depois (V2-19): o mesmo retrato (apps, dispositivos, recursos) do PC antigo e do Windows novo, comparado por id do winget, nome normalizado e HardwareID |
+| `core/userassist.py`, `core/suggest.py`, `platform/usage.py`, `collector/suggest.py`, `data/game_saves.yaml` | Assistente "o que levar" (V2-20): sinais locais (UserAssist, inventário, catálogo, saves, pastas da raiz), pontuação pura e determinística; nada é adicionado sem escolha |
 | `core/versions.py`, `collector/app_updates.py` | Atualizar instaladores do pendrive (V2-21, D-041): baixar para comparar; a pasta velha só sai depois que a receita aponta para a nova |
 | `core/secrets.py` | Registro único de segredos do processo (R-53); `runner` e `EventLog` mascaram |
 | `core/wifi.py`, `collector/wifi.py`, `platform/wifi.py`, `agent/steps/wifi.py` | Wi-Fi (V2-02): XML do perfil, coleta, `netsh` só por código de saída e arquivos, etapa antes do login |
@@ -346,6 +348,7 @@ runner.run(
 | R-52 | `tests/agent/test_user_folders.py::test_recipe_rejects_drive_letters_in_volume_paths` (caminhos de volume nunca levam letra) |
 | V2-23 | `tests/core/test_share.py::test_export_never_contains_personal_data` (conta, senha, Wi-Fi, caminhos e volumes nunca saem) |
 | V2-21 | `tests/core/test_app_updates.py::test_failure_in_the_middle_keeps_old_version` |
+| V2-20 | `tests/collector/test_suggest.py::test_dismissed_never_come_back_and_accept_adds` (ignoradas não voltam; nada entra sem "Adicionar") |
 | XML (IN-015) | `test_no_global_xml_namespace_registration` e `test_strip_key_does_not_change_other_xml` |
 | R-55 | `tests/i18n/test_usage.py::test_no_loose_ui_strings` (AST em `studio`, `agent/ui`, `ui`, `cli`) |
 | Empacotamento | `test_no_dynamic_imports_in_package` (IN-013) |

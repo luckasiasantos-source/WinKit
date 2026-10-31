@@ -9,6 +9,7 @@ from pathlib import Path
 from winkit.core.regional import RegionalDefaults
 from winkit.platform.associations import AssociationsTool, DismAssociations
 from winkit.platform.copy import Copier, RobocopyCopier
+from winkit.platform.devices import DeviceInspector, WindowsDeviceInspector
 from winkit.platform.disks import DiskInspector, WindowsDiskInspector
 from winkit.platform.drivers import DriverManager, WindowsDriverManager
 from winkit.platform.features import SystemFeatures, WindowsSystemFeatures
@@ -46,6 +47,7 @@ class Services:
     scheduler: TaskScheduler | None = None
     associations: AssociationsTool | None = None
     volumes: Volumes | None = None
+    devices: DeviceInspector | None = None
 
 
 def real_services() -> Services:
@@ -68,4 +70,5 @@ def real_services() -> Services:
         scheduler=WindowsTaskScheduler(ps),
         associations=DismAssociations(runner),
         volumes=WindowsVolumes(ps),
+        devices=WindowsDeviceInspector(ps),
     )

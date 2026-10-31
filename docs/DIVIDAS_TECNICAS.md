@@ -240,3 +240,12 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Impacto: (1) quem importa precisa confiar no id do winget; (2) a verificação gasta banda e tempo.
 - Plano: usar `Find-WinGetPackage` quando o módulo existir, nas duas funções.
 - Prioridade: baixa
+
+### DT-026 — Assistente e relatório antes/depois incompletos
+- Estado: aberta
+- Origem: M17 (V2-20, V2-19)
+- Onde: `collector/suggest.py`, `core/compare.py`, `agent/steps/compare.py`
+- Descrição: (1) o assistente não tem a categoria "Outros" (Wi-Fi, fontes, aparência e variáveis em modo "só contar") nem o manifesto opcional do Ludusavi; os saves vêm só do catálogo curado (13 jogos). (2) O tamanho dos saves é calculado sem limite de tempo (só as pastas da raiz têm limite). (3) A comparação não lista à parte os backups não restaurados (eles já aparecem como etapas com falha no resumo), não compara fontes e não grava `comparacao.json` em `Logs`.
+- Impacto: sugestões e comparação menos completas do que o plano; nada é feito sem o usuário escolher.
+- Plano: contar as capturas das outras funções sem gravar; baixar o manifesto do Ludusavi sob confirmação (atribuição no `NOTICE`); gravar a comparação também em JSON.
+- Prioridade: baixa

@@ -189,3 +189,23 @@ def test_live_page_preview_then_apply(qapp, tmp_path: Path) -> None:
         world.system / "Users" / "Samuel" / "AppData" / "Roaming" / "discord" / "settings.json"
     )
     assert restored.read_text() == "x"
+
+
+def test_suggestions_page_adds_and_ignores(window: StudioWindow, qapp, tmp_path: Path) -> None:
+    roaming = tmp_path / "C" / "Users" / "Samuel" / "AppData" / "Roaming"
+    (roaming / ".minecraft" / "saves" / "Mundo").mkdir(parents=True)
+    (roaming / "StardewValley" / "Saves" / "Fazenda").mkdir(parents=True)
+    window.ctl.create_recipe("Samuel", None)
+    page = window.go_to("suggest")
+    page._analyze()  # type: ignore[attr-defined]
+    titles = [r.title_label.text() for r in page.findChildren(Row)]
+    assert "Minecraft" in titles and "Stardew Valley" in titles
+    items = {s.title: s for s in page._items}  # type: ignore[attr-defined]
+    page._accept(items["Minecraft"])  # type: ignore[attr-defined]
+    page._dismiss(items["Stardew Valley"])  # type: ignore[attr-defined]
+    wait(qapp, 5)
+    assert page._items == []  # type: ignore[attr-defined]
+    r = window.ctl.recipe
+    assert r is not None
+    assert [b.template for b in r.backups] == [r"{APPDATA}\.minecraft\saves"]
+    assert r.meta.dismissed_suggestions == ["save:stardew_valley"]

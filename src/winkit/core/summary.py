@@ -11,6 +11,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from winkit.core.compare import Comparison
 from winkit.core.devices import ProblemDevice, problem_text
 from winkit.core.planner.models import Plan
 from winkit.core.recipe.models import Recipe
@@ -45,6 +46,8 @@ class Summary(BaseModel):
     #: V2-09: dispositivos que ficaram sem driver e drivers achados no Windows Update.
     devices: tuple[ProblemDevice, ...] = ()
     drivers_found: tuple[str, ...] = ()
+    #: V2-19: comparação com o PC antigo.
+    comparison: Comparison | None = None
 
     @property
     def failures(self) -> list[SummaryItem]:
@@ -95,6 +98,7 @@ def build_summary(
         warnings=tuple(_unique(warnings)),
         devices=tuple(state.devices),
         drivers_found=tuple(state.drivers_found),
+        comparison=state.comparison,
     )
 
 
@@ -140,6 +144,29 @@ tr.failed td:last-child { color: var(--bad); font-weight: 600; }
 tr.done td:last-child { color: var(--ok); }
 .d { color: var(--mut); font-size: 13px; }
 """
+
+
+def _comparison_html(summary: Summary) -> str:
+    """Seção "Comparação com o PC antigo" (V2-19)."""
+    c = summary.comparison
+    if c is None:
+        return ""
+    e = html.escape
+    parts = [f"<h2>{e(t('summary.compare'))}</h2>"]
+    if c.empty:
+        parts.append(f"<p>{e(t('summary.compare_all_good'))}</p>")
+    groups = (
+        ("summary.compare_apps", c.missing_apps),
+        ("summary.compare_drivers", c.driverless),
+        ("summary.compare_features", c.missing_features),
+    )
+    for key, items in groups:
+        if items:
+            li = "".join(f"<li>{e(x)}</li>" for x in items)
+            parts.append(f"<p><strong>{e(t(key))}</strong></p><ul>{li}</ul>")
+    if not c.same_hardware:
+        parts.append(f"<p class='mut'>{e(t('summary.compare_other_hardware'))}</p>")
+    return "\n".join(parts)
 
 
 def _devices_html(summary: Summary) -> str:
@@ -199,7 +226,7 @@ def render_html(summary: Summary, *, log_path: str) -> str:
     )
     fail_block = f"<h2>{e(t('summary.failures'))}</h2><table>{failures}</table>" if failures else ""
     warn_block = f"<h2>{e(t('summary.warnings'))}</h2><ul>{warnings}</ul>" if warnings else ""
-    device_block = _devices_html(summary)
+    device_block = _devices_html(summary) + _comparison_html(summary)
     generated = e(t("summary.generated_at", when=format_datetime(summary.generated_at)))
     lang = current_language()
     return (

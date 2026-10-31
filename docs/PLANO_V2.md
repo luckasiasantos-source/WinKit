@@ -2029,7 +2029,7 @@ As três funções e o resolver de volumes estão prontos, com o teste de prote�
   - **Pastas grandes fora do lugar comum** (ex.: `C:\Projetos`), sugeridas como backup ou como aviso "isto está no C: e será apagado";
   - **Outras coisas que dá para levar**: Wi-Fi, fontes, aparência, variáveis, quando detectadas e ainda não marcadas.
 - Cada cartão tem "Adicionar" e "Ignorar" (o ignorado não volta, guardado em `recipe.meta.dismissed_suggestions`). Nada é adicionado sozinho.
-- **CLI:** `winkit sugestoes [--json]`.
+- **CLI:** `winkit sugestoes listar [--json]`, `winkit sugestoes adicionar <id>...`, `winkit sugestoes ignorar <id>...` (o id é estável, ex.: `app:Mozilla.Firefox`, `save:hades`).
 
 **Fontes de sinal (todas locais, nada sai do PC):**
 
@@ -2055,7 +2055,7 @@ As três funções e o resolver de volumes estão prontos, com o teste de prote�
 
 **Hipóteses.** H34: a estrutura binária do UserAssist (72 bytes, contador em `+4`, FILETIME em `+60`) continua igual no Windows 11 atual.
 
-**Arquivos:** `core/userassist.py`, `core/suggest.py`, `data/game_saves.yaml`, `platform/usage.py`, `collector/suggest.py`, `studio/ui/pages/bring.py`, `cli/commands/suggest.py`, os testes.
+**Arquivos:** `core/userassist.py`, `core/suggest.py`, `data/game_saves.yaml`, `platform/usage.py`, `collector/suggest.py`, `studio/ui/pages/bring.py`, `cli/main.py`, os testes. (Pendências em DT-026.)
 
 ### 12.5 M17 — Pronto quando
 

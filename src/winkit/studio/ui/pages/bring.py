@@ -8,10 +8,18 @@ from typing import Any
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QFileDialog, QInputDialog, QLabel, QLineEdit, QMessageBox
+from PySide6.QtWidgets import (
+    QFileDialog,
+    QHBoxLayout,
+    QInputDialog,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QWidget,
+)
 
 from winkit.core.recipe.models import AppItem
-from winkit.i18n import t, tn
+from winkit.i18n import render, t, tn
 from winkit.i18n.format import format_size
 from winkit.studio.ui.base import Page
 from winkit.studio.ui.pages.common import choice_row, empty, toggle
@@ -690,3 +698,87 @@ class GamesPage(Page):
             QMessageBox.information(self, t("app.name"), "\n".join(lines))
 
         self.tasks.run(t("studio.games.reading"), self.ctl.collect_games, done)
+
+
+#: Ordem das seções da página de sugestões (V2-20).
+SUGGESTION_KINDS = ("app", "config", "save", "folder", "other")
+SUGGESTION_ICON = {
+    "app": "app",
+    "config": "backup",
+    "save": "game_library",
+    "folder": "backup",
+    "other": "compare",
+}
+
+
+class SuggestionsPage(Page):
+    """V2-20: o WinKit olha este PC e sugere o que levar, sempre explicando o porquê."""
+
+    title_key = "studio.suggest.title"
+    subtitle_key = "studio.suggest.subtitle"
+
+    def __init__(self, ctl: Any, tasks: Any) -> None:
+        self._items: list[Any] | None = None
+        super().__init__(ctl, tasks)
+
+    def refresh(self) -> None:
+        self.clear_content()
+        if self.needs_recipe():
+            return
+        self.content.addLayout(
+            self.toolbar(button(t("studio.suggest.analyze"), "Primary", self._analyze))
+        )
+        if self._items is None:
+            self.content.addWidget(
+                section("", empty(t("studio.suggest.hint")), footer=t("studio.suggest.privacy"))
+            )
+            return
+        if not self._items:
+            self.content.addWidget(section("", empty(t("studio.suggest.none"))))
+            return
+        for kind in SUGGESTION_KINDS:
+            items = [s for s in self._items if s.kind == kind]
+            if not items:
+                continue
+            card = Card()
+            for s in items:
+                card.add_row(
+                    Row(
+                        s.title,
+                        render(s.reason),
+                        accessory=self._actions(s),
+                        icon=kind_icon(SUGGESTION_ICON[kind]),
+                    )
+                )
+            self.content.addWidget(section(t(f"studio.suggest.kind_{kind}"), card))
+
+    def _actions(self, s: Any) -> QWidget:
+        acc = QWidget()
+        lay = QHBoxLayout(acc)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.setSpacing(6)
+        lay.addWidget(button(t("studio.suggest.ignore"), None, partial(self._dismiss, s)))
+        lay.addWidget(button(t("studio.add"), "Primary", partial(self._accept, s)))
+        return acc
+
+    def _drop(self, s: Any) -> None:
+        if self._items is not None:
+            self._items = [x for x in self._items if x.id != s.id]
+        self.refresh()
+
+    def _accept(self, s: Any) -> None:
+        if not self.ctl.accept_suggestion(s):
+            QMessageBox.warning(self, t("app.name"), t("studio.suggest.add_failed"))
+            return
+        self._drop(s)
+
+    def _dismiss(self, s: Any) -> None:
+        self.ctl.dismiss_suggestion(s.id)
+        self._drop(s)
+
+    def _analyze(self) -> None:
+        def done(items: list[Any]) -> None:
+            self._items = items
+            self.refresh()
+
+        self.tasks.run(t("studio.suggest.analyzing"), self.ctl.suggestions, done)

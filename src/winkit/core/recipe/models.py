@@ -67,6 +67,8 @@ class Meta(_Model):
     source_system_volume: Annotated[str, Field(pattern=r"^[0-9A-F]{8}$")] | None = None
     #: V2-21: última vez que os instaladores do pendrive foram conferidos.
     last_update_check: datetime | None = None
+    #: V2-20: sugestões que o usuário ignorou (não voltam).
+    dismissed_suggestions: list[str] = Field(default_factory=list)
 
 
 class Execution(_Model):
@@ -456,6 +458,8 @@ class Recipe(_Model):
     start_layout: StartLayout = Field(default_factory=StartLayout)
     user_folders: UserFolders = Field(default_factory=UserFolders)
     game_libraries: list[GameLibrary] = Field(default_factory=list)
+    #: V2-19: no fim da instalação, comparar com o inventário do PC antigo.
+    compare_after_install: bool = True
 
     # ---- consultas de conveniência (sem efeito colateral)
     def app(self, app_id: str) -> AppItem | None:

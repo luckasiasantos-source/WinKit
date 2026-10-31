@@ -13,6 +13,7 @@ Opções globais: --pendrive E:  ou  --raiz PASTA (usa uma pasta como se fosse o
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import os
 import shutil
@@ -34,7 +35,7 @@ from winkit.builder.build import (
     save_profile_recipe,
 )
 from winkit.builder.validate import validate_pendrive
-from winkit.collector import app_updates
+from winkit.collector import app_updates, snapshot
 from winkit.collector import apps as app_collector
 from winkit.collector import associations as assoc_collector
 from winkit.collector import backups as backup_collector
@@ -47,6 +48,7 @@ from winkit.collector import games as games_collector
 from winkit.collector import netdrives as netdrive_collector
 from winkit.collector import personal as personal_collector
 from winkit.collector import start_layout as start_collector
+from winkit.collector import suggest as suggest_collector
 from winkit.collector import user_folders as folders_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import dns as dns_rules
@@ -203,6 +205,19 @@ def cmd_construir(args: argparse.Namespace, services: Services, out: Out) -> int
         agent_source=Path(args.agente) if args.agente else default_agent_source(),
         iso_cache=None if args.raiz else _cache_path(),
     )
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    if recipe.compare_after_install and not args.somente_xml:  # V2-19: inventário "antes"
+        try:
+            snap = snapshot.take_snapshot(
+                services.inventory,
+                services.devices,
+                services.features,
+                default_catalogs(),
+                build=WindowsEnvironment().windows_build(),
+            )
+            snapshot.write_before(tgt.root, recipe, snap)
+        except WinKitError as exc:
+            out(t("cli.snapshot_failed", detail=str(exc)))
     report = build(tgt, services.disks, default_catalogs(), options, now=_now())
     for iso in report.isos:
         out(
@@ -1442,6 +1457,84 @@ def _add_game_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
         jm.set_defaults(func=cmd_jogos_marcar, command_value=value)
 
 
+# ------------------------------------------------------------------ sugestões (V2-20)
+def _suggestions(args: argparse.Namespace, services: Services) -> tuple[Any, Any, list[Any]]:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    folders = {**services.folders.machine(), **services.folders.current_user()}
+    items = suggest_collector.analyze(
+        recipe,
+        default_catalogs(),
+        inventory=services.inventory,
+        registry=services.registry,
+        folders=folders,
+        volume_root=services.volume_root,
+        now=_now(),
+    )
+    return tgt, recipe, items
+
+
+def cmd_sugestoes_listar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    _, _, items = _suggestions(args, services)
+    if args.json:
+        out(
+            json.dumps(
+                [
+                    {
+                        "id": s.id,
+                        "kind": s.kind,
+                        "title": s.title,
+                        "reason": render(s.reason),
+                        "score": round(s.score, 1),
+                    }
+                    for s in items
+                ],
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return 0
+    if not items:
+        out(t("studio.suggest.none"))
+    for s in items:
+        out(f"  {s.id:45} {s.title}")
+        out(f"      {render(s.reason)}")
+    return 0
+
+
+def cmd_sugestoes_aplicar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt, recipe, items = _suggestions(args, services)
+    by_id = {s.id: s for s in items}
+    missing = [i for i in args.ids if i not in by_id]
+    folders = {**services.folders.machine(), **services.folders.current_user()}
+    failed = []
+    for sid in args.ids:
+        if sid not in by_id:
+            continue
+        if args.command_value == "dismiss":
+            suggest_collector.dismiss(recipe, sid)
+        elif not suggest_collector.accept(recipe, default_catalogs(), by_id[sid], folders):
+            failed.append(sid)
+    _save(tgt, recipe)
+    if failed:
+        out(t("cli.suggest_failed", ids=", ".join(failed)))
+    if missing:
+        out(t("cli.not_found", ids=", ".join(missing)))
+    return 1 if missing or failed else 0
+
+
+def _add_suggest_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    sg = sub.add_parser("sugestoes", aliases=["suggestions"], help=t("cli.h.suggest"))
+    sg_sub = sg.add_subparsers(dest="action", required=True)
+    sl = sg_sub.add_parser("listar", aliases=["list"], parents=[common])
+    sl.add_argument("--json", action="store_true", help=t("cli.h.json"))
+    sl.set_defaults(func=cmd_sugestoes_listar)
+    for name, alias, value in (("adicionar", "add", "add"), ("ignorar", "dismiss", "dismiss")):
+        sa = sg_sub.add_parser(name, aliases=[alias], parents=[common])
+        sa.add_argument("ids", nargs="+", help=t("cli.h.suggest_ids"))
+        sa.set_defaults(func=cmd_sugestoes_aplicar, command_value=value)
+
+
 # ------------------------------------------------------------------ contas extras (V2-11)
 def cmd_contas_listar(args: argparse.Namespace, services: Services, out: Out) -> int:
     tgt = _target(args, services)
@@ -1913,6 +2006,7 @@ def _add_system_and_network_parsers(sub: Any, common: argparse.ArgumentParser) -
     _add_browser_parsers(sub, common)
     _add_folder_parsers(sub, common)
     _add_game_parsers(sub, common)
+    _add_suggest_parsers(sub, common)
     _add_account_parsers(sub, common)
 
 

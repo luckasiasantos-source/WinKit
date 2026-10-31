@@ -60,8 +60,9 @@ _G2 = {
     "maintenance": 55,  # R27: a tarefa do winget é do usuário
     "rename_computer": 60,
     "windows_update": 70,
-    "driver_report": 75,
-    "default_apps_verify": 77,  # R28: depois do Windows Update, que já resolve muitos drivers
+    "driver_report": 75,  # R28: depois do Windows Update, que já resolve muitos drivers
+    "default_apps_verify": 77,
+    "compare": 78,  # R29: no fim, depois de instalar e procurar drivers
     "restore_point": 80,
     "finalize": 99,
 }
@@ -131,7 +132,7 @@ def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> 
     post_install = {b for a in recipe.selected_apps() for b in a.restore_backups_after_install}
     _plan_backups(recipe, ask, post_install, drafts)
     _plan_apps(recipe, ask, post_install, drafts)
-    _plan_tail(recipe, ask, drafts)
+    _plan_tail(recipe, ask, drafts, ctx)
     _plan_live_and_restore(recipe, ctx, drafts)
     if ctx.only_kinds is not None:
         kept = [d for d in drafts if d.kind in ctx.only_kinds or d.kind in _ALWAYS]
@@ -705,7 +706,7 @@ def _topo_order(ids: list[str], deps: dict[str, list[str]], apps: dict[str, AppI
     return order
 
 
-def _plan_tail(recipe: Recipe, ask: Ask, out: list[_Draft]) -> None:
+def _plan_tail(recipe: Recipe, ask: Ask, out: list[_Draft], ctx: PlanContext) -> None:
     if ask(recipe.windows.computer_name_decide_at_runtime):
         out.append(
             _Draft(
@@ -729,6 +730,18 @@ def _plan_tail(recipe: Recipe, ask: Ask, out: list[_Draft]) -> None:
                 needs_network=True,
                 user_choice=ask(True),
                 sort=(_G2["windows_update"], 0, "all"),
+            )
+        )
+    if recipe.compare_after_install and ctx.mode == "install":  # R29
+        out.append(
+            _Draft(
+                "compare",
+                "after",
+                2,
+                t("plan.compare"),
+                "machine",
+                needs_pendrive=True,
+                sort=(_G2["compare"], 0, "after"),
             )
         )
     if recipe.updates.fix_missing_drivers:  # R28

@@ -35,6 +35,7 @@ StepKind = Literal[
     "windows_update",
     "driver_report",
     "default_apps_verify",
+    "compare",
     "restore_point",
     "finalize",
 ]

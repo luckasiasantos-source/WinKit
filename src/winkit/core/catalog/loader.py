@@ -34,6 +34,7 @@ FILES: dict[str, str] = {
     "browsers": "browsers.yaml",
     "extensions": "extensions.yaml",
     "search_providers": "search_providers.yaml",
+    "game_saves": "game_saves.yaml",
 }
 
 
@@ -84,6 +85,7 @@ def _check_unique(c: Catalogs) -> None:
         "browsers.yaml": [b.id for b in c.browsers],
         "extensions.yaml": [e.id for e in c.extensions],
         "search_providers.yaml": [s.id for s in c.search_providers],
+        "game_saves.yaml": [g.id for g in c.game_saves],
     }
     for name, ids in groups.items():
         dupes = sorted({i for i in ids if ids.count(i) > 1})

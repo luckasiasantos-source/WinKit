@@ -1,0 +1,15 @@
+# Saves de jogos conhecidos (V2-20, M17): subconjunto curado à mão. Os moldes usam as mesmas
+# variáveis dos backups ({DOCUMENTS}, {SAVEDGAMES}, {APPDATA}, {LOCALAPPDATA}, {LOCALLOW}).
+- {id: minecraft, name: Minecraft, template: '{APPDATA}\.minecraft\saves'}
+- {id: stardew_valley, name: Stardew Valley, template: '{APPDATA}\StardewValley\Saves'}
+- {id: terraria, name: Terraria, template: '{DOCUMENTS}\My Games\Terraria'}
+- {id: hades, name: Hades, template: '{DOCUMENTS}\Saved Games\Hades'}
+- {id: hollow_knight, name: Hollow Knight, template: '{LOCALLOW}\Team Cherry\Hollow Knight'}
+- {id: elden_ring, name: Elden Ring, template: '{APPDATA}\EldenRing'}
+- {id: witcher3, name: The Witcher 3, template: '{DOCUMENTS}\The Witcher 3\gamesaves'}
+- {id: skyrim_se, name: Skyrim Special Edition, template: '{DOCUMENTS}\My Games\Skyrim Special Edition\Saves'}
+- {id: gta5, name: GTA V, template: '{DOCUMENTS}\Rockstar Games\GTA V\Profiles'}
+- {id: factorio, name: Factorio, template: '{APPDATA}\Factorio\saves'}
+- {id: rimworld, name: RimWorld, template: '{LOCALLOW}\Ludeon Studios\RimWorld by Ludeon Studios\Saves'}
+- {id: cyberpunk2077, name: Cyberpunk 2077, template: '{SAVEDGAMES}\CD Projekt Red\Cyberpunk 2077'}
+- {id: baldurs_gate3, name: "Baldur's Gate 3", template: '{LOCALAPPDATA}\Larian Studios\Baldur''s Gate 3\PlayerProfiles'}
