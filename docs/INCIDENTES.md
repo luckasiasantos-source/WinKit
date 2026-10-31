@@ -117,6 +117,15 @@
 - Correção: DT-013 e DT-014 voltaram para "aberta".
 - Prevenção: editar documento vivo trocando o bloco inteiro da entrada (título + estado), nunca uma linha genérica que se repete; conferir o `git diff` dos documentos antes do commit.
 
+### IN-012 — Primeira release falhou ao conferir que a versão ainda não existia
+- Data: 2026-10-31
+- Marco: Fechamento (release `v0.1.0`)
+- O que aconteceu: o workflow `Release` falhou no passo "Conferir a versão", logo depois do `uv sync`, sem mensagem de erro.
+- Causa raiz: o passo usa `gh release view` esperando o código 1 ("não existe"). No `pwsh`, o GitHub Actions encerra o passo com o último `$LASTEXITCODE`, então o caso esperado virou falha. Não dava para testar o workflow localmente (sem PowerShell aqui).
+- Impacto: nenhum; a release não foi criada.
+- Correção: zerar `$LASTEXITCODE` depois da verificação.
+- Prevenção: em passos `pwsh` do Actions, todo comando nativo cujo código diferente de zero é esperado termina com `$global:LASTEXITCODE = 0`.
+
 ## Lições da fase de desenho
 
 Problemas encontrados na conversa anterior (PDF de referência) e corrigidos **antes** de virar código. Ficam registrados porque são erros fáceis de repetir.

@@ -28,6 +28,16 @@
 
 ---
 
+## 2026-10-31 — Fechamento — Correção: workflow de release
+**Tipo:** correção
+**Resumo:** a primeira release falhou porque o código 1 esperado do `gh release view` encerrava o passo (IN-012).
+
+### Alterado
+- `.github/workflows/release.yml` — zera `$LASTEXITCODE` depois de conferir que a release não existe
+
+### Documentos vivos atualizados
+- INCIDENTES — IN-012
+
 ## 2026-10-31 — Fechamento — Licença Apache-2.0, aviso de uso por conta e risco e releases
 **Tipo:** documentação + implementação + infraestrutura
 **Resumo:** o projeto passa a ser código aberto sob a Apache-2.0, com aviso em destaque de que é um pré-alpha pessoal (quem usa é testador), 100% vibe-codado e de que toda a responsabilidade é de quem usa. Versões prontas para baixar passam a ser publicadas na página de Releases a cada tag `vX.Y.Z`.

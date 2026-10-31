@@ -36,6 +36,8 @@ jobs:
           if ($env:GITHUB_REF_TYPE -eq 'tag' -and $tag -ne $env:GITHUB_REF_NAME) { throw "Tag $env:GITHUB_REF_NAME não bate com a versão $version" }
           gh release view $tag 2>$null | Out-Null
           if ($LASTEXITCODE -eq 0) { throw "A release $tag já existe; suba __version__ antes" }
+          # "não encontrada" (código 1) é o esperado; o Actions sairia com esse código (IN-012)
+          $global:LASTEXITCODE = 0
           "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "TAG=$tag" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
