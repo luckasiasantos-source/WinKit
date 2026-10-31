@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
-from PySide6.QtCore import QObject, Qt, QTimer, QUrl, Signal
+from PySide6.QtCore import QCoreApplication, QObject, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import QAction, QDesktopServices
 from PySide6.QtWidgets import (
     QApplication,
@@ -63,6 +63,8 @@ KIND_COUNT_KEYS = {
 class _Request:
     event: threading.Event = field(default_factory=threading.Event)
     value: Any = None
+    #: Resposta usada se a interface fechar antes de responder (IN-019).
+    default: Any = None
 
 
 # ------------------------------------------------------------------ páginas
@@ -390,6 +392,7 @@ class _Gui(QObject):
         self.auto_quit_ms = auto_quit_ms
         self.window = AgentWindow()
         self.finished_seen = False
+        self.work_done = False
         self.tray: QSystemTrayIcon | None = None
         if QSystemTrayIcon.isSystemTrayAvailable() and (
             execution.show_tray_icon or execution.notify_on_finish or self.window_mode
@@ -404,7 +407,7 @@ class _Gui(QObject):
         self.sig_finished.connect(self._on_finished)
         self.sig_work_done.connect(self._on_work_done)
         self.window.progress_page.minimize_requested.connect(self.window.hide)
-        self.window.done_page.close_requested.connect(self._quit)
+        self.window.done_page.close_requested.connect(self._close_requested)
 
     def _make_tray(self) -> None:
         self.tray = QSystemTrayIcon(app_icon(32))
@@ -466,9 +469,18 @@ class _Gui(QObject):
         self.window.stack.setCurrentWidget(self.window.done_page)
 
     def _on_work_done(self) -> None:
+        self.work_done = True
         if self.window_mode and self.window.isVisible() and self.finished_seen:
             return  # o usuário fecha a janela
         QTimer.singleShot(self.auto_quit_ms if self.tray is not None else 0, self._quit)
+
+    def _close_requested(self) -> None:
+        """Fechar o resumo antes do fim (ex.: falta perguntar sobre reiniciar) só esconde a
+        janela; o laço continua até o trabalho acabar (IN-019)."""
+        if self.work_done:
+            self._quit()
+        else:
+            self.window.hide()
 
     def _quit(self) -> None:
         if self.tray is not None:
@@ -486,6 +498,8 @@ class QtAgentUi:
         self.execution = execution
         self.auto_quit_ms = auto_quit_ms
         self._gui: _Gui | None = None
+        #: Pedidos da thread de trabalho ainda sem resposta (liberados ao fechar, IN-019).
+        self._pending: list[_Request] = []
 
     @property
     def gui(self) -> _Gui:
@@ -511,17 +525,38 @@ class QtAgentUi:
         thread = threading.Thread(target=runner, name="winkit-fase2", daemon=True)
         thread.start()
         app.exec()
+        if thread.is_alive():  # o laço acabou com o trabalho esperando uma resposta (IN-019)
+            QCoreApplication.removePostedEvents(self.gui)
+            self.gui.blockSignals(True)
+            self._release_pending()
         thread.join(timeout=10)
         if "error" in result:
             raise result["error"]
         return int(result.get("code", 0))
 
+    def _release_pending(self) -> None:
+        for req in list(self._pending):
+            if not req.event.is_set():
+                req.value = req.default
+                req.event.set()
+
+    def _ask(self, req: _Request, emit: Callable[[], None]) -> Any:
+        self._pending.append(req)
+        try:
+            if self.gui.signalsBlocked():
+                return req.default
+            emit()
+            req.event.wait()
+            return req.value
+        finally:
+            self._pending.remove(req)
+
     # ---- protocolo AgentUi (chamado pela thread de trabalho)
     def choose(self, pending: list[PlannedStep], done_before_login: dict[str, int]) -> Choice:
-        req = _Request()
-        self.gui.sig_choose.emit(pending, done_before_login, req)
-        req.event.wait()
-        value: Choice = req.value
+        req = _Request(default=Choice(action="postpone"))
+        value: Choice = self._ask(
+            req, lambda: self.gui.sig_choose.emit(pending, done_before_login, req)
+        )
         return value
 
     def progress(self, done: int, total: int, current: str) -> None:
@@ -546,10 +581,8 @@ class QtAgentUi:
         self.gui.sig_notify.emit(title, message)
 
     def ask_reboot(self) -> bool:
-        req = _Request()
-        self.gui.sig_reboot.emit(req)
-        req.event.wait()
-        return bool(req.value)
+        req = _Request(default=False)  # sem resposta: não reinicia sozinho
+        return bool(self._ask(req, lambda: self.gui.sig_reboot.emit(req)))
 
     def finished(self, summary: Summary, html: Path) -> None:
         self.gui.sig_finished.emit(summary, html)

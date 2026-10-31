@@ -166,7 +166,7 @@
 - Data: 2026-10-31
 - Marco: M13/M14 (execução da release de `b652529`)
 - O que aconteceu: o passo "Testes" da release ficou mais de 50 minutos parado no Windows, sem saída, enquanto a CI do **mesmo commit** tinha passado em 6 minutos. A execução foi cancelada; a 0.4.0 não foi publicada separadamente (as mudanças dela saem na 0.5.0).
-- Causa raiz: não identificada. O job não tinha limite de tempo e o `pytest -q` não diz qual teste está rodando, então o log não mostra onde parou. Suspeita: um teste que toca o Windows real (mutex, PowerShell) travando de forma intermitente no runner.
+- Causa raiz: achada depois com o `faulthandler` — ver IN-019. O job não tinha limite de tempo e o `pytest -q` não diz qual teste está rodando, então o log não mostra onde parou. Suspeita: um teste que toca o Windows real (mutex, PowerShell) travando de forma intermitente no runner.
 - Impacto: uma release a menos; nenhum efeito no aplicativo.
 - Correção: `faulthandler_timeout = 300` no pytest (um teste preso imprime a pilha de todas as threads) e `timeout-minutes: 25` nos passos de teste da CI e da release; a release também fixa `QT_QPA_PLATFORM=offscreen`, como a CI.
 - Prevenção: se acontecer de novo, o log mostra o teste e a linha; o achado vira um incidente com causa raiz.
@@ -180,6 +180,15 @@
 - Impacto: a release 0.6.0 esperou a correção. De quebra, o id da fonte saía com a extensão duplicada (`inter-regular.ttf.ttf`); corrigido.
 - Correção: a função que lê a data é injetável (`created`); os testes passam uma baseada na modificação, que eles controlam; o teste da CLI não depende mais da data.
 - Prevenção: testes que dependem de metadados de arquivo usam funções injetadas, nunca o comportamento do sistema de arquivos de uma plataforma.
+
+### IN-019 — Pergunta de reiniciar "órfã" travava as releases (causa do IN-017)
+- Data: 2026-10-31
+- Marco: M12–M16 (releases 0.4.0, 0.6.0 e 0.7.0 presas no passo de testes)
+- O que aconteceu: o `faulthandler` (IN-017) mostrou duas pilhas: a thread de trabalho de um teste da janela do Agente esperando a resposta de "reiniciar agora?", e o teste seguinte (páginas do Studio) parado dentro de `_on_reboot`, num diálogo modal que ninguém fechava.
+- Causa raiz: **defeito do produto**, não só do teste. Fechar a janela do resumo encerrava o laço do Qt mesmo com a Fase 2 ainda trabalhando; a pergunta de reiniciar ficava na fila e a thread, presa para sempre. Na instalação real, o usuário que fechasse o resumo cedo nunca veria a pergunta. Nos testes, o pedido órfão era entregue mais tarde, dentro de outro teste. Na CI (com cobertura, mais lenta) a ordem dos eventos quase nunca expunha isso; na release, quase sempre.
+- Impacto: 0.4.0 e 0.6.0 nunca foram publicadas; a 0.7.0 foi cancelada e refeita.
+- Correção: fechar o resumo antes do fim só esconde a janela (o laço continua até o trabalho acabar e a pergunta aparece); se o laço terminar com um pedido pendente, ele recebe a resposta padrão segura (não reiniciar; adiar a escolha) e os sinais na fila são descartados. O teste antigo, que só passava por causa do vazamento, agora fixa a política de reinício.
+- Prevenção: `test_closing_summary_before_reboot_question_still_asks` e `test_pending_request_is_released_when_the_loop_ends`.
 
 ## Lições da fase de desenho
 

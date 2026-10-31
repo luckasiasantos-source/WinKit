@@ -146,6 +146,7 @@ def test_phase2_runs_inside_qt(qapp, tmp_path: Path) -> None:
     r = world.recipe()
     r.execution.mode = "countdown"
     r.execution.countdown_seconds = 5
+    r.execution.reboot_policy = "never"  # a pergunta de reiniciar tem teste próprio (IN-019)
     r.tweaks = [tweak("visual.dark_theme", decide_at_runtime=True)]
     world.save_recipe(r)
     run_phase1(world.runtime())
@@ -172,3 +173,48 @@ def test_phase2_runs_inside_qt(qapp, tmp_path: Path) -> None:
     state = StateStore(world.paths.state).load()
     assert state is not None and state.step("finalize:summary").status == "done"
     assert state.step("tweak:visual.dark_theme").status == "done"  # contagem começou sozinha
+
+
+def test_closing_summary_before_reboot_question_still_asks(
+    qapp, monkeypatch, tmp_path: Path
+) -> None:
+    """IN-019: fechar o resumo antes da pergunta de reiniciar só esconde a janela."""
+    import time
+
+    from PySide6.QtCore import QTimer
+    from PySide6.QtWidgets import QDialog
+
+    monkeypatch.setattr(RebootDialog, "exec", lambda self: QDialog.DialogCode.Accepted)
+    ui = QtAgentUi(Execution(mode="countdown"), auto_quit_ms=10)
+    html = tmp_path / "resumo.html"
+    html.write_text("<html></html>", encoding="utf-8")
+
+    def work() -> int:
+        ui.finished(summary(), html)
+        time.sleep(0.4)  # o usuário fecha a janela antes da pergunta
+        return 1 if ui.ask_reboot() else 0
+
+    def close_when_finished() -> None:
+        if ui._gui is None or not ui.gui.finished_seen:
+            QTimer.singleShot(50, close_when_finished)
+            return
+        ui.gui.window.done_page.close_requested.emit()
+
+    QTimer.singleShot(50, close_when_finished)
+    assert ui.host(work) == 1  # a pergunta apareceu e foi respondida
+
+
+def test_pending_request_is_released_when_the_loop_ends(qapp, monkeypatch) -> None:
+    """IN-019: a thread de trabalho nunca fica presa e nenhum pedido vaza para depois."""
+    import threading
+
+    from PySide6.QtCore import QTimer
+
+    from winkit.agent.ui import qt
+
+    asked = threading.Event()
+    monkeypatch.setattr(qt._Gui, "_on_reboot", lambda self, req: asked.set())  # nunca responde
+    ui = QtAgentUi(Execution(mode="silent"), auto_quit_ms=10)
+    QTimer.singleShot(300, qapp.quit)
+    assert ui.host(lambda: 1 if ui.ask_reboot() else 0) == 0  # resposta padrão: não reiniciar
+    assert not [t for t in threading.enumerate() if t.name == "winkit-fase2" and t.is_alive()]

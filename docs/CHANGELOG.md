@@ -28,6 +28,18 @@
 
 ---
 
+## 2026-10-31 — Correção: pergunta de reiniciar perdida ao fechar o resumo (IN-019)
+**Tipo:** correção
+**Resumo:** fechar a janela do resumo antes do fim da Fase 2 deixava a pergunta "reiniciar agora?" sem resposta e a thread do Agente presa. Era também o que travava as releases (IN-017). A 0.7.0 passa a incluir as receitas compartilháveis e a atualização dos instaladores.
+
+### Alterado
+- `src/winkit/agent/ui/qt.py` — fechar o resumo cedo só esconde a janela; pedidos pendentes recebem a resposta padrão segura ao sair; sinais na fila descartados
+- `tests/ui/test_agent_ui.py` — dois testes de regressão; o teste da Fase 2 fixa a política de reinício
+- `packaging/NOTAS_DA_VERSAO.md` — a 0.7.0 inclui modelos/receitas compartilháveis e "Procurar atualizações"
+
+### Documentos vivos atualizados
+- INCIDENTES — IN-019 (e IN-017 com a causa)
+
 ## 2026-10-31 — M17 — Receitas compartilháveis (V2-23) e atualização dos instaladores (V2-21)
 **Tipo:** implementação
 **Resumo:** dá para exportar a receita sem dados pessoais, importar a de outra pessoa com prévia e começar de cinco modelos prontos. Os instaladores do pendrive podem ser atualizados sem refazer a receita, sem nunca perder a versão antiga numa falha. A release 0.7.0 foi disparada antes deste commit.
