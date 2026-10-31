@@ -36,6 +36,15 @@
 - Correção: na primeira construção o backup é sempre gravado; sem arquivo original, ele recebe `{}`.
 - Prevenção: teste de idempotência mantido (rodar `construir` duas vezes deve produzir exatamente os mesmos arquivos).
 
+### IN-003 — Commit do M2 enviado com erros de lint nos testes
+- Data: 2026-10-31
+- Marco: M2
+- O que aconteceu: o commit `f0d7789` foi enviado com 4 avisos do ruff em arquivos de teste.
+- Causa raiz: a verificação foi encadeada como `ruff ... | tail -1 && git commit`; o `| tail` devolve o código de saída do `tail` (0), então o erro do ruff não impediu o commit.
+- Impacto: CI do commit `f0d7789` falha no passo de lint; nenhum efeito funcional.
+- Correção: avisos corrigidos no commit seguinte.
+- Prevenção: `scripts/check.sh` com `set -euo pipefail`, obrigatório antes de cada commit (`CLAUDE.md`).
+
 ## Lições da fase de desenho
 
 Problemas encontrados na conversa anterior (PDF de referência) e corrigidos **antes** de virar código. Ficam registrados porque são erros fáceis de repetir.

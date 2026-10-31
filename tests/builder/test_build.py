@@ -62,7 +62,7 @@ def test_iso_file_was_never_modified(target: targets.Target, inspector: FakeDisk
 def test_only_allowed_paths_are_written(
     target: targets.Target, inspector: FakeDiskInspector
 ) -> None:  # R-19
-    before = {p for p in target.root.rglob("*")}
+    before = set(target.root.rglob("*"))
     run(target, inspector)
     created = {p.relative_to(target.root).as_posix() for p in target.root.rglob("*")} - {
         p.relative_to(target.root).as_posix() for p in before

@@ -20,7 +20,7 @@ SCRIPT = resources.files("winkit.builder").joinpath("assets/bootstrap.ps1")
 
 def _ps(*args: str, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
     exe = (
-        Path(os.environ["SystemRoot"])
+        Path(os.environ["SYSTEMROOT"])
         / "System32"
         / "WindowsPowerShell"
         / "v1.0"

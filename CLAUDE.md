@@ -13,6 +13,14 @@ Leia, nesta ordem:
 5. `docs/INCIDENTES.md` — o que já deu errado, para não repetir.
 6. `docs/CHANGELOG.md` — o mapa de todas as mudanças e implementações já feitas.
 
+## Antes de cada commit (obrigatório)
+
+```bash
+scripts/check.sh
+```
+
+Roda lint, formatação, tipos, contratos de arquitetura e testes, e **para no primeiro erro**. Não commite se ele não terminar com `== OK` (IN-003).
+
 ## Documentos vivos (obrigatório)
 
 Toda mudança de código vem **no mesmo commit** com a atualização dos documentos afetados:

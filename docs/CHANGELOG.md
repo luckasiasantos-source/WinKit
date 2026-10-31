@@ -28,6 +28,23 @@
 
 ---
 
+## 2026-10-31 — M2 — Correção de lint e script de verificação
+**Tipo:** correção + infraestrutura
+**Resumo:** corrige os avisos de lint enviados no commit do M2 e cria o `scripts/check.sh`, obrigatório antes de cada commit.
+
+### Adicionado
+- `scripts/check.sh` — ruff, formatação, mypy, import-linter e pytest, parando no primeiro erro
+
+### Alterado
+- `pyproject.toml` — `S314` (parse de XML) liberado nos testes, que leem XML gerado pelo próprio WinKit
+- `tests/builder/test_bootstrap_ps1.py`, `tests/builder/test_build.py` — avisos do ruff
+- `CLAUDE.md` — seção "Antes de cada commit"
+
+### Documentos vivos atualizados
+- INCIDENTES — IN-003
+
+---
+
 ## 2026-10-31 — M2 — Construtor mínimo (XML, Ventoy, bootstrap, CLI)
 **Tipo:** implementação + testes + documentação
 **Resumo:** o WinKit já prepara um pendrive Ventoy de verdade: lê as ISOs sem alterá-las, gera um `autounattend.xml` por idioma/arquitetura, mescla o `ventoy.json` com segurança, grava o `bootstrap.ps1` e valida o resultado. Primeira versão utilizável da linha de comando.
