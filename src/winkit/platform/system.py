@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 #: Sem janela de console para processos filhos no Windows (modo silencioso).
@@ -33,7 +34,13 @@ def powershell_exe() -> Path:
 
 
 def program_data() -> Path:
-    return Path(os.environ.get("PROGRAMDATA") or r"C:\ProgramData")
+    """``C:\\ProgramData``. Fora do Windows (só testes), nunca um caminho relativo (IN-008)."""
+    value = os.environ.get("PROGRAMDATA")
+    if value:
+        return Path(value)
+    if is_windows():
+        return Path(r"C:\ProgramData")
+    return Path(tempfile.gettempdir()) / "winkit-programdata"
 
 
 def winkit_program_data() -> Path:

@@ -86,3 +86,20 @@ def test_phase1_does_not_import_qt() -> None:
     if "No module named 'winkit.agent.main'" in proc.stderr:
         pytest.skip("agente ainda não implementado")
     assert proc.returncode == 0, proc.stderr
+
+
+def test_no_windows_drive_paths_tracked() -> None:
+    """Arquivo com "C:\\" no nome quebra o checkout no Windows (IN-008)."""
+    proc = subprocess.run(
+        ["git", "ls-files"], cwd=ROOT, capture_output=True, text=True, check=False
+    )
+    if proc.returncode != 0:
+        pytest.skip("git indisponível")
+    bad = [f for f in proc.stdout.splitlines() if ":" in f or "\\" in f]
+    assert not bad, bad
+
+
+def test_program_data_is_never_relative() -> None:
+    from winkit.platform.system import program_data
+
+    assert program_data().is_absolute()

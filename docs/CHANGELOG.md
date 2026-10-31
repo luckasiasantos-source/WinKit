@@ -28,6 +28,23 @@
 
 ---
 
+## 2026-10-31 — M5 — Correção: arquivo inválido no repositório quebrava o CI Windows
+**Tipo:** correção
+**Resumo:** remove um log criado por engano com o nome literal `C:\ProgramData\...` (inválido no Windows), impede que isso se repita e adiciona testes de proteção.
+
+### Removido
+- `C:\ProgramData/WinKit/Logs/agente-erro-fatal.log` — lixo de teste (IN-008)
+
+### Alterado
+- `src/winkit/platform/system.py` — `program_data()` nunca devolve caminho relativo
+- `.gitignore` — bloqueia nomes com letra de unidade
+- `tests/test_architecture.py` — `test_no_windows_drive_paths_tracked`, `test_program_data_is_never_relative`
+
+### Documentos vivos atualizados
+- INCIDENTES — IN-008
+
+---
+
 ## 2026-10-31 — M5 — Aplicativos
 **Tipo:** implementação + correção + testes + documentação
 **Resumo:** lê os apps instalados no PC atual, sugere a fonte de cada um (winget, instalador offline), baixa instaladores para o pendrive e instala no Windows novo (offline na Fase 1, winget na Fase 2), com pós-instalação silenciosa.

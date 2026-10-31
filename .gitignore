@@ -12,3 +12,5 @@ build/
 dist/
 *.egg-info/
 .import_linter_cache/
+# Nunca versionar caminhos com letra de unidade criados por engano fora do Windows (IN-008)
+[A-Za-z]:*

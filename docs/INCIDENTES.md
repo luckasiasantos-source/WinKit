@@ -81,6 +81,15 @@
 - Correção: ligação refeita no executor.
 - Prevenção: toda edição por script verifica que o trecho original existe antes de substituir (falha alta); testes de comportamento cobrem cada ligação entre executor e etapa.
 
+### IN-008 — Arquivo com nome inválido no Windows entrou no repositório e quebrou o CI
+- Data: 2026-10-31
+- Marco: M3 (descoberto ao verificar o CI do M4)
+- O que aconteceu: os CIs do M3, da correção do M3 e do M4 falharam no Windows já no checkout: `error: invalid path 'C:\ProgramData/WinKit/Logs/agente-erro-fatal.log'`. Nenhum teste rodou no Windows nesses commits (o pacote também não foi gerado).
+- Causa raiz: (1) `program_data()` caía em `r"C:\ProgramData"` quando a variável de ambiente não existia; no Linux isso é um caminho **relativo** com esse nome literal, criado dentro do repositório por um teste do M3 (antes de ele usar `PROGRAMDATA`); (2) o commit usava `git add -A`, que incluiu o arquivo; (3) eu não conferi o resultado do CI antes de seguir para o M4.
+- Impacto: três commits sem validação no Windows.
+- Correção: arquivo removido; `program_data()` nunca devolve caminho relativo fora do Windows; `.gitignore` bloqueia nomes com letra de unidade.
+- Prevenção: testes `test_no_windows_drive_paths_tracked` e `test_program_data_is_never_relative`; conferir o CI do commit anterior antes de fechar o marco seguinte.
+
 ## Lições da fase de desenho
 
 Problemas encontrados na conversa anterior (PDF de referência) e corrigidos **antes** de virar código. Ficam registrados porque são erros fáceis de repetir.
