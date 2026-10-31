@@ -32,7 +32,10 @@
 - ✅ Análise da conversa anterior (PDF) e correções técnicas
 - ✅ Decisões D-001 a D-019 (`ARQUITETURA.md`)
 - ✅ `PLANO.md`, `ARQUITETURA.md`, `STATUS.md`, `DIVIDAS_TECNICAS.md`, `INCIDENTES.md`, `CHANGELOG.md`, `CLAUDE.md`
-- ✅ `README.md` e `CONTRIBUTING.md` para código aberto · ⬜ licença a definir (DT-015)
+- ✅ `README.md` e `CONTRIBUTING.md` para código aberto
+- ✅ Licença Apache-2.0 (`LICENSE`, `NOTICE`) e aviso "100% vibe-codado, uso por conta e risco" no README, no pacote e no Studio (D-028)
+- ⬜ Tornar o repositório público (feito pelo dono nas configurações do GitHub)
+- ✅ Release por tag (`release.yml`, D-029); versões saem como pré-lançamento até a validação em VM
 
 ### M0 — Fundação ✅
 - ✅ `pyproject.toml` (hatchling, src layout) + uv + `uv.lock`

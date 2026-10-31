@@ -107,6 +107,15 @@ def choice_row(
 
 
 # ------------------------------------------------------------------ 1. Pendrive
+#: Aviso de isenção mostrado na primeira página do Studio (ver NOTICE).
+DISCLAIMER = (
+    "Este aplicativo foi 100% vibe-codado (escrito por IA, sem auditoria humana completa) e "
+    "ainda não foi validado numa instalação real. Pode ter erros e falhas de segurança. "
+    "O uso é por sua conta e risco: toda a responsabilidade é de quem usa. "
+    "Teste primeiro numa máquina virtual e faça backup antes."
+)
+
+
 class PendrivePage(Page):
     title_text = "Pendrive"
     subtitle_text = "Onde o WinKit guarda tudo. A ISO do Windows nunca é modificada."
@@ -178,6 +187,11 @@ class PendrivePage(Page):
                 )
             )
             self.content.addWidget(section("Este pendrive", info))
+        warning = Card()
+        warning.add_row(
+            Row("Use por sua conta e risco", DISCLAIMER, icon=symbol_icon("!", "#FF3B30"))
+        )
+        self.content.addWidget(section("Aviso", warning))
 
     def _use(self, v: Any) -> None:
         self.ctl.open_ventoy(v)

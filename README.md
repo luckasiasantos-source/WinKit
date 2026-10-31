@@ -9,10 +9,17 @@
 [![CI](https://github.com/luckasiasantos-source/Iso-Modify-Win11/actions/workflows/ci.yml/badge.svg)](https://github.com/luckasiasantos-source/Iso-Modify-Win11/actions/workflows/ci.yml)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
 ![Windows 11](https://img.shields.io/badge/Windows-11-0078D4)
+[![Licença: Apache 2.0](https://img.shields.io/badge/licen%C3%A7a-Apache%202.0-green)](LICENSE)
+![100% vibe-codado](https://img.shields.io/badge/100%25-vibe--codado-red)
 
 </div>
 
-> **English summary.** WinKit prepares a [Ventoy](https://www.ventoy.net) USB drive so that any *unmodified* Windows 11 ISO installs unattended with a local account, your drivers, your apps (offline installers or winget), your app settings restored to the right folders, bloatware removed and privacy/UI tweaks applied. Everything lives in a `WinKit\` folder on the USB drive; the ISO is never touched. The UI is in Brazilian Portuguese.
+> [!CAUTION]
+> **Aplicativo 100% vibe-codado. Use por sua conta e risco.**
+> Todo o código do WinKit foi escrito por inteligência artificial, sem auditoria humana completa, e ainda **não foi validado numa instalação real do Windows**. Ele mexe em partes sensíveis do sistema (instalação, registro, drivers, contas, arquivos) e pode ter erros ou falhas de segurança que causem perda de dados ou um Windows inutilizável.
+> **Toda a responsabilidade é de quem baixa e usa.** O autor não se responsabiliza por nenhum dano, perda ou falha de segurança. Teste primeiro numa máquina virtual, faça backup antes e [relate os erros que encontrar](https://github.com/luckasiasantos-source/Iso-Modify-Win11/issues). Veja a seção [Aviso](#aviso).
+
+> **English summary.** WinKit prepares a [Ventoy](https://www.ventoy.net) USB drive so that any *unmodified* Windows 11 ISO installs unattended with a local account, your drivers, your apps (offline installers or winget), your app settings restored to the right folders, bloatware removed and privacy/UI tweaks applied. Everything lives in a `WinKit\` folder on the USB drive; the ISO is never touched. The UI is in Brazilian Portuguese. **This project is 100% vibe-coded (AI-written, not fully human-reviewed, not yet validated on real hardware). Use entirely at your own risk; the author accepts no liability.**
 
 ---
 
@@ -72,7 +79,7 @@ O WinKit faz isso de uma vez. Você monta uma **receita** no seu PC atual, e o p
 
 ### Usar
 
-1. Baixe o pacote **WinKit-windows** na [última execução do CI](https://github.com/luckasiasantos-source/Iso-Modify-Win11/actions/workflows/ci.yml) (aba *Artifacts*) e extraia.
+1. Baixe o `WinKit-…-windows-x64.zip` na página de [**Releases**](https://github.com/luckasiasantos-source/Iso-Modify-Win11/releases) e extraia. Não precisa compilar nada. Os executáveis não são assinados: se o SmartScreen avisar, clique em "Mais informações" → "Executar assim mesmo".
 2. Abra `winkit-studio\winkit-studio.exe`.
 3. Siga a barra lateral: **Pendrive → Windows e conta → Aplicativos → Configurações dos apps → Drivers → Apps pré-instalados → Ajustes → Energia → Primeiro login → Revisar e construir**.
 4. Dê boot pelo Ventoy, escolha a ISO e o modelo `winkit-…`.
@@ -146,8 +153,19 @@ Antes de abrir um PR, leia o [`CONTRIBUTING.md`](CONTRIBUTING.md) e rode `script
 
 ## Aviso
 
-O WinKit automatiza a instalação de um Windows que você tem direito de usar. Ele não ativa o Windows nem contorna licenciamento: as chaves usadas só selecionam a edição no instalador. Use por sua conta e risco; faça backup dos seus dados antes de reinstalar.
+**O WinKit é 100% vibe-codado.** Todo o código, os testes e a documentação foram escritos por inteligência artificial, sem auditoria humana completa. Os testes automáticos passam, mas eles não substituem uma instalação real, que ainda não foi feita.
+
+Ao baixar, compilar ou usar o WinKit, você concorda que:
+
+- **o uso é inteiramente por sua conta e risco**;
+- **toda a responsabilidade é sua**, de quem baixou e usou: por perda de dados, por um Windows que não inicia, por falhas de segurança, por qualquer dano ao seu computador ou a terceiros;
+- o autor e os contribuidores **não se responsabilizam por nada**, conforme as seções 7 (sem garantias) e 8 (limitação de responsabilidade) da [licença](LICENSE) e o arquivo [`NOTICE`](NOTICE);
+- cabe a você testar (de preferência numa máquina virtual), conferir se funciona e fazer backup antes.
+
+Encontrou um erro ou uma falha de segurança? [Abra uma issue](https://github.com/luckasiasantos-source/Iso-Modify-Win11/issues).
+
+O WinKit automatiza a instalação de um Windows que você tem direito de usar. Ele não ativa o Windows nem contorna licenciamento: as chaves usadas só selecionam a edição no instalador.
 
 ## Licença
 
-A definir.
+[Apache License 2.0](LICENSE). Leia também o [`NOTICE`](NOTICE).

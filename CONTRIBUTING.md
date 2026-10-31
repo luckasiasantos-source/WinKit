@@ -44,6 +44,16 @@ Toda mudança de código vem **no mesmo commit** com os documentos afetados:
 - **Ajustes e bloatware** (`src/winkit/data/tweaks.yaml`, `bloatware.yaml`): valores confirmados numa versão específica do Windows, com a fonte.
 - **Testes em VM ou PC real**: siga um roteiro de [`docs/validacao/`](docs/validacao/) e abra uma issue com a versão do Windows (`winver`), o roteiro, o resultado de cada passo e os logs de `WinKit\Logs\` do pendrive.
 
+## Publicar uma versão
+
+1. Suba `__version__` em `src/winkit/__init__.py` e registre no `docs/CHANGELOG.md`.
+2. Commit, e então `git tag vX.Y.Z` e `git push origin vX.Y.Z`.
+3. O workflow `Release` testa, compila, roda o teste de fumaça e publica o `.zip` na página de Releases.
+
+## Licença das contribuições
+
+O WinKit é distribuído sob a [Apache License 2.0](LICENSE). Ao enviar uma contribuição, você concorda que ela seja distribuída sob a mesma licença (seção 5). Lembre que o projeto é 100% vibe-codado e sem garantias: veja o [`NOTICE`](NOTICE).
+
 ## Abrindo o PR
 
 1. Um assunto por PR, com testes do comportamento novo (o resultado exato, não "feito ou pulado").

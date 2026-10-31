@@ -28,6 +28,33 @@
 
 ---
 
+## 2026-10-31 — Fechamento — Licença Apache-2.0, aviso de uso por conta e risco e releases
+**Tipo:** documentação + implementação + infraestrutura
+**Resumo:** o projeto passa a ser código aberto sob a Apache-2.0, com aviso em destaque de que é 100% vibe-codado e de que toda a responsabilidade é de quem usa. Versões prontas para baixar passam a ser publicadas na página de Releases a cada tag `vX.Y.Z`.
+
+### Adicionado
+- `LICENSE` — texto da Apache License 2.0
+- `NOTICE` — direitos autorais e aviso de isenção (pt-BR e inglês)
+- `tests/ui/test_studio_ui.py` — teste de que a primeira página do Studio mostra o aviso
+- `.github/workflows/release.yml` — tag `vX.Y.Z` → testes, pacote, fumaça, `.zip` + SHA-256, release (pré-lançamento)
+- `packaging/smoke.ps1` — teste de fumaça dos executáveis, extraído do CI para ser usado também na release
+- `packaging/NOTAS_DA_VERSAO.md` — texto da página da release, com o aviso
+
+### Alterado
+- `README.md` — aviso em destaque no topo, selos de licença e "vibe-codado", seções Aviso e Licença
+- `src/winkit/studio/ui/pages.py` — `DISCLAIMER` e seção "Aviso" na página Pendrive
+- `packaging/LEIA-ME.txt`, `packaging/build.ps1` — aviso no LEIA-ME; o pacote leva `LICENSE` e `NOTICE`
+- `pyproject.toml` — `license = "Apache-2.0"`
+- `CONTRIBUTING.md` — licença das contribuições e como publicar uma versão
+- `.github/workflows/ci.yml` — o teste de fumaça chama `packaging/smoke.ps1`
+- `README.md` — o download passa a ser pela página de Releases
+
+### Documentos vivos atualizados
+- ARQUITETURA — D-028, D-029; PLANO — §18 (arquivos novos) e §22 (risco do código escrito por IA); DIVIDAS — DT-015 quitada; STATUS — licença e aviso, repositório público pendente
+
+### Decisões
+- D-028, D-029 (novas)
+
 ## 2026-10-31 — Fechamento — README e guia de contribuição
 **Tipo:** documentação
 **Resumo:** README completo para código aberto (o que é, recursos, capturas, como funciona, uso pelo Studio e pela CLI, compilação, arquitetura) e guia de contribuição. Revisão final dos documentos vivos.

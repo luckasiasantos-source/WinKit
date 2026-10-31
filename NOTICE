@@ -1,0 +1,31 @@
+WinKit
+Copyright 2026 Samuel Lucas e contribuidores
+
+Licenciado sob a Apache License, Version 2.0 (arquivo LICENSE).
+
+AVISO IMPORTANTE
+----------------
+Este aplicativo foi 100% "vibe-codado": todo o código foi escrito por uma
+inteligência artificial e não passou por uma auditoria humana completa. Ele
+ainda não foi validado numa instalação real do Windows.
+
+O WinKit mexe em partes sensíveis do sistema (instalação do Windows, registro,
+drivers, contas, cópia de arquivos). Pode conter erros, falhas de segurança ou
+comportamentos inesperados que causem perda de dados ou um Windows inutilizável.
+
+O uso é inteiramente por sua conta e risco. Ao baixar, compilar ou usar o
+WinKit, você assume toda a responsabilidade pelo que acontecer com o seu
+computador, os seus dados e qualquer sistema onde ele for usado. O autor e os
+contribuidores não se responsabilizam por nenhum dano, perda ou falha de
+segurança, conforme as seções 7 e 8 da licença.
+
+Teste primeiro numa máquina virtual, faça backup antes e relate os erros que
+encontrar em: https://github.com/luckasiasantos-source/Iso-Modify-Win11/issues
+
+DISCLAIMER (English)
+--------------------
+This application was 100% "vibe-coded": all code was written by an AI and has
+not been fully reviewed by a human or validated on a real Windows install. It
+may contain bugs or security flaws that cause data loss or an unusable system.
+Use it entirely at your own risk; the author and contributors accept no
+liability whatsoever (see sections 7 and 8 of the License).

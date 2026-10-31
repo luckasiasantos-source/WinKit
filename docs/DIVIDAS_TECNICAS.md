@@ -143,7 +143,7 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Prioridade: média
 
 ### DT-015 — Licença do projeto não definida
-- Estado: aberta
+- Estado: ✅ quitada em 2026-10-31 (Apache-2.0, D-028)
 - Origem: fechamento da v1 (README para código aberto)
 - Onde: `pyproject.toml` (`license = "Proprietary"`), `README.md` (seção Licença), falta o arquivo `LICENSE`
 - Descrição: o projeto deve virar código aberto, mas a licença ainda não foi escolhida pelo dono.

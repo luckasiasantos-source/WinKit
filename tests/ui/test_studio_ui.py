@@ -7,8 +7,9 @@ import pytest
 from tests.ui.conftest import wait
 from winkit.platform.fakes.services import fake_services
 from winkit.studio.controller import StudioController
+from winkit.studio.ui.pages import DISCLAIMER
 from winkit.studio.ui.window import SECTIONS, StudioWindow
-from winkit.ui.widgets import ToggleSwitch
+from winkit.ui.widgets import Row, ToggleSwitch
 
 pytestmark = pytest.mark.ui
 
@@ -78,3 +79,10 @@ def test_tweaks_and_bloat_pages_change_recipe(window: StudioWindow, qapp) -> Non
     ex = window.go_to("Primeiro login")
     ex._set("mode", "silent")  # type: ignore[attr-defined]
     assert r.execution.mode == "silent"
+
+
+def test_first_page_shows_disclaimer(window: StudioWindow, qapp) -> None:
+    page = window.go_to("Pendrive")
+    wait(qapp, 10)
+    assert DISCLAIMER in [r.subtitle_label.text() for r in page.findChildren(Row)]
+    assert "vibe-codado" in DISCLAIMER

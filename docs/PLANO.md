@@ -1267,10 +1267,14 @@ Ferramentas do Windows usadas (todas nativas, nada a instalar): `robocopy`, `pnp
 ```
 Iso-Modify-Win11/
 ├── CLAUDE.md                       regras obrigatórias para quem mexe no código
-├── README.md
+├── README.md                       apresentação, aviso de uso por conta e risco, licença
+├── CONTRIBUTING.md                 como contribuir
+├── LICENSE                         Apache License 2.0
+├── NOTICE                          direitos autorais e aviso de isenção (100% vibe-codado)
 ├── pyproject.toml
 ├── uv.lock
-├── .github/workflows/ci.yml
+├── .github/workflows/ci.yml        lint, tipos, testes (Linux + Windows), empacotamento
+├── .github/workflows/release.yml   tag vX.Y.Z → compila, testa e publica a release com o .zip
 ├── docs/
 │   ├── PLANO.md                    este arquivo
 │   ├── ARQUITETURA.md              arquitetura, regras de código, registro de decisões
@@ -1321,8 +1325,11 @@ Iso-Modify-Win11/
 │   ├── studio/ui/                  PySide6 (M10)
 │   └── cli/                        winkit coletar | construir | sincronizar | validar | pendrive
 ├── packaging/
-│   ├── studio.spec
-│   └── agent.spec
+│   ├── winkit-studio.spec, winkit.spec, winkit-agent.spec
+│   ├── build.ps1                   gera dist\WinKit-<versão>
+│   ├── smoke.ps1                   teste de fumaça com os executáveis prontos
+│   ├── LEIA-ME.txt                 vai dentro do pacote
+│   └── NOTAS_DA_VERSAO.md          texto da página da release
 └── tests/
     ├── core/                       roda no Linux
     ├── builder/                    roda no Linux com fakes
@@ -1482,6 +1489,7 @@ Cada marco tem um **critério de pronto**. Um marco só é marcado como concluí
 | Antivírus marca o Agente | Média | Médio | onedir, sem ofuscação; assinatura de código depois |
 | Ventoy mudar o formato do `auto_install` | Baixa | Alto | Testes de snapshot + validação a cada versão do Ventoy |
 | Desenvolvimento sem acesso direto a Windows real | Certa | Médio | CI `windows-latest` + roteiros de validação em hardware por marco |
+| Código 100% escrito por IA, sem auditoria humana completa, publicado como código aberto | Certa | Alto | Aviso de isenção no README, no `NOTICE`, no `LEIA-ME.txt` do pacote e na primeira página do Studio; licença Apache-2.0 (sem garantias, seções 7 e 8); pedido de relato de erros por issues (D-028) |
 
 ---
 
