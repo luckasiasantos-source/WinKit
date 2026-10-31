@@ -1,0 +1,24 @@
+WinKit — cómo usarlo
+====================
+
+Esta carpeta tiene tres programas:
+  winkit-studio\winkit-studio.exe   la aplicación (ventana). Empieza aquí.
+  winkit\winkit.exe                 lo mismo en la línea de comandos (ejecútalo como administrador)
+  winkit-agent\                     el Agente; Studio copia esta carpeta a la memoria USB por su cuenta
+
+Con Studio (recomendado):
+  1. Conecta la memoria USB con Ventoy y abre winkit-studio.exe (pide permisos de administrador).
+  2. Sigue la barra lateral de arriba hacia abajo. El botón Preferencias cambia idioma y tema.
+  3. En "Revisar y preparar", haz clic en "Preparar memoria USB".
+
+Después arranca desde Ventoy, elige la ISO de Windows y la plantilla "winkit-...".
+La ISO nunca se modifica. Todo lo que usa WinKit queda en la carpeta WinKit\ de la memoria USB.
+
+Línea de comandos: winkit\winkit.exe --idioma es --help
+
+AVISO: versión pre-alfa de un proyecto personal, hecho para uso propio como una prueba, no
+como un producto lanzado; quien lo use es, en la práctica, un probador. Aplicación 100%
+hecha con "vibe coding" (escrita por IA, sin auditoría humana completa y aún no validada en
+una instalación real). Puede tener errores y fallas de seguridad. Úsala bajo tu propio
+riesgo: toda la responsabilidad es de quien la usa. Pruébala primero en una máquina virtual
+y haz una copia de seguridad antes. Detalles en los archivos LICENSE (Apache 2.0) y NOTICE.

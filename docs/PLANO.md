@@ -3,7 +3,7 @@
 > Documento vivo. Descreve **o que** o produto é, **como** foi desenhado e **em que ordem** será construído.
 > Regras de código ficam em `ARQUITETURA.md`; o andamento real fica em `STATUS.md`.
 >
-> Nome do produto: **WinKit** (provisório). Repositório: `Iso-Modify-Win11`.
+> Nome do produto: **WinKit**. Repositório: `WinKit` (antes `Iso-Modify-Win11`; o GitHub redireciona os links antigos).
 > Data da primeira versão deste plano: 2026-10-31.
 
 ## Sumário
@@ -1267,7 +1267,7 @@ Ferramentas do Windows usadas (todas nativas, nada a instalar): `robocopy`, `pnp
 ## 18. Estrutura do repositório
 
 ```
-Iso-Modify-Win11/
+WinKit/
 ├── CLAUDE.md                       regras obrigatórias para quem mexe no código
 ├── README.md                       apresentação, aviso de uso por conta e risco, licença
 ├── CONTRIBUTING.md                 como contribuir

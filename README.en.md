@@ -1,0 +1,163 @@
+<div align="center">
+
+<img src="docs/imagens/en/studio-pendrive.png" alt="WinKit Studio" width="820">
+
+# WinKit
+
+[Português](README.md) · **English** · [Español](README.es.md)
+
+**Install Windows already the way you like it — drivers, apps, settings and privacy — from a Ventoy USB drive, without modifying the ISO.**
+
+[![CI](https://github.com/luckasiasantos-source/WinKit/actions/workflows/ci.yml/badge.svg)](https://github.com/luckasiasantos-source/WinKit/actions/workflows/ci.yml)
+![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
+![Windows 11](https://img.shields.io/badge/Windows-11-0078D4)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-green)](LICENSE)
+![100% vibe-coded](https://img.shields.io/badge/100%25-vibe--coded-red)
+![Pre-alpha](https://img.shields.io/badge/stage-pre--alpha-orange)
+
+</div>
+
+> [!CAUTION]
+> **Pre-alpha, 100% vibe-coded, personal project. Use at your own risk.**
+> WinKit was made for the author's own use, as an experiment, not as a released product. Anyone who uses it is, in practice, a tester.
+> All of WinKit's code was written by artificial intelligence, without a full human review, and it **has not yet been validated on a real Windows install**. It touches sensitive parts of the system (setup, registry, drivers, accounts, files) and may have bugs or security flaws that cause data loss or an unusable Windows.
+> **All responsibility lies with whoever downloads and uses it.** The author accepts no liability for any damage, loss or security flaw. Test it in a virtual machine first, back up beforehand and [report the bugs you find](https://github.com/luckasiasantos-source/WinKit/issues). See the [Warning](#warning) section.
+
+---
+
+## Why it exists
+
+Reinstalling Windows is quick; making it your own is what takes time: hunting for drivers, downloading and installing app after app, setting each one up again, removing the extras, turning off telemetry, fixing the taskbar…
+
+WinKit does it all at once. You build a **recipe** on your current PC, and the Ventoy USB drive installs Windows already set up, from the same original ISO you downloaded from Microsoft.
+
+## What it does
+
+| | |
+|---|---|
+| 🔌 **Ventoy, ISO untouched** | Uses Ventoy's `auto_install` plugin. Swap the ISO for a newer one and everything keeps working. One USB drive serves several ISOs. |
+| 👤 **Local account** | No Microsoft account, no network and privacy screens. Language, keyboard, time zone and edition come from your current PC and can be changed in the recipe. |
+| 💽 **Disk never encrypted by itself** | By default Windows does not turn on automatic device encryption — not even after you sign in with a Microsoft account. |
+| 🧩 **Your PC's drivers** | Exports third-party drivers (network first) and installs them with `pnputil` before the first sign-in. |
+| 📦 **Your apps** | Reads the apps installed on your PC; you pick the ones you want. Installs offline (installers downloaded with `winget download`) or through winget online. Closes apps opened by the installer and turns off auto-start. |
+| 🗂️ **App settings** | Choose settings folders and files (Discord, VS Code, OBS, game saves…). They are copied to the USB drive with a shadow copy (even with the app open) and restored to the right place **before** you open the app on the new Windows. |
+| 🧹 **Preinstalled apps** | Removes what you choose (list with risk levels) and keeps them from coming back with updates. |
+| 🎛️ **Tweaks** | Privacy (minimum telemetry, advertising ID, Bing in Start, Copilot, Recall…), appearance (dark theme, left taskbar, classic context menu…), power. Applied to the default profile: your account is born already set up. |
+| 🔄 **Windows Update** | Optional, at the end, through the official API. |
+| 🪟 **First sign-in your way** | Silent (just a notice at the end), with a countdown or interactive — and items marked "ask" to decide at that moment. |
+| 🧾 **Summary and logs** | HTML summary on the desktop and logs written back to the USB drive. |
+| 🌎 **Three languages** | Portuguese, English and Spanish in Studio, on the command line and at first sign-in. Automatic from the Windows language or chosen in Preferences. |
+
+## How it works
+
+```
+ Your current PC              Ventoy USB drive                        New Windows
+┌──────────────┐  writes   ┌────────────────────────────┐   boot   ┌───────────────────────────┐
+│ WinKit Studio│ ────────► │ Original ISOs (untouched)  │ ───────► │ unattended setup           │
+│  recipe      │           │ ventoy/ventoy.json + XML   │          │ Phase 1 (before sign-in):  │
+│  apps        │           │ WinKit/                    │          │  drivers, bloatware,       │
+│  drivers     │           │   recipe, installers,      │          │  tweaks, apps, backups     │
+│  backups     │           │   drivers, backups, Agent  │          │ Phase 2 (after sign-in):   │
+└──────────────┘           └────────────────────────────┘          │  per-user apps, winget,    │
+                                                                    │  Windows Update, summary   │
+                                                                    └───────────────────────────┘
+```
+
+1. **Studio** (or the command line) reads your PC and writes the recipe and all the content to the `WinKit\` folder of the USB drive.
+2. Ventoy injects an `autounattend.xml` into the setup. You only choose the disk: WinKit **never** partitions or formats anything by itself.
+3. During setup, a small script finds the USB drive and prepares the **Agent**.
+4. The Agent does almost everything before the sign-in screen. What needs your user or the internet happens right after, in the background or with a window, as you choose.
+
+## Getting started
+
+### Requirements
+
+- Windows 10 or 11 on the PC where you prepare the USB drive (Studio asks for administrator rights).
+- A USB drive with [Ventoy](https://www.ventoy.net) installed and an original Windows 11 ISO.
+
+### Use
+
+1. Download `WinKit-…-windows-x64.zip` from the [**Releases**](https://github.com/luckasiasantos-source/WinKit/releases) page and extract it. Nothing to compile. The executables are not signed: if SmartScreen warns you, click "More info" → "Run anyway".
+2. Open `winkit-studio\winkit-studio.exe`.
+3. Follow the sidebar from top to bottom (groups **Prepare**, **What to bring**, **System** and **Finish**). The **Preferences** button changes language and theme.
+4. Boot from Ventoy, choose the ISO and the `winkit-…` template.
+
+### Command line
+
+Everything Studio does is also available on the CLI (run as administrator). Command names are in Portuguese and also accept English aliases; use `--idioma en-US` for English messages:
+
+```powershell
+winkit --idioma en-US drive list
+winkit recipe new --pendrive E: --usuario Sam --nome-pc MY-PC
+winkit collect apps --pendrive E:
+winkit apps select discord 7zip vscode --pendrive E:
+winkit apps download --pendrive E:
+winkit collect backups --pendrive E: --adicionar-recomendados
+winkit backup capture --pendrive E:
+winkit collect drivers --pendrive E:
+winkit plan --pendrive E:
+winkit build --pendrive E:
+winkit validate --pendrive E:
+```
+
+## Project status
+
+**Pre-alpha.** Version 1 is implemented and automatically tested (over 500 tests on Linux and Windows, with executables built and smoke-tested in CI). Version 2 is in progress, milestone by milestone ([`docs/PLANO_V2.md`](docs/PLANO_V2.md), in Portuguese). Validation in a virtual machine and on a real PC follows the scripts in [`docs/validacao/`](docs/validacao/).
+
+> ⚠️ Use it in a virtual machine first. Windows registry values and package names change between versions.
+
+## Building from source
+
+```powershell
+git clone https://github.com/luckasiasantos-source/WinKit
+cd WinKit
+uv sync                     # Python 3.12 and dependencies
+uv run pytest               # tests
+powershell -ExecutionPolicy Bypass -File packaging\build.ps1   # creates dist\WinKit-<version>
+```
+
+## Architecture
+
+Python 3.12 + PySide6, in layers whose rules are checked automatically:
+
+| Layer | Contents |
+|---|---|
+| `core/` | Pure logic (recipe, phase planner, path templates, XML, Ventoy, manifest), testable without Windows |
+| `platform/` | Everything that touches Windows (registry, PowerShell, robocopy, VSS, pnputil, winget, Appx), behind interfaces with fakes for tests |
+| `collector/`, `builder/`, `agent/` | Use cases: collect from the current PC, build the USB drive, set up the new Windows |
+| `ui/`, `studio/`, `agent/ui/` | macOS-style interface (light/dark theme) |
+| `i18n/`, `data/` | Texts in three languages; versioned catalogs (known apps, tweaks with source and undo, bloatware, editions) |
+
+The project documentation (`docs/`) is written in Portuguese.
+
+## Contributing
+
+Contributions are welcome, especially:
+
+- app catalog entries (`src/winkit/data/app_catalog.yaml`): settings folders and silent parameters;
+- tweaks and bloatware validated on new Windows versions;
+- corrections to the English and Spanish texts (`src/winkit/i18n/messages/`, `src/winkit/data/i18n_*.yaml`);
+- test reports from a VM or real PC.
+
+Before opening a PR, read [`CONTRIBUTING.md`](CONTRIBUTING.md) and run `scripts/check.sh`.
+
+## Warning
+
+**Pre-alpha version of a personal project.** WinKit was made for the author's own use, as an experiment, not as a released product. It is open to anyone who wants to use it, but whoever uses it is, in practice, a tester (beta tester), with all that this implies: features may be missing, things may change without notice and there is no guaranteed support.
+
+**WinKit is 100% vibe-coded.** All the code, tests and documentation were written by artificial intelligence, without a full human review. The automated tests pass, but they do not replace a real install, which has not been done yet.
+
+By downloading, building or using WinKit, you agree that:
+
+- **you use it entirely at your own risk**;
+- **all responsibility is yours**, whoever downloaded and used it: for data loss, for a Windows that does not boot, for security flaws, for any damage to your computer or to third parties;
+- the author and contributors **are not liable for anything**, under sections 7 (disclaimer of warranty) and 8 (limitation of liability) of the [license](LICENSE) and the [`NOTICE`](NOTICE) file;
+- it is up to you to test it (preferably in a virtual machine), check that it works and back up beforehand.
+
+Found a bug or a security flaw? [Open an issue](https://github.com/luckasiasantos-source/WinKit/issues).
+
+WinKit automates the installation of a Windows copy you are entitled to use. It does not activate Windows or bypass licensing: the keys it uses only select the edition in the installer.
+
+## License
+
+[Apache License 2.0](LICENSE). Also read the [`NOTICE`](NOTICE).

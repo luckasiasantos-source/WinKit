@@ -4,9 +4,11 @@
 
 # WinKit
 
+**Português** · [English](README.en.md) · [Español](README.es.md)
+
 **Instale o Windows já do seu jeito — drivers, apps, configurações e privacidade — a partir de um pendrive Ventoy, sem modificar a ISO.**
 
-[![CI](https://github.com/luckasiasantos-source/Iso-Modify-Win11/actions/workflows/ci.yml/badge.svg)](https://github.com/luckasiasantos-source/Iso-Modify-Win11/actions/workflows/ci.yml)
+[![CI](https://github.com/luckasiasantos-source/WinKit/actions/workflows/ci.yml/badge.svg)](https://github.com/luckasiasantos-source/WinKit/actions/workflows/ci.yml)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
 ![Windows 11](https://img.shields.io/badge/Windows-11-0078D4)
 [![Licença: Apache 2.0](https://img.shields.io/badge/licen%C3%A7a-Apache%202.0-green)](LICENSE)
@@ -19,9 +21,9 @@
 > **Pré-alpha, 100% vibe-codado, projeto pessoal. Use por sua conta e risco.**
 > O WinKit foi feito para uso próprio, como um teste, e não como um produto lançado. Quem usar será, na prática, um testador.
 > Todo o código do WinKit foi escrito por inteligência artificial, sem auditoria humana completa, e ainda **não foi validado numa instalação real do Windows**. Ele mexe em partes sensíveis do sistema (instalação, registro, drivers, contas, arquivos) e pode ter erros ou falhas de segurança que causem perda de dados ou um Windows inutilizável.
-> **Toda a responsabilidade é de quem baixa e usa.** O autor não se responsabiliza por nenhum dano, perda ou falha de segurança. Teste primeiro numa máquina virtual, faça backup antes e [relate os erros que encontrar](https://github.com/luckasiasantos-source/Iso-Modify-Win11/issues). Veja a seção [Aviso](#aviso).
+> **Toda a responsabilidade é de quem baixa e usa.** O autor não se responsabiliza por nenhum dano, perda ou falha de segurança. Teste primeiro numa máquina virtual, faça backup antes e [relate os erros que encontrar](https://github.com/luckasiasantos-source/WinKit/issues). Veja a seção [Aviso](#aviso).
 
-> **English summary.** WinKit prepares a [Ventoy](https://www.ventoy.net) USB drive so that any *unmodified* Windows 11 ISO installs unattended with a local account, your drivers, your apps (offline installers or winget), your app settings restored to the right folders, bloatware removed and privacy/UI tweaks applied. Everything lives in a `WinKit\` folder on the USB drive; the ISO is never touched. The UI is in Brazilian Portuguese. **Pre-alpha personal project, 100% vibe-coded (AI-written, not fully human-reviewed, not yet validated on real hardware). Use entirely at your own risk; the author accepts no liability.**
+> **English summary.** WinKit prepares a [Ventoy](https://www.ventoy.net) USB drive so that any *unmodified* Windows 11 ISO installs unattended with a local account, your drivers, your apps (offline installers or winget), your app settings restored to the right folders, bloatware removed and privacy/UI tweaks applied. Everything lives in a `WinKit\` folder on the USB drive; the ISO is never touched. The app speaks Portuguese, English and Spanish ([README in English](README.en.md)). **Pre-alpha personal project, 100% vibe-coded (AI-written, not fully human-reviewed, not yet validated on real hardware). Use entirely at your own risk; the author accepts no liability.**
 
 ---
 
@@ -36,7 +38,7 @@ O WinKit faz isso de uma vez. Você monta uma **receita** no seu PC atual, e o p
 | | |
 |---|---|
 | 🔌 **Ventoy, sem tocar na ISO** | Usa o plugin `auto_install` do Ventoy. Troque a ISO por uma versão nova e tudo continua funcionando. Um pendrive serve a várias ISOs. |
-| 👤 **Conta local** | Sem conta Microsoft, sem telas de rede e privacidade. Idioma, teclado ABNT2, fuso e edição definidos na receita. |
+| 👤 **Conta local** | Sem conta Microsoft, sem telas de rede e privacidade. Idioma, teclado, fuso e edição vêm do seu PC atual e podem ser mudados na receita. |
 | 💽 **Disco nunca criptografado sozinho** | Por padrão o Windows não liga a criptografia automática do dispositivo — nem depois de entrar com conta Microsoft. |
 | 🧩 **Drivers do seu PC** | Exporta os drivers de terceiros (rede primeiro) e instala com `pnputil` antes do primeiro login. |
 | 📦 **Seus aplicativos** | Lê os apps instalados no seu PC; você marca os que quer. Instala offline (instaladores baixados com `winget download`) ou pelo winget online. Fecha os apps abertos pelo instalador e desliga a inicialização automática. |
@@ -46,6 +48,7 @@ O WinKit faz isso de uma vez. Você monta uma **receita** no seu PC atual, e o p
 | 🔄 **Windows Update** | Opcional, no final, pela API oficial. |
 | 🪟 **Primeiro login do seu jeito** | Silencioso (só um aviso no fim), com contagem regressiva ou interativo — e itens marcados como "perguntar" para decidir na hora. |
 | 🧾 **Resumo e logs** | Resumo em HTML na área de trabalho e logs gravados de volta no pendrive. |
+| 🌎 **Três idiomas** | Português, inglês e espanhol, no Studio, na linha de comando e no primeiro login. Automático pelo idioma do Windows ou escolhido em Preferências. |
 
 <div align="center">
 <img src="docs/imagens/agente-inicio.png" alt="Janela do primeiro login" width="420">
@@ -81,9 +84,9 @@ O WinKit faz isso de uma vez. Você monta uma **receita** no seu PC atual, e o p
 
 ### Usar
 
-1. Baixe o `WinKit-…-windows-x64.zip` na página de [**Releases**](https://github.com/luckasiasantos-source/Iso-Modify-Win11/releases) e extraia. Não precisa compilar nada. Os executáveis não são assinados: se o SmartScreen avisar, clique em "Mais informações" → "Executar assim mesmo".
+1. Baixe o `WinKit-…-windows-x64.zip` na página de [**Releases**](https://github.com/luckasiasantos-source/WinKit/releases) e extraia. Não precisa compilar nada. Os executáveis não são assinados: se o SmartScreen avisar, clique em "Mais informações" → "Executar assim mesmo".
 2. Abra `winkit-studio\winkit-studio.exe`.
-3. Siga a barra lateral: **Pendrive → Windows e conta → Aplicativos → Configurações dos apps → Drivers → Apps pré-instalados → Ajustes → Energia → Primeiro login → Revisar e construir**.
+3. Siga a barra lateral, de cima para baixo (grupos **Preparar**, **O que levar**, **Sistema** e **Concluir**). O botão **Preferências** troca idioma e tema.
 4. Dê boot pelo Ventoy, escolha a ISO e o modelo `winkit-…`.
 
 <div align="center">
@@ -93,7 +96,7 @@ O WinKit faz isso de uma vez. Você monta uma **receita** no seu PC atual, e o p
 
 ### Linha de comando
 
-Tudo que o Studio faz também existe na CLI (rode como administrador):
+Tudo que o Studio faz também existe na CLI (rode como administrador). Use `--idioma en-US` ou `--idioma es` para outro idioma; os comandos também aceitam nomes em inglês (`winkit build`, `winkit recipe new`…):
 
 ```powershell
 winkit pendrive listar
@@ -111,15 +114,15 @@ winkit validar --pendrive E:
 
 ## Estado do projeto
 
-**Pré-alpha.** A versão 1 está implementada e testada automaticamente: 569 testes em Linux e Windows, com executáveis gerados e testados no CI. A validação em máquina virtual e em PC real segue os roteiros de [`docs/validacao/`](docs/validacao/). Veja [`docs/STATUS.md`](docs/STATUS.md).
+**Pré-alpha.** A versão 1 está implementada e testada automaticamente (mais de 500 testes em Linux e Windows, com executáveis gerados e testados no CI). A versão 2 está em andamento, marco a marco ([`docs/PLANO_V2.md`](docs/PLANO_V2.md)). A validação em máquina virtual e em PC real segue os roteiros de [`docs/validacao/`](docs/validacao/). Veja [`docs/STATUS.md`](docs/STATUS.md).
 
 > ⚠️ Use primeiro numa máquina virtual ([`docs/validacao/AMBIENTE_VM.md`](docs/validacao/AMBIENTE_VM.md)). Valores de registro e nomes de pacotes do Windows mudam entre versões.
 
 ## Compilar a partir do código
 
 ```powershell
-git clone https://github.com/luckasiasantos-source/Iso-Modify-Win11
-cd Iso-Modify-Win11
+git clone https://github.com/luckasiasantos-source/WinKit
+cd WinKit
 uv sync                     # Python 3.12 e dependências
 uv run pytest               # testes
 powershell -ExecutionPolicy Bypass -File packaging\build.ps1   # gera dist\WinKit-<versão>
@@ -139,7 +142,7 @@ O código é Python 3.12 + PySide6, em camadas com regras verificadas automatica
 
 Documentação completa:
 
-- [`docs/PLANO.md`](docs/PLANO.md): o produto e o desenho
+- [`docs/PLANO.md`](docs/PLANO.md) e [`docs/PLANO_V2.md`](docs/PLANO_V2.md): o produto e o desenho
 - [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md): camadas, regras do código e registro de decisões
 - [`docs/STATUS.md`](docs/STATUS.md), [`docs/DIVIDAS_TECNICAS.md`](docs/DIVIDAS_TECNICAS.md), [`docs/INCIDENTES.md`](docs/INCIDENTES.md), [`docs/CHANGELOG.md`](docs/CHANGELOG.md)
 
@@ -166,7 +169,7 @@ Ao baixar, compilar ou usar o WinKit, você concorda que:
 - o autor e os contribuidores **não se responsabilizam por nada**, conforme as seções 7 (sem garantias) e 8 (limitação de responsabilidade) da [licença](LICENSE) e o arquivo [`NOTICE`](NOTICE);
 - cabe a você testar (de preferência numa máquina virtual), conferir se funciona e fazer backup antes.
 
-Encontrou um erro ou uma falha de segurança? [Abra uma issue](https://github.com/luckasiasantos-source/Iso-Modify-Win11/issues).
+Encontrou um erro ou uma falha de segurança? [Abra uma issue](https://github.com/luckasiasantos-source/WinKit/issues).
 
 O WinKit automatiza a instalação de um Windows que você tem direito de usar. Ele não ativa o Windows nem contorna licenciamento: as chaves usadas só selecionam a edição no instalador.
 

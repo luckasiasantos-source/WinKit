@@ -25,7 +25,7 @@ contribuidores não se responsabilizam por nenhum dano, perda ou falha de
 segurança, conforme as seções 7 e 8 da licença.
 
 Teste primeiro numa máquina virtual, faça backup antes e relate os erros que
-encontrar em: https://github.com/luckasiasantos-source/Iso-Modify-Win11/issues
+encontrar em: https://github.com/luckasiasantos-source/WinKit/issues
 
 DISCLAIMER (English)
 --------------------
@@ -35,3 +35,14 @@ not been fully reviewed by a human or validated on a real Windows install. It
 may contain bugs or security flaws that cause data loss or an unusable system.
 Use it entirely at your own risk; the author and contributors accept no
 liability whatsoever (see sections 7 and 8 of the License).
+
+AVISO (Español)
+---------------
+Versión pre-alfa de un proyecto personal, hecho para uso propio como una
+prueba; quien lo use es, en la práctica, un probador. Esta aplicación está
+100% hecha con "vibe coding": todo el código lo escribió una IA, sin auditoría
+humana completa, y aún no se validó en una instalación real de Windows. Puede
+tener errores o fallas de seguridad que causen pérdida de datos o un Windows
+inutilizable. El uso es totalmente bajo tu propio riesgo; el autor y los
+colaboradores no se responsabilizan por nada (secciones 7 y 8 de la licencia).
+Pruébalo primero en una máquina virtual y haz una copia de seguridad antes.

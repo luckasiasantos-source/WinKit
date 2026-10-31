@@ -6,7 +6,7 @@
 > Legenda: ⬜ não iniciado · 🟨 em andamento · ✅ concluído · ⛔ bloqueado · ➖ fora do escopo atual
 
 **Última atualização:** 2026-10-31
-**Versão do código:** 0.1.0 (pré-alpha, projeto pessoal)
+**Versão do código:** 0.2.0 (pré-alpha, projeto pessoal)
 **Fase do projeto:** v1 implementada (M0–M10); falta a validação em VM/PC real pelos roteiros de `docs/validacao/`. v2 (M11–M18) aprovada e em implementação (`PLANO_V2.md`)
 
 ## Resumo
@@ -25,7 +25,7 @@
 | M8 | Windows Update, resumo e notificações | ✅ código | ⬜ roteiro pronto (`docs/validacao/M8.md`) |
 | M9 | Interface do Agente | ✅ código | ⬜ roteiro pronto (`docs/validacao/M9.md`) |
 | M10 | WinKit Studio (GUI) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M10.md`) |
-| M11 | Inglês e espanhol (V2-00) | 🟨 em andamento | — |
+| M11 | Inglês e espanhol (V2-00) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M11.md`) |
 | M12 | Aplicar neste PC + ponto de restauração (V2-03, V2-10) | ⬜ planejado | — |
 | M13 | Pendrive comum: Rufus/Microsoft (V2-01) | ⬜ planejado | — |
 | M14 | Rede e sistema (V2-02, 08, 09, 16, 17, 18, 22) | ⬜ planejado | — |
@@ -159,7 +159,7 @@
 
 (Itens detalhados de M4–M10 em `PLANO.md` §20; são desdobrados aqui quando o marco começar.)
 
-### M11 — Inglês e espanhol 🟨
+### M11 — Inglês e espanhol ✅ (código) · validação na VM pendente
 - ✅ Decisões D-030 a D-042 e regras R-51 a R-55 no `ARQUITETURA.md`
 - ✅ `winkit/i18n`: idiomas, `t`/`tn` com plural, `Msg`, formatação por idioma, tabelas pt-BR/en-US/es com paridade testada (R-51); contrato de pureza no import-linter
 - ✅ `Msg` no estado (schema 2, com migração da v1), nas etapas, no executor e no resumo (HTML com `lang` e datas por idioma)
@@ -170,7 +170,8 @@
 - ✅ Catálogos traduzidos (`data/i18n_*.yaml`, completude e órfãos testados), carregados por idioma
 - ✅ Detecção do idioma do Windows, troca no Studio, idioma do Agente pela receita
 - ✅ Receita nova com formatos, teclado e fuso do PC atual; descrição da conta no XML traduzida
-- ⬜ README, NOTICE, LEIA-ME e notas da release trilíngues; capturas; roteiro `M11.md`
+- ✅ README em três idiomas (`README.en.md`, `README.es.md`), `NOTICE`, LEIA-ME do pacote (`README.txt`, `LEAME.txt`) e notas da release trilíngues; links para o repositório `WinKit`
+- ✅ Capturas do Studio em pt/en/es (`docs/imagens/`, `docs/imagens/en/`, `docs/imagens/es/`); roteiro `docs/validacao/M11.md`; versão 0.2.0
 
 ## Hipóteses técnicas
 

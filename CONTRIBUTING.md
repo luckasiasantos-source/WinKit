@@ -5,8 +5,8 @@ Obrigado pelo interesse! Este guia resume o que você precisa saber antes de abr
 ## Preparar o ambiente
 
 ```bash
-git clone https://github.com/luckasiasantos-source/Iso-Modify-Win11
-cd Iso-Modify-Win11
+git clone https://github.com/luckasiasantos-source/WinKit
+cd WinKit
 uv sync
 scripts/check.sh
 ```

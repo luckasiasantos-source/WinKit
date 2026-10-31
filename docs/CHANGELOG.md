@@ -28,6 +28,25 @@
 
 ---
 
+## 2026-10-31 — M11 — Documentação trilíngue, capturas e versão 0.2.0
+**Tipo:** documentação + versão
+**Resumo:** fecha o M11. README em inglês e espanhol, `NOTICE` com a seção em espanhol, LEIA-ME do pacote nos três idiomas, notas da release trilíngues com as novidades, capturas novas do Studio e roteiro de validação. Links atualizados para o repositório renomeado (`WinKit`). Versão 0.2.0.
+
+### Adicionado
+- `README.en.md`, `README.es.md`
+- `packaging/README.txt`, `packaging/LEAME.txt` (copiados pelo `build.ps1`)
+- `docs/imagens/en/`, `docs/imagens/es/` e capturas novas em `docs/imagens/`
+- `docs/validacao/M11.md`
+
+### Alterado
+- `README.md` — seletor de idioma, três idiomas, barra lateral agrupada, apelidos da CLI, links do repositório `WinKit`
+- `NOTICE`, `CONTRIBUTING.md`, `packaging/LEIA-ME.txt`, `packaging/NOTAS_DA_VERSAO.md`, `packaging/build.ps1`
+- `src/winkit/__init__.py` — versão 0.2.0
+- `docs/PLANO.md` — nome do repositório
+
+### Documentos vivos atualizados
+- STATUS — M11 ✅ código, validação pendente
+
 ## 2026-10-31 — M11 — Catálogos traduzidos e padrões regionais do PC atual
 **Tipo:** implementação + dados
 **Resumo:** ajustes, apps pré-instalados, classes de driver e avisos de DPAPI ganham tradução em inglês e espanhol, carregada conforme o idioma (no Studio e no Agente). A receita nova passa a nascer com formatos, teclado e fuso do PC atual. A descrição da conta local no XML sai no idioma escolhido.

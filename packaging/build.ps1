@@ -15,6 +15,6 @@ New-Item -ItemType Directory -Path $out | Out-Null
 Move-Item dist\build\winkit $out
 Move-Item dist\build\winkit-agent $out
 Move-Item dist\build\winkit-studio $out
-Copy-Item packaging\LEIA-ME.txt $out
+Copy-Item packaging\LEIA-ME.txt, packaging\README.txt, packaging\LEAME.txt $out
 Copy-Item LICENSE, NOTICE $out
 Write-Host "Pacote pronto: $out"

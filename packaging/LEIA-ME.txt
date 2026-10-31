@@ -8,10 +8,8 @@ Esta pasta tem três programas:
 
 Pelo Studio (recomendado):
   1. Conecte o pendrive com o Ventoy e abra winkit-studio.exe (ele pede administrador).
-  2. Pendrive: escolha o pendrive. Windows e conta: crie a receita.
-  3. Aplicativos, Configurações dos apps, Drivers, Apps pré-instalados, Ajustes, Energia,
-     Primeiro login: marque o que quiser.
-  4. Revisar e construir: clique em "Construir pendrive".
+  2. Siga a barra lateral de cima para baixo. O botão Preferências troca idioma e tema.
+  3. Em "Revisar e construir", clique em "Construir pendrive".
 
 Depois é só dar boot pelo Ventoy, escolher a ISO do Windows e o modelo "winkit-...".
 A ISO nunca é modificada. Tudo do WinKit fica na pasta WinKit\ do pendrive.
