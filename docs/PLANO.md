@@ -1452,6 +1452,9 @@ Cada marco tem um **critério de pronto**. Um marco só é marcado como concluí
 - **Pronto quando:** dá para fazer todo o fluxo sem editar JSON à mão.
 
 ### Depois do v1 (backlog ordenado)
+
+> A v2 (M11–M18) está planejada em detalhe em [`PLANO_V2.md`](PLANO_V2.md), **aguardando aprovação**. Os itens 3 (backup de `HKCU`, agora em forma curada, D-037) e 4 (fixar na barra, V2-04) deste backlog foram absorvidos por ela.
+
 1. Item 20 — Windows 10 (catálogos com `os: [10]`, validação em hardware).
 2. Item 23 — Perfis múltiplos (o Ventoy mostra um menu com os modelos; um XML por perfil).
 3. Item 15 — Backup de registro `HKCU`.

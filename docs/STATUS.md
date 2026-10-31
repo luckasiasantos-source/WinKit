@@ -7,7 +7,7 @@
 
 **Última atualização:** 2026-10-31
 **Versão do código:** 0.1.0 (pré-alpha, projeto pessoal)
-**Fase do projeto:** v1 implementada (M0–M10); falta a validação em VM/PC real pelos roteiros de `docs/validacao/`
+**Fase do projeto:** v1 implementada (M0–M10); falta a validação em VM/PC real pelos roteiros de `docs/validacao/`. v2 (M11–M18) planejada em `PLANO_V2.md`, aguardando aprovação
 
 ## Resumo
 
@@ -25,6 +25,14 @@
 | M8 | Windows Update, resumo e notificações | ✅ código | ⬜ roteiro pronto (`docs/validacao/M8.md`) |
 | M9 | Interface do Agente | ✅ código | ⬜ roteiro pronto (`docs/validacao/M9.md`) |
 | M10 | WinKit Studio (GUI) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M10.md`) |
+| M11 | Inglês e espanhol (V2-00) | ⬜ planejado (`PLANO_V2.md` §6), aguardando aprovação | — |
+| M12 | Aplicar neste PC + ponto de restauração (V2-03, V2-10) | ⬜ planejado | — |
+| M13 | Pendrive comum: Rufus/Microsoft (V2-01) | ⬜ planejado | — |
+| M14 | Rede e sistema (V2-02, 08, 09, 16, 17, 18, 22) | ⬜ planejado | — |
+| M15 | Personalização (V2-04, 05, 06, 07, 12, 15) | ⬜ planejado | — |
+| M16 | Contas, pastas e jogos (V2-11, 13, 14) | ⬜ planejado | — |
+| M17 | Inteligência do pendrive (V2-19, 20, 21, 23) | ⬜ planejado | — |
+| M18 | Fechamento da v2 | ⬜ planejado | — |
 
 ## Detalhe por marco
 

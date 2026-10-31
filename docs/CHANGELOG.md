@@ -28,6 +28,20 @@
 
 ---
 
+## 2026-10-31 — Planejamento v2 — Plano detalhado M11 a M18
+**Tipo:** documentação
+**Resumo:** plano minucioso da v2, aguardando aprovação: tradução para inglês e espanhol e 23 funções novas, em 8 marcos, com decisões, regras, hipóteses, riscos, testes e checklists.
+
+### Adicionado
+- `docs/PLANO_V2.md` — escopo (V2-00 a V2-23), decisões propostas D-030 a D-042, mudanças de regra (R-03, R-04, R-19) e regras novas R-51 a R-55, arquitetura transversal (receita, catálogos, layout, planejador R16–R33, contrato de etapa, plataforma, volumes, segredos, Studio, CLI), detalhamento de cada função por marco, hipóteses H12–H34, riscos, dívidas previstas, estratégia de testes, ordem e versões, rastreabilidade e checklists
+
+### Alterado
+- `CLAUDE.md` — `PLANO_V2.md` na ordem de leitura e na tabela de documentos vivos
+- `docs/PLANO.md` — §20 aponta para o plano da v2
+
+### Documentos vivos atualizados
+- STATUS — M11 a M18 como "planejado, aguardando aprovação"
+
 ## 2026-10-31 — Fechamento — Correção: workflow de release
 **Tipo:** correção
 **Resumo:** a primeira release falhou porque o código 1 esperado do `gh release view` encerrava o passo (IN-012).

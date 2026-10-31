@@ -7,6 +7,7 @@ Este arquivo vale para qualquer pessoa ou agente de IA que for trabalhar neste r
 Leia, nesta ordem:
 
 1. `docs/PLANO.md` — o que o produto é e como foi desenhado.
+   - `docs/PLANO_V2.md` — plano da v2 (M11–M18): funções novas, decisões D-030+ e regras R-51+.
 2. `docs/ARQUITETURA.md` — arquitetura e **regras do código** (obrigatórias).
 3. `docs/STATUS.md` — o que já está implementado e o que está em andamento.
 4. `docs/DIVIDAS_TECNICAS.md` — o que sabemos que está incompleto ou feito de um jeito provisório.
@@ -31,7 +32,7 @@ Toda mudança de código vem **no mesmo commit** com a atualização dos documen
 | Começou, terminou ou bloqueou um item de um marco | `docs/STATUS.md` |
 | Fez algo provisório, pulou um caso, deixou um TODO | `docs/DIVIDAS_TECNICAS.md` |
 | Algo quebrou, uma hipótese se provou falsa, um teste real falhou | `docs/INCIDENTES.md` |
-| Mudou escopo ou comportamento do produto | `docs/PLANO.md` |
+| Mudou escopo ou comportamento do produto | `docs/PLANO.md` (v1) ou `docs/PLANO_V2.md` (v2) |
 | **Qualquer commit** | `docs/CHANGELOG.md` — sempre, sem exceção |
 
 `TODO` no código sem uma entrada correspondente em `DIVIDAS_TECNICAS.md` não é permitido.
