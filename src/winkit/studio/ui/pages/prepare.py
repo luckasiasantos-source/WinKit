@@ -11,7 +11,8 @@ from PySide6.QtWidgets import QFileDialog, QInputDialog, QLineEdit, QMessageBox
 
 from winkit.core.recipe.models import Recipe
 from winkit.core.recipe.validation import username_problem, validate_computer_name
-from winkit.i18n import t
+from winkit.core.text import slugify
+from winkit.i18n import render, t
 from winkit.i18n.format import format_size
 from winkit.studio.ui.base import Page
 from winkit.studio.ui.pages.common import TIME_ZONES, combo, empty, keyboards, toggle
@@ -460,3 +461,81 @@ class AccountPage(Page):
     def _remove_extra(self, username: str) -> None:
         self.ctl.remove_extra_account(username)
         self.refresh()
+
+
+class TemplatesPage(Page):
+    """V2-23: começar de um modelo pronto, importar e exportar receitas sem dados pessoais."""
+
+    title_key = "studio.templates.title"
+    subtitle_key = "studio.templates.subtitle"
+
+    def refresh(self) -> None:
+        self.clear_content()
+        if self.needs_recipe():
+            return
+        self.content.addLayout(
+            self.toolbar(
+                button(t("studio.templates.import"), "Secondary", self._import),
+                button(t("studio.templates.export"), "Secondary", self._export),
+            )
+        )
+        card = Card()
+        for template_id, share in self.ctl.templates():
+            card.add_row(
+                Row(
+                    t(f"template.{template_id}.title"),
+                    t(f"template.{template_id}.description"),
+                    accessory=button(
+                        t("studio.templates.use"), "Secondary", partial(self._use, share)
+                    ),
+                    icon=symbol_icon("sliders", "#AF52DE"),
+                )
+            )
+        self.content.addWidget(
+            section(t("studio.templates.ready"), card, footer=t("studio.templates.footer"))
+        )
+
+    def _confirm_and_apply(self, share: Any) -> None:
+        preview = self.ctl.share_preview(share)
+        lines = [render(m) for m in preview.changes] or [t("studio.presets.nothing")]
+        lines += ["⚠ " + render(m) for m in preview.ignored]
+        answer = QMessageBox.question(
+            self,
+            t("studio.templates.confirm_title"),
+            t("studio.presets.confirm") + "\n\n• " + "\n• ".join(lines),
+        )
+        if answer == QMessageBox.StandardButton.Yes:
+            self.ctl.share_apply(share)
+            self.refresh()
+
+    def _use(self, share: Any) -> None:
+        self._confirm_and_apply(share)
+
+    def _import(self) -> None:
+        path, _ = QFileDialog.getOpenFileName(
+            self, t("studio.templates.import"), "", t("studio.templates.filter")
+        )
+        if not path:
+            return
+        try:
+            share = self.ctl.share_load(Path(path))
+        except (OSError, ValueError) as exc:
+            QMessageBox.warning(self, t("app.name"), t("studio.templates.invalid", detail=str(exc)))
+            return
+        self._confirm_and_apply(share)
+
+    def _export(self) -> None:
+        title, ok = QInputDialog.getText(
+            self, t("studio.templates.export"), t("studio.templates.name")
+        )
+        if not ok or not title.strip():
+            return
+        path, _ = QFileDialog.getSaveFileName(
+            self,
+            t("studio.templates.export"),
+            slugify(title) + ".winkit.json",
+            t("studio.templates.filter"),
+        )
+        if path:
+            self.ctl.share_export(Path(path), title.strip())
+            QMessageBox.information(self, t("app.name"), t("studio.templates.exported"))

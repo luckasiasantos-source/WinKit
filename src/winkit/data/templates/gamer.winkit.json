@@ -1,0 +1,31 @@
+{
+  "share_schema_version": 1,
+  "winkit_version": "0.8.0",
+  "title": "Gamer",
+  "description": "Steam, Epic e Discord, ajustes de jogos e alto desempenho.",
+  "apps": [
+    {
+      "winget_id": "Valve.Steam",
+      "name": "Steam"
+    },
+    {
+      "winget_id": "EpicGames.EpicGamesLauncher",
+      "name": "Epic Games Launcher"
+    },
+    {
+      "winget_id": "Discord.Discord",
+      "name": "Discord",
+      "scope": "user"
+    }
+  ],
+  "tweaks": [
+    "gaming.game_mode",
+    "gaming.no_mouse_acceleration",
+    "gaming.no_background_recording",
+    "gaming.windowed_optimizations"
+  ],
+  "power_scheme": "high_performance",
+  "presets_applied": [
+    "gamer"
+  ]
+}

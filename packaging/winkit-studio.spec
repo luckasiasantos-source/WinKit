@@ -7,6 +7,7 @@ SRC = os.path.join(SPECPATH, "..", "src", "winkit")
 ICON = os.path.join(SPECPATH, "winkit.ico")
 datas = [
     (os.path.join(SRC, "data", "*.yaml"), os.path.join("winkit", "data")),
+    (os.path.join(SRC, "data", "templates", "*.winkit.json"), os.path.join("winkit", "data", "templates")),
     (os.path.join(SRC, "builder", "assets", "bootstrap.ps1"), os.path.join("winkit", "builder", "assets")),
 ]
 

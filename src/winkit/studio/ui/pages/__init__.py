@@ -12,7 +12,7 @@ from winkit.studio.ui.pages.bring import (
 )
 from winkit.studio.ui.pages.finish import BuildPage, ExecutionPage, LivePage
 from winkit.studio.ui.pages.network import BrowsersPage, DnsPage, NetworkDrivesPage, WifiPage
-from winkit.studio.ui.pages.prepare import AccountPage, PendrivePage
+from winkit.studio.ui.pages.prepare import AccountPage, PendrivePage, TemplatesPage
 from winkit.studio.ui.pages.system import (
     BloatPage,
     EnergyPage,
@@ -45,6 +45,7 @@ __all__ = [
     "NetworkDrivesPage",
     "PendrivePage",
     "StartLayoutPage",
+    "TemplatesPage",
     "TweaksPage",
     "UserFoldersPage",
     "WifiPage",

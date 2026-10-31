@@ -63,6 +63,8 @@ class FakeWinget:
     calls: list[tuple[str, ...]] = field(default_factory=list)
     #: id → (tipo winget, escopo, switches) para simular "winget download"
     downloads: dict[str, tuple[str, str, str]] = field(default_factory=dict)
+    #: id → versão que o "winget download" baixa (padrão 1.0)
+    versions: dict[str, str] = field(default_factory=dict)
 
     def available(self) -> bool:
         return self.is_available
@@ -81,10 +83,11 @@ class FakeWinget:
         if package_id not in self.downloads:
             return 0x8A150014
         kind, scope, switches = self.downloads[package_id]
+        version = self.versions.get(package_id, "1.0")
         dest.mkdir(parents=True, exist_ok=True)
-        (dest / f"{package_id}_1.0_{kind}.exe").write_bytes(b"MZ" + b"\0" * 64)
-        (dest / f"{package_id}_1.0.yaml").write_text(
-            f"PackageIdentifier: {package_id}\nPackageVersion: 1.0\nInstallerType: {kind}\n"
+        (dest / f"{package_id}_{version}_{kind}.exe").write_bytes(b"MZ" + version.encode())
+        (dest / f"{package_id}_{version}.yaml").write_text(
+            f"PackageIdentifier: {package_id}\nPackageVersion: {version}\nInstallerType: {kind}\n"
             f"Scope: {scope}\nInstallerSwitches:\n  Silent: {switches}\n",
             encoding="utf-8",
         )

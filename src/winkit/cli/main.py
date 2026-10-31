@@ -34,6 +34,7 @@ from winkit.builder.build import (
     save_profile_recipe,
 )
 from winkit.builder.validate import validate_pendrive
+from winkit.collector import app_updates
 from winkit.collector import apps as app_collector
 from winkit.collector import associations as assoc_collector
 from winkit.collector import backups as backup_collector
@@ -49,10 +50,11 @@ from winkit.collector import start_layout as start_collector
 from winkit.collector import user_folders as folders_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import dns as dns_rules
-from winkit.core import layout
+from winkit.core import layout, share
 from winkit.core.browsers import undo_operations
 from winkit.core.catalog.loader import default_catalogs
 from winkit.core.errors import RecipeError, WinKitError
+from winkit.core.fsutil import atomic_write_text
 from winkit.core.maintenance import DAYS, TASK_FOLDER
 from winkit.core.planner.models import PlanContext
 from winkit.core.planner.planner import plan
@@ -1531,6 +1533,90 @@ def _add_account_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     bp.set_defaults(func=cmd_backup_para_quem)
 
 
+# ------------------------------------------------------------------ receitas compartilháveis
+def cmd_receita_exportar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    data = share.export_recipe(
+        recipe,
+        title=args.titulo or Path(args.arquivo).stem,
+        description=args.descricao or "",
+        version=__version__,
+    )
+    atomic_write_text(Path(args.arquivo), share.dumps(data))
+    out(t("cli.share_exported", path=args.arquivo))
+    return 0
+
+
+def _print_import(result: share.ImportResult, out: Out) -> None:
+    for change in result.changes:
+        out("  + " + render(change))
+    for ignored in result.ignored:
+        out("  ! " + render(ignored))
+    if not result.changes and not result.ignored:
+        out(t("studio.presets.nothing"))
+
+
+def _import_share(
+    data: share.ShareableRecipe, args: argparse.Namespace, services: Services, out: Out
+) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    catalogs = default_catalogs()
+    if args.aplicar:
+        _print_import(share.import_recipe(data, recipe, catalogs), out)
+        _save(tgt, recipe)
+    else:
+        _print_import(share.preview_import(data, recipe, catalogs), out)
+        out(t("cli.share_preview_hint"))
+    return 0
+
+
+def cmd_receita_importar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    try:
+        data = share.loads(Path(args.arquivo).read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        out(t("studio.templates.invalid", detail=str(exc)))
+        return 1
+    return _import_share(data, args, services, out)
+
+
+def cmd_receita_modelo(args: argparse.Namespace, services: Services, out: Out) -> int:
+    if args.id is None:
+        for template_id in share.TEMPLATE_IDS:
+            title = t(f"template.{template_id}.title")
+            out(f"  {template_id:12} {title} — {t(f'template.{template_id}.description')}")
+        return 0
+    try:
+        data = share.load_template(args.id)
+    except share.ShareError:
+        out(t("cli.not_found", ids=args.id))
+        return 1
+    return _import_share(data, args, services, out)
+
+
+def _add_share_parsers(rec_sub: Any, common: argparse.ArgumentParser) -> None:
+    ex = rec_sub.add_parser(
+        "exportar", aliases=["export"], parents=[common], help=t("cli.h.share_export")
+    )
+    ex.add_argument("arquivo", help=t("cli.h.share_file"))
+    ex.add_argument("--titulo", help=t("cli.h.share_title"))
+    ex.add_argument("--descricao", help=t("cli.h.share_description"))
+    ex.set_defaults(func=cmd_receita_exportar)
+    im = rec_sub.add_parser(
+        "importar", aliases=["import"], parents=[common], help=t("cli.h.share_import")
+    )
+    im.add_argument("arquivo", help=t("cli.h.share_file"))
+    im.add_argument("--aplicar", action="store_true", help=t("cli.h.share_apply"))
+    im.set_defaults(func=cmd_receita_importar)
+    mo = rec_sub.add_parser(
+        "modelo", aliases=["template"], parents=[common], help=t("cli.h.share_template")
+    )
+    mo.add_argument("id", nargs="?", help=t("cli.h.share_template_id"))
+    mo.add_argument("--aplicar", action="store_true", help=t("cli.h.share_apply"))
+    mo.set_defaults(func=cmd_receita_modelo)
+
+
 def _add_dns_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     dns = sub.add_parser("dns", help=t("cli.h.dns"))
     dns_sub = dns.add_subparsers(dest="action", required=True)
@@ -1685,9 +1771,41 @@ def _add_collect_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     capp.set_defaults(func=cmd_coletar_apps)
 
 
+def cmd_apps_atualizar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    results = app_updates.refresh_apps(
+        services.winget,
+        tgt.root,
+        recipe,
+        default_catalogs(),
+        apply=not args.verificar,
+        ids=args.ids or None,
+        save=lambda: _save(tgt, recipe),
+        now=datetime.now(UTC),
+    )
+    for r in results:
+        line = t(
+            f"studio.apps.update_{r.status}",
+            name=r.name,
+            current=r.current or "?",
+            available=r.available or "?",
+        )
+        out("  " + line + (f" ({r.detail})" if r.detail else ""))
+    if not results:
+        out(t("studio.apps.no_offline"))
+    return 1 if any(r.status == "failed" for r in results) else 0
+
+
 def _add_apps_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     apps = sub.add_parser("apps", help=t("cli.h.apps"))
     apps_sub = apps.add_subparsers(dest="action", required=True)
+    au = apps_sub.add_parser(
+        "atualizar", aliases=["update"], parents=[common], help=t("cli.h.apps_update")
+    )
+    au.add_argument("ids", nargs="*", help=t("cli.h.apps_update_ids"))
+    au.add_argument("--verificar", action="store_true", help=t("cli.h.apps_update_check"))
+    au.set_defaults(func=cmd_apps_atualizar)
     apps_sub.add_parser("listar", aliases=["list"], parents=[common]).set_defaults(
         func=cmd_apps_listar
     )
@@ -1824,6 +1942,7 @@ def build_parser() -> argparse.ArgumentParser:
     nova.add_argument("--nome-pc", help=t("cli.h.pc_name"))
     nova.add_argument("--sobrescrever", action="store_true")
     nova.set_defaults(func=cmd_receita_nova)
+    _add_share_parsers(rec_sub, common)
 
     pl = sub.add_parser("plano", aliases=["plan"], parents=[common], help=t("cli.h.plan"))
     pl.add_argument("--windows", type=int, choices=[10, 11], default=11)

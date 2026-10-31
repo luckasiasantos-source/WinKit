@@ -1,0 +1,28 @@
+{
+  "share_schema_version": 1,
+  "winkit_version": "0.8.0",
+  "title": "Programador",
+  "description": "VS Code, Git, PowerToys, WSL e cliente SSH; apps atualizados toda semana.",
+  "apps": [
+    {
+      "winget_id": "Microsoft.VisualStudioCode",
+      "name": "Visual Studio Code"
+    },
+    {
+      "winget_id": "Git.Git",
+      "name": "Git"
+    },
+    {
+      "winget_id": "Microsoft.PowerToys",
+      "name": "PowerToys"
+    }
+  ],
+  "optional_features": [
+    "wsl",
+    "openssh_client"
+  ],
+  "winget_upgrade": "weekly",
+  "presets_applied": [
+    "developer"
+  ]
+}

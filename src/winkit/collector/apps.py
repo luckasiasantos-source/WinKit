@@ -95,6 +95,7 @@ def download_app(  # noqa: PLR0911 — cada retorno é um motivo diferente para 
         timeout_minutes=item.installer.timeout_minutes if item.installer else 30,
     )
     item.source = "offline"
+    item.installer_version = pkg.version or None
     if pkg.scope is not None:
         item.scope = pkg.scope
     return DownloadResult(item.id, True, f"{pkg.package_id} {pkg.version} ({pkg.raw_type})")

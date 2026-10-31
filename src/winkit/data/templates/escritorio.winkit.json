@@ -1,0 +1,31 @@
+{
+  "share_schema_version": 1,
+  "winkit_version": "0.8.0",
+  "title": "Escritório",
+  "description": "Firefox, leitor de PDF, LibreOffice e 7-Zip; menos distrações.",
+  "apps": [
+    {
+      "winget_id": "Mozilla.Firefox",
+      "name": "Firefox"
+    },
+    {
+      "winget_id": "SumatraPDF.SumatraPDF",
+      "name": "SumatraPDF"
+    },
+    {
+      "winget_id": "TheDocumentFoundation.LibreOffice",
+      "name": "LibreOffice"
+    },
+    {
+      "winget_id": "7zip.7zip",
+      "name": "7-Zip"
+    }
+  ],
+  "tweaks": [
+    "system.consumer_content"
+  ],
+  "storage_sense": true,
+  "presets_applied": [
+    "office"
+  ]
+}

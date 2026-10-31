@@ -1,0 +1,16 @@
+{
+  "share_schema_version": 1,
+  "winkit_version": "0.8.0",
+  "title": "Mínimo",
+  "description": "Só o essencial: 7-Zip e menos propaganda no Windows.",
+  "apps": [
+    {
+      "winget_id": "7zip.7zip",
+      "name": "7-Zip"
+    }
+  ],
+  "tweaks": [
+    "system.consumer_content",
+    "privacy.start_suggestions"
+  ]
+}

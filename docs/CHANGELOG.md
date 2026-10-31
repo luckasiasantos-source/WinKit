@@ -28,6 +28,23 @@
 
 ---
 
+## 2026-10-31 — M17 — Receitas compartilháveis (V2-23) e atualização dos instaladores (V2-21)
+**Tipo:** implementação
+**Resumo:** dá para exportar a receita sem dados pessoais, importar a de outra pessoa com prévia e começar de cinco modelos prontos. Os instaladores do pendrive podem ser atualizados sem refazer a receita, sem nunca perder a versão antiga numa falha. A release 0.7.0 foi disparada antes deste commit.
+
+### Adicionado
+- `src/winkit/core/share.py`, `src/winkit/data/templates/*.winkit.json` (incluídos nas três specs do PyInstaller)
+- `src/winkit/core/versions.py`, `src/winkit/collector/app_updates.py`; `AppItem.installer_version`, `meta.last_update_check` (aditivos)
+- Studio: seção "Modelos" (Preparar); "Procurar atualizações" e faixa de aviso em Aplicativos; CLI: `receita exportar|importar|modelo`, `apps atualizar`
+- Testes: `tests/core/test_share.py` (inclui o de proteção de dados pessoais), `tests/core/test_app_updates.py` (inclui o de proteção da versão antiga)
+
+### Alterado
+- `src/winkit/platform/fakes/apps.py` — o winget falso baixa a versão pedida pelo teste
+- `src/winkit/collector/apps.py` — grava a versão do instalador baixado
+
+### Documentos vivos atualizados
+- ARQUITETURA — módulos e verificações; STATUS — M17 em andamento; PLANO_V2 — §12.2; DIVIDAS — DT-025
+
 ## 2026-10-31 — M16 — Contas extras (V2-11) e fechamento do M16 (0.7.0)
 **Tipo:** implementação
 **Resumo:** a instalação cria outras contas locais (administrador ou padrão), com a senha trocada no primeiro acesso por padrão. Backups podem valer só para a conta principal. Fecha o M16 com o roteiro de validação e a versão 0.7.0.

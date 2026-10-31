@@ -231,3 +231,12 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Impacto: esses ícones precisam ser fixados à mão; o Studio lista os que ficaram de fora.
 - Plano: ler a lista `Taskband` do registro (formato binário não documentado) só se a validação na VM mostrar que vale o risco; caso contrário, oferecer a escolha de apps da Store por AUMID na tela.
 - Prioridade: baixa
+
+### DT-025 — Prévia da importação sem o publicador; verificação de versão sempre baixa
+- Estado: aberta
+- Origem: M17 (V2-23, V2-21)
+- Onde: `core/share.py`, `collector/app_updates.py`
+- Descrição: (1) a prévia de uma receita importada mostra o id do winget de cada app, mas não o publicador do manifesto (exigiria consultar o winget na hora). (2) "Procurar atualizações" sempre baixa o instalador para saber a versão; o caminho mais leve pelo módulo `Microsoft.WinGet.Client` (`Find-WinGetPackage`) não foi feito.
+- Impacto: (1) quem importa precisa confiar no id do winget; (2) a verificação gasta banda e tempo.
+- Plano: usar `Find-WinGetPackage` quando o módulo existir, nas duas funções.
+- Prioridade: baixa

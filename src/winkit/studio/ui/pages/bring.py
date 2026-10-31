@@ -53,10 +53,21 @@ class AppsPage(Page):
         self.search.setPlaceholderText(t("studio.search"))
         self.search.setClearButtonEnabled(True)
         self.search.textChanged.connect(self._filter)
+        if self.ctl.apps_need_update_check():
+            banner = Card()
+            banner.add_row(
+                Row(
+                    t("studio.apps.stale_title"),
+                    t("studio.apps.stale"),
+                    icon=symbol_icon("refresh", "#FF9500"),
+                )
+            )
+            self.content.addWidget(section("", banner))
         self.content.addLayout(
             self.toolbar(
                 button(t("studio.apps.read"), None, self._collect),
                 button(t("studio.apps.download"), "Primary", self._download),
+                button(t("studio.apps.check_updates"), None, self._check_updates),
                 button(t("studio.apps.add_installer"), None, self._add_installer),
                 button(t("studio.apps.add_portable"), None, self._add_portable),
             )
@@ -106,6 +117,39 @@ class AppsPage(Page):
     def _collect(self) -> None:
         self.tasks.run(
             t("studio.apps.reading"), self.ctl.collect_apps, lambda added: self.refresh()
+        )
+
+    def _check_updates(self) -> None:
+        def show(results: list[Any]) -> None:
+            newer = [r for r in results if r.status == "newer"]
+            lines = [self._update_line(r) for r in results] or [t("studio.apps.no_offline")]
+            text = "\n".join(lines)
+            if not newer:
+                QMessageBox.information(self, t("studio.apps.check_updates"), text)
+                self.refresh()
+                return
+            answer = QMessageBox.question(
+                self,
+                t("studio.apps.check_updates"),
+                text + "\n\n" + tn("studio.apps.update_confirm", len(newer)),
+            )
+            if answer == QMessageBox.StandardButton.Yes:
+                ids = [r.app_id for r in newer]
+                self.tasks.run(
+                    t("studio.apps.updating"),
+                    lambda: self.ctl.update_apps(ids),
+                    lambda _: self.refresh(),
+                )
+
+        self.tasks.run(t("studio.apps.checking"), self.ctl.check_app_updates, show)
+
+    @staticmethod
+    def _update_line(r: Any) -> str:
+        return t(
+            f"studio.apps.update_{r.status}",
+            name=r.name,
+            current=r.current or "?",
+            available=r.available or "?",
         )
 
     def _download(self) -> None:

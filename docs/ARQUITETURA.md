@@ -154,6 +154,8 @@ Por que isso importa:
 | `core/user_folders.py`, `collector/user_folders.py`, `agent/steps/user_folders.py` | Pastas do usuário em outro disco (V2-14): `User Shell Folders` com `%USERNAME%`; "Copiar agora" só em `merge` |
 | `core/vdf.py`, `core/games.py`, `collector/games.py`, `agent/steps/game_library.py` | Jogos sem baixar de novo (V2-13): `libraryfolders.vdf` da Steam e manifestos da Epic |
 | `agent/steps/account.py`, `platform/accounts.py` | Contas extras (V2-11): `LocalAccount` no XML, grupo conferido pelo SID, `PasswordExpired`; nunca ao vivo |
+| `core/share.py`, `data/templates/*.winkit.json` | Receitas compartilháveis e modelos (V2-23, D-040): formato sem campos pessoais (`extra="forbid"`), importar = mesclar com prévia |
+| `core/versions.py`, `collector/app_updates.py` | Atualizar instaladores do pendrive (V2-21, D-041): baixar para comparar; a pasta velha só sai depois que a receita aponta para a nova |
 | `core/secrets.py` | Registro único de segredos do processo (R-53); `runner` e `EventLog` mascaram |
 | `core/wifi.py`, `collector/wifi.py`, `platform/wifi.py`, `agent/steps/wifi.py` | Wi-Fi (V2-02): XML do perfil, coleta, `netsh` só por código de saída e arquivos, etapa antes do login |
 | `core/media.py` | Pendrive comum (D-034): reconhecer a mídia de instalação, marcar o `autounattend.xml` do WinKit |
@@ -342,6 +344,8 @@ runner.run(
 | `hosts` (V2-16) | `tests/agent/test_network_privacy.py::test_hosts_block_roundtrip_keeps_user_bytes` (CRLF, LF, BOM, Latin-1) e `test_catalogs_are_safe` (nenhum domínio da Microsoft) |
 | R-42 (V2-04) | `tests/agent/test_start_layout.py` — snapshots de `LayoutModification.xml` e `.json` em `tests/fixtures/start_layout/` |
 | R-52 | `tests/agent/test_user_folders.py::test_recipe_rejects_drive_letters_in_volume_paths` (caminhos de volume nunca levam letra) |
+| V2-23 | `tests/core/test_share.py::test_export_never_contains_personal_data` (conta, senha, Wi-Fi, caminhos e volumes nunca saem) |
+| V2-21 | `tests/core/test_app_updates.py::test_failure_in_the_middle_keeps_old_version` |
 | XML (IN-015) | `test_no_global_xml_namespace_registration` e `test_strip_key_does_not_change_other_xml` |
 | R-55 | `tests/i18n/test_usage.py::test_no_loose_ui_strings` (AST em `studio`, `agent/ui`, `ui`, `cli`) |
 | Empacotamento | `test_no_dynamic_imports_in_package` (IN-013) |

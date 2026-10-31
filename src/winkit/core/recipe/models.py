@@ -65,6 +65,8 @@ class Meta(_Model):
     source_pc: str | None = None
     #: Serial do volume do sistema antigo (V2-13/V2-14): o que estiver nele será formatado.
     source_system_volume: Annotated[str, Field(pattern=r"^[0-9A-F]{8}$")] | None = None
+    #: V2-21: última vez que os instaladores do pendrive foram conferidos.
+    last_update_check: datetime | None = None
 
 
 class Execution(_Model):
@@ -184,6 +186,8 @@ class AppItem(_Model):
     depends_on: list[ItemId] = Field(default_factory=list)
     restore_backups_after_install: list[ItemId] = Field(default_factory=list)
     decide_at_runtime: bool = False
+    #: V2-21: versão do instalador offline no pendrive (do manifesto do winget).
+    installer_version: str | None = None
 
 
 class BackupItem(_Model):

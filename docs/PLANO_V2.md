@@ -1971,7 +1971,7 @@ As três funções e o resolver de volumes estão prontos, com o teste de prote�
 
 **Segurança.**
 - Um arquivo importado só contém ids de catálogo e ids do winget; não existe campo que execute algo (R-34).
-- A prévia mostra o publicador vindo do manifesto do winget (`Publisher`), obtido na hora.
+- A prévia mostra o id do winget de cada app (o publicador vindo do manifesto ficou para depois: DT-025).
 - Um teste de proteção exporta uma receita completa de fixture (com senha, Wi-Fi, usuário, caminhos) e confere que nenhum desses valores aparece no arquivo gerado.
 
 **Testes.** Exportar → importar (ida e volta); proteção de dados pessoais; mescla idempotente; ids desconhecidos ignorados com motivo; modelos do pacote válidos.

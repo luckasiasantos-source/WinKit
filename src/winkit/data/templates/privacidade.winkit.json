@@ -1,0 +1,45 @@
+{
+  "share_schema_version": 1,
+  "winkit_version": "0.8.0",
+  "title": "Privacidade máxima",
+  "description": "Ajustes de privacidade, DNS Quad9 com bloqueio de rastreadores e Firefox com uBlock Origin.",
+  "apps": [
+    {
+      "winget_id": "Mozilla.Firefox",
+      "name": "Firefox"
+    }
+  ],
+  "tweaks": [
+    "privacy.telemetry_minimum",
+    "privacy.advertising_id",
+    "privacy.activity_history",
+    "privacy.tailored_experiences",
+    "privacy.start_bing_search"
+  ],
+  "dns_provider": "quad9",
+  "require_doh": true,
+  "hosts_blocklists": [
+    "trackers_basic"
+  ],
+  "browsers": [
+    {
+      "id": "firefox",
+      "extensions": [
+        {
+          "id": "uBlock0@raymondhill.net",
+          "name": "uBlock Origin",
+          "slug": "ublock-origin"
+        },
+        {
+          "id": "jid1-MnnxcxisBPnSXQ@jetpack",
+          "name": "Privacy Badger",
+          "slug": "privacy-badger17"
+        }
+      ],
+      "search": "duckduckgo"
+    }
+  ],
+  "presets_applied": [
+    "privacy_max"
+  ]
+}

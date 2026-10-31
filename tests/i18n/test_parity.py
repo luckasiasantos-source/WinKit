@@ -108,6 +108,7 @@ ALWAYS_SAME = {
     "cli.dns_servers",
     "cli.env_path_item",
     "preset.dns",
+    "studio.apps.update_newer",
 }
 
 

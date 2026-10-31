@@ -28,6 +28,7 @@ from winkit.builder.build import (
 )
 from winkit.builder.isos import scan_isos
 from winkit.builder.validate import PendriveReport, validate_pendrive
+from winkit.collector import app_updates
 from winkit.collector import apps as app_collector
 from winkit.collector import associations as assoc_collector
 from winkit.collector import backups as backup_collector
@@ -42,11 +43,12 @@ from winkit.collector import personal as personal_collector
 from winkit.collector import start_layout as start_collector
 from winkit.collector import user_folders as folders_collector
 from winkit.collector import wifi as wifi_collector
-from winkit.core import layout
+from winkit.core import layout, share
 from winkit.core.browsers import suggested
 from winkit.core.catalog.loader import default_catalogs
 from winkit.core.catalog.models import AssociationGroup, Catalogs
 from winkit.core.errors import RecipeError, WinKitError
+from winkit.core.fsutil import atomic_write_text
 from winkit.core.isos import IsoInfo
 from winkit.core.live import LivePreview
 from winkit.core.planner.models import Plan, PlanContext, StepKind
@@ -69,6 +71,7 @@ from winkit.core.recipe.models import (
     WifiNetwork,
 )
 from winkit.core.recipe.validation import ValidationReport, username_problem, validate_recipe
+from winkit.core.share import ShareableRecipe
 from winkit.core.user_folders import ORDER, default_folders
 from winkit.core.volumes import VolumeInfo
 from winkit.core.volumes import ref_for as volume_ref
@@ -485,6 +488,50 @@ class StudioController:
         )
         self.save()
         return result
+
+    # ---- atualizar os instaladores do pendrive (V2-21)
+    def apps_need_update_check(self) -> bool:
+        return app_updates.needs_check(self.require_recipe(), datetime.now(UTC))
+
+    def _refresh(self, *, apply: bool, ids: list[str] | None) -> list[app_updates.UpdateCheck]:
+        return app_updates.refresh_apps(
+            self.services.winget,
+            self.root,
+            self.require_recipe(),
+            self.catalogs,
+            apply=apply,
+            ids=ids,
+            save=self.save,
+            now=datetime.now(UTC),
+        )
+
+    def check_app_updates(self) -> list[app_updates.UpdateCheck]:
+        return self._refresh(apply=False, ids=None)
+
+    def update_apps(self, ids: list[str]) -> list[app_updates.UpdateCheck]:
+        return self._refresh(apply=True, ids=ids)
+
+    # ---- modelos e receitas compartilháveis (V2-23)
+    def templates(self) -> list[tuple[str, ShareableRecipe]]:
+        return [(i, share.load_template(i)) for i in share.TEMPLATE_IDS]
+
+    @staticmethod
+    def share_load(path: Path) -> ShareableRecipe:
+        return share.loads(path.read_text(encoding="utf-8"))
+
+    def share_preview(self, data: ShareableRecipe) -> share.ImportResult:
+        return share.preview_import(data, self.require_recipe(), self.catalogs)
+
+    def share_apply(self, data: ShareableRecipe) -> share.ImportResult:
+        result = share.import_recipe(data, self.require_recipe(), self.catalogs)
+        self.save()
+        return result
+
+    def share_export(self, path: Path, title: str) -> None:
+        data = share.export_recipe(
+            self.require_recipe(), title=title, description="", version=self.version()
+        )
+        atomic_write_text(path, share.dumps(data))
 
     # ---- contas extras (V2-11)
     def add_extra_account(self, username: str, *, admin: bool, password_mode: str) -> str | None:
