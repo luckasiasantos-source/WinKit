@@ -45,6 +45,24 @@
 - Correção: avisos corrigidos no commit seguinte.
 - Prevenção: `scripts/check.sh` com `set -euo pipefail`, obrigatório antes de cada commit (`CLAUDE.md`).
 
+### IN-004 — Snapshot do XML falhava no Windows por causa de CRLF
+- Data: 2026-10-31
+- Marco: M2 (descoberto no CI do M2)
+- O que aconteceu: `test_snapshot_default_recipe` passou no Linux e falhou no CI Windows; a diferença eram só as quebras de linha.
+- Causa raiz: o Git no Windows (com `core.autocrlf`) converte LF em CRLF no checkout; o arquivo de referência deixou de bater byte a byte com o XML gerado.
+- Impacto: só o teste; o XML gerado pelo WinKit não mudou.
+- Correção: `.gitattributes` com `* text=auto eol=lf`.
+- Prevenção: todo arquivo de referência comparado por bytes fica coberto pelo `.gitattributes`.
+
+### IN-005 — `bootstrap.ps1` com acentos corrompidos e erro silencioso
+- Data: 2026-10-31
+- Marco: M2 (descoberto no CI do M2)
+- O que aconteceu: no CI Windows, o log do bootstrap saiu com `inÃ­cio` em vez de `início`, e um marcador inexistente não gerou "ERRO" no log.
+- Causa raiz: (1) o Windows PowerShell 5.1 lê scripts UTF-8 **sem BOM** como ANSI; (2) com `$ErrorActionPreference = 'Continue'`, `Get-Content` de um arquivo inexistente é um erro não fatal: o script seguia com `$marker` vazio e concluía, errado, que era "marcador de outro pendrive".
+- Impacto: no Windows real, logs ilegíveis e um pendrive com problema seria ignorado em silêncio, sem rastro do motivo.
+- Correção: script gravado com BOM UTF-8; `$ErrorActionPreference = 'Stop'` dentro do bloco principal; o registro do erro no `catch` é protegido para nunca quebrar a instalação.
+- Prevenção: teste `test_script_has_utf8_bom` (roda em qualquer sistema) e `test_builder_copies_script_byte_for_byte`; testes reais no CI Windows.
+
 ## Lições da fase de desenho
 
 Problemas encontrados na conversa anterior (PDF de referência) e corrigidos **antes** de virar código. Ficam registrados porque são erros fáceis de repetir.

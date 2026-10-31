@@ -28,6 +28,23 @@
 
 ---
 
+## 2026-10-31 — M3 — Correções vindas do CI Windows
+**Tipo:** correção
+**Resumo:** o CI Windows revelou dois problemas reais no `bootstrap.ps1` (codificação e erro silencioso) e um de quebras de linha no snapshot. Corrigidos com testes.
+
+### Adicionado
+- `.gitattributes` — LF em todos os arquivos de texto
+- `tests/builder/test_bootstrap_ps1.py` — `test_script_has_utf8_bom`, `test_builder_copies_script_byte_for_byte`
+
+### Alterado
+- `src/winkit/builder/assets/bootstrap.ps1` — UTF-8 com BOM; `ErrorActionPreference = 'Stop'` no bloco principal; `catch` protegido
+- `tests/builder/test_build.py` — leitura do script com `utf-8-sig`
+
+### Documentos vivos atualizados
+- INCIDENTES — IN-004, IN-005
+
+---
+
 ## 2026-10-31 — M3 — Agente: fases, executor, resumo, limpeza e empacotamento
 **Tipo:** implementação + infraestrutura + testes + documentação
 **Resumo:** o Agente roda de ponta a ponta (Fase 1 antes do login, Fase 2 depois), retoma após reinício, cai no fallback se a Fase 1 não rodar, gera o resumo e limpa tudo. Os executáveis `winkit.exe` e `winkit-agent.exe` são gerados e testados no CI Windows.

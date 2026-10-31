@@ -36,6 +36,20 @@ def _ps(*args: str, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
     )
 
 
+def test_script_has_utf8_bom() -> None:
+    """Sem BOM o PowerShell 5.1 lê o script como ANSI e corrompe os acentos (IN-005)."""
+    data = SCRIPT.read_bytes()
+    assert data.startswith(b"\xef\xbb\xbf")
+    data[3:].decode("utf-8")
+
+
+def test_builder_copies_script_byte_for_byte(tmp_path: Path) -> None:
+    from winkit.builder.build import BuildOptions, BuildReport, _copy_agent
+
+    _copy_agent(tmp_path, BuildOptions(), BuildReport(root=tmp_path))
+    assert (tmp_path / layout.BOOTSTRAP).read_bytes() == SCRIPT.read_bytes()
+
+
 @pytest.mark.windows
 def test_script_parses_without_errors(tmp_path: Path) -> None:
     script = tmp_path / "bootstrap.ps1"

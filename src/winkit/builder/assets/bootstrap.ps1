@@ -1,10 +1,12 @@
-# WinKit — bootstrap (PLANO.md §10.1, D-012, D-013, D-023)
+﻿# WinKit — bootstrap (PLANO.md §10.1, D-012, D-013, D-023)
 #
 # Chamado pelo autounattend.xml na etapa "specialize", como SYSTEM:
 #   powershell -nop -ep Bypass -File X:\WinKit\Agent\bootstrap.ps1 X: <pendrive_id> <perfil>
 #
 # Regras: nunca falhar a instalação do Windows (sempre sai com código 0); não depender de
 # nada além do PowerShell 5.1; registrar tudo em C:\ProgramData\WinKit\Logs\bootstrap.log.
+# Este arquivo PRECISA ser UTF-8 com BOM: sem BOM o PowerShell 5.1 lê como ANSI e os acentos
+# viram lixo (IN-005). Há um teste que garante o BOM.
 
 param(
     [Parameter(Position = 0)] [string] $Root,
@@ -26,6 +28,8 @@ function Write-Log([string] $message) {
 $proceed = $true
 $pendriveRoot = $null
 try {
+    # Dentro do bloco principal, qualquer erro interrompe e cai no catch (IN-005).
+    $ErrorActionPreference = 'Stop'
     $pendriveRoot = $Root.TrimEnd('\') + '\'
     Write-Log "início: raiz=$pendriveRoot id=$PendriveId perfil=$ProfileId"
 
@@ -87,6 +91,7 @@ try {
                     -Trigger $trigger -Principal $principal -Settings $settings -Force | Out-Null
                 Write-Log 'tarefa \WinKit\Fase2 registrada'
             } catch {
+                # o serviço de agendamento pode não estar pronto na etapa specialize
                 Write-Log "AVISO: tarefa não registrada agora (o Agente tenta de novo): $($_.Exception.Message)"
             }
         }
@@ -96,14 +101,15 @@ try {
             profile = $ProfileId
             timestamp = (Get-Date).ToString('o')
             agent_present = (Test-Path -LiteralPath $exe)
-            agent_version = (Get-Content -LiteralPath (Join-Path $pendriveRoot 'WinKit\Agent\VERSION') -ErrorAction SilentlyContinue)
+            agent_version = (Get-Content -LiteralPath (Join-Path $pendriveRoot 'WinKit\Agent\VERSION') -ErrorAction SilentlyContinue | Select-Object -First 1)
         }
         $info | ConvertTo-Json | Set-Content -LiteralPath $stamp -Encoding UTF8
         Write-Log 'bootstrap concluído'
     }
 } catch {
-    Write-Log ("ERRO: " + ($_ | Out-String))
+    try { Write-Log ("ERRO: " + ($_ | Out-String)) } catch { }
 } finally {
+    $ErrorActionPreference = 'Continue'
     if ($pendriveRoot) {
         try {
             $dest = Join-Path $pendriveRoot ("WinKit\Logs\{0}_{1}" -f $env:COMPUTERNAME, (Get-Date -Format 'yyyy-MM-dd_HH-mm'))

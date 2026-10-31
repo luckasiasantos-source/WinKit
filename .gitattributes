@@ -1,0 +1,6 @@
+# Quebras de linha sempre LF no repositório e no checkout (inclusive no Windows): os testes de
+# snapshot comparam bytes (IN-004). O PowerShell lê scripts com LF normalmente.
+* text=auto eol=lf
+*.iso binary
+*.png binary
+*.ico binary

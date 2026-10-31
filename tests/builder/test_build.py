@@ -47,7 +47,7 @@ def test_full_xml_build(target: targets.Target, inspector: FakeDiskInspector) ->
             "timeout": 15,
         }
     ]
-    assert (root / layout.BOOTSTRAP).read_text(encoding="utf-8").startswith("# WinKit")
+    assert (root / layout.BOOTSTRAP).read_text(encoding="utf-8-sig").startswith("# WinKit")
     assert (root / layout.AGENT_VERSION).read_text().strip() == __version__
     assert not report.agent_copied
 
