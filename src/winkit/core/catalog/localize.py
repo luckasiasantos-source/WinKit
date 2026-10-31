@@ -53,6 +53,7 @@ class CatalogTranslation(_Model):
     dns_providers: dict[str, NameText] = Field(default_factory=dict)
     hosts_blocklists: dict[str, FeatureText] = Field(default_factory=dict)
     presets: dict[str, FeatureText] = Field(default_factory=dict)
+    association_groups: dict[str, NameText] = Field(default_factory=dict)
 
 
 def localize(catalogs: Catalogs, tr: CatalogTranslation) -> Catalogs:
@@ -102,8 +103,15 @@ def localize(catalogs: Catalogs, tr: CatalogTranslation) -> Catalogs:
         x.model_copy(update=tr.presets[x.id].model_dump()) if x.id in tr.presets else x
         for x in catalogs.presets
     ]
+    groups = [
+        g.model_copy(update=tr.association_groups[g.id].model_dump())
+        if g.id in tr.association_groups
+        else g
+        for g in catalogs.association_groups
+    ]
     return catalogs.model_copy(
         update={
+            "association_groups": groups,
             "presets": presets,
             "features": features,
             "dns_providers": providers,
@@ -140,6 +148,11 @@ def missing_translations(catalogs: Catalogs, tr: CatalogTranslation) -> list[str
         if b.id not in tr.hosts_blocklists
     ]
     out += [f"presets.{x.id}" for x in catalogs.presets if x.id not in tr.presets]
+    out += [
+        f"association_groups.{g.id}"
+        for g in catalogs.association_groups
+        if g.id not in tr.association_groups
+    ]
     return out
 
 
@@ -155,4 +168,9 @@ def orphan_translations(catalogs: Catalogs, tr: CatalogTranslation) -> list[str]
     out += [f"dns_providers.{k}" for k in tr.dns_providers if catalogs.dns_provider(k) is None]
     out += [f"hosts_blocklists.{k}" for k in tr.hosts_blocklists if catalogs.blocklist(k) is None]
     out += [f"presets.{k}" for k in tr.presets if catalogs.preset(k) is None]
+    out += [
+        f"association_groups.{k}"
+        for k in tr.association_groups
+        if catalogs.association_group(k) is None
+    ]
     return out

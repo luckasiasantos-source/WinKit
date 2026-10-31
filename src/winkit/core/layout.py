@@ -49,6 +49,10 @@ def backups_dir(profile_id: str) -> str:
     return f"{profile_dir(profile_id)}/Backups"
 
 
+def associations_file(profile_id: str) -> str:
+    return f"{profile_dir(profile_id)}/Associacoes/exportado.xml"
+
+
 def fonts_dir(profile_id: str) -> str:
     return f"{profile_dir(profile_id)}/Fontes"
 

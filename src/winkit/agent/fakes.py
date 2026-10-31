@@ -13,6 +13,7 @@ from winkit.platform.fakes.apps import (
     FakeShortcuts,
     FakeWinget,
 )
+from winkit.platform.fakes.associations import FakeAssociations
 from winkit.platform.fakes.dns import FakeDns
 from winkit.platform.fakes.drivers import FakeDriverManager
 from winkit.platform.fakes.powershell import FakePowerShell
@@ -64,6 +65,7 @@ def fake_agent_services(*, pendrive: Path, system: Path, **overrides: Any) -> Ag
         "dns": FakeDns(),
         "drive_mapper": FakeDriveMapper(),
         "font_loader": FakeFontLoader(),
+        "associations": FakeAssociations(),
     }
     values.update(overrides)
     return AgentServices(**values)

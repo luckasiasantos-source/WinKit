@@ -989,4 +989,32 @@ MESSAGES: dict[str, Entry] = {
     "cli.h.fonts": "fontes da receita",
     "cli.h.collect_fonts": "lê as fontes instaladas neste PC",
     "cli.h.font_ids": "ids das fontes (veja 'fontes listar')",
+    "plan.default_apps": "Apps padrão",
+    "plan.default_apps_verify": "Conferir os apps padrão",
+    "preview.default_apps": "definir os apps padrão",
+    "step.default_apps.manual": "o Windows só deixa definir os apps padrão na instalação; escolha em Configurações > Aplicativos > Aplicativos padrão",
+    "step.default_apps.code": "o dism recusou os apps padrão (código {code})",
+    "step.default_apps.imported": Plural(
+        one="{n} app padrão definido", other="{n} apps padrão definidos"
+    ),
+    "step.default_apps.pending": Plural(
+        one="{n} item não pegou (veja o resumo)", other="{n} itens não pegaram (veja o resumo)"
+    ),
+    "step.default_apps.all_set": "todos os apps padrão estão certos",
+    "summary.default_apps_pending": "Confirme os apps padrão em Configurações > Aplicativos > Aplicativos padrão para: {ids}",
+    "studio.defaults.title": "Apps padrão",
+    "studio.defaults.subtitle": "Navegador, leitor de PDF, players e compactador padrão iguais aos deste PC.",
+    "studio.defaults.read": "Ler deste PC",
+    "studio.defaults.reading": "Lendo os apps padrão…",
+    "studio.defaults.none": "Nenhum app padrão lido ainda.",
+    "studio.defaults.no_app": "nenhum app escolhido neste PC",
+    "studio.defaults.warning_title": "O Windows protege a escolha de apps padrão",
+    "studio.defaults.warning": "O WinKit aplica o que der na instalação; para apps instalados depois do primeiro login, o resumo pede para você confirmar em Aplicativos padrão.",
+    "studio.keywords.defaults": "apps padrão associação de arquivos navegador pdf abrir com",
+    "studio.live.kind.default_apps": "Apps padrão",
+    "studio.live.kind.default_apps_verify": "Conferir os apps padrão",
+    "cli.defaults_unavailable": "A leitura dos apps padrão está indisponível neste PC.",
+    "cli.h.defaults": "apps padrão da receita",
+    "cli.h.collect_defaults": "lê os apps padrão deste PC",
+    "cli.h.default_groups": "grupos (browser, pdf, video, music, images, archives, email, text)",
 }

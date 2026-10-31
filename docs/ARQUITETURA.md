@@ -146,6 +146,7 @@ Por que isso importa:
 | `core/maintenance.py`, `agent/steps/maintenance.py`, `platform/scheduler.py` (tarefas do usuário e nativas) | Manutenção (V2-18): especificação pura da tarefa do winget, otimização nativa do disco, Sensor de Armazenamento como ajuste |
 | `data/presets.yaml`, `core/presets.py` | Perfis rápidos (V2-15): aplicar = mesclar (D-040), a prévia usa a mesma função numa cópia |
 | `core/fonts.py`, `collector/fonts.py`, `platform/fonts.py`, `agent/steps/font.py` | Fontes (V2-07): leitor da tabela `name`, cópia ao marcar, instalação sem sobrescrever (`_winkit`) |
+| `data/file_associations.yaml`, `core/associations.py`, `platform/associations.py`, `collector/associations.py`, `agent/steps/default_apps.py` | Apps padrão (V2-05): XML do `dism` inteiro no pendrive, filtrado por grupo na hora; importação só na Fase 1; conferência do `UserChoice` na Fase 2 |
 | `core/secrets.py` | Registro único de segredos do processo (R-53); `runner` e `EventLog` mascaram |
 | `core/wifi.py`, `collector/wifi.py`, `platform/wifi.py`, `agent/steps/wifi.py` | Wi-Fi (V2-02): XML do perfil, coleta, `netsh` só por código de saída e arquivos, etapa antes do login |
 | `core/media.py` | Pendrive comum (D-034): reconhecer a mídia de instalação, marcar o `autounattend.xml` do WinKit |

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DefaultAssociations>
+  <Association Identifier=".htm" ProgId="FirefoxHTML-308046B0AF4A39CB" ApplicationName="Firefox" />
+  <Association Identifier=".html" ProgId="FirefoxHTML-308046B0AF4A39CB" ApplicationName="Firefox" />
+  <Association Identifier=".pdf" ProgId="SumatraPDF" ApplicationName="SumatraPDF" />
+  <Association Identifier=".mp4" ProgId="VLC.mp4" ApplicationName="VLC media player" />
+  <Association Identifier=".mkv" ProgId="VLC.mkv" ApplicationName="VLC media player" />
+  <Association Identifier=".txt" ProgId="txtfile" ApplicationName="Bloco de Notas" />
+  <Association Identifier="http" ProgId="FirefoxURL-308046B0AF4A39CB" ApplicationName="Firefox" />
+  <Association Identifier="https" ProgId="FirefoxURL-308046B0AF4A39CB" ApplicationName="Firefox" />
+  <Association Identifier="mailto" ProgId="" ApplicationName="" />
+</DefaultAssociations>

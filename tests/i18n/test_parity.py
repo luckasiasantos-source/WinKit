@@ -81,6 +81,7 @@ SAME_AS_BASE: dict[str, set[str]] = {
         "step.env.set",
         "studio.presets.confirm_title",
         "studio.fonts.origin_machine",
+        "cli.h.default_groups",
     },
 }
 ALWAYS_SAME = {

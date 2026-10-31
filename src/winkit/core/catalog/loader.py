@@ -29,6 +29,7 @@ FILES: dict[str, str] = {
     "hosts_blocklists": "hosts_blocklists.yaml",
     "protected_env": "protected_env.yaml",
     "presets": "presets.yaml",
+    "association_groups": "file_associations.yaml",
 }
 
 
@@ -74,6 +75,7 @@ def _check_unique(c: Catalogs) -> None:
         "dns_providers.yaml": [d.id for d in c.dns_providers],
         "hosts_blocklists.yaml": [b.id for b in c.hosts_blocklists],
         "presets.yaml": [p.id for p in c.presets],
+        "file_associations.yaml": [g.id for g in c.association_groups],
     }
     for name, ids in groups.items():
         dupes = sorted({i for i in ids if ids.count(i) > 1})

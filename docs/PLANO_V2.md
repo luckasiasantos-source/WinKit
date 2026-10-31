@@ -334,10 +334,10 @@ class Environment(_Model):          # M14 — V2-22
     variables: list[EnvVar] = []       # EnvVar também ganhou `selected`
     path_entries: list[EnvPathEntry] = []
 
-class DefaultApps(_Model):          # M15 — V2-05
+class DefaultApps(_Model):          # M15 — V2-05 (implementado assim)
     enabled: bool = False
-    associations_file: PayloadPath | None = None   # XML do DISM filtrado
-    selected: list[str] = []        # extensões e protocolos (".pdf", "http")
+    associations_file: PayloadPath | None = None   # XML do DISM inteiro; filtrado na hora
+    groups: list[str] = []          # ids de file_associations.yaml (navegador, pdf…)
 
 class Personal(_Model):             # M15 — V2-06
     groups: list[str] = []          # ids de grupos de personal_settings.yaml

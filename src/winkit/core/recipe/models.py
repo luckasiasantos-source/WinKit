@@ -285,6 +285,14 @@ class FontItem(_Model):
     selected: bool = False
 
 
+class DefaultApps(_Model):
+    """V2-05: apps padrão. O XML exportado fica inteiro no pendrive; os grupos filtram."""
+
+    enabled: bool = False
+    associations_file: PayloadPath | None = None
+    groups: list[ItemId] = Field(default_factory=list)
+
+
 class RestorePoint(_Model):
     """V2-10: ponto de restauração "Windows pronto" no fim da instalação (M12)."""
 
@@ -319,6 +327,7 @@ class Recipe(_Model):
     #: V2-15: perfis rápidos já aplicados (só histórico, para a tela).
     presets_applied: list[str] = Field(default_factory=list)
     fonts: list[FontItem] = Field(default_factory=list)
+    default_apps: DefaultApps = Field(default_factory=DefaultApps)
 
     # ---- consultas de conveniência (sem efeito colateral)
     def app(self, app_id: str) -> AppItem | None:

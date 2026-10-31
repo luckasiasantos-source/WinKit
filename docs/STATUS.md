@@ -202,7 +202,8 @@
 ### M15 — Personalização 🟨
 - ✅ V2-15 Perfis rápidos: Gamer, Privacidade máxima, Escritório e Programador (`presets.yaml`); 5 ajustes novos na categoria Jogos; aplicar mescla e nunca desmarca, com prévia; o Gamer mantém o Xbox Game Bar; Studio (cartão no topo de Ajustes) e CLI (`perfil-rapido listar|aplicar [--simular]`)
 - ✅ V2-07 Fontes: leitor da tabela `name` (TTF, OTF, TTC) sem dependência nova; coleta das fontes do usuário e das da máquina instaladas depois do Windows; o arquivo só vai para o pendrive ao marcar; instalação para todos os usuários sem sobrescrever (`_winkit`); ao vivo carrega na sessão; Studio (grupo O que levar) e CLI (`coletar fontes`, `fontes listar|marcar|desmarcar`)
-- ⬜ V2-05 Apps padrão · V2-06 Aparência · V2-12 Navegadores · V2-04 Iniciar e barra
+- ✅ V2-05 Apps padrão: `dism /Export-DefaultAppAssociations` (só código de saída e XML), grupos do catálogo (navegador, PDF, vídeo, música, imagens, compactados, e-mail, texto) com o app atual; importação na Fase 1 depois dos apps offline (R20); conferência do `UserChoice` na Fase 2 com aviso no resumo do que não pegou; fora da Fase 1 e ao vivo, só a instrução manual; Studio (O que levar) e CLI (`coletar associacoes`, `associacoes listar|marcar|desmarcar`)
+- ⬜ V2-06 Aparência · V2-12 Navegadores · V2-04 Iniciar e barra
 
 ## Hipóteses técnicas
 
@@ -228,5 +229,6 @@
 | H18 | O instalador usa o `autounattend.xml` do pendrive de boot mesmo com outra mídia removível | ⬜ | — |
 | H21 | `Mount-DiskImage -Access ReadOnly` de uma ISO na partição exFAT do Ventoy funciona na Fase 1, como SYSTEM | ⬜ | — |
 | H22 | `Enable-WindowsOptionalFeature` funciona na Fase 1 sem o serviço Windows Update ativo | ⬜ | — |
+| H25 | `/Import-DefaultAppAssociations` na Fase 1 vale para a conta criada no primeiro login, para apps já instalados | ⬜ | — |
 | H24 | Valores em `HKCU\Network` gravados no perfil Default são reconectados no primeiro login do usuário novo | ⬜ | — |
 | H23 | `Set-DnsClientServerAddress` funciona na Fase 1 para adaptadores cujo driver acabou de ser instalado pelo `pnputil` | ⬜ | — |

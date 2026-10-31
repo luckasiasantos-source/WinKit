@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from winkit.core.regional import RegionalDefaults
+from winkit.platform.associations import AssociationsTool, DismAssociations
 from winkit.platform.copy import Copier, RobocopyCopier
 from winkit.platform.disks import DiskInspector, WindowsDiskInspector
 from winkit.platform.drivers import DriverManager, WindowsDriverManager
@@ -42,6 +43,7 @@ class Services:
     #: Registro do PC atual (unidades de rede, variáveis de ambiente).
     registry: Registry | None = None
     scheduler: TaskScheduler | None = None
+    associations: AssociationsTool | None = None
 
 
 def real_services() -> Services:
@@ -62,4 +64,5 @@ def real_services() -> Services:
         features=WindowsSystemFeatures(ps),
         registry=registry,
         scheduler=WindowsTaskScheduler(ps),
+        associations=DismAssociations(runner),
     )

@@ -42,6 +42,7 @@ _G1 = {
     "env": 48,
     "font": 49,
     "backup": 50,
+    "default_apps": 65,  # depois dos apps offline, para que os ProgIds já existam
     "app": 60,
 }
 _G2 = {
@@ -53,7 +54,8 @@ _G2 = {
     "maintenance": 55,  # R27: a tarefa do winget é do usuário
     "rename_computer": 60,
     "windows_update": 70,
-    "driver_report": 75,  # R28: depois do Windows Update, que já resolve muitos drivers
+    "driver_report": 75,
+    "default_apps_verify": 77,  # R28: depois do Windows Update, que já resolve muitos drivers
     "restore_point": 80,
     "finalize": 99,
 }
@@ -109,6 +111,7 @@ def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> 
     _plan_maintenance(recipe, drafts)
     _plan_env(recipe, drafts)
     _plan_fonts(recipe, drafts)
+    _plan_default_apps(recipe, ctx, drafts)
     _plan_power(recipe, drafts)
     _plan_bloat(recipe, catalogs, ctx, drafts, excluded)
     _plan_features(recipe, catalogs, ctx, drafts, excluded)
@@ -253,6 +256,36 @@ def _plan_fonts(recipe: Recipe, out: list[_Draft]) -> None:
                     sort=(_G1["font"], 0, f.id),
                 )
             )
+
+
+def _plan_default_apps(recipe: Recipe, ctx: PlanContext, out: list[_Draft]) -> None:  # R20
+    d = recipe.default_apps
+    if not (d.enabled and d.groups and d.associations_file):
+        return
+    out.append(
+        _Draft(
+            "default_apps",
+            "import",
+            1,
+            t("plan.default_apps"),
+            "machine",
+            needs_pendrive=True,
+            sort=(_G1["default_apps"], 0, "import"),
+        )
+    )
+    if ctx.mode == "install":
+        out.append(
+            _Draft(
+                "default_apps_verify",
+                "user",
+                2,
+                t("plan.default_apps_verify"),
+                "user_profile",
+                needs_pendrive=True,
+                depends_on=["default_apps:import"],
+                sort=(_G2["default_apps_verify"], 0, "user"),
+            )
+        )
 
 
 def _plan_power(recipe: Recipe, out: list[_Draft]) -> None:  # R5

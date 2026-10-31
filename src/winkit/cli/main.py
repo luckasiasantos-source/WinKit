@@ -35,6 +35,7 @@ from winkit.builder.build import (
 )
 from winkit.builder.validate import validate_pendrive
 from winkit.collector import apps as app_collector
+from winkit.collector import associations as assoc_collector
 from winkit.collector import backups as backup_collector
 from winkit.collector import drivers as driver_collector
 from winkit.collector import env as env_collector
@@ -1019,6 +1020,60 @@ def _add_font_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
         fm.set_defaults(func=cmd_fontes_marcar, command_value=value)
 
 
+# ------------------------------------------------------------------ apps padrão (V2-05)
+def cmd_coletar_associacoes(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    if services.associations is None:
+        out(t("cli.defaults_unavailable"))
+        return 1
+    assoc_collector.collect_associations(
+        services.associations, tgt.root, recipe, default_catalogs()
+    )
+    _save(tgt, recipe)
+    out(t("studio.defaults.warning"))
+    return cmd_associacoes_listar(args, services, out)
+
+
+def cmd_associacoes_listar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    if not recipe.default_apps.associations_file:
+        out(t("studio.defaults.none"))
+        return 0
+    for group, app in assoc_collector.group_rows(tgt.root, recipe, default_catalogs()):
+        mark = "x" if group.id in recipe.default_apps.groups else " "
+        out(f"  [{mark}] {group.id:10} {group.name}: {app or t('studio.defaults.no_app')}")
+    return 0
+
+
+def cmd_associacoes_marcar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    catalogs = default_catalogs()
+    missing = [g for g in args.grupos if catalogs.association_group(g) is None]
+    for group_id in args.grupos:
+        if group_id not in missing:
+            assoc_collector.set_group(recipe, group_id, args.command_value)
+    _save(tgt, recipe)
+    if missing:
+        out(t("cli.not_found", ids=", ".join(missing)))
+        return 1
+    return cmd_associacoes_listar(args, services, out)
+
+
+def _add_default_apps_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    da = sub.add_parser("associacoes", aliases=["defaults"], help=t("cli.h.defaults"))
+    da_sub = da.add_subparsers(dest="action", required=True)
+    da_sub.add_parser("listar", aliases=["list"], parents=[common]).set_defaults(
+        func=cmd_associacoes_listar
+    )
+    for name, alias, value in (("marcar", "select", True), ("desmarcar", "deselect", False)):
+        dm = da_sub.add_parser(name, aliases=[alias], parents=[common])
+        dm.add_argument("grupos", nargs="+", help=t("cli.h.default_groups"))
+        dm.set_defaults(func=cmd_associacoes_marcar, command_value=value)
+
+
 def _add_dns_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     dns = sub.add_parser("dns", help=t("cli.h.dns"))
     dns_sub = dns.add_subparsers(dest="action", required=True)
@@ -1146,6 +1201,10 @@ def _add_collect_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
         "fontes", aliases=["fonts"], parents=[common], help=t("cli.h.collect_fonts")
     )
     cfo.set_defaults(func=cmd_coletar_fontes)
+    cas = col_sub.add_parser(
+        "associacoes", aliases=["defaults"], parents=[common], help=t("cli.h.collect_defaults")
+    )
+    cas.set_defaults(func=cmd_coletar_associacoes)
 
     capp = col_sub.add_parser("apps", parents=[common], help=t("cli.h.collect_apps"))
     capp.add_argument(
@@ -1261,6 +1320,7 @@ def _add_system_and_network_parsers(sub: Any, common: argparse.ArgumentParser) -
     _add_env_parsers(sub, common)
     _add_preset_parsers(sub, common)
     _add_font_parsers(sub, common)
+    _add_default_apps_parsers(sub, common)
 
 
 def build_parser() -> argparse.ArgumentParser:

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 from winkit.platform.accounts import Accounts, WindowsAccounts
 from winkit.platform.appx import AppxManager, WindowsAppxManager
+from winkit.platform.associations import AssociationsTool, DismAssociations
 from winkit.platform.copy import Copier, RobocopyCopier
 from winkit.platform.devices import DeviceInspector, WindowsDeviceInspector
 from winkit.platform.dns import DnsClient, WindowsDnsClient
@@ -56,6 +57,7 @@ class AgentServices:
     dns: DnsClient
     drive_mapper: DriveMapper
     font_loader: FontLoader
+    associations: AssociationsTool
 
 
 def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windows
@@ -87,4 +89,5 @@ def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windo
         dns=WindowsDnsClient(ps),
         drive_mapper=WindowsDriveMapper(ps),
         font_loader=WindowsFontLoader(),
+        associations=DismAssociations(runner),
     )

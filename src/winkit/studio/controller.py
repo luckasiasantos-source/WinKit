@@ -29,6 +29,7 @@ from winkit.builder.build import (
 from winkit.builder.isos import scan_isos
 from winkit.builder.validate import PendriveReport, validate_pendrive
 from winkit.collector import apps as app_collector
+from winkit.collector import associations as assoc_collector
 from winkit.collector import backups as backup_collector
 from winkit.collector import drivers as driver_collector
 from winkit.collector import env as env_collector
@@ -38,7 +39,7 @@ from winkit.collector import netdrives as netdrive_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import layout
 from winkit.core.catalog.loader import default_catalogs
-from winkit.core.catalog.models import Catalogs
+from winkit.core.catalog.models import AssociationGroup, Catalogs
 from winkit.core.errors import RecipeError, WinKitError
 from winkit.core.isos import IsoInfo
 from winkit.core.live import LivePreview
@@ -379,6 +380,24 @@ class StudioController:
         font_collector.select_font(
             self.root, self.require_recipe(), font_id, selected, self.services.volume_root
         )
+        self.save()
+
+    def collect_default_apps(self) -> int:
+        """Exporta os apps padrão deste PC (V2-05); devolve quantas associações leu."""
+        recipe = self.require_recipe()
+        if self.services.associations is None:
+            return 0
+        items = assoc_collector.collect_associations(
+            self.services.associations, self.root, recipe, self.catalogs
+        )
+        self.save()
+        return len(items)
+
+    def default_app_rows(self) -> list[tuple[AssociationGroup, str | None]]:
+        return assoc_collector.group_rows(self.root, self.require_recipe(), self.catalogs)
+
+    def set_default_app_group(self, group_id: str, selected: bool) -> None:
+        assoc_collector.set_group(self.require_recipe(), group_id, selected)
         self.save()
 
     def preset_preview(self, preset_id: str) -> PresetResult:

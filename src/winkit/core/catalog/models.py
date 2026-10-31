@@ -333,6 +333,20 @@ class Preset(_Model):
     winget_weekly: bool = False
 
 
+# ------------------------------------------------------------------ apps padrão (V2-05)
+class AssociationGroup(_Model):
+    id: Annotated[str, Field(pattern=r"^[a-z0-9_]+$")]
+    name: str
+    #: Extensões (``.pdf``) e protocolos (``http``), em minúsculas.
+    identifiers: Annotated[list[str], Field(min_length=1)]
+
+    @model_validator(mode="after")
+    def _lower(self) -> Self:
+        if any(i != i.lower() for i in self.identifiers):
+            raise ValueError(f"{self.id}: identificadores em minúsculas")
+        return self
+
+
 # ------------------------------------------------------------------ outros
 class EditionEntry(_Model):
     id: str
@@ -378,6 +392,10 @@ class Catalogs(_Model):
     hosts_blocklists: list[HostsBlocklist] = Field(default_factory=list)
     protected_env: ProtectedEnv = Field(default_factory=ProtectedEnv)
     presets: list[Preset] = Field(default_factory=list)
+    association_groups: list[AssociationGroup] = Field(default_factory=list)
+
+    def association_group(self, group_id: str) -> AssociationGroup | None:
+        return next((x for x in self.association_groups if x.id == group_id), None)
 
     def preset(self, preset_id: str) -> Preset | None:
         return next((x for x in self.presets if x.id == preset_id), None)

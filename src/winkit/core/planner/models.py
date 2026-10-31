@@ -17,6 +17,7 @@ StepKind = Literal[
     "maintenance",
     "env",
     "font",
+    "default_apps",
     "bloat",
     "feature",
     "tweak",
@@ -27,6 +28,7 @@ StepKind = Literal[
     "rename_computer",
     "windows_update",
     "driver_report",
+    "default_apps_verify",
     "restore_point",
     "finalize",
 ]

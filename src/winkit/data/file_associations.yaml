@@ -1,0 +1,26 @@
+# Grupos de apps padrão (V2-05, M15). Cada grupo junta as extensões e protocolos que o
+# usuário entende como "o mesmo app" (ex.: o navegador abre http, https e .html).
+- id: browser
+  name: Navegador
+  identifiers: [http, https, .htm, .html]
+- id: pdf
+  name: Leitor de PDF
+  identifiers: [.pdf]
+- id: video
+  name: Vídeo
+  identifiers: [.mp4, .mkv, .avi, .mov, .wmv, .webm]
+- id: music
+  name: Música
+  identifiers: [.mp3, .flac, .m4a, .wav, .ogg, .aac]
+- id: images
+  name: Imagens
+  identifiers: [.jpg, .jpeg, .png, .gif, .webp, .bmp]
+- id: archives
+  name: Arquivos compactados
+  identifiers: [.zip, .7z, .rar]
+- id: email
+  name: E-mail
+  identifiers: [mailto]
+- id: text
+  name: Texto
+  identifiers: [.txt, .md, .log]

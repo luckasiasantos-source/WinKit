@@ -28,6 +28,19 @@
 
 ---
 
+## 2026-10-31 — M15 — Apps padrão (V2-05)
+**Tipo:** implementação
+**Resumo:** navegador, leitor de PDF, players, visualizador e compactador padrão iguais aos do PC antigo, aplicados na instalação. O que o Windows não deixar (apps instalados depois do login) aparece no resumo para confirmar.
+
+### Adicionado
+- `src/winkit/data/file_associations.yaml` (+ traduções), `src/winkit/core/associations.py`, `src/winkit/platform/associations.py`, `src/winkit/platform/fakes/associations.py`, `src/winkit/collector/associations.py`, `src/winkit/agent/steps/default_apps.py`
+- Receita: `default_apps` (aditivo); plano: `default_apps:import` (Fase 1) e `default_apps_verify:user` (Fase 2)
+- Serviços do Studio: `associations`; Studio: seção "Apps padrão"; CLI: `coletar associacoes`, `associacoes listar|marcar|desmarcar`
+- Testes: `tests/agent/test_default_apps.py` e a fixture `tests/fixtures/associations/exportado.xml`
+
+### Documentos vivos atualizados
+- ARQUITETURA — módulos; STATUS — V2-05, H25; PLANO_V2 — §5.1
+
 ## 2026-10-31 — M15 — Perfis rápidos (V2-15) e fontes (V2-07)
 **Tipo:** implementação
 **Resumo:** um clique aplica o perfil Gamer, Privacidade máxima, Escritório ou Programador, sempre somando à receita. As fontes instaladas no PC antigo vão para o Windows novo, para todos os usuários. A release 0.5.0 foi disparada antes deste commit.

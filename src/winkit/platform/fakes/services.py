@@ -8,6 +8,7 @@ from typing import Any
 
 from winkit.platform.copy import PythonCopier
 from winkit.platform.fakes.apps import FakeInventory, FakeWinget
+from winkit.platform.fakes.associations import FakeAssociations
 from winkit.platform.fakes.backup import FakeOldPcFolders, FakeShadowCopies
 from winkit.platform.fakes.disks import FakeDiskInspector, windows_iso
 from winkit.platform.fakes.drivers import FakeDriverManager
@@ -34,6 +35,7 @@ def fake_services(*, old_pc: Path | None = None, **overrides: Any) -> Services:
         "wifi": FakeWifi(),
         "registry": FakeRegistry(),
         "scheduler": FakeScheduler(),
+        "associations": FakeAssociations(),
     }
     values.update(overrides)
     return Services(**values)

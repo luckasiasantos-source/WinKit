@@ -13,7 +13,7 @@ from winkit.i18n import t, tn
 from winkit.i18n.format import format_size
 from winkit.studio.ui.base import Page
 from winkit.studio.ui.pages.common import choice_row, empty, toggle
-from winkit.ui.widgets import Card, Row, button, kind_icon, section
+from winkit.ui.widgets import Card, Row, button, kind_icon, section, symbol_icon
 
 
 def app_subtitle(a: AppItem) -> str:
@@ -378,3 +378,51 @@ class FontsPage(Page):
             )
 
         self.tasks.run(t("studio.fonts.reading"), self.ctl.collect_fonts, done)
+
+
+class DefaultAppsPage(Page):
+    """V2-05: navegador, PDF, vídeo… padrão iguais aos do PC antigo."""
+
+    title_key = "studio.defaults.title"
+    subtitle_key = "studio.defaults.subtitle"
+
+    def refresh(self) -> None:
+        self.clear_content()
+        if self.needs_recipe():
+            return
+        r = self.ctl.recipe
+        assert r is not None  # noqa: S101
+        self.content.addLayout(
+            self.toolbar(button(t("studio.defaults.read"), "Primary", self._read))
+        )
+        card = Card()
+        if r.default_apps.associations_file:
+            for group, app in self.ctl.default_app_rows():
+                card.add_row(
+                    choice_row(
+                        group.name,
+                        app or t("studio.defaults.no_app"),
+                        icon_kind="default_apps",
+                        selected=group.id in r.default_apps.groups,
+                        enabled=app is not None,
+                        on_select=partial(self._set, group.id),
+                    )
+                )
+        self.content.addWidget(section("", card if card.rows else empty(t("studio.defaults.none"))))
+        warn = Card()
+        warn.add_row(
+            Row(
+                t("studio.defaults.warning_title"),
+                t("studio.defaults.warning"),
+                icon=symbol_icon("!", "#FF9500"),
+            )
+        )
+        self.content.addWidget(section("", warn))
+
+    def _set(self, group_id: str, value: bool) -> None:
+        self.ctl.set_default_app_group(group_id, value)
+
+    def _read(self) -> None:
+        self.tasks.run(
+            t("studio.defaults.reading"), self.ctl.collect_default_apps, lambda _: self.refresh()
+        )

@@ -364,3 +364,20 @@ presets:
   developer:
     name: "Developer"
     description: "WSL, SSH client and weekly app updates."
+association_groups:
+  browser:
+    name: Browser
+  pdf:
+    name: PDF reader
+  video:
+    name: Video
+  music:
+    name: Music
+  images:
+    name: Images
+  archives:
+    name: Compressed files
+  email:
+    name: Email
+  text:
+    name: Text

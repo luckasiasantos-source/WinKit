@@ -380,6 +380,8 @@ KIND_STYLE: dict[str, tuple[str, str]] = {
     "maintenance": ("refresh", "#34C759"),
     "env": ("sliders", "#8E8E93"),
     "font": ("pencil", "#FF2D55"),
+    "default_apps": ("check", "#007AFF"),
+    "default_apps_verify": ("check", "#007AFF"),
     "finalize": ("check", "#34C759"),
 }
 
