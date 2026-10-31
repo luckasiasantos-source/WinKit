@@ -123,6 +123,8 @@ MESSAGES: dict[str, str] = {
     "agent.waiting_winget": "Aguardando o winget ficar disponível…",
     "agent.waiting_network": "Aguardando conexão com a internet…",
     # ---------------------------------------------------------------- interface do Agente
+    "ui.ask": "Perguntar",
+    "ui.ask_tip": "Mostrar na janela do primeiro login para confirmar na hora",
     "ui.agent.title": "Finalizando a configuração",
     "ui.agent.subtitle": "O Windows já está instalado. Falta pouco para deixar tudo do seu jeito.",
     "ui.agent.nothing_before": "Nada — tudo será feito agora.",

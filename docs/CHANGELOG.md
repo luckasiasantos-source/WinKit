@@ -28,6 +28,36 @@
 
 ---
 
+## 2026-10-31 — M10 — WinKit Studio (GUI estilo macOS)
+**Tipo:** implementação + infraestrutura + testes + documentação
+**Resumo:** o aplicativo gráfico para o PC atual, com o visual pedido pelo usuário (estilo "Ajustes do Sistema" do Mac): todas as escolhas da receita sem editar arquivos, e "Construir pendrive" com um clique.
+
+### Adicionado
+- `src/winkit/studio/controller.py` — `StudioController`
+- `src/winkit/studio/ui/base.py` — `Page`, `TaskRunner`, `WorkingSheet`, `show_error`
+- `src/winkit/studio/ui/pages.py` — 10 páginas
+- `src/winkit/studio/ui/window.py` — `StudioWindow`, `SECTIONS`
+- `src/winkit/studio/main.py` — entrada da GUI (`--teste-fumaca`)
+- `src/winkit/ui/widgets.py` — `SegmentedControl`, `ask_pill`
+- `packaging/entry_studio.py`, `winkit-studio.spec`, `make_icon.py`
+- Testes: `tests/studio/test_controller.py`, `tests/ui/test_studio_ui.py`
+- `docs/imagens/studio-*.png`, `docs/validacao/M10.md`
+
+### Alterado
+- `src/winkit/ui/theme.py` — controle segmentado, botões "Perguntar", seta desenhada das listas, títulos da barra lateral
+- `src/winkit/platform/registry.py` — `winreg` carregado no primeiro uso
+- `packaging/*.spec`, `build.ps1`, `LEIA-ME.txt` — ícone, Studio no pacote
+- `.github/workflows/ci.yml` — fumaça do Studio empacotado
+- `.gitignore` — ícone gerado
+
+### Documentos vivos atualizados
+- STATUS — M10 e fase do projeto; ARQUITETURA — D-027, módulos
+
+### Decisões
+- D-027 (Studio como executável próprio, com elevação)
+
+---
+
 ## 2026-10-31 — M9 — Janela do Agente (estilo macOS)
 **Tipo:** implementação + testes + documentação
 **Resumo:** a Fase 2 ganha a interface pedida: janela no estilo macOS com contagem regressiva, modo interativo, escolhas na hora e progresso por etapa; modo silencioso só com bandeja e notificação.

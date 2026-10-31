@@ -37,6 +37,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from winkit.i18n import t
 from winkit.ui import theme
 
 
@@ -192,6 +193,54 @@ class Row(QWidget):
         self.subtitle_label.setVisible(bool(text))
 
 
+class SegmentedControl(QWidget):
+    """Seletor em pílula (NSSegmentedControl)."""
+
+    changed = Signal(str)
+
+    def __init__(
+        self, options: list[tuple[str, str]], value: str, parent: QWidget | None = None
+    ) -> None:
+        super().__init__(parent)
+        self.setObjectName("Segmented")
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        lay = QHBoxLayout(self)
+        lay.setContentsMargins(2, 2, 2, 2)
+        lay.setSpacing(0)
+        self.buttons: dict[str, QPushButton] = {}
+        for key, text in options:
+            b = QPushButton(text)
+            b.setObjectName("Segment")
+            b.setCheckable(True)
+            b.setCursor(Qt.CursorShape.PointingHandCursor)
+            b.clicked.connect(lambda _=False, k=key: self.set_value(k, emit=True))
+            lay.addWidget(b)
+            self.buttons[key] = b
+        self._value = value
+        self.set_value(value)
+
+    def value(self) -> str:
+        return self._value
+
+    def set_value(self, key: str, *, emit: bool = False) -> None:
+        self._value = key
+        for k, b in self.buttons.items():
+            b.setChecked(k == key)
+        if emit:
+            self.changed.emit(key)
+
+
+def ask_pill(checked: bool) -> QPushButton:
+    """Botão pequeno "Perguntar" (decidir na hora, item 35)."""
+    b = QPushButton(t("ui.ask"))
+    b.setObjectName("Pill")
+    b.setCheckable(True)
+    b.setChecked(checked)
+    b.setCursor(Qt.CursorShape.PointingHandCursor)
+    b.setToolTip(t("ui.ask_tip"))
+    return b
+
+
 def section(title: str, card: Card, *, footer: str | None = None) -> QWidget:
     """Cabeçalho cinza em maiúsculas + cartão + rodapé opcional (como no Mac)."""
     box = QWidget()
@@ -285,7 +334,9 @@ def symbol_icon(kind: str, color: str, size: int = 22) -> QIcon:
         painter.setFont(font)
         painter.drawText(QRectF(0, 0, s, s), Qt.AlignmentFlag.AlignCenter, kind[:1].upper())
     painter.end()
-    return QIcon(pm)
+    icon = QIcon(pm)
+    icon.addPixmap(pm, QIcon.Mode.Selected)  # sem o escurecimento padrão ao selecionar
+    return icon
 
 
 def app_icon(size: int = 64) -> QIcon:

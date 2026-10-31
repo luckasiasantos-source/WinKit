@@ -1,30 +1,19 @@
 WinKit — como usar
 ==================
 
-Esta pasta tem dois programas:
-  winkit\winkit.exe              linha de comando (rode como ADMINISTRADOR)
-  winkit-agent\                  o Agente; o "construir" copia esta pasta para o pendrive
+Esta pasta tem três programas:
+  winkit-studio\winkit-studio.exe   o aplicativo (janela). Comece por aqui.
+  winkit\winkit.exe                 a mesma coisa pela linha de comando (rode como administrador)
+  winkit-agent\                     o Agente; o Studio copia esta pasta para o pendrive sozinho
 
-Passo a passo (Prompt de Comando ou PowerShell como administrador, dentro desta pasta):
-
-  1. Ver o pendrive Ventoy conectado:
-       winkit\winkit.exe pendrive listar
-
-  2. Criar a receita (troque E: pela letra do seu pendrive e Samuel pelo seu usuário):
-       winkit\winkit.exe receita nova --pendrive E: --usuario Samuel --nome-pc MEU-PC
-
-  3. Coletar apps, drivers e backups do PC atual (ver "winkit\winkit.exe coletar --help").
-
-  4. Ver o que o Agente vai fazer:
-       winkit\winkit.exe plano --pendrive E:
-
-  5. Preparar o pendrive:
-       winkit\winkit.exe construir --pendrive E:
-
-  6. Conferir:
-       winkit\winkit.exe validar --pendrive E:
+Pelo Studio (recomendado):
+  1. Conecte o pendrive com o Ventoy e abra winkit-studio.exe (ele pede administrador).
+  2. Pendrive: escolha o pendrive. Windows e conta: crie a receita.
+  3. Aplicativos, Configurações dos apps, Drivers, Apps pré-instalados, Ajustes, Energia,
+     Primeiro login: marque o que quiser.
+  4. Revisar e construir: clique em "Construir pendrive".
 
 Depois é só dar boot pelo Ventoy, escolher a ISO do Windows e o modelo "winkit-...".
 A ISO nunca é modificada. Tudo do WinKit fica na pasta WinKit\ do pendrive.
 
-Documentação completa: docs\ no repositório do projeto.
+Pela linha de comando: winkit\winkit.exe --help

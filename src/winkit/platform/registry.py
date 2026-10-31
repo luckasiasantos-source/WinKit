@@ -68,12 +68,19 @@ def encode_binary(data: str) -> bytes:
 
 class WindowsRegistry:  # pragma: no cover — exercitado no CI Windows
     def __init__(self, runner: CommandRunner) -> None:
+        self._runner: CommandRunner = runner
+        self._ready = False
+
+    def _init(self) -> None:
+        """Carrega o ``winreg`` no primeiro uso: criar o serviço nunca falha fora do Windows."""
+        if self._ready:
+            return
         if sys.platform != "win32":
             raise RegistryError("registro só existe no Windows")
         import winreg  # noqa: PLC0415 — só existe no Windows
 
         self._w: Any = winreg
-        self._runner: CommandRunner = runner
+        self._ready = True
         self._roots: dict[str, Any] = {
             "HKLM": winreg.HKEY_LOCAL_MACHINE,
             "HKCU": winreg.HKEY_CURRENT_USER,
@@ -89,12 +96,14 @@ class WindowsRegistry:  # pragma: no cover — exercitado no CI Windows
         }
 
     def _root(self, hive: str) -> Any:
+        self._init()
         try:
             return self._roots[hive]
         except KeyError as exc:
             raise RegistryError(f"hive desconhecido: {hive}") from exc
 
     def get(self, hive: str, key: str, value: str) -> Any:
+        self._init()
         w = self._w
         try:
             with w.OpenKey(self._root(hive), key, 0, w.KEY_READ | w.KEY_WOW64_64KEY) as k:
@@ -106,6 +115,7 @@ class WindowsRegistry:  # pragma: no cover — exercitado no CI Windows
             raise RegistryError(f"{hive}\\{key}\\{value}: {exc}") from exc
 
     def set(self, hive: str, key: str, value: str, reg_type: RegType, data: Any) -> None:
+        self._init()
         w = self._w
         payload = encode_binary(data) if reg_type == "binary" else data
         try:
@@ -115,6 +125,7 @@ class WindowsRegistry:  # pragma: no cover — exercitado no CI Windows
             raise RegistryError(f"{hive}\\{key}\\{value}: {exc}") from exc
 
     def delete_value(self, hive: str, key: str, value: str) -> bool:
+        self._init()
         w = self._w
         try:
             with w.OpenKey(self._root(hive), key, 0, w.KEY_SET_VALUE | w.KEY_WOW64_64KEY) as k:
@@ -126,6 +137,7 @@ class WindowsRegistry:  # pragma: no cover — exercitado no CI Windows
             raise RegistryError(f"{hive}\\{key}\\{value}: {exc}") from exc
 
     def delete_key(self, hive: str, key: str) -> bool:
+        self._init()
         w = self._w
         try:
             w.DeleteKeyEx  # noqa: B018 — garante a API
@@ -137,6 +149,7 @@ class WindowsRegistry:  # pragma: no cover — exercitado no CI Windows
             raise RegistryError(f"{hive}\\{key}: {exc}") from exc
 
     def _delete_tree(self, root: Any, key: str) -> None:
+        self._init()
         w = self._w
         access = w.KEY_ALL_ACCESS | w.KEY_WOW64_64KEY
         with w.OpenKey(root, key, 0, access) as k:
@@ -149,6 +162,7 @@ class WindowsRegistry:  # pragma: no cover — exercitado no CI Windows
         w.DeleteKeyEx(root, key, w.KEY_WOW64_64KEY, 0)
 
     def key_exists(self, hive: str, key: str) -> bool:
+        self._init()
         w = self._w
         try:
             with w.OpenKey(self._root(hive), key, 0, w.KEY_READ | w.KEY_WOW64_64KEY):
@@ -157,6 +171,7 @@ class WindowsRegistry:  # pragma: no cover — exercitado no CI Windows
             return False
 
     def create_key(self, hive: str, key: str) -> None:
+        self._init()
         w = self._w
         try:
             with w.CreateKeyEx(self._root(hive), key, 0, w.KEY_WRITE | w.KEY_WOW64_64KEY):
@@ -165,6 +180,7 @@ class WindowsRegistry:  # pragma: no cover — exercitado no CI Windows
             raise RegistryError(f"{hive}\\{key}: {exc}") from exc
 
     def subkeys(self, hive: str, key: str) -> list[str]:
+        self._init()
         w = self._w
         out: list[str] = []
         try:
@@ -181,6 +197,7 @@ class WindowsRegistry:  # pragma: no cover — exercitado no CI Windows
         return out
 
     def values(self, hive: str, key: str) -> dict[str, Any]:
+        self._init()
         w = self._w
         out: dict[str, Any] = {}
         try:

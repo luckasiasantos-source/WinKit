@@ -7,7 +7,7 @@
 
 **Última atualização:** 2026-10-31
 **Versão do código:** 0.1.0 (em desenvolvimento)
-**Fase do projeto:** implementação em andamento (autorizada pelo usuário para seguir de ponta a ponta de forma autônoma)
+**Fase do projeto:** v1 implementada (M0–M10); falta a validação em VM/PC real pelos roteiros de `docs/validacao/`
 
 ## Resumo
 
@@ -24,7 +24,7 @@
 | M7 | Bloatware e ajustes | ✅ código | ⬜ roteiro pronto (`docs/validacao/M7.md`) |
 | M8 | Windows Update, resumo e notificações | ✅ código | ⬜ roteiro pronto (`docs/validacao/M8.md`) |
 | M9 | Interface do Agente | ✅ código | ⬜ roteiro pronto (`docs/validacao/M9.md`) |
-| M10 | WinKit Studio (GUI) | ⬜ | — |
+| M10 | WinKit Studio (GUI) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M10.md`) |
 
 ## Detalhe por marco
 
@@ -136,7 +136,14 @@
 - ✅ Protocolo `AgentUi.step_result` (status real de cada etapa na lista)
 - ✅ Capturas em `docs/imagens/`
 - ✅ Roteiro `docs/validacao/M9.md`
-### M10 — WinKit Studio ⬜
+### M10 — WinKit Studio ✅ (código) · validação no PC pendente
+- ✅ `studio/controller.py` — fachada sem Qt sobre os mesmos serviços da CLI (R-36), testada à parte
+- ✅ `studio/ui/` — janela no estilo "Ajustes do Sistema" (D-026): barra lateral com 10 seções (Pendrive, Windows e conta, Aplicativos, Configurações dos apps, Drivers, Apps pré-instalados, Ajustes, Energia e atualizações, Primeiro login, Revisar e construir), tarefas demoradas fora da thread da interface com folha "Trabalhando…" (R-37)
+- ✅ Kit visual: controle segmentado, botão "Perguntar" (decidir na hora), seta das listas, ícones sem escurecer na seleção
+- ✅ Empacotamento: `packaging/winkit-studio.spec` (janela, pede administrador), ícone gerado (`make_icon.py`), CI abre o Studio pronto no modo `--teste-fumaca`
+- ✅ Registro do Windows carregado só no primeiro uso (o app não cai fora do Windows)
+- ✅ Capturas em `docs/imagens/studio-*.png`
+- ✅ Roteiro `docs/validacao/M10.md`
 
 (Itens detalhados de M4–M10 em `PLANO.md` §20; são desdobrados aqui quando o marco começar.)
 

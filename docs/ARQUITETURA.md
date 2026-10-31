@@ -141,6 +141,8 @@ Por que isso importa:
 | `agent/reboot.py`, `steps/windows_update.py` | Política de reinício; Windows Update |
 | `agent/steps/tweak.py`, `steps/system.py` | Motor de ajustes (onde gravar conforme o alvo); bloatware, energia, nome do PC |
 | `agent/steps/*.py` | Uma classe por tipo de etapa: `DriverStep`, `BloatStep`, `TweakStep`, `BackupStep`, `AppStep`, `ShortcutStep`, `WindowsUpdateStep`, `CleanupStep` |
+| `studio/controller.py` | Fachada do Studio sem Qt: pendrive, receita, apps, drivers, backups, plano, construir |
+| `studio/ui/` (`base.py`, `pages.py`, `window.py`), `studio/main.py` | GUI do Studio: barra lateral, 10 páginas, tarefas em segundo plano |
 | `agent/ui/qt.py` | Janela da Fase 2 (Início, Progresso, Concluído), diálogo de reinício, bandeja; ponte entre threads (import tardio) |
 | `ui/theme.py`, `ui/widgets.py` | Kit visual compartilhado estilo macOS (D-026) |
 
@@ -432,3 +434,9 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 **Contexto:** pedido do usuário: "uma interface bonita, bem feitinha, estilo Mac".
 **Decisão:** kit visual próprio em `winkit/ui` (folha de estilo gerada de tokens de cor claro/escuro, inspirada no "Ajustes do Sistema"): barra lateral, listas agrupadas em cartões arredondados, chaves animadas, botões em pílula com o azul de destaque, títulos grandes, ícones de símbolo em quadrados coloridos. A moldura da janela continua a do Windows (sem imitar os botões de semáforo do Mac). Fonte: Segoe UI Variable/Segoe UI no Windows.
 **Consequências:** o mesmo kit serve ao Agente e ao Studio; o import-linter garante que o kit não dependa de casos de uso nem da plataforma.
+
+### D-027 — Studio como executável próprio, com elevação
+2026-10-31 · aceita
+**Contexto:** ler ISOs, drivers e copiar arquivos em uso exige administrador; o usuário vai usar a GUI.
+**Decisão:** `winkit-studio.exe` (janela, `uac_admin=True` no PyInstaller) ao lado de `winkit.exe` (CLI) e `winkit-agent`. Ícone único gerado a partir do desenho do kit visual. O CI abre o Studio empacotado com `--teste-fumaca`.
+**Consequências:** o pacote tem três pastas onedir; Studio e Agente carregam o Qt cada um (~200 MB no total), aceitável num pendrive de 100 GB.

@@ -5,10 +5,21 @@ Tokens de cor em um lugar só; a folha de estilo é gerada a partir deles.
 
 from __future__ import annotations
 
+import tempfile
 from dataclasses import dataclass
+from pathlib import Path
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont, QGuiApplication, QPalette
+from PySide6.QtCore import QPointF, Qt
+from PySide6.QtGui import (
+    QColor,
+    QFont,
+    QGuiApplication,
+    QPainter,
+    QPainterPath,
+    QPalette,
+    QPen,
+    QPixmap,
+)
 from PySide6.QtWidgets import QApplication
 
 FONT_STACK = ["Segoe UI Variable Text", "Segoe UI", "Inter", "Helvetica Neue", "Arial"]
@@ -94,7 +105,34 @@ def current() -> Palette:
     return DARK if system_is_dark() else LIGHT
 
 
+def chevron_file(p: Palette) -> str:
+    """Seta "para baixo" desenhada em PNG (QSS não desenha triângulos de forma confiável)."""
+    path = Path(tempfile.gettempdir()) / f"winkit-chevron-{p.name}.png"
+    if not path.exists():
+        pm = QPixmap(20, 20)
+        pm.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(pm)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setPen(
+            QPen(
+                QColor(p.secondary),
+                2.4,
+                Qt.PenStyle.SolidLine,
+                Qt.PenCapStyle.RoundCap,
+                Qt.PenJoinStyle.RoundJoin,
+            )
+        )
+        line = QPainterPath(QPointF(5, 8))
+        line.lineTo(10, 13)
+        line.lineTo(15, 8)
+        painter.drawPath(line)
+        painter.end()
+        pm.save(str(path))
+    return path.as_posix()
+
+
 def stylesheet(p: Palette) -> str:
+    chevron = chevron_file(p)
     return f"""
 * {{ font-family: {", ".join(f'"{f}"' for f in FONT_STACK)}; color: {p.text}; }}
 QWidget#Root, QMainWindow, QDialog {{ background: {p.window}; }}
@@ -122,7 +160,11 @@ QPushButton#Link {{ background: transparent; color: {p.accent}; padding: 2px 4px
 QLineEdit, QComboBox, QSpinBox {{ background: {p.card}; border: 1px solid {p.card_border};
     border-radius: 7px; padding: 6px 9px; font-size: 13px; selection-background-color: {p.accent}; }}
 QLineEdit:focus, QComboBox:focus, QSpinBox:focus {{ border: 2px solid {p.accent}; padding: 5px 8px; }}
-QComboBox::drop-down {{ border: none; width: 22px; }}
+QComboBox::drop-down {{ border: none; width: 24px; }}
+QComboBox::down-arrow {{ image: url("{chevron}"); width: 10px; height: 10px; margin-right: 8px; }}
+QComboBox QAbstractItemView {{ background: {p.card}; border: 1px solid {p.card_border};
+    border-radius: 8px; padding: 4px; selection-background-color: {p.accent};
+    selection-color: {p.accent_text}; outline: none; }}
 QListWidget#SidebarList {{ background: transparent; border: none; outline: none; font-size: 13px; }}
 QListWidget#SidebarList::item {{ padding: 7px 10px; border-radius: 7px; margin: 1px 8px; }}
 QListWidget#SidebarList::item:selected {{ background: {p.selection}; color: {p.text}; }}
@@ -134,6 +176,17 @@ QScrollBar::add-line, QScrollBar::sub-line {{ height: 0; }}
 QProgressBar {{ background: {p.switch_off}; border: none; border-radius: 3px; max-height: 6px;
     min-height: 6px; text-align: center; }}
 QProgressBar::chunk {{ background: {p.accent}; border-radius: 3px; }}
+QWidget#Segmented {{ background: {p.control}; border-radius: 8px; }}
+QPushButton#Segment {{ background: transparent; border-radius: 6px; padding: 5px 14px; margin: 2px;
+    font-weight: 500; }}
+QPushButton#Segment:checked {{ background: {p.card}; color: {p.text}; font-weight: 600;
+    border: 1px solid {p.card_border}; }}
+QPushButton#Pill {{ background: transparent; border: 1px solid {p.card_border}; border-radius: 10px;
+    padding: 2px 10px; font-size: 11px; color: {p.secondary}; }}
+QPushButton#Pill:checked {{ background: {p.accent}; border-color: {p.accent}; color: {p.accent_text}; }}
+QLabel#Badge {{ background: {p.control}; border-radius: 9px; padding: 1px 8px; font-size: 11px;
+    color: {p.secondary}; }}
+QLabel#SidebarTitle {{ font-size: 15px; font-weight: 700; }}
 QToolTip {{ background: {p.card}; color: {p.text}; border: 1px solid {p.card_border};
     border-radius: 6px; padding: 4px 8px; }}
 """

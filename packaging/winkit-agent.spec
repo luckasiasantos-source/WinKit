@@ -3,6 +3,7 @@
 import os
 
 SRC = os.path.join(SPECPATH, "..", "src", "winkit")
+ICON = os.path.join(SPECPATH, "winkit.ico")
 datas = [
     (os.path.join(SRC, "data", "*.yaml"), os.path.join("winkit", "data")),
     (os.path.join(SRC, "builder", "assets", "bootstrap.ps1"), os.path.join("winkit", "builder", "assets")),
@@ -18,5 +19,6 @@ pyz = PYZ(a.pure)
 exe = EXE(
     pyz, a.scripts, [], exclude_binaries=True, name="winkit-agent",
     console=False, upx=False, version=None,
+    icon=ICON if os.path.exists(ICON) else None,
 )
 coll = COLLECT(exe, a.binaries, a.datas, name="winkit-agent", upx=False)
