@@ -19,6 +19,7 @@ import sys
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from winkit import __version__
 from winkit.builder import target as targets
@@ -30,6 +31,7 @@ from winkit.builder.build import (
     save_profile_recipe,
 )
 from winkit.builder.validate import validate_pendrive
+from winkit.collector import apps as app_collector
 from winkit.collector import drivers as driver_collector
 from winkit.core import layout
 from winkit.core.catalog.loader import default_catalogs
@@ -37,8 +39,10 @@ from winkit.core.errors import RecipeError, WinKitError
 from winkit.core.planner.models import PlanContext
 from winkit.core.planner.planner import plan
 from winkit.core.recipe.io import new_recipe
+from winkit.core.recipe.models import Recipe
 from winkit.core.recipe.validation import validate_recipe
 from winkit.core.text import human_size
+from winkit.core.winget_manifest import split_args
 from winkit.i18n import t
 from winkit.platform.services import Services, real_services
 from winkit.platform.session import is_admin
@@ -242,7 +246,168 @@ def cmd_coletar_drivers(args: argparse.Namespace, services: Services, out: Out) 
     return 0
 
 
+def _save(tgt: targets.Target, recipe: Recipe) -> None:
+    recipe.meta.updated_at = _now()
+    save_profile_recipe(tgt.root, recipe)
+
+
+def _source_label(source: str, winget_id: str | None) -> str:
+    if source == "winget_online":
+        return f"winget ({winget_id})"
+    if source == "portable":
+        return "portátil"
+    return "instalador offline"
+
+
+def cmd_coletar_apps(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    catalogs = default_catalogs()
+    apps = app_collector.collect_inventory(services.inventory, services.winget, catalogs)
+    out(t("collect.apps_found", count=len(apps)))
+    added = app_collector.add_inventory(
+        recipe, apps, catalogs, include_redist=args.incluir_redistribuiveis
+    )
+    _save(tgt, recipe)
+    out(
+        f"{len(added)} app(s) novos na receita (todos desmarcados). Marque com: "
+        "winkit apps marcar <id>"
+    )
+    return cmd_apps_listar(args, services, out)
+
+
+def cmd_apps_listar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    for a in sorted(recipe.apps, key=lambda x: (not x.selected, x.order, x.name.casefold())):
+        mark = "x" if a.selected else " "
+        where = "por usuário" if a.scope == "user" else "máquina"
+        label = _source_label(a.source, a.winget_id)
+        out(f"  [{mark}] {a.id:28} {a.name[:36]:36} {where:11} {label}")
+    return 0
+
+
+def cmd_apps_marcar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    value = args.command_value
+    missing = []
+    for app_id in args.ids:
+        item = recipe.app(app_id)
+        if item is None:
+            missing.append(app_id)
+            continue
+        item.selected = value
+        if args.ordem is not None:
+            item.order = args.ordem
+        if args.decidir_na_hora is not None:
+            item.decide_at_runtime = args.decidir_na_hora
+    _save(tgt, recipe)
+    if missing:
+        out(f"Não encontrados na receita: {', '.join(missing)}")
+        return 1
+    out(f"{len(args.ids)} app(s) {'marcado(s)' if value else 'desmarcado(s)'}.")
+    return 0
+
+
+def cmd_apps_baixar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    catalogs = default_catalogs()
+    if args.ids:
+        items = [a for a in recipe.apps if a.id in set(args.ids)]
+    else:
+        items = [
+            a
+            for a in recipe.selected_apps()
+            if a.source == "winget_online" and a.winget_source == "winget"
+        ]
+    if not services.winget.available():
+        out("O winget não está disponível neste PC.")
+        return 1
+    failures = 0
+    for item in items:
+        free = targets.from_folder(tgt.root).free if args.raiz else tgt.free
+        res = app_collector.download_app(services.winget, tgt.root, item, catalogs, free_bytes=free)
+        out(f"  {'ok ' if res.ok else 'não'} {item.id}: {res.message}")
+        failures += 0 if res.ok else 1
+    _save(tgt, recipe)
+    return 0 if failures == 0 else 1
+
+
+def cmd_apps_adicionar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    item = app_collector.add_local_installer(
+        tgt.root,
+        recipe,
+        Path(args.instalador),
+        name=args.nome,
+        catalogs=default_catalogs(),
+        args=split_args(args.args) if args.args is not None else None,
+        scope=args.escopo,
+    )
+    _save(tgt, recipe)
+    assert item.installer is not None  # noqa: S101
+    out(
+        f'App "{item.name}" adicionado: tipo {item.installer.type}, '
+        f"argumentos {' '.join(item.installer.args) or '(nenhum)'}"
+    )
+    if item.installer.type == "unknown" and not item.installer.args:
+        out("Atenção: tipo desconhecido. Informe os argumentos silenciosos com --args.")
+        return 1
+    return 0
+
+
 # ------------------------------------------------------------------ parser
+def _add_collect_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    col = sub.add_parser("coletar", help="coleta do PC atual: drivers, apps, backups")
+    col_sub = col.add_subparsers(dest="what", required=True)
+    cdrv = col_sub.add_parser("drivers", parents=[common], help="exporta drivers de terceiros")
+    cdrv.add_argument("--listar", action="store_true", help="só mostra, não exporta")
+    cdrv.add_argument(
+        "--todos", action="store_true", help="todas as classes, não só as recomendadas"
+    )
+    cdrv.add_argument("--classe", action="append", help="só estas classes (ex.: Net, Display)")
+    cdrv.set_defaults(func=cmd_coletar_drivers)
+
+    capp = col_sub.add_parser("apps", parents=[common], help="lê os apps instalados neste PC")
+    capp.add_argument(
+        "--incluir-redistribuiveis",
+        action="store_true",
+        help="inclui Visual C++, .NET etc. (normalmente vêm junto com os apps)",
+    )
+    capp.set_defaults(func=cmd_coletar_apps)
+
+
+def _add_apps_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    apps = sub.add_parser("apps", help="escolher e preparar os aplicativos da receita")
+    apps_sub = apps.add_subparsers(dest="action", required=True)
+    apps_sub.add_parser("listar", parents=[common]).set_defaults(func=cmd_apps_listar)
+    for name, value in (("marcar", True), ("desmarcar", False)):
+        mk = apps_sub.add_parser(name, parents=[common])
+        mk.add_argument("ids", nargs="+", help="ids dos apps (veja 'winkit apps listar')")
+        mk.add_argument("--ordem", type=int, help="ordem de instalação (menor primeiro)")
+        mk.add_argument(
+            "--decidir-na-hora",
+            action=argparse.BooleanOptionalAction,
+            default=None,
+            help="mostrar na janela do primeiro login para confirmar",
+        )
+        mk.set_defaults(func=cmd_apps_marcar, command_value=value)
+    bx = apps_sub.add_parser(
+        "baixar", parents=[common], help="baixa para o pendrive (offline) com winget download"
+    )
+    bx.add_argument("ids", nargs="*", help="padrão: todos os marcados que usam o winget")
+    bx.set_defaults(func=cmd_apps_baixar)
+    ad = apps_sub.add_parser("adicionar", parents=[common], help="usa um instalador seu")
+    ad.add_argument("--instalador", required=True, help="caminho do .exe/.msi/.msix")
+    ad.add_argument("--nome", required=True, help="nome do app")
+    ad.add_argument("--args", help="argumentos silenciosos (padrão: detectados pelo tipo)")
+    ad.add_argument("--escopo", choices=["machine", "user"], default="machine")
+    ad.set_defaults(func=cmd_apps_adicionar)
+
+
 def build_parser() -> argparse.ArgumentParser:
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--pendrive", help="letra da unidade do pendrive Ventoy (ex.: E:)")
@@ -282,15 +447,8 @@ def build_parser() -> argparse.ArgumentParser:
     cons.add_argument("--agente", help="pasta do Agente compilado (winkit-agent)")
     cons.set_defaults(func=cmd_construir)
 
-    col = sub.add_parser("coletar", help="coleta do PC atual: drivers, apps, backups")
-    col_sub = col.add_subparsers(dest="what", required=True)
-    cdrv = col_sub.add_parser("drivers", parents=[common], help="exporta drivers de terceiros")
-    cdrv.add_argument("--listar", action="store_true", help="só mostra, não exporta")
-    cdrv.add_argument(
-        "--todos", action="store_true", help="todas as classes, não só as recomendadas"
-    )
-    cdrv.add_argument("--classe", action="append", help="só estas classes (ex.: Net, Display)")
-    cdrv.set_defaults(func=cmd_coletar_drivers)
+    _add_collect_parsers(sub, common)
+    _add_apps_parsers(sub, common)
 
     val = sub.add_parser("validar", parents=[common], help="confere o pendrive sem alterar nada")
     val.set_defaults(func=cmd_validar)

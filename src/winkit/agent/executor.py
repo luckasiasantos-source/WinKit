@@ -31,6 +31,7 @@ from winkit.i18n import t
 class Waits:
     pendrive_seconds: float = 15 * 60
     network_seconds: float = 10 * 60
+    winget_seconds: float = 10 * 60
     poll_seconds: float = 5.0
 
 
@@ -183,6 +184,8 @@ class Executor:
             pendrive=self.pendrive() if step.needs_pendrive else self._pendrive,
             phase=phase,
             clock=self.clock,
+            wait=self._wait_for,
+            winget_wait_seconds=self.waits.winget_seconds,
         )
         st.mark_running(state, step.id, phase, self.clock())
         self.store.save(state)

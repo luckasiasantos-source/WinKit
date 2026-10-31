@@ -223,6 +223,8 @@ def _validate_app(
     for ref in a.restore_backups_after_install:
         if ref not in backup_ids:
             err(t("recipe.unknown_backup_ref", app=a.id, backup=ref))
+    if not a.selected:
+        return  # apps desmarcados ficam na receita só como inventário (IN-006)
     if a.source == "offline":
         if a.installer is None or not a.installer.path:
             err(t("recipe.missing_installer", id=a.id))

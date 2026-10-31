@@ -19,7 +19,7 @@
 | M2 | Construtor mínimo + primeira instalação real | ✅ código | ⬜ roteiro pronto (`docs/validacao/M2.md`), aguardando execução na VM |
 | M3 | Esqueleto do Agente | ✅ código | ⬜ roteiro pronto (`docs/validacao/M3.md`) |
 | M4 | Drivers | ✅ código | ⬜ roteiro pronto (`docs/validacao/M4.md`) |
-| M5 | Aplicativos | ⬜ | ⬜ pendente |
+| M5 | Aplicativos | ✅ código | ⬜ roteiro pronto (`docs/validacao/M5.md`) |
 | M6 | Backups | ⬜ | ⬜ pendente |
 | M7 | Bloatware e ajustes | ⬜ | ⬜ pendente |
 | M8 | Windows Update, resumo e notificações | ⬜ | ⬜ pendente |
@@ -96,7 +96,14 @@
 - ✅ `construir` agora é idempotente também no manifesto (`write_if_changed`)
 - ✅ CLI: `winkit coletar drivers [--listar] [--todos] [--classe X]`
 - ✅ Roteiro `docs/validacao/M4.md`
-### M5 — Aplicativos ⬜
+### M5 — Aplicativos ✅ (código) · validação na VM pendente
+- ✅ `core/inventory.py` — filtros de ruído (§7.1.2), escopo por usuário, redistribuíveis, correspondência com o catálogo e com o `winget export` (heurística), sugestão de item para a receita, mescla que preserva escolhas
+- ✅ `core/winget_manifest.py` — leitura do manifesto do `winget download`, tipos do winget → tipos do WinKit, divisão de argumentos no estilo Windows
+- ✅ `core/installers/detect.py` — detecção por conteúdo (MSI/OLE, MSIX/ZIP, seção PE `.wixburn`, marcadores Inno/NSIS/Squirrel/InstallShield)
+- ✅ Plataforma: `inventory.py` (registro + `Get-AppxPackage`), `winget.py` (export, download, install, list, registro do App Installer), `installers.py` (msiexec, MSIX via PowerShell, exe; `taskkill`), `shortcuts.py` (.lnk via WScript.Shell)
+- ✅ `agent/steps/app.py` — instalador offline (hash, cópia local, códigos de sucesso/reinício, dica para instalar manualmente), winget online (registro + espera, adiamento), pós-instalação (encerrar processos, remover inicialização automática, atalhos), atalhos de apps portáteis
+- ✅ `collector/apps.py` + CLI: `coletar apps`, `apps listar|marcar|desmarcar|baixar|adicionar` (com `--ordem` e `--decidir-na-hora`)
+- ✅ Roteiro `docs/validacao/M5.md`
 ### M6 — Backups ⬜
 ### M7 — Bloatware e ajustes ⬜
 ### M8 — Windows Update, resumo e notificações ⬜

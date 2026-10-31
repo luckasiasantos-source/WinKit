@@ -63,6 +63,24 @@
 - Correção: script gravado com BOM UTF-8; `$ErrorActionPreference = 'Stop'` dentro do bloco principal; o registro do erro no `catch` é protegido para nunca quebrar a instalação.
 - Prevenção: teste `test_script_has_utf8_bom` (roda em qualquer sistema) e `test_builder_copies_script_byte_for_byte`; testes reais no CI Windows.
 
+### IN-006 — Apps desmarcados do inventário bloqueavam o `construir`
+- Data: 2026-10-31
+- Marco: M5
+- O que aconteceu: no teste de ponta a ponta da CLI, `construir` falhou com "precisa de um instalador" para apps que vieram do inventário e não foram marcados.
+- Causa raiz: a validação exigia instalador/ID do winget de **todos** os apps da receita; o inventário guarda todos os apps do PC (desmarcados) para o usuário escolher.
+- Impacto: impediria qualquer construção depois de `coletar apps`.
+- Correção: as exigências de fonte de instalação só valem para apps marcados.
+- Prevenção: `test_unselected_apps_do_not_need_installer`.
+
+### IN-007 — Edição por script falhou em silêncio (espera do winget desligada)
+- Data: 2026-10-31
+- Marco: M5
+- O que aconteceu: a etapa do winget nunca esperava o winget ficar disponível; o teste `test_winget_never_available_defers` falhou.
+- Causa raiz: processo de desenvolvimento. A alteração foi feita por substituição de texto, mas o formatador já tinha reformatado aquele trecho; a substituição não encontrou nada e não avisou. O mesmo aconteceu antes com fixtures de teste no M4.
+- Impacto: nenhum em produção (pego pelo teste).
+- Correção: ligação refeita no executor.
+- Prevenção: toda edição por script verifica que o trecho original existe antes de substituir (falha alta); testes de comportamento cobrem cada ligação entre executor e etapa.
+
 ## Lições da fase de desenho
 
 Problemas encontrados na conversa anterior (PDF de referência) e corrigidos **antes** de virar código. Ficam registrados porque são erros fáceis de repetir.

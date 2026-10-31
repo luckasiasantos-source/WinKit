@@ -104,3 +104,43 @@ def test_coletar_drivers(tmp_path: Path, services: Services) -> None:
     assert "1 driver(s)" in text
     code, text = run(["construir", *raiz], services)
     assert "Manifesto:" in text and "Drivers" in text
+
+
+def test_apps_flow(tmp_path: Path, services: Services) -> None:
+    from tests.core.test_installer_detect import fake_pe
+    from winkit.platform.fakes.apps import FakeWinget
+
+    raiz = ["--raiz", str(tmp_path / "pen")]
+    (tmp_path / "pen").mkdir()
+    run(["receita", "nova", *raiz, "--usuario", "Samuel"], services)
+    code, text = run(["coletar", "apps", *raiz], services)
+    assert code == 0 and "discord" in text and "[ ]" in text
+    code, text = run(["apps", "marcar", "discord", "7zip", *raiz, "--ordem", "5"], services)
+    assert code == 0 and "2 app(s) marcado(s)" in text
+    code, text = run(["apps", "marcar", "nao-existe", *raiz], services)
+    assert code == 1
+    winget = services.winget
+    assert isinstance(winget, FakeWinget)
+    winget.downloads["7zip.7zip"] = ("nullsoft", "machine", "/S")
+    code, text = run(["apps", "baixar", *raiz], services)
+    assert "ok  7zip" in text and "não discord" in text
+    code, text = run(["apps", "listar", *raiz], services)
+    assert "[x] 7zip" in text and "instalador offline" in text
+    setup = tmp_path / "x.exe"
+    setup.write_bytes(fake_pe([".text"], b"Nullsoft.NSIS"))
+    code, text = run(
+        ["apps", "adicionar", *raiz, "--instalador", str(setup), "--nome", "X"], services
+    )
+    assert code == 0 and "tipo nsis" in text
+    unknown = tmp_path / "y.exe"
+    unknown.write_bytes(fake_pe([".text"]))
+    code, text = run(
+        ["apps", "adicionar", *raiz, "--instalador", str(unknown), "--nome", "Y"], services
+    )
+    assert code == 1 and "--args" in text
+    code, text = run(["apps", "desmarcar", "y", *raiz], services)
+    assert code == 0
+    code, text = run(["construir", *raiz], services)
+    assert code == 0, text
+    code, text = run(["validar", *raiz], services)
+    assert code == 0, text

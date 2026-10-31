@@ -85,7 +85,9 @@ Por que isso importa:
 | `core/manifest/` | Manifesto de arquivos e cálculo do que mudou | `(Manifest, Manifest)` → `ManifestDiff` |
 | `core/ventoy/` | Mesclagem do `ventoy.json` | `(json existente, entradas WinKit)` → json novo |
 | `core/unattend/` | Geração do `autounattend.xml` e da linha de bootstrap | `(Recipe, IsoInfo)` → `bytes` (XML) |
-| `core/installers/` | Detecção do tipo de instalador por bytes | `bytes` (cabeçalho/conteúdo) → `InstallerType` |
+| `core/installers/` | Detecção do tipo de instalador por bytes (inclui leitura das seções PE) | `bytes` (cabeçalho/conteúdo) → `InstallerType` |
+| `core/inventory.py` | Inventário de apps: filtros, escopo, correspondência com catálogo/winget, sugestão de item | valores do registro/JSON → `InstalledApp` → `AppItem` |
+| `core/winget_manifest.py` | Manifesto do `winget download` → tipo, escopo, argumentos | pasta → `DownloadedPackage` |
 | `core/errors.py` | Hierarquia de exceções | — |
 | `core/fsutil.py` | Escrita atômica (R-16) e `write_if_changed` (preserva data e manifesto) | `(Path, texto/bytes)` → arquivo |
 | `core/text.py` | `slugify`, `human_size` | texto → texto |
@@ -103,7 +105,9 @@ Por que isso importa:
 | `vss.py` | Cópias de sombra | `ShadowCopies` |
 | `drivers.py` | Listagem (`Get-WindowsDriver`), exportação e instalação (`pnputil`) de drivers | `DriverManager` |
 | `appx.py` | Pacotes MSIX: remoção e bloqueio de reinstalação | `AppxManager` |
-| `winget.py` | export, download, install | `Winget` |
+| `winget.py` | export, download, install, list, registro do App Installer | `Winget` |
+| `inventory.py` | Apps instalados: registro de desinstalação + `Get-AppxPackage` | `AppInventory` |
+| `shortcuts.py` | Atalhos `.lnk` (WScript.Shell) | `Shortcuts` |
 | `installers.py` | Execução de instaladores com tempo limite e códigos de saída | `InstallerRunner` |
 | `disks.py` | Detecção do Ventoy, montagem de ISO somente leitura, leitura de edições | `DiskInspector` |
 | `scheduler.py` | Tarefas agendadas | `TaskScheduler` |
@@ -117,7 +121,7 @@ Por que isso importa:
 
 | Módulo | Responsabilidade |
 |---|---|
-| `collector/apps.py` | Inventário de apps (fontes, filtros, classificação) |
+| `collector/apps.py` | Inventário → receita, `winget download` para o pendrive, instalador local |
 | `collector/drivers.py` | Candidatos (classe, prioridade, recomendado) e exportação idempotente para o pendrive |
 | `collector/backups.py` | Sugestão de pastas, captura com VSS, avisos DPAPI |
 | `builder/target.py` | Escolha do pendrive e checagens (sistema de arquivos, espaço) |

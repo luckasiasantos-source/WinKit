@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from winkit.platform.fakes.apps import FakeInventory, FakeWinget
 from winkit.platform.fakes.disks import FakeDiskInspector, windows_iso
 from winkit.platform.fakes.drivers import FakeDriverManager
 from winkit.platform.fakes.runner import FakeRunner
@@ -15,6 +16,8 @@ def fake_services(**overrides: Any) -> Services:
         "runner": FakeRunner(),
         "disks": FakeDiskInspector(isos={"Windows11.iso": windows_iso()}),
         "drivers": FakeDriverManager(),
+        "inventory": FakeInventory(),
+        "winget": FakeWinget(),
     }
     values.update(overrides)
     return Services(**values)

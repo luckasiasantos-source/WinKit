@@ -7,11 +7,15 @@ from dataclasses import dataclass
 from winkit.platform.accounts import Accounts, WindowsAccounts
 from winkit.platform.drivers import DriverManager, WindowsDriverManager
 from winkit.platform.environment import Environment, WindowsEnvironment
+from winkit.platform.installers import InstallerRunner, WindowsInstallerRunner
+from winkit.platform.inventory import AppInventory, WindowsAppInventory
 from winkit.platform.known_folders import KnownFolders, WindowsKnownFolders
 from winkit.platform.powershell import PowerShell
 from winkit.platform.registry import Registry, WindowsRegistry
 from winkit.platform.runner import CommandRunner, SubprocessRunner
 from winkit.platform.scheduler import TaskScheduler, WindowsTaskScheduler
+from winkit.platform.shortcuts import Shortcuts, WindowsShortcuts
+from winkit.platform.winget import WindowsWinget, Winget
 
 
 @dataclass
@@ -24,6 +28,10 @@ class AgentServices:
     env: Environment
     folders: KnownFolders
     drivers: DriverManager
+    inventory: AppInventory
+    winget: Winget
+    installers: InstallerRunner
+    shortcuts: Shortcuts
 
 
 def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windows
@@ -39,4 +47,8 @@ def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windo
         env=WindowsEnvironment(),
         folders=WindowsKnownFolders(registry),
         drivers=WindowsDriverManager(runner, ps),
+        inventory=WindowsAppInventory(registry, None),
+        winget=WindowsWinget(runner, ps),
+        installers=WindowsInstallerRunner(runner, ps),
+        shortcuts=WindowsShortcuts(ps),
     )

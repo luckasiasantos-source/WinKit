@@ -188,3 +188,13 @@ def test_ensure_valid_raises_with_all_problems() -> None:
     with pytest.raises(RecipeValidationError) as exc:
         ensure_valid(r, CAT)
     assert len(exc.value.problems) == 2
+
+
+def test_unselected_apps_do_not_need_installer() -> None:  # IN-006
+    r = recipe(
+        apps=[
+            app("a", installer=None, selected=False),
+            app("w", source="winget_online", winget_id=None, selected=False),
+        ]
+    )
+    assert errors(r) == []

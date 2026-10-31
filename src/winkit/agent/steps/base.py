@@ -61,6 +61,9 @@ class StepContext:
     pendrive: Path | None
     phase: int
     clock: Callable[[], datetime]
+    #: Espera ``probe()`` ficar verdadeiro por até N segundos, avisando a interface (motivo).
+    wait: Callable[[Callable[[], bool], float, str], bool] = lambda probe, s, r: probe()
+    winget_wait_seconds: float = 600.0
 
     def folders(self) -> dict[str, str]:
         """Pastas para resolver moldes de caminho conforme o alvo da etapa."""

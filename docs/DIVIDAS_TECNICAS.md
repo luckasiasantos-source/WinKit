@@ -122,6 +122,24 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Plano: M9 (janela Qt, bandeja, notificações).
 - Prioridade: alta (é funcionalidade pedida)
 
+### DT-013 — Códigos de reinício do winget não confirmados
+- Estado: aberta
+- Origem: M5
+- Onde: `src/winkit/platform/winget.py` (`REBOOT_CODES`)
+- Descrição: os códigos `0x8A150109`/`0x8A15010A` como "instalado, precisa reiniciar" vêm da documentação de memória, não de teste real.
+- Impacto: um app que pede reinício pode aparecer como "falhou" com esse código.
+- Plano: confirmar na VM (M5) e ajustar a tabela.
+- Prioridade: baixa
+
+### DT-014 — Correspondência nome do app ↔ ID do winget é heurística
+- Estado: aberta
+- Origem: M5
+- Onde: `src/winkit/core/inventory.py` (`_heuristic_id`)
+- Descrição: o `winget export` traz só IDs; o nome exibido no Windows é casado por heurística (última parte do ID × primeira palavra do nome). Apps da Loja (msstore) não são casados.
+- Impacto: alguns apps aparecem sem ID do winget (precisam de instalador próprio) ou, raramente, com o ID errado.
+- Plano: usar o módulo `Microsoft.WinGet.Client` (`Get-WinGetPackage`, saída em objetos) quando estiver instalado; manter a heurística como alternativa.
+- Prioridade: média
+
 ## Quitadas
 
 (nenhuma)

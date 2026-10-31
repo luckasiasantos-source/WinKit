@@ -28,6 +28,31 @@
 
 ---
 
+## 2026-10-31 — M5 — Aplicativos
+**Tipo:** implementação + correção + testes + documentação
+**Resumo:** lê os apps instalados no PC atual, sugere a fonte de cada um (winget, instalador offline), baixa instaladores para o pendrive e instala no Windows novo (offline na Fase 1, winget na Fase 2), com pós-instalação silenciosa.
+
+### Adicionado
+- `src/winkit/core/inventory.py`, `core/winget_manifest.py`, `core/installers/detect.py`
+- `src/winkit/platform/inventory.py`, `winget.py`, `installers.py`, `shortcuts.py`, `fakes/apps.py`
+- `src/winkit/collector/apps.py`
+- `src/winkit/agent/steps/app.py` — `AppStep`, `ShortcutStep`, `after_install`, `create_shortcuts`
+- CLI: `coletar apps`, `apps listar|marcar|desmarcar|baixar|adicionar`
+- Testes: `tests/core/test_inventory.py`, `test_winget_manifest.py`, `test_installer_detect.py`, `tests/collector/test_apps.py`, `tests/agent/test_app_step.py`, caso de ponta a ponta em `tests/cli/test_cli.py`
+- `docs/validacao/M5.md`
+
+### Alterado
+- `src/winkit/agent/steps/base.py` — `StepContext.wait` e `winget_wait_seconds`
+- `src/winkit/agent/executor.py` — `Waits.winget_seconds`; repassa a espera às etapas
+- `src/winkit/agent/services.py`, `platform/services.py`, fakes — inventário, winget, instaladores, atalhos
+- `src/winkit/core/recipe/validation.py` — exigências de instalação só para apps marcados (IN-006)
+- `src/winkit/cli/main.py` — parser dividido em funções
+
+### Documentos vivos atualizados
+- STATUS — M5; ARQUITETURA — módulos; DIVIDAS — DT-013, DT-014; INCIDENTES — IN-006, IN-007
+
+---
+
 ## 2026-10-31 — M4 — Drivers
 **Tipo:** implementação + testes + documentação
 **Resumo:** coleta e exportação de drivers de terceiros no PC atual, instalação com `pnputil` na Fase 1 com verificação de integridade, e manifesto do pendrive gravado pelo `construir`.

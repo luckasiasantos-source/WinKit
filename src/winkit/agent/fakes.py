@@ -6,6 +6,12 @@ from pathlib import Path
 from typing import Any
 
 from winkit.agent.services import AgentServices
+from winkit.platform.fakes.apps import (
+    FakeInstallerRunner,
+    FakeInventory,
+    FakeShortcuts,
+    FakeWinget,
+)
 from winkit.platform.fakes.drivers import FakeDriverManager
 from winkit.platform.fakes.powershell import FakePowerShell
 from winkit.platform.fakes.registry import FakeRegistry
@@ -28,6 +34,10 @@ def fake_agent_services(*, pendrive: Path, system: Path, **overrides: Any) -> Ag
         "env": FakeEnvironment(roots=[pendrive]),
         "folders": FakeKnownFolders(system),
         "drivers": FakeDriverManager(),
+        "inventory": FakeInventory(apps=[]),
+        "winget": FakeWinget(),
+        "installers": FakeInstallerRunner(),
+        "shortcuts": FakeShortcuts(),
     }
     values.update(overrides)
     return AgentServices(**values)
