@@ -1278,6 +1278,8 @@ Ferramentas do Windows usadas (todas nativas, nada a instalar): `robocopy`, `pnp
 
 ## 18. Estrutura do repositório
 
+> A árvore atual, arquivo por arquivo, está em [`ESTRUTURA.md`](ESTRUTURA.md) (gerada a partir do código, R-57). O desenho abaixo é o original do plano.
+
 ```
 WinKit/
 ├── CLAUDE.md                       regras obrigatórias para quem mexe no código

@@ -151,7 +151,7 @@ Python 3.12 + PySide6, en capas con reglas verificadas automáticamente:
 | `ui/`, `studio/`, `agent/ui/` | Interfaz al estilo macOS (tema claro/oscuro) |
 | `i18n/`, `data/` | Textos en tres idiomas; catálogos versionados (aplicaciones conocidas, ajustes con fuente y deshacer, bloatware, ediciones, características de Windows, DNS y listas de bloqueo, perfiles rápidos, partidas guardadas, plantillas de receta) |
 
-La documentación del proyecto (`docs/`) está en portugués.
+La documentación del proyecto (`docs/`) está en portugués; [`docs/ESTRUTURA.md`](docs/ESTRUTURA.md) tiene el árbol del proyecto con lo que hace cada archivo de código.
 
 ## Contribuir
 

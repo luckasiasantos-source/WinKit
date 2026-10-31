@@ -28,6 +28,22 @@
 
 ---
 
+## 2026-10-31 — Documentação — README bilíngue e estrutura do projeto (R-56, R-57)
+**Tipo:** documentação
+**Resumo:** o `README.md` passa a ter a versão em inglês logo abaixo da portuguesa, com aviso no começo. Nova regra: o README é atualizado sempre que o que ele descreve muda. Novo `docs/ESTRUTURA.md`, gerado a partir das docstrings, com a árvore do projeto e o que cada arquivo faz.
+
+### Adicionado
+- `scripts/sync_readme.py` — copia o `README.en.md` para o fim do `README.md`
+- `scripts/gen_estrutura.py`, `docs/ESTRUTURA.md` — árvore do projeto gerada
+- `tests/test_docs_sync.py` — falha se o README ou a estrutura ficarem desatualizados
+
+### Alterado
+- `README.md` — aviso da versão em inglês no topo e a versão completa embaixo; os três READMEs apontam para `ESTRUTURA.md`
+- `CLAUDE.md` — leitura de `ESTRUTURA.md`; README e estrutura na tabela de documentos vivos; docstring obrigatória
+
+### Documentos vivos atualizados
+- ARQUITETURA — R-56 e R-57 e a verificação; PLANO — §18 aponta para `ESTRUTURA.md`
+
 ## 2026-10-31 — Correção: varredura das sugestões seguia junções
 **Tipo:** correção
 **Resumo:** no Windows, `DirEntry.is_dir(follow_symlinks=False)` é verdadeiro para junções (ex.: "Application Data" nos perfis), então a medição das pastas podia andar em ciclo até o limite de tempo e contar arquivos em dobro. Agora links e junções são ignorados, e o tamanho dos saves também tem limite de tempo (5 s). Entra na próxima versão; a 0.9.0 já publicada tem o limite de tempo geral, que segura o caso.

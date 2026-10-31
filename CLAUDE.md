@@ -13,6 +13,7 @@ Leia, nesta ordem:
 4. `docs/DIVIDAS_TECNICAS.md` — o que sabemos que está incompleto ou feito de um jeito provisório.
 5. `docs/INCIDENTES.md` — o que já deu errado, para não repetir.
 6. `docs/CHANGELOG.md` — o mapa de todas as mudanças e implementações já feitas.
+7. `docs/ESTRUTURA.md` — a árvore do projeto, com o que cada arquivo de código faz.
 
 ## Antes de cada commit (obrigatório)
 
@@ -33,9 +34,13 @@ Toda mudança de código vem **no mesmo commit** com a atualização dos documen
 | Fez algo provisório, pulou um caso, deixou um TODO | `docs/DIVIDAS_TECNICAS.md` |
 | Algo quebrou, uma hipótese se provou falsa, um teste real falhou | `docs/INCIDENTES.md` |
 | Mudou escopo ou comportamento do produto | `docs/PLANO.md` (v1) ou `docs/PLANO_V2.md` (v2) |
+| Mudou algo que o README descreve (funções, requisitos, comandos, estado, aviso) | `README.md`, `README.en.md` e `README.es.md`; depois rode `uv run python scripts/sync_readme.py` (copia o inglês para baixo do português no `README.md`) — R-56 |
+| Criou, moveu ou removeu um arquivo de código, ou mudou a docstring de um módulo | rode `uv run python scripts/gen_estrutura.py` para regerar `docs/ESTRUTURA.md` — R-57 |
 | **Qualquer commit** | `docs/CHANGELOG.md` — sempre, sem exceção |
 
 `TODO` no código sem uma entrada correspondente em `DIVIDAS_TECNICAS.md` não é permitido.
+
+Todo módulo Python começa com uma docstring cuja primeira linha diz o que ele faz: é dela que sai a descrição em `docs/ESTRUTURA.md`. O teste `tests/test_docs_sync.py` falha se o README ou a estrutura ficarem desatualizados.
 
 ## Regras inegociáveis (resumo — detalhes em ARQUITETURA.md)
 

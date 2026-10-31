@@ -328,6 +328,8 @@ runner.run(
 - **R-53** Arquivos e valores com segredo (senhas de Wi-Fi, senhas de contas) ficam num registro único (`core/secrets.py`); o `runner`, o `EventLog` e o resumo os mascaram. Em vigor desde o M14.
 - **R-54** Toda etapa do Agente declara `live_safe` e implementa `preview()` sem efeito colateral. Em vigor desde o M12.
 - **R-55** Strings de interface só aparecem dentro de `t(...)`, `tn(...)` ou `Msg(...)`: nenhum literal de texto passado a `label`, `button`, `Row`, `section`, `setText`, `setWindowTitle`, `setToolTip`, `QMessageBox.*`, `help=`/`description=` do `argparse` nem a `out()`/`print()` da CLI. Em vigor desde o M11.
+- **R-56** Toda mudança que altera o que o README descreve (funções, requisitos, comandos, estado do projeto, aviso) atualiza os READMEs no mesmo commit, nos três idiomas. O `README.md` traz a versão em inglês logo abaixo da portuguesa, gerada do `README.en.md` por `scripts/sync_readme.py`; o começo do `README.md` avisa que ela existe. Em vigor desde 2026-10-31.
+- **R-57** `docs/ESTRUTURA.md` descreve a árvore do projeto e cada arquivo de código. É gerado por `scripts/gen_estrutura.py` a partir das docstrings (todo módulo tem docstring) e regerado no mesmo commit que cria, move, remove ou muda a descrição de um arquivo. Em vigor desde 2026-10-31.
 
 ### 5.12 Como as regras são verificadas automaticamente
 
@@ -351,6 +353,7 @@ runner.run(
 | V2-20 | `tests/collector/test_suggest.py::test_dismissed_never_come_back_and_accept_adds` (ignoradas não voltam; nada entra sem "Adicionar") |
 | XML (IN-015) | `test_no_global_xml_namespace_registration` e `test_strip_key_does_not_change_other_xml` |
 | R-55 | `tests/i18n/test_usage.py::test_no_loose_ui_strings` (AST em `studio`, `agent/ui`, `ui`, `cli`) |
+| R-56, R-57 | `tests/test_docs_sync.py` (README.md com a versão em inglês igual ao README.en.md; ESTRUTURA.md igual ao que o gerador produz) |
 | Empacotamento | `test_no_dynamic_imports_in_package` (IN-013) |
 
 ---

@@ -151,7 +151,7 @@ Python 3.12 + PySide6, in layers whose rules are checked automatically:
 | `ui/`, `studio/`, `agent/ui/` | macOS-style interface (light/dark theme) |
 | `i18n/`, `data/` | Texts in three languages; versioned catalogs (known apps, tweaks with source and undo, bloatware, editions, Windows features, DNS and blocklists, quick profiles, game saves, recipe templates) |
 
-The project documentation (`docs/`) is written in Portuguese.
+The project documentation (`docs/`) is written in Portuguese; [`docs/ESTRUTURA.md`](docs/ESTRUTURA.md) has the project tree with what each code file does.
 
 ## Contributing
 
