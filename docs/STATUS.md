@@ -31,7 +31,7 @@
 | M14 | Rede e sistema (V2-02, 08, 09, 16, 17, 18, 22) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M14.md`) |
 | M15 | Personalização (V2-04, 05, 06, 07, 12, 15) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M15.md`) |
 | M16 | Contas, pastas e jogos (V2-11, 13, 14) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M16.md`) |
-| M17 | Inteligência do pendrive (V2-19, 20, 21, 23) | 🟨 em andamento | — |
+| M17 | Inteligência do pendrive (V2-19, 20, 21, 23) | ✅ código · validação na VM pendente | `docs/validacao/M17.md` |
 | M18 | Fechamento da v2 | ⬜ planejado | — |
 
 ## Detalhe por marco
@@ -215,11 +215,12 @@
 - ✅ V2-11 Contas extras: administrador ou padrão; senha "trocar no primeiro acesso" (padrão), "sem senha" ou "definida agora" (registrada como segredo, R-53); `LocalAccount` no XML (snapshot com duas contas); na Fase 1 o grupo é conferido pelo SID e a conta padrão sai de Administradores; backups "só a conta principal" vão para a Fase 2 no perfil dela; nunca ao vivo; Studio (Windows e conta) e CLI (`contas listar|adicionar|remover`, `backup-para-quem`)
 - ✅ Roteiro `docs/validacao/M16.md` e versão 0.7.0
 
-### M17 — Inteligência do pendrive 🟨
+### M17 — Inteligência do pendrive ✅ (código) · validação na VM pendente
 - ✅ V2-23 Receitas compartilháveis: exportar sem dados pessoais (o formato não tem os campos), importar com prévia e mescla (ids desconhecidos ignorados com motivo), cinco modelos prontos no pacote (Mínimo, Escritório, Programador, Gamer, Privacidade máxima); Studio (seção Modelos no grupo Preparar) e CLI (`receita exportar|importar|modelo`)
 - ✅ V2-21 Atualizar instaladores: comparação de versões tolerante; "Procurar atualizações" baixa e compara; troca só quando a versão é maior, salva a receita e só então apaga a pasta antiga; faixa no Studio depois de 30 dias; CLI `apps atualizar [--verificar]`
 - ✅ V2-19 Relatório antes/depois: na construção, o Studio e a CLI gravam `Perfis/<p>/Inventario/antes.json` (apps sem redistribuíveis, dispositivos com o primeiro HardwareID, recursos ligados, build); na Fase 2 a etapa `compare` (só instalação, `live_safe`) gera o mesmo retrato do Windows novo e o resumo ganha "Comparação com o PC antigo" (apps que faltaram, dispositivos sem driver que tinham driver, recursos que não foram ligados); hardware diferente (menos de 50% dos ids em comum) deixa de comparar drivers; chave em "Revisar e construir"
 - ✅ V2-20 Assistente "o que levar": UserAssist (ROT13 + registro de 72 bytes, H34) cruzado com o inventário; configurações recomendadas que faltam; 13 saves de jogos conhecidos; pastas grandes na raiz do C: com limite de tempo; pontuação determinística por uso, recência e tamanho; "Adicionar" e "Ignorar" (ignoradas não voltam); Studio (Sugestões, primeira de O que levar) e CLI (`sugestoes listar [--json]|adicionar|ignorar`). A categoria "Outros" e o manifesto do Ludusavi ficaram para depois (DT-026)
+- ✅ Roteiro `docs/validacao/M17.md` e versão 0.8.0
 
 ## Hipóteses técnicas
 

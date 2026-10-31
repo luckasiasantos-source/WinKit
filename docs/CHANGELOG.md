@@ -28,6 +28,19 @@
 
 ---
 
+## 2026-10-31 — M17 — Fechamento do M17 (0.8.0)
+**Tipo:** documentação
+**Resumo:** fecha o M17 com o roteiro de validação na VM, as notas da versão e a versão 0.8.0.
+
+### Adicionado
+- `docs/validacao/M17.md` — roteiro (sugestões, modelos, exportação, atualização dos instaladores, comparação)
+
+### Alterado
+- `src/winkit/__init__.py` — versão 0.8.0; `packaging/NOTAS_DA_VERSAO.md` — novidades do M17 nos três idiomas
+
+### Documentos vivos atualizados
+- STATUS — M17 pronto no código, validação na VM pendente
+
 ## 2026-10-31 — M17 — Relatório antes/depois (V2-19) e assistente "o que levar" (V2-20)
 **Tipo:** implementação
 **Resumo:** no fim da instalação, o resumo compara o Windows novo com o PC antigo (apps que faltaram, dispositivos sem driver, recursos não ligados). O Studio ganhou a seção Sugestões, que olha este PC e sugere apps usados, configurações, saves e pastas grandes, sempre explicando o porquê. A release 0.7.0 foi disparada antes deste commit.
