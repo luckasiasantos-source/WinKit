@@ -13,6 +13,7 @@ from pydantic import ValidationError
 from winkit import __version__
 from winkit.core.errors import RecipeError
 from winkit.core.recipe.models import SCHEMA_VERSION, Account, Meta, Recipe, WindowsSettings
+from winkit.core.regional import RegionalDefaults
 from winkit.i18n import t
 
 Migration = Callable[[dict[str, Any]], dict[str, Any]]
@@ -74,8 +75,18 @@ def new_recipe(
     profile_id: str = "padrao",
     source_pc: str | None = None,
     now: datetime | None = None,
+    regional: RegionalDefaults | None = None,
 ) -> Recipe:
     stamp = now or datetime.now(UTC)
+    windows = WindowsSettings(account=Account(username=username))
+    if regional is not None:
+        if regional.user_locale:
+            windows.user_locale = regional.user_locale
+            windows.system_locale = regional.user_locale
+        if regional.input_locale:
+            windows.input_locale = regional.input_locale
+        if regional.time_zone:
+            windows.time_zone = regional.time_zone
     return Recipe(
         meta=Meta(
             profile_id=profile_id,
@@ -85,5 +96,5 @@ def new_recipe(
             winkit_version=__version__,
             source_pc=source_pc,
         ),
-        windows=WindowsSettings(account=Account(username=username)),
+        windows=windows,
     )

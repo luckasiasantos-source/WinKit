@@ -6,11 +6,13 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from winkit.core.regional import RegionalDefaults
 from winkit.platform.copy import Copier, RobocopyCopier
 from winkit.platform.disks import DiskInspector, WindowsDiskInspector
 from winkit.platform.drivers import DriverManager, WindowsDriverManager
 from winkit.platform.inventory import AppInventory, WindowsAppInventory
 from winkit.platform.known_folders import KnownFolders, WindowsKnownFolders
+from winkit.platform.locale import read_regional
 from winkit.platform.powershell import PowerShell
 from winkit.platform.registry import WindowsRegistry
 from winkit.platform.runner import CommandRunner, SubprocessRunner
@@ -30,6 +32,8 @@ class Services:
     folders: KnownFolders
     #: Letra de volume → pasta que dá acesso a ele (nos testes, uma pasta temporária).
     volume_root: Callable[[str], Path] = field(default=lambda v: Path(v + "\\"))
+    #: Formatos, teclado e fuso do PC atual para a receita nova (D-030).
+    regional: Callable[[], RegionalDefaults] = field(default=RegionalDefaults)
 
 
 def real_services() -> Services:
@@ -45,4 +49,5 @@ def real_services() -> Services:
         copier=RobocopyCopier(runner),
         vss=WindowsShadowCopies(ps),
         folders=WindowsKnownFolders(registry),
+        regional=lambda: read_regional(registry),
     )

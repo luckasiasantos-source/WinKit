@@ -6,7 +6,9 @@ import ctypes
 import os
 import sys
 
+from winkit.core.regional import RegionalDefaults, regional_from_values
 from winkit.i18n import Language, normalize
+from winkit.platform.registry import Registry
 
 _LOCALE_NAME_MAX_LENGTH = 85
 
@@ -32,3 +34,19 @@ def detect_language() -> Language:
     if tag is None:
         return "pt-BR"
     return normalize(tag)
+
+
+def read_regional(registry: Registry) -> RegionalDefaults:
+    """Formatos, teclado e fuso do usuário atual, pelo registro (nunca por texto, R-13)."""
+    preload = registry.get("HKCU", r"Keyboard Layout\Preload", "1")
+    substitute = (
+        registry.get("HKCU", r"Keyboard Layout\Substitutes", str(preload)) if preload else None
+    )
+    return regional_from_values(
+        locale_name=registry.get("HKCU", r"Control Panel\International", "LocaleName"),
+        preload=str(preload) if preload else None,
+        substitute=str(substitute) if substitute else None,
+        time_zone=registry.get(
+            "HKLM", r"SYSTEM\CurrentControlSet\Control\TimeZoneInformation", "TimeZoneKeyName"
+        ),
+    )

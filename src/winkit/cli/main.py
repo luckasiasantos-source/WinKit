@@ -122,6 +122,7 @@ def cmd_receita_nova(args: argparse.Namespace, services: Services, out: Out) -> 
         profile_id=args.perfil,
         source_pc=os.environ.get("COMPUTERNAME"),
         now=_now(),
+        regional=services.regional(),
     )
     if args.nome_pc:
         recipe.windows.computer_name = args.nome_pc

@@ -19,6 +19,7 @@ from winkit.core.unattend.commands import (
     labconfig_commands,
     reg_add_command,
 )
+from winkit.i18n import t
 
 NS = "urn:schemas-microsoft-com:unattend"
 WCM = "http://schemas.microsoft.com/WMIConfig/2002/State"
@@ -212,7 +213,7 @@ def _oobe_system(root: ET.Element, recipe: Recipe, arch: str, ui_lang: str) -> N
     _sub(shell, "TimeZone", win.time_zone)
     accounts = _sub(_sub(shell, "UserAccounts"), "LocalAccounts")
     acc = ET.SubElement(accounts, _q("LocalAccount"), {f"{{{WCM}}}action": "add"})
-    _sub(acc, "Description", "Conta local criada pelo WinKit")
+    _sub(acc, "Description", t("unattend.account_description"))
     _sub(acc, "DisplayName", account.display_name or account.username)
     _sub(acc, "Group", "Administrators")
     _sub(acc, "Name", account.username)

@@ -1,0 +1,294 @@
+# Traduções dos catálogos (espanhol) — D-030, R-51.
+# Chave = id do item no catálogo base (pt-BR). `text` do bloatware = side_effect ou reason.
+tweaks:
+  privacy.telemetry_minimum:
+    title: Telemetría al mínimo permitido
+    description: Envía a Microsoft solo los datos de diagnóstico obligatorios.
+  privacy.advertising_id:
+    title: Desactivar el identificador de publicidad
+    description: Las aplicaciones dejan de usar un identificador para anuncios personalizados.
+  privacy.activity_history:
+    title: Desactivar el historial de actividad
+    description: Windows no registra ni envía el historial de actividad.
+  privacy.tailored_experiences:
+    title: Desactivar las experiencias personalizadas
+    description: Microsoft no usa tus datos de diagnóstico para sugerencias y anuncios.
+  privacy.start_bing_search:
+    title: Búsqueda de Inicio sin resultados web (Bing)
+    description: La búsqueda del menú Inicio busca solo en el equipo.
+  privacy.start_suggestions:
+    title: Sin sugerencias de aplicaciones en Inicio y Configuración
+    description: Quita las "sugerencias" (publicidad) del menú Inicio y de la aplicación Configuración.
+  privacy.copilot:
+    title: Desactivar Copilot
+    description: Oculta el botón y desactiva Copilot de Windows (la aplicación se puede quitar en la lista de bloatware).
+  privacy.recall:
+    title: Desactivar Recall
+    description: Desactiva la función que toma capturas de pantalla periódicas (solo en equipos Copilot+).
+  privacy.widgets:
+    title: Desactivar Widgets (noticias e intereses)
+    description: Desactiva el panel de Widgets y las noticias en la barra de tareas.
+  privacy.welcome_experience:
+    title: Sin pantallas de "bienvenida" y "terminemos de configurar"
+    description: Windows deja de mostrar pantallas de ofertas de servicios después de las actualizaciones.
+  privacy.lock_screen_tips:
+    title: Sin consejos ni curiosidades en la pantalla de bloqueo
+    description: La pantalla de bloqueo muestra solo la imagen y el reloj.
+  visual.dark_theme:
+    title: Tema oscuro
+    description: Ventanas y aplicaciones en modo oscuro.
+  visual.taskbar_left:
+    title: Barra de tareas alineada a la izquierda
+    description: Botón Inicio e iconos a la izquierda, como en Windows 10.
+  visual.show_extensions:
+    title: Mostrar extensiones de archivo
+    description: Muestra ".exe", ".pdf", etc. en el Explorador de archivos.
+  visual.show_hidden_files:
+    title: Mostrar archivos ocultos
+    description: Muestra archivos y carpetas ocultos (como AppData) en el Explorador.
+  visual.classic_context_menu:
+    title: Menú contextual clásico (clic derecho completo)
+    description: El clic derecho vuelve a mostrar el menú completo de Windows 10, sin "Mostrar más opciones".
+  visual.explorer_this_pc:
+    title: El Explorador se abre en "Este equipo"
+    description: El Explorador de archivos se abre mostrando las unidades en lugar de la página de inicio.
+  visual.hide_task_view_button:
+    title: Ocultar el botón Vista de tareas
+    description: Quita el botón de escritorios virtuales de la barra de tareas (el atajo Win+Tab sigue funcionando).
+  visual.hide_widgets_button:
+    title: Ocultar el botón de Widgets
+    description: Quita el botón de Widgets/clima de la barra de tareas.
+  visual.hide_chat_button:
+    title: Ocultar el botón de Teams/Chat
+    description: Quita el botón de chat de la barra de tareas.
+  visual.search_icon_only:
+    title: Búsqueda de la barra de tareas solo como icono
+    description: Cambia el cuadro de búsqueda grande por un icono de lupa.
+  visual.start_hide_recommended:
+    title: Inicio sin recomendaciones ni archivos recientes
+    description: Oculta consejos y archivos recientes en la sección "Recomendado" de Inicio.
+  system.prevent_device_encryption:
+    title: No cifrar el disco automáticamente
+    description: Impide el cifrado automático del dispositivo, incluso después de iniciar sesión con una cuenta
+      Microsoft (D-020). BitLocker manual sigue disponible.
+  system.wu_no_driver_replacement:
+    title: Windows Update no reemplaza los controladores
+    description: Windows Update deja de instalar controladores encima de los que instalaste.
+  system.consumer_content:
+    title: Bloquear aplicaciones sugeridas que se instalan solas
+    description: Impide que Windows instale juegos y aplicaciones "sugeridos" (Candy Crush, TikTok, etc.).
+  system.long_paths:
+    title: Permitir rutas largas
+    description: Los programas compatibles pueden usar rutas de más de 260 caracteres.
+bloatware:
+  Clipchamp.Clipchamp:
+    name: Clipchamp (editor de video)
+  Microsoft.BingNews:
+    name: Noticias
+  Microsoft.BingWeather:
+    name: El Tiempo
+  Microsoft.BingSearch:
+    name: Búsqueda de Bing
+  Microsoft.GetHelp:
+    name: Obtener ayuda
+  Microsoft.Getstarted:
+    name: Sugerencias
+  Microsoft.MicrosoftSolitaireCollection:
+    name: Microsoft Solitaire Collection
+  Microsoft.MicrosoftOfficeHub:
+    name: Microsoft 365 (Office) — acceso a la suscripción
+  Microsoft.PowerAutomateDesktop:
+    name: Power Automate
+  Microsoft.Todos:
+    name: Microsoft To Do
+  Microsoft.WindowsFeedbackHub:
+    name: Centro de opiniones
+  Microsoft.WindowsMaps:
+    name: Mapas
+  MSTeams:
+    name: Microsoft Teams (personal)
+  Microsoft.ZuneVideo:
+    name: Películas y TV
+  Microsoft.Windows.DevHome:
+    name: Dev Home
+  Microsoft.549981C3F5F10:
+    name: Cortana
+  Microsoft.People:
+    name: Contactos
+  Microsoft.MixedReality.Portal:
+    name: Portal de realidad mixta
+  Microsoft.SkypeApp:
+    name: Skype
+  Microsoft.Microsoft3DViewer:
+    name: Visor 3D
+  Microsoft.Wallet:
+    name: Cartera
+  Microsoft.Copilot:
+    name: Copilot
+    text: El asistente Copilot deja de existir; se puede reinstalar desde Microsoft Store.
+  MicrosoftWindows.Client.WebExperience:
+    name: Widgets
+    text: El panel de Widgets y el clima de la barra de tareas desaparecen.
+  Microsoft.OutlookForWindows:
+    name: Outlook (nuevo)
+    text: La aplicación de correo y calendario predeterminada desaparece.
+  Microsoft.YourPhone:
+    name: Vínculo con el teléfono
+    text: Deja de mostrar las notificaciones y fotos del teléfono.
+  Microsoft.XboxGamingOverlay:
+    name: Xbox Game Bar
+    text: Win+G y la grabación de juegos dejan de funcionar.
+  Microsoft.GamingApp:
+    name: Xbox (aplicación)
+    text: Game Pass para PC deja de funcionar.
+  Microsoft.XboxIdentityProvider:
+    name: Xbox Identity Provider
+    text: Los juegos que exigen iniciar sesión en Xbox (Game Pass, Minecraft) pueden fallar.
+  Microsoft.XboxSpeechToTextOverlay:
+    name: Xbox — transcripción de voz
+    text: Las funciones de accesibilidad del chat de Xbox dejan de funcionar.
+  Microsoft.Xbox.TCUI:
+    name: Xbox TCUI
+    text: Las pantallas de amigos/invitaciones de Xbox dentro de los juegos dejan de funcionar.
+  Microsoft.ZuneMusic:
+    name: Reproductor multimedia
+    text: El reproductor de música y video predeterminado desaparece.
+  Microsoft.Windows.Photos:
+    name: Fotos
+    text: El visor de imágenes predeterminado desaparece.
+  Microsoft.ScreenSketch:
+    name: Recortes
+    text: Win+Shift+S (captura de pantalla) deja de funcionar.
+  Microsoft.WindowsCalculator:
+    name: Calculadora
+    text: La calculadora desaparece.
+  Microsoft.WindowsAlarms:
+    name: Reloj
+    text: Las alarmas, el temporizador y las sesiones de concentración desaparecen.
+  Microsoft.WindowsCamera:
+    name: Cámara
+    text: La aplicación de cámara desaparece (la cámara web sigue funcionando en otras aplicaciones).
+  Microsoft.WindowsSoundRecorder:
+    name: Grabadora de sonido
+    text: La grabadora de audio desaparece.
+  Microsoft.MicrosoftStickyNotes:
+    name: Notas rápidas
+    text: Las notas existentes quedan inaccesibles en este PC.
+  Microsoft.Paint:
+    name: Paint
+    text: Paint desaparece.
+  Microsoft.WindowsNotepad:
+    name: Bloc de notas
+    text: El Bloc de notas desaparece; los archivos .txt quedan sin programa predeterminado.
+  Microsoft.WindowsTerminal:
+    name: Terminal
+    text: La terminal predeterminada de Windows 11 desaparece; vuelve a abrirse el símbolo del sistema clásico.
+  MicrosoftCorporationII.QuickAssist:
+    name: Asistencia rápida
+    text: No podrás recibir ayuda remota con ella.
+  Microsoft.WindowsStore:
+    name: Microsoft Store
+    text: Sin la Store no puedes instalar ni actualizar aplicaciones de la tienda, ni winget.
+  Microsoft.DesktopAppInstaller:
+    name: Instalador de aplicación (winget)
+    text: 'Es winget: sin él, la instalación de tus aplicaciones falla.'
+  Microsoft.StorePurchaseApp:
+    name: Compras de Store
+    text: Necesario para que la Store funcione.
+  Microsoft.SecHealthUI:
+    name: Seguridad de Windows
+    text: Es la interfaz del antivirus y del firewall.
+  Microsoft.VCLibs.140.00:
+    name: Bibliotecas de Visual C++ (UWP)
+    text: Biblioteca que usan varias aplicaciones; quitarla rompe otros programas.
+  Microsoft.VCLibs.140.00.UWPDesktop:
+    name: Bibliotecas de Visual C++ (Desktop Bridge)
+    text: Biblioteca que usan winget y varias aplicaciones.
+  Microsoft.UI.Xaml.2.8:
+    name: WinUI 2.8
+    text: Biblioteca de interfaz que usan varias aplicaciones.
+  Microsoft.NET.Native.Framework.2.2:
+    name: .NET Native Framework
+    text: Biblioteca que usan varias aplicaciones.
+  Microsoft.NET.Native.Runtime.2.2:
+    name: .NET Native Runtime
+    text: Biblioteca que usan varias aplicaciones.
+  Microsoft.WindowsAppRuntime.1.5:
+    name: Windows App Runtime
+    text: Biblioteca que usan varias aplicaciones de Windows 11.
+  Microsoft.HEIFImageExtension:
+    name: Extensiones de imagen HEIF
+    text: 'Códec: sin él, las fotos del teléfono (.heic) no se abren.'
+  Microsoft.WebMediaExtensions:
+    name: Extensiones de multimedia web
+    text: Códec que usan los navegadores y reproductores.
+driver_classes:
+  Net:
+    label: Red (Ethernet/Wi-Fi)
+  SCSIAdapter:
+    label: Controladora de almacenamiento (NVMe/RAID)
+  HDC:
+    label: Controladora de disco (SATA/AHCI)
+  System:
+    label: Chipset y dispositivos del sistema
+  USB:
+    label: Controladoras USB
+  Display:
+    label: Tarjeta gráfica
+  MEDIA:
+    label: Audio
+  AudioProcessingObject:
+    label: Efectos de audio
+  Bluetooth:
+    label: Bluetooth
+  HIDClass:
+    label: Dispositivos de entrada (HID)
+  Mouse:
+    label: Mouse y panel táctil
+  Keyboard:
+    label: Teclado
+  Camera:
+    label: Cámara
+  Image:
+    label: Cámara/escáner (imagen)
+  Biometric:
+    label: Lector biométrico
+  Sensor:
+    label: Sensores
+  SmartCardReader:
+    label: Lector de tarjetas inteligentes
+  SecurityDevices:
+    label: Dispositivos de seguridad (TPM)
+  Ports:
+    label: Puertos (COM/LPT)
+  Monitor:
+    label: Monitor
+  Printer:
+    label: Impresora
+  SoftwareComponent:
+    label: Componente de software
+  Extension:
+    label: Extensión de controlador
+  Firmware:
+    label: Firmware (actualización de BIOS/dispositivo)
+dpapi_patterns:
+  electron_token:
+    what: contiene el token de inicio de sesión; tendrás que volver a iniciar sesión
+  chromium_login_data:
+    what: las contraseñas guardadas del navegador no funcionarán
+  chromium_cookies:
+    what: las cookies (sesiones abiertas) no funcionarán
+  chromium_cookies_legacy:
+    what: las cookies (sesiones abiertas) no funcionarán
+  chromium_local_state:
+    what: la clave que protege contraseñas y cookies está ligada a esta cuenta
+  chromium_web_data:
+    what: las tarjetas y los datos de autocompletar no funcionarán
+  firefox_logins:
+    what: las contraseñas de Firefox pueden no abrirse si hay contraseña principal
+  windows_credentials:
+    what: las credenciales de Windows no se pueden transferir
+  windows_protect:
+    what: las claves DPAPI de Windows no se pueden transferir
+  dpapi_generic:
+    what: archivo protegido por Windows; no funcionará en otra máquina

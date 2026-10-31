@@ -28,6 +28,28 @@
 
 ---
 
+## 2026-10-31 — M11 — Catálogos traduzidos e padrões regionais do PC atual
+**Tipo:** implementação + dados
+**Resumo:** ajustes, apps pré-instalados, classes de driver e avisos de DPAPI ganham tradução em inglês e espanhol, carregada conforme o idioma (no Studio e no Agente). A receita nova passa a nascer com formatos, teclado e fuso do PC atual. A descrição da conta local no XML sai no idioma escolhido.
+
+### Adicionado
+- `src/winkit/data/i18n_en_us.yaml`, `src/winkit/data/i18n_es.yaml` — traduções dos catálogos
+- `src/winkit/core/catalog/localize.py` — `localize`, `missing_translations`, `orphan_translations`
+- `src/winkit/core/regional.py` — `RegionalDefaults`, conversão do layout de teclado para o formato do XML
+- `platform/locale.read_regional` — formatos, teclado e fuso pelo registro
+- Testes: `tests/core/test_catalog_localize.py`, `tests/core/test_regional.py`, descrição da conta por idioma
+
+### Alterado
+- `src/winkit/core/catalog/loader.py` — `default_catalogs()` no idioma atual (cache por idioma), `load_translation`
+- `src/winkit/studio/controller.py` — catálogos sempre no idioma atual (`catalogs_override` para testes)
+- `src/winkit/agent/phases.py`, `src/winkit/agent/main.py` — catálogos recarregados no idioma da receita
+- `src/winkit/core/recipe/io.py` — `new_recipe(regional=...)`; Studio e CLI passam os valores do PC
+- `src/winkit/platform/services.py` — `Services.regional`
+- `src/winkit/core/unattend/generator.py` — descrição da conta por chave
+
+### Documentos vivos atualizados
+- PLANO — §9.5; PLANO_V2 — onde ficaram as traduções dos catálogos; STATUS — itens do M11
+
 ## 2026-10-31 — M11 — Agente, CLI e mensagens do motor em três idiomas
 **Tipo:** implementação + testes
 **Resumo:** o Agente passa a falar o idioma da receita (`auto` = idioma do Windows novo); a CLI ganha `--idioma`, `WINKIT_LANG` e apelidos em inglês (`build`, `recipe new`…); os avisos do Construtor, da validação e do Coletor saem traduzidos. Dois testes de proteção garantem que nenhuma chave falta, nenhuma sobra e nenhum texto de interface fica solto no código.

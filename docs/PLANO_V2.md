@@ -782,7 +782,7 @@ Isso **muda o `PLANO.md` §9.5**: `user_locale`, `system_locale`, `input_locale`
 
 #### 6.3.4 Catálogos traduzidos
 
-- Arquivos `i18n/catalogs/en_us.yaml` e `es.yaml`, chaves planas:
+- *(Implementado em `src/winkit/data/i18n_en_us.yaml` e `i18n_es.yaml`, YAML aninhado por catálogo e id — os ids de bloatware têm ponto, e a pasta `data/` já entra no executável empacotado.)* Formato originalmente planejado, com chaves planas:
   ```yaml
   tweaks.privacy.telemetry_minimum.title: Minimum telemetry
   tweaks.privacy.telemetry_minimum.description: Sends Microsoft only the required diagnostic data.

@@ -235,3 +235,19 @@ def test_first_logon_command_guards_missing_agent() -> None:
     cmd = commands.first_logon_command()
     assert cmd.startswith("cmd.exe /c if exist")
     assert "phase2" in cmd
+
+
+@pytest.mark.parametrize(
+    ("lang", "text"),
+    [
+        ("pt-BR", "Conta local criada pelo WinKit"),
+        ("en-US", "Local account created by WinKit"),
+        ("es", "Cuenta local creada por WinKit"),
+    ],
+)
+def test_account_description_follows_language(lang: str, text: str) -> None:
+    from winkit.i18n import set_language
+
+    set_language(lang)  # type: ignore[arg-type]
+    root = gen()
+    assert text in ET.tostring(root, encoding="unicode")

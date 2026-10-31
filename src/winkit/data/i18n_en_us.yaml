@@ -1,0 +1,294 @@
+# Traduções dos catálogos (inglês) — D-030, R-51.
+# Chave = id do item no catálogo base (pt-BR). `text` do bloatware = side_effect ou reason.
+tweaks:
+  privacy.telemetry_minimum:
+    title: Minimum allowed telemetry
+    description: Sends Microsoft only the required diagnostic data.
+  privacy.advertising_id:
+    title: Turn off the advertising ID
+    description: Apps stop using an identifier for personalized ads.
+  privacy.activity_history:
+    title: Turn off activity history
+    description: Windows does not record or send your activity history.
+  privacy.tailored_experiences:
+    title: Turn off tailored experiences
+    description: Microsoft does not use your diagnostic data for tips and ads.
+  privacy.start_bing_search:
+    title: Start search without web results (Bing)
+    description: Start menu search looks only on the computer.
+  privacy.start_suggestions:
+    title: No app suggestions in Start and Settings
+    description: Removes "suggestions" (ads) from the Start menu and the Settings app.
+  privacy.copilot:
+    title: Turn off Copilot
+    description: Hides the button and turns off Windows Copilot (the app can be removed in the bloatware list).
+  privacy.recall:
+    title: Turn off Recall
+    description: Turns off the feature that takes periodic screenshots (only on Copilot+ PCs).
+  privacy.widgets:
+    title: Turn off Widgets (news and interests)
+    description: Turns off the Widgets board and the news on the taskbar.
+  privacy.welcome_experience:
+    title: No "welcome" and "let's finish setting up" screens
+    description: Windows stops showing service offer screens after updates.
+  privacy.lock_screen_tips:
+    title: No tips and fun facts on the lock screen
+    description: The lock screen shows only the picture and the clock.
+  visual.dark_theme:
+    title: Dark theme
+    description: Windows and apps in dark mode.
+  visual.taskbar_left:
+    title: Taskbar aligned to the left
+    description: Start button and icons on the left, like Windows 10.
+  visual.show_extensions:
+    title: Show file extensions
+    description: Shows ".exe", ".pdf" etc. in File Explorer.
+  visual.show_hidden_files:
+    title: Show hidden files
+    description: Shows hidden files and folders (such as AppData) in File Explorer.
+  visual.classic_context_menu:
+    title: Classic context menu (full right-click)
+    description: Right-click shows the full Windows 10 menu again, without "Show more options".
+  visual.explorer_this_pc:
+    title: File Explorer opens on "This PC"
+    description: File Explorer opens showing the drives instead of the home page.
+  visual.hide_task_view_button:
+    title: Hide the Task View button
+    description: Removes the virtual desktops button from the taskbar (the Win+Tab shortcut still works).
+  visual.hide_widgets_button:
+    title: Hide the Widgets button
+    description: Removes the Widgets/weather button from the taskbar.
+  visual.hide_chat_button:
+    title: Hide the Teams/Chat button
+    description: Removes the chat button from the taskbar.
+  visual.search_icon_only:
+    title: Taskbar search as an icon only
+    description: Replaces the large search box with a magnifier icon.
+  visual.start_hide_recommended:
+    title: Start without recommendations and recent files
+    description: Hides tips and recent files in the "Recommended" section of Start.
+  system.prevent_device_encryption:
+    title: Do not encrypt the disk automatically
+    description: Prevents automatic device encryption, even after signing in with a Microsoft account (D-020). Manual
+      BitLocker is still available.
+  system.wu_no_driver_replacement:
+    title: Windows Update does not replace drivers
+    description: Windows Update stops installing drivers over the ones you installed.
+  system.consumer_content:
+    title: Block suggested apps installed by themselves
+    description: Keeps Windows from installing "suggested" games and apps (Candy Crush, TikTok etc.).
+  system.long_paths:
+    title: Allow long paths
+    description: Compatible programs can use paths longer than 260 characters.
+bloatware:
+  Clipchamp.Clipchamp:
+    name: Clipchamp (video editor)
+  Microsoft.BingNews:
+    name: News
+  Microsoft.BingWeather:
+    name: Weather
+  Microsoft.BingSearch:
+    name: Bing Search
+  Microsoft.GetHelp:
+    name: Get Help
+  Microsoft.Getstarted:
+    name: Tips
+  Microsoft.MicrosoftSolitaireCollection:
+    name: Microsoft Solitaire Collection
+  Microsoft.MicrosoftOfficeHub:
+    name: Microsoft 365 (Office) — subscription shortcut
+  Microsoft.PowerAutomateDesktop:
+    name: Power Automate
+  Microsoft.Todos:
+    name: Microsoft To Do
+  Microsoft.WindowsFeedbackHub:
+    name: Feedback Hub
+  Microsoft.WindowsMaps:
+    name: Maps
+  MSTeams:
+    name: Microsoft Teams (personal)
+  Microsoft.ZuneVideo:
+    name: Movies & TV
+  Microsoft.Windows.DevHome:
+    name: Dev Home
+  Microsoft.549981C3F5F10:
+    name: Cortana
+  Microsoft.People:
+    name: People
+  Microsoft.MixedReality.Portal:
+    name: Mixed Reality Portal
+  Microsoft.SkypeApp:
+    name: Skype
+  Microsoft.Microsoft3DViewer:
+    name: 3D Viewer
+  Microsoft.Wallet:
+    name: Wallet
+  Microsoft.Copilot:
+    name: Copilot
+    text: The Copilot assistant is gone; it can be reinstalled from the Microsoft Store.
+  MicrosoftWindows.Client.WebExperience:
+    name: Widgets
+    text: The Widgets board and the weather on the taskbar disappear.
+  Microsoft.OutlookForWindows:
+    name: Outlook (new)
+    text: The default mail and calendar app disappears.
+  Microsoft.YourPhone:
+    name: Phone Link
+    text: Stops mirroring notifications and photos from your phone.
+  Microsoft.XboxGamingOverlay:
+    name: Xbox Game Bar
+    text: Win+G and game recording stop working.
+  Microsoft.GamingApp:
+    name: Xbox (app)
+    text: PC Game Pass stops working.
+  Microsoft.XboxIdentityProvider:
+    name: Xbox Identity Provider
+    text: Games that require an Xbox sign-in (Game Pass, Minecraft) may fail.
+  Microsoft.XboxSpeechToTextOverlay:
+    name: Xbox — speech to text
+    text: Xbox chat accessibility features stop working.
+  Microsoft.Xbox.TCUI:
+    name: Xbox TCUI
+    text: Xbox friends/invites screens inside games stop working.
+  Microsoft.ZuneMusic:
+    name: Media Player
+    text: The default music and video player disappears.
+  Microsoft.Windows.Photos:
+    name: Photos
+    text: The default image viewer disappears.
+  Microsoft.ScreenSketch:
+    name: Snipping Tool
+    text: Win+Shift+S (screen capture) stops working.
+  Microsoft.WindowsCalculator:
+    name: Calculator
+    text: The calculator disappears.
+  Microsoft.WindowsAlarms:
+    name: Clock
+    text: Alarms, timer and focus sessions disappear.
+  Microsoft.WindowsCamera:
+    name: Camera
+    text: The camera app disappears (the webcam still works in other apps).
+  Microsoft.WindowsSoundRecorder:
+    name: Sound Recorder
+    text: The audio recorder disappears.
+  Microsoft.MicrosoftStickyNotes:
+    name: Sticky Notes
+    text: Existing notes become inaccessible on this PC.
+  Microsoft.Paint:
+    name: Paint
+    text: Paint disappears.
+  Microsoft.WindowsNotepad:
+    name: Notepad
+    text: Notepad disappears; .txt files have no default program.
+  Microsoft.WindowsTerminal:
+    name: Terminal
+    text: The default Windows 11 terminal disappears; the classic prompt opens again.
+  MicrosoftCorporationII.QuickAssist:
+    name: Quick Assist
+    text: You will not be able to receive remote help through it.
+  Microsoft.WindowsStore:
+    name: Microsoft Store
+    text: Without the Store you cannot install or update Store apps, nor winget.
+  Microsoft.DesktopAppInstaller:
+    name: App Installer (winget)
+    text: 'It is winget: without it, installing your apps fails.'
+  Microsoft.StorePurchaseApp:
+    name: Store Purchase App
+    text: Required for the Store to work.
+  Microsoft.SecHealthUI:
+    name: Windows Security
+    text: It is the antivirus and firewall interface.
+  Microsoft.VCLibs.140.00:
+    name: Visual C++ Libraries (UWP)
+    text: Library used by several apps; removing it breaks other programs.
+  Microsoft.VCLibs.140.00.UWPDesktop:
+    name: Visual C++ Libraries (Desktop Bridge)
+    text: Library used by winget and several apps.
+  Microsoft.UI.Xaml.2.8:
+    name: WinUI 2.8
+    text: Interface library used by several apps.
+  Microsoft.NET.Native.Framework.2.2:
+    name: .NET Native Framework
+    text: Library used by several apps.
+  Microsoft.NET.Native.Runtime.2.2:
+    name: .NET Native Runtime
+    text: Library used by several apps.
+  Microsoft.WindowsAppRuntime.1.5:
+    name: Windows App Runtime
+    text: Library used by several Windows 11 apps.
+  Microsoft.HEIFImageExtension:
+    name: HEIF Image Extensions
+    text: 'Codec: without it, phone photos (.heic) do not open.'
+  Microsoft.WebMediaExtensions:
+    name: Web Media Extensions
+    text: Codec used by browsers and players.
+driver_classes:
+  Net:
+    label: Network (Ethernet/Wi-Fi)
+  SCSIAdapter:
+    label: Storage controller (NVMe/RAID)
+  HDC:
+    label: Disk controller (SATA/AHCI)
+  System:
+    label: Chipset and system devices
+  USB:
+    label: USB controllers
+  Display:
+    label: Graphics card
+  MEDIA:
+    label: Audio
+  AudioProcessingObject:
+    label: Audio effects
+  Bluetooth:
+    label: Bluetooth
+  HIDClass:
+    label: Input devices (HID)
+  Mouse:
+    label: Mouse and touchpad
+  Keyboard:
+    label: Keyboard
+  Camera:
+    label: Camera
+  Image:
+    label: Camera/scanner (imaging)
+  Biometric:
+    label: Biometric reader
+  Sensor:
+    label: Sensors
+  SmartCardReader:
+    label: Smart card reader
+  SecurityDevices:
+    label: Security devices (TPM)
+  Ports:
+    label: Ports (COM/LPT)
+  Monitor:
+    label: Monitor
+  Printer:
+    label: Printer
+  SoftwareComponent:
+    label: Software component
+  Extension:
+    label: Driver extension
+  Firmware:
+    label: Firmware (BIOS/device update)
+dpapi_patterns:
+  electron_token:
+    what: contains the sign-in token; you will have to sign in again
+  chromium_login_data:
+    what: saved browser passwords will not work
+  chromium_cookies:
+    what: cookies (open sessions) will not work
+  chromium_cookies_legacy:
+    what: cookies (open sessions) will not work
+  chromium_local_state:
+    what: the key that protects passwords and cookies is tied to this account
+  chromium_web_data:
+    what: cards and autofill data will not work
+  firefox_logins:
+    what: Firefox passwords may not open if there is a primary password
+  windows_credentials:
+    what: Windows credentials cannot be transferred
+  windows_protect:
+    what: Windows DPAPI keys cannot be transferred
+  dpapi_generic:
+    what: file protected by Windows; it will not work on another machine

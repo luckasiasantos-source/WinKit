@@ -60,6 +60,7 @@ def build_runtime() -> Runtime:
         clock=_now,
         ui_factory=select_ui,
         detect_language=detect_language,
+        catalog_loader=default_catalogs,
     )
 
 

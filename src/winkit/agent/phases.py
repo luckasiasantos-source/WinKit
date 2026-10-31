@@ -47,12 +47,16 @@ class Runtime:
     waits: Waits = field(default_factory=Waits)
     #: Idioma do Windows atual (para ``execution.language = auto``, D-030).
     detect_language: Callable[[], str] = lambda: "pt-BR"
+    #: Recarrega os catálogos no idioma escolhido (``None`` = manter os recebidos, como nos testes).
+    catalog_loader: Callable[[], Catalogs] | None = None
 
 
 def apply_language(rt: Runtime, recipe: Recipe) -> None:
     """Janela, notificações, resumo e motivos no idioma da receita."""
     choice = recipe.execution.language
     set_language(normalize(rt.detect_language()) if choice == "auto" else choice)
+    if rt.catalog_loader is not None:
+        rt.catalogs = rt.catalog_loader()
 
 
 @dataclass

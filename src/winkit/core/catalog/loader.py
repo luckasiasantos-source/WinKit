@@ -10,8 +10,10 @@ from typing import Any
 import yaml
 from pydantic import ValidationError
 
+from winkit.core.catalog.localize import CatalogTranslation, localize
 from winkit.core.catalog.models import Catalogs
 from winkit.core.errors import CatalogError
+from winkit.i18n import Language, current_language
 
 FILES: dict[str, str] = {
     "apps": "app_catalog.yaml",
@@ -70,7 +72,34 @@ def _check_unique(c: Catalogs) -> None:
             raise CatalogError(f"{name}: identificadores repetidos {dupes}")
 
 
+#: Arquivo de tradução dos catálogos por idioma (pt-BR é a base, D-030).
+TRANSLATION_FILES: dict[str, str] = {"en-US": "i18n_en_us.yaml", "es": "i18n_es.yaml"}
+
+
+def load_translation(lang: str, directory: Path | None = None) -> CatalogTranslation:
+    name = TRANSLATION_FILES[lang]
+    try:
+        data = _parse(name, _read_text(name, directory)) or {}
+        return CatalogTranslation.model_validate(data)
+    except FileNotFoundError as exc:
+        raise CatalogError(f"tradução ausente: {name}") from exc
+    except ValidationError as exc:
+        raise CatalogError(f"tradução inválida em {name}: {exc}") from exc
+
+
 @functools.cache
-def default_catalogs() -> Catalogs:
-    """Catálogos empacotados, carregados uma vez por processo."""
+def _base_catalogs() -> Catalogs:
     return load_catalogs()
+
+
+@functools.cache
+def catalogs_for(lang: Language) -> Catalogs:
+    base = _base_catalogs()
+    if lang not in TRANSLATION_FILES:
+        return base
+    return localize(base, load_translation(lang))
+
+
+def default_catalogs() -> Catalogs:
+    """Catálogos empacotados no idioma atual, carregados uma vez por idioma."""
+    return catalogs_for(current_language())

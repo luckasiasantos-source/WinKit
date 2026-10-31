@@ -61,7 +61,8 @@ def default_agent_source() -> Path | None:
 @dataclass
 class StudioController:
     services: Services
-    catalogs: Catalogs = field(default_factory=default_catalogs)
+    #: Catálogos fixos (testes); ``None`` = os empacotados, no idioma atual (D-030).
+    catalogs_override: Catalogs | None = None
     clock: Callable[[], datetime] = field(default=lambda: datetime.now(UTC))
     profile_id: str = "padrao"
     target: targets.Target | None = None
@@ -69,6 +70,10 @@ class StudioController:
     agent_source: Path | None = field(default_factory=default_agent_source)
 
     # ------------------------------------------------------------------ pendrive
+    @property
+    def catalogs(self) -> Catalogs:
+        return self.catalogs_override or default_catalogs()
+
     def pendrives(self) -> list[VentoyTarget]:
         return targets.list_targets(self.services.disks)
 
@@ -104,6 +109,7 @@ class StudioController:
             profile_id=self.profile_id,
             source_pc=os.environ.get("COMPUTERNAME"),
             now=self.clock(),
+            regional=self.services.regional(),
         )
         recipe.windows.computer_name = computer_name or None
         self.recipe = recipe

@@ -167,7 +167,9 @@
 - ✅ Janela do Agente, resumo e notificações no idioma da receita (`execution.language`; `auto` = idioma do Windows novo)
 - ✅ CLI: textos por chave, `--idioma`, `WINKIT_LANG`, apelidos em inglês (D-032); avisos do Construtor, da validação e do Coletor traduzidos
 - ✅ Testes de proteção: uso das chaves (R-51) e nenhum texto de interface solto (R-55)
-- ⬜ Catálogos traduzidos, detecção do idioma, troca no Studio, idioma do Agente pela receita
+- ✅ Catálogos traduzidos (`data/i18n_*.yaml`, completude e órfãos testados), carregados por idioma
+- ✅ Detecção do idioma do Windows, troca no Studio, idioma do Agente pela receita
+- ✅ Receita nova com formatos, teclado e fuso do PC atual; descrição da conta no XML traduzida
 - ⬜ README, NOTICE, LEIA-ME e notas da release trilíngues; capturas; roteiro `M11.md`
 
 ## Hipóteses técnicas

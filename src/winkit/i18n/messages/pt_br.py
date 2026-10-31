@@ -590,4 +590,5 @@ MESSAGES: dict[str, Entry] = {
     "recipe.silent_asks": "No modo silencioso nada é perguntado; estes itens usarão a escolha padrão: {ids}",
     "recipe.store_offline": "app {id}: apps da Microsoft Store não podem ser baixados para uso offline",
     "ui.agent.pc_placeholder": "PC-NOVO",
+    "unattend.account_description": "Conta local criada pelo WinKit",
 }

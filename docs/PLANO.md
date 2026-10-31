@@ -765,7 +765,9 @@ A edição é escolhida pela **chave genérica de instalação** pública da Mic
 
 ### 9.5 Idioma
 
-`UILanguage` **precisa** ser um idioma presente na imagem; senão o instalador falha. Por isso `ui_language = auto` usa o idioma da ISO detectado em 8.2, enquanto teclado, formatos regionais e fuso usam os valores da receita (pt-BR). Por isso existe um XML por idioma de ISO.
+`UILanguage` **precisa** ser um idioma presente na imagem; senão o instalador falha. Por isso `ui_language = auto` usa o idioma da ISO detectado em 8.2, enquanto teclado, formatos regionais e fuso usam os valores da receita. Por isso existe um XML por idioma de ISO.
+
+Desde o M11 (D-030), a receita nova **nasce com os valores do PC atual** (formatos, teclado e fuso, lidos do registro por `platform/locale.read_regional`); se não der para ler, ficam os padrões do Brasil. A descrição da conta local no XML sai no idioma do Studio.
 
 ---
 
