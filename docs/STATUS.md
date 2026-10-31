@@ -22,7 +22,7 @@
 | M5 | Aplicativos | ✅ código | ⬜ roteiro pronto (`docs/validacao/M5.md`) |
 | M6 | Backups | ✅ código | ⬜ roteiro pronto (`docs/validacao/M6.md`) |
 | M7 | Bloatware e ajustes | ✅ código | ⬜ roteiro pronto (`docs/validacao/M7.md`) |
-| M8 | Windows Update, resumo e notificações | ⬜ | ⬜ pendente |
+| M8 | Windows Update, resumo e notificações | ✅ código | ⬜ roteiro pronto (`docs/validacao/M8.md`) |
 | M9 | Interface do Agente | ⬜ | ⬜ pendente |
 | M10 | WinKit Studio (GUI) | ⬜ | — |
 
@@ -120,7 +120,14 @@
 - ✅ `agent/steps/system.py` — bloatware + bloqueio de reinstalação; plano de energia com duplicação de planos ocultos (Modern Standby), hibernação, inicialização rápida; renomear o computador (decidir na hora)
 - ✅ Teste de dados: todos os ajustes do catálogo aplicam em todos os alvos
 - ✅ Roteiro `docs/validacao/M7.md`
-### M8 — Windows Update, resumo e notificações ⬜
+### M8 — Windows Update, resumo e notificações ✅ (código) · validação na VM pendente
+- ✅ `platform/windows_update.py` — API COM `Microsoft.Update.Session`: procurar, aceitar EULA, baixar, instalar; com ou sem drivers
+- ✅ `platform/power.py` — ociosidade (`GetLastInputInfo`) e reinício agendado (`shutdown /r /t`)
+- ✅ `agent/steps/windows_update.py` — resultados 2/3/4, reinício necessário, títulos no log
+- ✅ `agent/reboot.py` — políticas `ask`, `auto_if_idle` (5 min ocioso, aviso de 60 s), `never`
+- ✅ Atalho "Tentar de novo os que falharam (WinKit)" quando há falha (o Agente fica instalado — D-024)
+- ✅ Resumo HTML e notificação final (M3) agora com todos os tipos de etapa reais
+- ✅ Roteiro `docs/validacao/M8.md`
 ### M9 — Interface do Agente ⬜
 ### M10 — WinKit Studio ⬜
 

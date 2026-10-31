@@ -113,6 +113,8 @@ Por que isso importa:
 | `disks.py` | Detecção do Ventoy, montagem de ISO somente leitura, leitura de edições | `DiskInspector` |
 | `scheduler.py` | Tarefas agendadas | `TaskScheduler` |
 | `session.py` | Privilégio de administrador | — |
+| `power.py` | Ociosidade da sessão e reinício agendado | `SessionControl` |
+| `windows_update.py` | Windows Update via COM | `WindowsUpdater` |
 | `environment.py` | Unidades, internet (NCSI), build do Windows, trava de instância única | `Environment` |
 | `accounts.py` | Garante a conta no grupo Administradores pelo SID (H11) | `Accounts` |
 | `services.py` | Fábrica das implementações reais para o Studio | `Services` |
@@ -136,6 +138,7 @@ Por que isso importa:
 | `agent/executor.py` | Executa um `Plan`, persiste `State`, trata reinicialização e pendrive ausente |
 | `agent/integrity.py` | Confere arquivo ou pasta do pendrive contra o `manifesto.json` (R-22) |
 | `agent/fakes.py`, `platform/fakes/services.py` | Fábricas de serviços falsos (um lugar só para acrescentar campos) |
+| `agent/reboot.py`, `steps/windows_update.py` | Política de reinício; Windows Update |
 | `agent/steps/tweak.py`, `steps/system.py` | Motor de ajustes (onde gravar conforme o alvo); bloatware, energia, nome do PC |
 | `agent/steps/*.py` | Uma classe por tipo de etapa: `DriverStep`, `BloatStep`, `TweakStep`, `BackupStep`, `AppStep`, `ShortcutStep`, `WindowsUpdateStep`, `CleanupStep` |
 | `agent/ui/` | Janela da Fase 2, bandeja, resumo (import tardio) |

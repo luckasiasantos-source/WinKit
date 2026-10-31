@@ -15,6 +15,7 @@ from winkit.agent.executor import Executor, PhaseOutcome, Waits
 from winkit.agent.paths import AgentPaths
 from winkit.agent.pendrive import PendriveLocator
 from winkit.agent.progress import AgentUi, NullUi
+from winkit.agent.reboot import handle_reboot
 from winkit.agent.services import AgentServices
 from winkit.agent.steps.base import StepHandler
 from winkit.agent.steps.registry import default_handlers
@@ -225,6 +226,7 @@ def run_phase2(rt: Runtime, *, retry_failed: bool = False) -> int:
                 log.info("adiado pelo usuário para o próximo login")
                 return 0
             s.state.postponed = False
+            s.state.reboot_pending = False  # nova sessão: reinícios anteriores já ocorreram
             if choice.computer_name:
                 s.state.computer_name_choice = choice.computer_name
             ps = s.state.phase2
@@ -238,6 +240,9 @@ def run_phase2(rt: Runtime, *, retry_failed: bool = False) -> int:
             _log_outcome(log, 2, outcome)
             if outcome.reboot_required:
                 log.info("reinicialização necessária para concluir algumas etapas")
+                handle_reboot(
+                    s.recipe.execution.reboot_policy, ui=ui, services=rt.services, log=log
+                )
             s.mirror_logs()
     finally:
         log.detach_python_logging()

@@ -28,6 +28,30 @@
 
 ---
 
+## 2026-10-31 — M8 — Windows Update, política de reinício e "tentar de novo"
+**Tipo:** implementação + testes + documentação
+**Resumo:** última etapa da Fase 2: Windows Update pela API oficial; reinício conforme a política da receita; atalho para tentar de novo o que falhou. Com isso, todos os tipos de etapa do Agente estão implementados.
+
+### Adicionado
+- `src/winkit/platform/windows_update.py` — `ComWindowsUpdater`, `UpdateResult`
+- `src/winkit/platform/power.py` — `WindowsSessionControl`
+- `src/winkit/agent/steps/windows_update.py` — `WindowsUpdateStep`
+- `src/winkit/agent/reboot.py` — `handle_reboot`
+- `FakeUpdater`, `FakeSession`
+- Testes: `tests/agent/test_update_and_reboot.py`
+- `docs/validacao/M8.md`
+
+### Alterado
+- `src/winkit/agent/steps/finalize.py` — atalho "tentar de novo" quando há falha
+- `src/winkit/agent/phases.py` — aplica a política de reinício; limpa o sinal de reinício a cada nova sessão
+- `src/winkit/agent/steps/registry.py` — nenhum tipo de etapa pendente de implementação
+- `src/winkit/agent/services.py`, `agent/fakes.py` — `updater`, `session`
+
+### Documentos vivos atualizados
+- STATUS — M8; ARQUITETURA — módulos
+
+---
+
 ## 2026-10-31 — M7 — Bloatware, ajustes, energia e nome do computador
 **Tipo:** implementação + testes + documentação
 **Resumo:** o Agente remove os apps escolhidos e impede que voltem, aplica os ajustes de privacidade/visual/sistema no perfil Default (a conta já nasce configurada), ajusta energia e renomeia o computador quando decidido na hora.

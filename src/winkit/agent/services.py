@@ -13,11 +13,13 @@ from winkit.platform.features import SystemFeatures, WindowsSystemFeatures
 from winkit.platform.installers import InstallerRunner, WindowsInstallerRunner
 from winkit.platform.inventory import AppInventory, WindowsAppInventory
 from winkit.platform.known_folders import KnownFolders, WindowsKnownFolders
+from winkit.platform.power import SessionControl, WindowsSessionControl
 from winkit.platform.powershell import PowerShell
 from winkit.platform.registry import Registry, WindowsRegistry
 from winkit.platform.runner import CommandRunner, SubprocessRunner
 from winkit.platform.scheduler import TaskScheduler, WindowsTaskScheduler
 from winkit.platform.shortcuts import Shortcuts, WindowsShortcuts
+from winkit.platform.windows_update import ComWindowsUpdater, WindowsUpdater
 from winkit.platform.winget import WindowsWinget, Winget
 
 
@@ -38,6 +40,8 @@ class AgentServices:
     copier: Copier
     appx: AppxManager
     features: SystemFeatures
+    updater: WindowsUpdater
+    session: SessionControl
 
 
 def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windows
@@ -60,4 +64,6 @@ def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windo
         copier=RobocopyCopier(runner),
         appx=WindowsAppxManager(ps),
         features=WindowsSystemFeatures(ps),
+        updater=ComWindowsUpdater(ps),
+        session=WindowsSessionControl(runner),
     )

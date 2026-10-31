@@ -50,6 +50,21 @@ def _desktop_shortcut(ctx: StepContext) -> None:
     atomic_write_text(local_path(desktop) / f"{t('agent.summary_shortcut')}.url", content)
 
 
+def _retry_shortcut(ctx: StepContext) -> None:
+    """Com falhas, o Agente fica instalado (D-024) e ganha um atalho "tentar de novo"."""
+    desktop = ctx.services.folders.current_user().get("DESKTOP")
+    if not desktop:
+        return
+    try:
+        ctx.services.shortcuts.create(
+            local_path(desktop) / f"{t('summary.retry_failed')} (WinKit).lnk",
+            str(ctx.paths.agent_exe),
+            "retry",
+        )
+    except Exception as exc:  # noqa: BLE001 — atalho é conveniência
+        ctx.log.warning(f"atalho de nova tentativa não criado: {exc}", step=ctx.step.id)
+
+
 class FinalizeStep:
     def check(self, ctx: StepContext) -> bool:
         return False
@@ -64,6 +79,8 @@ class FinalizeStep:
             )
         failures = [k for k, v in ctx.state.steps.items() if v.status == "failed"]
         report = cleanup(ctx.services, ctx.paths, remove_agent=not failures)
+        if failures:
+            _retry_shortcut(ctx)
         for err in report.errors:
             ctx.log.warning(f"limpeza: {err}", step=ctx.step.id)
         for item in report.removed:

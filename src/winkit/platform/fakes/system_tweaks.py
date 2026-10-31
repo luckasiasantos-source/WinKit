@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from winkit.platform.appx import AppxRemoval
 from winkit.platform.features import FeatureResult
+from winkit.platform.windows_update import UpdateResult
 
 
 @dataclass
@@ -48,3 +50,25 @@ class FakeFeatures:
             return False
         self.renamed_to = name
         return True
+
+
+@dataclass
+class FakeUpdater:
+    result: UpdateResult = field(default_factory=lambda: UpdateResult(2, 2, True, ("KB1", "KB2")))
+    calls: list[bool] = field(default_factory=list)
+
+    def install_all(self, *, include_drivers: bool, log: Path | None) -> UpdateResult:
+        self.calls.append(include_drivers)
+        return self.result
+
+
+@dataclass
+class FakeSession:
+    idle: float = 0.0
+    reboots: list[tuple[int, str]] = field(default_factory=list)
+
+    def idle_seconds(self) -> float:
+        return self.idle
+
+    def reboot(self, *, delay_seconds: int, message: str) -> None:
+        self.reboots.append((delay_seconds, message))
