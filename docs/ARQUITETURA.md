@@ -106,7 +106,10 @@ Por que isso importa:
 | `installers.py` | Execução de instaladores com tempo limite e códigos de saída | `InstallerRunner` |
 | `disks.py` | Detecção do Ventoy, montagem de ISO somente leitura, leitura de edições | `DiskInspector` |
 | `scheduler.py` | Tarefas agendadas | `TaskScheduler` |
-| `session.py` | Último input (ociosidade), sessão interativa, notificações sem Qt | `SessionInfo` |
+| `session.py` | Privilégio de administrador | — |
+| `environment.py` | Unidades, internet (NCSI), build do Windows, trava de instância única | `Environment` |
+| `accounts.py` | Garante a conta no grupo Administradores pelo SID (H11) | `Accounts` |
+| `services.py` | Fábrica das implementações reais para o Studio | `Services` |
 | `fakes/` | Uma implementação falsa para cada interface acima | — |
 
 ### 3.3 Casos de uso
@@ -121,7 +124,9 @@ Por que isso importa:
 | `builder/payload.py` | Gravação de Agent/Apps/Drivers/Backups + manifesto + marcador |
 | `builder/build.py` | Orquestra a construção completa e a sincronização |
 | `builder/assets/bootstrap.ps1` | Script de bootstrap (copiado para o pendrive) |
-| `agent/main.py` | Ponto de entrada (`phase1`, `phase2`, `summary`) |
+| `agent/main.py` | Ponto de entrada (`phase1`, `phase2`, `retry`, `summary`) |
+| `agent/phases.py` | Abre a sessão (receita, estado, plano), redes de segurança, Fase 1, Fase 2, fallback |
+| `agent/paths.py`, `store.py`, `eventlog.py`, `pendrive.py`, `progress.py`, `cleanup.py`, `services.py`, `ui_select.py` | Caminhos locais, estado atômico, logs, localização do pendrive, protocolo de UI sem Qt, limpeza, serviços, escolha da UI |
 | `agent/executor.py` | Executa um `Plan`, persiste `State`, trata reinicialização e pendrive ausente |
 | `agent/steps/*.py` | Uma classe por tipo de etapa: `DriverStep`, `BloatStep`, `TweakStep`, `BackupStep`, `AppStep`, `ShortcutStep`, `WindowsUpdateStep`, `CleanupStep` |
 | `agent/ui/` | Janela da Fase 2, bandeja, resumo (import tardio) |
@@ -398,3 +403,13 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 **Contexto:** a Fase 1 depende do `SetupComplete.cmd` (H3) e a Fase 2 de uma tarefa agendada criada na etapa *specialize*, quando não se sabe se o serviço de agendamento já está disponível.
 **Decisão:** (1) `SetupComplete.cmd` → Fase 1; (2) tarefa `\WinKit\Fase2` registrada pelo bootstrap **e** garantida de novo pelo Agente; (3) `FirstLogonCommands` no XML inicia a Fase 2 com `cmd /c start` (não bloqueia a área de trabalho). A trava de instância única do Agente torna as execuções repetidas inofensivas.
 **Consequências:** a Fase 2 começa mesmo se um dos mecanismos falhar; a Fase 1 que não rodou é coberta pelo fallback de D-012.
+
+### D-024 — Resumo em HTML estático e remoção condicional do Agente
+2026-10-31 · aceita
+**Contexto:** o plano previa apagar o Agente no fim (§10.4), mas o resumo tem botão "tentar de novo" e um atalho na área de trabalho; e um executável não consegue apagar a própria pasta enquanto roda.
+**Decisão:** o resumo é gravado como `resumo.html` (estático, abre sem o Agente) e `resumo.json`. A pasta do Agente só é removida se nada falhou, por um comando em `HKLM\...\RunOnce` executado no próximo login. Com falhas, o Agente fica para permitir `winkit-agent.exe retry`.
+**Consequências:** sem falhas, nada do WinKit sobra além de `C:\ProgramData\WinKit\Logs`, `estado.json` e o resumo.
+
+### D-025 — Pacote de distribuição em duas pastas onedir
+2026-10-31 · aceita
+**Decisão:** `WinKit-<versão>\winkit\` (CLI, com console, sem Qt) e `WinKit-<versão>\winkit-agent\` (Agente, sem console). O `construir` copia `winkit-agent` para o pendrive automaticamente quando roda a partir do pacote. O CI gera o pacote no Windows e o testa com os executáveis prontos.

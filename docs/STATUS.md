@@ -17,7 +17,7 @@
 | M0 | Fundação | ✅ | — |
 | M1 | Núcleo puro | ✅ | — |
 | M2 | Construtor mínimo + primeira instalação real | ✅ código | ⬜ roteiro pronto (`docs/validacao/M2.md`), aguardando execução na VM |
-| M3 | Esqueleto do Agente | ⬜ | ⬜ pendente |
+| M3 | Esqueleto do Agente | ✅ código | ⬜ roteiro pronto (`docs/validacao/M3.md`) |
 | M4 | Drivers | ⬜ | ⬜ pendente |
 | M5 | Aplicativos | ⬜ | ⬜ pendente |
 | M6 | Backups | ⬜ | ⬜ pendente |
@@ -75,13 +75,18 @@
 
 **Testes:** 392 passando no Linux; testes reais do `bootstrap.ps1` e da listagem de partições rodam no CI Windows.
 
-### M3 — Esqueleto do Agente ⬜
-- ⬜ Empacotamento PyInstaller onedir
-- ⬜ Executor + estado + retomada + instância única
-- ⬜ `SetupComplete.cmd`, tarefa agendada, fallback, limpeza
-- ⬜ Localização e espera do pendrive
-- ⬜ Logs no pendrive
-- ⬜ Roteiro `docs/validacao/M3.md`
+### M3 — Esqueleto do Agente ✅ (código) · validação na VM pendente
+- ✅ Plataforma: `registry.py` (winreg + montagem de hive), `scheduler.py` (tarefa pelo SID), `accounts.py` (rede de segurança H11), `environment.py` (unidades, internet via NCSI, build, trava de instância única), `known_folders.py` (`SHGetKnownFolderPath`) + fakes
+- ✅ `agent/executor.py` — contrato §4.2: falha isolada, dependências, espera de pendrive/internet sem gastar tentativa, desmarcado na janela, estado gravado antes/depois
+- ✅ `agent/phases.py` — Fase 1 e Fase 2, fallback (D-012), retomada, receita local ou do pendrive, adiar, tentar de novo
+- ✅ `agent/steps/finalize.py` + `agent/cleanup.py` — resumo JSON/HTML, atalho `.url` na área de trabalho, limpeza (tarefa, `SetupComplete.cmd`, Panther, Winlogon, receita local, remoção do Agente via `RunOnce`)
+- ✅ `core/summary.py` — resumo e HTML autocontido com escape
+- ✅ `agent/main.py` — `phase1 | phase2 [--first-logon] | retry | summary`; a Fase 1 sempre sai com 0; erro fatal vai para `agente-erro-fatal.log`
+- ✅ Empacotamento: `packaging/*.spec`, `packaging/build.ps1`, job de CI "Empacotar" com teste de fumaça usando os executáveis prontos; artefato **WinKit-windows**
+- ✅ Etapas de drivers/apps/backups/ajustes ainda como "não implementada" (preenchidas em M4–M8)
+- ✅ Roteiro `docs/validacao/M3.md`
+
+**Testes:** 417 passando; teste de proteção "Fase 1 não carrega Qt" agora ativo; CLI congelada testada localmente.
 
 ### M4 — Drivers ⬜
 ### M5 — Aplicativos ⬜

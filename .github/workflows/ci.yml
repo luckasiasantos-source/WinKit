@@ -58,3 +58,48 @@ jobs:
           path: |
             pytest-${{ matrix.os }}.xml
             coverage.xml
+
+  empacotar:
+    name: Empacotar executáveis (Windows)
+    needs: qualidade
+    runs-on: windows-latest
+    env:
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Gerar pacote
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File packaging\build.ps1
+
+      - name: Teste de fumaça com os executáveis prontos
+        shell: pwsh
+        run: |
+          $pkg = Get-ChildItem dist -Directory -Filter 'WinKit-*' | Select-Object -First 1
+          $cli = Join-Path $pkg.FullName 'winkit\winkit.exe'
+          $agent = Join-Path $pkg.FullName 'winkit-agent'
+          $root = Join-Path $env:RUNNER_TEMP 'pendrive'
+          New-Item -ItemType Directory -Force $root | Out-Null
+          & $cli --version
+          & $cli receita nova --raiz $root --usuario Samuel --nome-pc PC-CI
+          if ($LASTEXITCODE -ne 0) { throw "receita nova falhou" }
+          & $cli construir --raiz $root --agente $agent
+          if ($LASTEXITCODE -ne 0) { throw "construir falhou" }
+          & $cli validar --raiz $root
+          if ($LASTEXITCODE -ne 0) { throw "validar falhou" }
+          if (-not (Test-Path (Join-Path $root 'WinKit\Agent\winkit-agent\winkit-agent.exe'))) { throw "Agente não copiado" }
+          if (-not (Test-Path (Join-Path $root 'WinKit\Agent\bootstrap.ps1'))) { throw "bootstrap ausente" }
+          $p = Start-Process -FilePath (Join-Path $agent 'winkit-agent.exe') -ArgumentList 'summary' -Wait -PassThru
+          if ($p.ExitCode -ne 1) { throw "Agente não iniciou corretamente (código $($p.ExitCode))" }
+          Write-Host "Fumaça OK"
+
+      - name: Publicar pacote
+        uses: actions/upload-artifact@v4
+        with:
+          name: WinKit-windows
+          path: dist/WinKit-*

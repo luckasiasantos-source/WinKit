@@ -113,6 +113,15 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Plano: confirmar na VM; se falhar, marcar o ajuste como "só Fase 1" no catálogo.
 - Prioridade: baixa
 
+### DT-012 — Fase 2 sem janela até o M9
+- Estado: aberta
+- Origem: M3
+- Onde: `src/winkit/agent/ui_select.py`
+- Descrição: todos os modos de início usam `NullUi` (nenhuma janela, sem bandeja); contagem regressiva, modo interativo e escolhas na hora entram no M9.
+- Impacto: até o M9, `countdown` e `interactive` se comportam como `silent`.
+- Plano: M9 (janela Qt, bandeja, notificações).
+- Prioridade: alta (é funcionalidade pedida)
+
 ## Quitadas
 
 (nenhuma)

@@ -28,6 +28,37 @@
 
 ---
 
+## 2026-10-31 — M3 — Agente: fases, executor, resumo, limpeza e empacotamento
+**Tipo:** implementação + infraestrutura + testes + documentação
+**Resumo:** o Agente roda de ponta a ponta (Fase 1 antes do login, Fase 2 depois), retoma após reinício, cai no fallback se a Fase 1 não rodar, gera o resumo e limpa tudo. Os executáveis `winkit.exe` e `winkit-agent.exe` são gerados e testados no CI Windows.
+
+### Adicionado
+- `src/winkit/platform/registry.py`, `scheduler.py`, `accounts.py`, `environment.py`, `known_folders.py`
+- `src/winkit/platform/fakes/registry.py`, `fakes/system.py`
+- `src/winkit/core/summary.py` — `Summary`, `build_summary`, `render_html`, `format_duration`
+- `src/winkit/core/state/models.py` — `mark_deferred`
+- `src/winkit/agent/paths.py`, `eventlog.py`, `pendrive.py`, `progress.py` (`AgentUi`, `NullUi`, `Choice`), `services.py`, `store.py`, `executor.py`, `phases.py`, `cleanup.py`, `ui_select.py`, `main.py`
+- `src/winkit/agent/steps/base.py` (`StepContext`, `StepResult`, `StepHandler`, `local_path`), `steps/registry.py`, `steps/finalize.py`
+- `packaging/entry_agent.py`, `entry_cli.py`, `winkit-agent.spec`, `winkit.spec`, `build.ps1`, `LEIA-ME.txt`
+- `.github/workflows/ci.yml` — job "Empacotar executáveis (Windows)" com teste de fumaça e artefato `WinKit-windows`
+- Testes: `tests/agent/helpers.py`, `test_executor.py`, `test_phases.py`
+- `docs/validacao/M3.md`
+
+### Alterado
+- `src/winkit/cli/main.py` — usa o Agente do pacote automaticamente (`default_agent_source`)
+- `pyproject.toml` — `E501` liberado nos módulos de plataforma (scripts PowerShell embutidos)
+
+### Documentos vivos atualizados
+- STATUS — M3 com código concluído
+- ARQUITETURA — D-024, D-025; tabela de módulos
+- DIVIDAS — DT-012 (Fase 2 sem janela até o M9)
+
+### Decisões
+- D-024 (resumo HTML estático; remoção condicional do Agente)
+- D-025 (pacote em duas pastas onedir)
+
+---
+
 ## 2026-10-31 — M2 — Correção de lint e script de verificação
 **Tipo:** correção + infraestrutura
 **Resumo:** corrige os avisos de lint enviados no commit do M2 e cria o `scripts/check.sh`, obrigatório antes de cada commit.

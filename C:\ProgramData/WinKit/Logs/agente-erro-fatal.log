@@ -1,0 +1,18 @@
+2026-10-31T05:49:52.720083+00:00 WinKit 0.1.0
+Traceback (most recent call last):
+  File "/home/user/Iso-Modify-Win11/src/winkit/agent/main.py", line 68, in main
+    rt = build_runtime()
+         ^^^^^^^^^^^^^^^
+  File "/home/user/Iso-Modify-Win11/tests/agent/test_phases.py", line 187, in boom
+    raise RuntimeError("falha ao montar o runtime")
+RuntimeError: falha ao montar o runtime
+
+2026-10-31T05:49:52.721671+00:00 WinKit 0.1.0
+Traceback (most recent call last):
+  File "/home/user/Iso-Modify-Win11/src/winkit/agent/main.py", line 68, in main
+    rt = build_runtime()
+         ^^^^^^^^^^^^^^^
+  File "/home/user/Iso-Modify-Win11/tests/agent/test_phases.py", line 187, in boom
+    raise RuntimeError("falha ao montar o runtime")
+RuntimeError: falha ao montar o runtime
+

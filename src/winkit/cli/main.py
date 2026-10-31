@@ -62,6 +62,15 @@ def _cache_path() -> Path:
     return (Path(base) if base else Path.home() / ".cache") / "WinKit" / "iso-cache.json"
 
 
+def default_agent_source() -> Path | None:
+    """No pacote, o Agente fica ao lado da pasta da CLI: WinKit-x.y\\winkit-agent."""
+    if getattr(sys, "frozen", False):
+        candidate = Path(sys.executable).resolve().parent.parent / "winkit-agent"
+        if (candidate / layout.AGENT_EXE_NAME).is_file():
+            return candidate
+    return None
+
+
 def _target(args: argparse.Namespace, services: Services) -> targets.Target:
     if args.raiz:
         return targets.from_folder(Path(args.raiz), args.sistema_arquivos)
@@ -146,7 +155,7 @@ def cmd_construir(args: argparse.Namespace, services: Services, out: Out) -> int
     options = BuildOptions(
         profile_id=args.perfil,
         xml_only=args.somente_xml,
-        agent_source=Path(args.agente) if args.agente else None,
+        agent_source=Path(args.agente) if args.agente else default_agent_source(),
         iso_cache=None if args.raiz else _cache_path(),
     )
     report = build(tgt, services.disks, default_catalogs(), options, now=_now())

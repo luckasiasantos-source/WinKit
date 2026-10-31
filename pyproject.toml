@@ -64,7 +64,7 @@ ignore = [
 "src/winkit/agent/ui/**" = ["N802"]
 "src/winkit/i18n/**" = ["E501"]
 "src/winkit/cli/**" = ["T20"]           # textos longos ficam inteiros para facilitar a revisão
-"src/winkit/platform/powershell.py" = ["E501"]  # trechos de script PowerShell
+"src/winkit/platform/*.py" = ["E501"]  # trechos de script PowerShell embutidos
 "src/winkit/studio/**" = ["N802"]
 
 [tool.ruff.lint.isort]

@@ -164,6 +164,18 @@ def mark_failed(
     return st
 
 
+def mark_deferred(state: AgentState, step_id: str, reason: str) -> StepState:
+    """Etapa que não pôde rodar agora (sem pendrive/internet): volta a pendente.
+
+    A tentativa não é contada.
+    """
+    st = _require_running(state, step_id)
+    st.status = "pending"
+    st.attempts = max(0, st.attempts - 1)
+    st.reason = reason
+    return st
+
+
 def mark_skipped(state: AgentState, step_id: str, now: datetime, reason: str) -> StepState:
     """Pular não exige ``running``: dependência falhou, desmarcado na janela etc."""
     st = state.step(step_id)
