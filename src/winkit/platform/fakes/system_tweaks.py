@@ -156,3 +156,12 @@ class FakeDriveMapper:
             return False
         self.mapped[letter] = path
         return True
+
+
+@dataclass
+class FakeFontLoader:
+    loaded: list[Path] = field(default_factory=list)
+
+    def load(self, path: Path) -> bool:
+        self.loaded.append(path)
+        return True

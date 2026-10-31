@@ -361,3 +361,67 @@
     - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy', value: '01', type: dword, data: 1}
   undo:
     - reg_set: {key: 'Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy', value: '01', type: dword, data: 0}
+
+# ------------------------------------------------------------------ jogos (V2-15)
+- id: gaming.game_mode
+  title: Modo de Jogo
+  description: O Windows dá prioridade ao jogo aberto e adia atualizações e notificações.
+  category: gaming
+  scope: user
+  source: https://support.microsoft.com/windows/use-game-mode-while-gaming-on-your-windows-device-73f6ab61-9a5f-4ebd-e8c2-4c42d7f6a4d3
+  apply:
+    - reg_set: {key: 'Software\Microsoft\GameBar', value: AutoGameModeEnabled, type: dword, data: 1}
+  undo:
+    - reg_delete_value: {key: 'Software\Microsoft\GameBar', value: AutoGameModeEnabled}
+
+- id: gaming.hags
+  title: Agendamento de GPU acelerado por hardware
+  description: A placa de vídeo organiza o próprio trabalho. Depende da placa e do driver; exige reiniciar.
+  category: gaming
+  risk: caution
+  scope: machine
+  source: https://devblogs.microsoft.com/directx/hardware-accelerated-gpu-scheduling/
+  apply:
+    - reg_set: {key: 'SYSTEM\CurrentControlSet\Control\GraphicsDrivers', value: HwSchMode, type: dword, data: 2}
+  undo:
+    - reg_set: {key: 'SYSTEM\CurrentControlSet\Control\GraphicsDrivers', value: HwSchMode, type: dword, data: 1}
+
+- id: gaming.no_mouse_acceleration
+  title: Sem aceleração do mouse
+  description: Desliga "Aumentar a precisão do ponteiro"; o ponteiro anda sempre na mesma proporção da mão.
+  category: gaming
+  scope: user
+  source: https://learn.microsoft.com/windows-hardware/design/component-guidelines/pointer-ballistics-for-windows-xp
+  apply:
+    - reg_set: {key: 'Control Panel\Mouse', value: MouseSpeed, type: sz, data: '0'}
+    - reg_set: {key: 'Control Panel\Mouse', value: MouseThreshold1, type: sz, data: '0'}
+    - reg_set: {key: 'Control Panel\Mouse', value: MouseThreshold2, type: sz, data: '0'}
+  undo:
+    - reg_set: {key: 'Control Panel\Mouse', value: MouseSpeed, type: sz, data: '1'}
+    - reg_set: {key: 'Control Panel\Mouse', value: MouseThreshold1, type: sz, data: '6'}
+    - reg_set: {key: 'Control Panel\Mouse', value: MouseThreshold2, type: sz, data: '10'}
+
+- id: gaming.no_background_recording
+  title: Sem gravação em segundo plano
+  description: Desliga a gravação contínua do Xbox Game Bar, que consome desempenho.
+  category: gaming
+  scope: user
+  source: https://learn.microsoft.com/windows/client-management/mdm/policy-csp-applicationmanagement#allowgamedvr
+  apply:
+    - reg_set: {key: 'System\GameConfigStore', value: GameDVR_Enabled, type: dword, data: 0}
+    - reg_set: {key: 'SOFTWARE\Policies\Microsoft\Windows\GameDVR', value: AllowGameDVR, type: dword, data: 0, hive: HKLM}
+  undo:
+    - reg_set: {key: 'System\GameConfigStore', value: GameDVR_Enabled, type: dword, data: 1}
+    - reg_delete_value: {key: 'SOFTWARE\Policies\Microsoft\Windows\GameDVR', value: AllowGameDVR, hive: HKLM}
+
+- id: gaming.windowed_optimizations
+  title: Otimizações para jogos em janela
+  description: Jogos em janela ou sem borda ganham menos atraso e recursos como HDR automático.
+  category: gaming
+  scope: user
+  source: https://support.microsoft.com/windows/optimizations-for-windowed-games-in-windows-11-3f006843-2c7e-4ed0-9a5e-f9389e535952
+  windows: {os: [11]}
+  apply:
+    - reg_set: {key: 'Software\Microsoft\DirectX\UserGpuPreferences', value: DirectXUserGlobalSettings, type: sz, data: 'SwapEffectUpgradeEnable=1;'}
+  undo:
+    - reg_delete_value: {key: 'Software\Microsoft\DirectX\UserGpuPreferences', value: DirectXUserGlobalSettings}

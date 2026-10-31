@@ -204,3 +204,12 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Impacto: baixo; o usuário pode rodar "Aplicar neste PC" de novo só com "Servidor DNS".
 - Plano: avaliar uma tarefa agendada no evento de adaptador novo, ou a política de servidores DNS por GPO (`NameServer`).
 - Prioridade: baixa
+
+### DT-022 — Fontes da máquina pela data de criação
+- Estado: aberta
+- Origem: M15 (V2-07)
+- Onde: `collector/fonts.py`
+- Descrição: as fontes "para todos" que o usuário instalou são separadas das do Windows pela data de criação do arquivo, posterior a `InstallDate`. Atualizações do Windows e programas também instalam fontes depois; elas aparecem na lista (desmarcadas). O catálogo `default_fonts.yaml` (gerado numa VM limpa, PLANO_V2 §21) ainda não existe.
+- Impacto: a lista pode mostrar fontes que vieram com o Windows ou com o Office; como nada vem marcado, só polui a tela.
+- Plano: gerar `default_fonts.yaml` na validação na VM e usar como lista de exclusão.
+- Prioridade: baixa

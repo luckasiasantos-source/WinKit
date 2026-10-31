@@ -10,7 +10,7 @@ from PySide6.QtWidgets import QHBoxLayout, QLineEdit, QMessageBox, QSpinBox, QWi
 
 from winkit.core.maintenance import DAYS
 from winkit.core.recipe.models import Recipe, TweakSelection
-from winkit.i18n import t, tn
+from winkit.i18n import render, t, tn
 from winkit.studio.ui.base import Page
 from winkit.studio.ui.pages.common import choice_row, combo, empty, toggle
 from winkit.ui.widgets import (
@@ -108,7 +108,7 @@ class TweaksPage(Page):
             "maintenance.storage_sense",
         }
     )
-    CATEGORIES: tuple[str, ...] = ("privacy", "visual", "system")
+    CATEGORIES: tuple[str, ...] = ("privacy", "visual", "gaming", "system")
 
     def refresh(self) -> None:
         self.clear_content()
@@ -116,6 +116,22 @@ class TweaksPage(Page):
             return
         r = self.ctl.recipe
         assert r is not None  # noqa: S101
+        presets = Card()
+        for p in self.ctl.catalogs.presets:
+            applied = p.id in r.presets_applied
+            presets.add_row(
+                Row(
+                    p.name + (" ✓" if applied else ""),
+                    p.description,
+                    accessory=button(
+                        t("studio.presets.apply"), "Secondary", partial(self._preset, p.id)
+                    ),
+                    icon=symbol_icon("sliders", "#AF52DE"),
+                )
+            )
+        self.content.addWidget(
+            section(t("studio.presets.title"), presets, footer=t("studio.presets.footer"))
+        )
         selected = {sel.id: sel for sel in r.tweaks}
         for cat in self.CATEGORIES:
             card = Card()
@@ -136,6 +152,19 @@ class TweaksPage(Page):
                 )
             if card.rows:
                 self.content.addWidget(section(t(f"studio.tweaks.cat_{cat}"), card))
+
+    def _preset(self, preset_id: str) -> None:
+        preview = self.ctl.preset_preview(preset_id)
+        lines = [render(m) for m in preview.changes] or [t("studio.presets.nothing")]
+        lines += ["⚠ " + render(m) for m in preview.warnings]
+        answer = QMessageBox.question(
+            self,
+            t("studio.presets.confirm_title"),
+            t("studio.presets.confirm") + "\n\n• " + "\n• ".join(lines),
+        )
+        if answer == QMessageBox.StandardButton.Yes:
+            self.ctl.apply_preset(preset_id)
+            self.refresh()
 
     def _set_enabled(self, tweak_id: str, value: bool) -> None:
         self._set(tweak_id, enabled=value)

@@ -1,0 +1,29 @@
+# Perfis rápidos (V2-15, M15): um clique marca um conjunto coerente de itens que já existem
+# nos outros catálogos. Aplicar sempre MESCLA com a receita (D-040): nunca desmarca nada.
+- id: gamer
+  name: Gamer
+  description: Menos interrupções e mais desempenho em jogos.
+  tweaks:
+    - gaming.game_mode
+    - gaming.hags
+    - gaming.no_mouse_acceleration
+    - gaming.no_background_recording
+    - gaming.windowed_optimizations
+  power_scheme: high_performance
+  bloatware_keep: [Microsoft.XboxGamingOverlay]
+- id: privacy_max
+  name: Privacidade máxima
+  description: Todos os ajustes de privacidade, DNS com bloqueio de rastreadores e menos sugestões.
+  all_in_category: [privacy]
+  dns_provider: quad9
+  blocklists: [trackers_basic]
+- id: office
+  name: Escritório
+  description: Menos distrações e o disco sempre limpo.
+  tweaks: [system.consumer_content]
+  storage_sense: true
+- id: developer
+  name: Programador
+  description: WSL, cliente SSH e atualização semanal dos apps.
+  features: [wsl, openssh_client]
+  winget_weekly: true

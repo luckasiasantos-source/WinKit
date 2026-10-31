@@ -28,6 +28,20 @@
 
 ---
 
+## 2026-10-31 — M15 — Perfis rápidos (V2-15) e fontes (V2-07)
+**Tipo:** implementação
+**Resumo:** um clique aplica o perfil Gamer, Privacidade máxima, Escritório ou Programador, sempre somando à receita. As fontes instaladas no PC antigo vão para o Windows novo, para todos os usuários. A release 0.5.0 foi disparada antes deste commit.
+
+### Adicionado
+- `src/winkit/data/presets.yaml`, `src/winkit/core/presets.py`; 5 ajustes `gaming.*` em `tweaks.yaml` (categoria nova `gaming`) e traduções
+- `src/winkit/core/fonts.py`, `src/winkit/collector/fonts.py`, `src/winkit/platform/fonts.py`, `src/winkit/agent/steps/font.py`
+- Receita: `presets_applied`, `fonts` (aditivos); plano: tipo `font` na Fase 1
+- Studio: cartão "Perfis rápidos" em Ajustes, categoria Jogos, seção "Fontes"; CLI: `perfil-rapido listar|aplicar`, `coletar fontes`, `fontes listar|marcar|desmarcar`
+- Testes: `tests/core/test_presets.py`, `tests/agent/test_fonts.py` (fontes geradas no teste)
+
+### Documentos vivos atualizados
+- ARQUITETURA — módulos; STATUS — M15 em andamento; PLANO_V2 — §10.3 e §10.6; DIVIDAS — DT-022
+
 ## 2026-10-31 — Limite de tempo e diagnóstico nos testes da CI e da release (IN-017)
 **Tipo:** correção (infraestrutura)
 **Resumo:** a release 0.4.0 travou no passo de testes sem dizer onde. Agora um teste preso imprime a pilha e os passos de teste têm limite de tempo.

@@ -29,7 +29,7 @@
 | M12 | Aplicar neste PC + ponto de restauração (V2-03, V2-10) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M12.md`) |
 | M13 | Pendrive comum: Rufus/Microsoft (V2-01) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M13.md`) |
 | M14 | Rede e sistema (V2-02, 08, 09, 16, 17, 18, 22) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M14.md`) |
-| M15 | Personalização (V2-04, 05, 06, 07, 12, 15) | ⬜ planejado | — |
+| M15 | Personalização (V2-04, 05, 06, 07, 12, 15) | 🟨 em andamento | — |
 | M16 | Contas, pastas e jogos (V2-11, 13, 14) | ⬜ planejado | — |
 | M17 | Inteligência do pendrive (V2-19, 20, 21, 23) | ⬜ planejado | — |
 | M18 | Fechamento da v2 | ⬜ planejado | — |
@@ -198,6 +198,11 @@
 - ✅ V2-18 Manutenção: tarefa do usuário que roda `winget upgrade --all` toda semana ou a cada 4 semanas (dia e hora escolhidos, log em `ProgramData\WinKit\Manutencao`); otimização semanal nativa do disco garantida (ligada por padrão); Sensor de Armazenamento como ajuste `maintenance.storage_sense` com desfazer; Studio (grupo Sistema) e CLI (`manutencao mostrar|definir|remover-do-pc`)
 - ✅ V2-22 Variáveis de ambiente e PATH: coleta só do que não é padrão (`protected_env.yaml`), valores com pastas do perfil viram moldes `%USERPROFILE%\…`, itens lidos chegam desmarcados; máquina no `HKLM` e usuário no perfil Default na Fase 1, `HKCU` + aviso aos programas ao vivo; nunca sobrescreve sem "substituir" (R-21); o PATH só ganha entradas no fim, sem duplicar; Studio (grupo Sistema) e CLI (`coletar variaveis`, `variaveis listar|marcar|desmarcar|definir`)
 - ✅ Versão 0.5.0 e roteiro `docs/validacao/M14.md`
+
+### M15 — Personalização 🟨
+- ✅ V2-15 Perfis rápidos: Gamer, Privacidade máxima, Escritório e Programador (`presets.yaml`); 5 ajustes novos na categoria Jogos; aplicar mescla e nunca desmarca, com prévia; o Gamer mantém o Xbox Game Bar; Studio (cartão no topo de Ajustes) e CLI (`perfil-rapido listar|aplicar [--simular]`)
+- ✅ V2-07 Fontes: leitor da tabela `name` (TTF, OTF, TTC) sem dependência nova; coleta das fontes do usuário e das da máquina instaladas depois do Windows; o arquivo só vai para o pendrive ao marcar; instalação para todos os usuários sem sobrescrever (`_winkit`); ao vivo carrega na sessão; Studio (grupo O que levar) e CLI (`coletar fontes`, `fontes listar|marcar|desmarcar`)
+- ⬜ V2-05 Apps padrão · V2-06 Aparência · V2-12 Navegadores · V2-04 Iniciar e barra
 
 ## Hipóteses técnicas
 

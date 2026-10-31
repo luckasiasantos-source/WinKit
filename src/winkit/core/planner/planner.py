@@ -40,6 +40,7 @@ _G1 = {
     "network_drive": 45,
     "maintenance": 47,
     "env": 48,
+    "font": 49,
     "backup": 50,
     "app": 60,
 }
@@ -107,6 +108,7 @@ def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> 
     _plan_network_drives(recipe, drafts)
     _plan_maintenance(recipe, drafts)
     _plan_env(recipe, drafts)
+    _plan_fonts(recipe, drafts)
     _plan_power(recipe, drafts)
     _plan_bloat(recipe, catalogs, ctx, drafts, excluded)
     _plan_features(recipe, catalogs, ctx, drafts, excluded)
@@ -234,6 +236,23 @@ def _plan_env(recipe: Recipe, out: list[_Draft]) -> None:  # R26
             ref = f"path.{scope}"
             title = tn(f"plan.env_path_{scope}", n)
             out.append(_Draft("env", ref, 1, title, target(scope), sort=(_G1["env"], 1, ref)))
+
+
+def _plan_fonts(recipe: Recipe, out: list[_Draft]) -> None:
+    for f in recipe.fonts:
+        if f.selected and f.file:
+            title = t("plan.font", name=f.full_name)
+            out.append(
+                _Draft(
+                    "font",
+                    f.id,
+                    1,
+                    title,
+                    "machine",
+                    needs_pendrive=True,
+                    sort=(_G1["font"], 0, f.id),
+                )
+            )
 
 
 def _plan_power(recipe: Recipe, out: list[_Draft]) -> None:  # R5

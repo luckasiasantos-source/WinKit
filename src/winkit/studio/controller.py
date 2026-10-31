@@ -33,6 +33,7 @@ from winkit.collector import backups as backup_collector
 from winkit.collector import drivers as driver_collector
 from winkit.collector import env as env_collector
 from winkit.collector import features as feature_collector
+from winkit.collector import fonts as font_collector
 from winkit.collector import netdrives as netdrive_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import layout
@@ -43,6 +44,7 @@ from winkit.core.isos import IsoInfo
 from winkit.core.live import LivePreview
 from winkit.core.planner.models import Plan, PlanContext, StepKind
 from winkit.core.planner.planner import plan
+from winkit.core.presets import PresetResult, apply_preset, preview_preset
 from winkit.core.recipe.io import new_recipe
 from winkit.core.recipe.models import (
     AppItem,
@@ -50,6 +52,7 @@ from winkit.core.recipe.models import (
     ConflictPolicy,
     EnvPathEntry,
     EnvVar,
+    FontItem,
     NetworkDrive,
     Recipe,
     Scope,
@@ -355,6 +358,43 @@ class StudioController:
         if found[0] or found[1]:
             self.save()
         return found
+
+    def collect_fonts(self) -> tuple[list[FontItem], list[str]]:
+        """Fontes instaladas neste PC (V2-07), desmarcadas; nada é copiado ainda."""
+        recipe = self.require_recipe()
+        if self.services.registry is None:
+            return [], []
+        found = font_collector.collect_fonts(
+            self.services.registry,
+            self.services.folders.windows_dir(),
+            self.services.volume_root,
+            recipe,
+        )
+        if found[0]:
+            self.save()
+        return found
+
+    def select_font(self, font_id: str, selected: bool) -> None:
+        """Ao marcar, copia o arquivo da fonte para o pendrive."""
+        font_collector.select_font(
+            self.root, self.require_recipe(), font_id, selected, self.services.volume_root
+        )
+        self.save()
+
+    def preset_preview(self, preset_id: str) -> PresetResult:
+        preset = self.catalogs.preset(preset_id)
+        if preset is None:
+            return PresetResult()
+        return preview_preset(preset, self.require_recipe(), self.catalogs)
+
+    def apply_preset(self, preset_id: str) -> PresetResult:
+        """Mescla o perfil rápido com a receita (V2-15, D-040) e salva."""
+        preset = self.catalogs.preset(preset_id)
+        if preset is None:
+            return PresetResult()
+        result = apply_preset(preset, self.require_recipe(), self.catalogs)
+        self.save()
+        return result
 
     def remove_hosts_block(self) -> bool:
         """Desfazer (V2-16): tira o bloco do WinKit do ``hosts`` deste PC."""

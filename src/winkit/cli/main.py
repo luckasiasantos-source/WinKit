@@ -39,6 +39,7 @@ from winkit.collector import backups as backup_collector
 from winkit.collector import drivers as driver_collector
 from winkit.collector import env as env_collector
 from winkit.collector import features as feature_collector
+from winkit.collector import fonts as font_collector
 from winkit.collector import netdrives as netdrive_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import dns as dns_rules
@@ -48,6 +49,7 @@ from winkit.core.errors import RecipeError, WinKitError
 from winkit.core.maintenance import DAYS, TASK_FOLDER
 from winkit.core.planner.models import PlanContext
 from winkit.core.planner.planner import plan
+from winkit.core.presets import apply_preset, preview_preset
 from winkit.core.recipe.io import new_recipe
 from winkit.core.recipe.models import EnvScope, EnvVar, Recipe
 from winkit.core.recipe.validation import validate_recipe
@@ -923,6 +925,100 @@ def _add_env_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     vd.set_defaults(func=cmd_variaveis_definir)
 
 
+# ------------------------------------------------------------------ perfis rápidos (V2-15)
+def cmd_perfil_rapido_listar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    for p in default_catalogs().presets:
+        out(f"  {p.id:14} {p.name} — {p.description}")
+    return 0
+
+
+def cmd_perfil_rapido_aplicar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    catalogs = default_catalogs()
+    preset = catalogs.preset(args.id)
+    if preset is None:
+        out(t("cli.not_found", ids=args.id))
+        return 1
+    result = (preview_preset if args.simular else apply_preset)(preset, recipe, catalogs)
+    for change in result.changes:
+        out("  + " + render(change))
+    for warning in result.warnings:
+        out("  ! " + render(warning))
+    if not result.changes and not result.warnings:
+        out(t("studio.presets.nothing"))
+    if not args.simular:
+        _save(tgt, recipe)
+    return 0
+
+
+def _add_preset_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    pr = sub.add_parser("perfil-rapido", aliases=["preset"], help=t("cli.h.presets"))
+    pr_sub = pr.add_subparsers(dest="action", required=True)
+    pr_sub.add_parser("listar", aliases=["list"], parents=[common]).set_defaults(
+        func=cmd_perfil_rapido_listar
+    )
+    pa = pr_sub.add_parser("aplicar", aliases=["apply"], parents=[common])
+    pa.add_argument("id", help=t("cli.h.preset_id"))
+    pa.add_argument("--simular", action="store_true", help=t("cli.h.preset_simulate"))
+    pa.set_defaults(func=cmd_perfil_rapido_aplicar)
+
+
+# ------------------------------------------------------------------ fontes (V2-07)
+def cmd_coletar_fontes(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    if services.registry is None:
+        out(t("cli.registry_unavailable"))
+        return 1
+    added, errors = font_collector.collect_fonts(
+        services.registry, services.folders.windows_dir(), services.volume_root, recipe
+    )
+    _save(tgt, recipe)
+    out(tn("studio.fonts.read_done", len(added)))
+    for path in errors:
+        out(t("cli.font_unreadable", path=path))
+    out(t("studio.fonts.license"))
+    return cmd_fontes_listar(args, services, out)
+
+
+def cmd_fontes_listar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    for f in load_profile_recipe(tgt.root, args.perfil).fonts:
+        origin = t(f"studio.fonts.origin_{f.origin}")
+        out(f"  [{'x' if f.selected else ' '}] {f.id:30} {f.full_name}  ({origin})")
+    return 0
+
+
+def cmd_fontes_marcar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    missing = [
+        i
+        for i in args.ids
+        if not font_collector.select_font(
+            tgt.root, recipe, i, args.command_value, services.volume_root
+        )
+    ]
+    _save(tgt, recipe)
+    if missing:
+        out(t("cli.not_found", ids=", ".join(missing)))
+        return 1
+    return cmd_fontes_listar(args, services, out)
+
+
+def _add_font_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    fo = sub.add_parser("fontes", aliases=["fonts"], help=t("cli.h.fonts"))
+    fo_sub = fo.add_subparsers(dest="action", required=True)
+    fo_sub.add_parser("listar", aliases=["list"], parents=[common]).set_defaults(
+        func=cmd_fontes_listar
+    )
+    for name, alias, value in (("marcar", "select", True), ("desmarcar", "deselect", False)):
+        fm = fo_sub.add_parser(name, aliases=[alias], parents=[common])
+        fm.add_argument("ids", nargs="+", help=t("cli.h.font_ids"))
+        fm.set_defaults(func=cmd_fontes_marcar, command_value=value)
+
+
 def _add_dns_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     dns = sub.add_parser("dns", help=t("cli.h.dns"))
     dns_sub = dns.add_subparsers(dest="action", required=True)
@@ -1046,6 +1142,10 @@ def _add_collect_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
         "variaveis", aliases=["env"], parents=[common], help=t("cli.h.collect_env")
     )
     cva.set_defaults(func=cmd_coletar_variaveis)
+    cfo = col_sub.add_parser(
+        "fontes", aliases=["fonts"], parents=[common], help=t("cli.h.collect_fonts")
+    )
+    cfo.set_defaults(func=cmd_coletar_fontes)
 
     capp = col_sub.add_parser("apps", parents=[common], help=t("cli.h.collect_apps"))
     capp.add_argument(
@@ -1159,6 +1259,8 @@ def _add_system_and_network_parsers(sub: Any, common: argparse.ArgumentParser) -
     _add_drive_parsers(sub, common)
     _add_maintenance_parsers(sub, common)
     _add_env_parsers(sub, common)
+    _add_preset_parsers(sub, common)
+    _add_font_parsers(sub, common)
 
 
 def build_parser() -> argparse.ArgumentParser:

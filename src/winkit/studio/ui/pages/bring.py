@@ -328,3 +328,53 @@ class BackupsPage(Page):
             self.refresh()
 
         self.tasks.run(t("studio.backups.capturing"), self.ctl.capture, done)
+
+
+class FontsPage(Page):
+    """V2-07: fontes instaladas neste PC; o arquivo só vai para o pendrive ao marcar."""
+
+    title_key = "studio.fonts.title"
+    subtitle_key = "studio.fonts.subtitle"
+
+    def refresh(self) -> None:
+        self.clear_content()
+        if self.needs_recipe():
+            return
+        r = self.ctl.recipe
+        assert r is not None  # noqa: S101
+        self.content.addLayout(self.toolbar(button(t("studio.fonts.read"), "Primary", self._read)))
+        card = Card()
+        for f in sorted(r.fonts, key=lambda x: x.family.casefold()):
+            origin = t(f"studio.fonts.origin_{f.origin}")
+            card.add_row(
+                choice_row(
+                    f.full_name,
+                    f"{f.family} · {format_size(f.size)} · {origin}",
+                    icon_kind="font",
+                    selected=f.selected,
+                    on_select=partial(self._select, f.id),
+                )
+            )
+        self.content.addWidget(
+            section(
+                t("studio.fonts.section"),
+                card if card.rows else empty(t("studio.fonts.none")),
+                footer=t("studio.fonts.license"),
+            )
+        )
+
+    def _select(self, font_id: str, value: bool) -> None:
+        try:
+            self.ctl.select_font(font_id, value)
+        except OSError as exc:
+            QMessageBox.warning(self, t("app.name"), t("studio.fonts.copy_failed", detail=str(exc)))
+            self.refresh()
+
+    def _read(self) -> None:
+        def done(found: tuple[list[Any], list[str]]) -> None:
+            self.refresh()
+            QMessageBox.information(
+                self, t("app.name"), tn("studio.fonts.read_done", len(found[0]))
+            )
+
+        self.tasks.run(t("studio.fonts.reading"), self.ctl.collect_fonts, done)

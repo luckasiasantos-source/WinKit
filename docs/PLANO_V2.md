@@ -1608,7 +1608,7 @@ As sete funções funcionam na instalação e no modo ao vivo (com prévia), os 
 - `run()`: copia (sem sobrescrever arquivo de mesmo nome com conteúdo diferente: grava com sufixo `_winkit`) e grava o valor do registro.
 - Ao vivo: também `AddFontResourceW` + `WM_FONTCHANGE`, para valer sem sair da sessão.
 
-**Testes.** Parser da tabela `name` com fontes livres pequenas (fixtures OFL, com a licença incluída em `tests/fixtures/fonts/`); TTC; arquivo corrompido gera erro claro; etapa com conflito de nome.
+**Testes.** Parser da tabela `name` com fontes **geradas no próprio teste** (cabeçalho sfnt + tabela `name`; nenhum arquivo de terceiros nem licença); TTC; arquivo corrompido gera erro claro; etapa com conflito de nome.
 
 **Validação na VM.** Instalar duas fontes livres (uma só para o usuário, uma para todos) e conferir no Word/WordPad do Windows novo.
 
@@ -1711,7 +1711,7 @@ As sete funções funcionam na instalação e no modo ao vivo (com prévia), os 
 Outros perfis: **Privacidade máxima**, **Escritório**, **Programador** (WSL, OpenSSH, variáveis, Terminal).
 
 **Como se usa.**
-- **Studio**, seção **Modelos** (grupo Preparar) e um cartão "Perfis rápidos" no topo de **Ajustes**:
+- **Studio**: um cartão "Perfis rápidos" no topo de **Ajustes** (a seção separada "Modelos" no grupo Preparar ficou para depois, porque o cartão já cobre o uso):
   - cada perfil mostra o que vai mudar (lista) antes de aplicar;
   - aplicar **mescla** com a receita (D-040), nunca desmarca o que já estava marcado.
 - **CLI:** `winkit perfil-rapido listar`, `winkit perfil-rapido aplicar gamer`.

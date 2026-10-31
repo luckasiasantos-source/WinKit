@@ -8,7 +8,14 @@ from typing import Annotated, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from winkit.core.recipe.models import AfterInstall, Edition, InstallerType, OsMajor, Scope
+from winkit.core.recipe.models import (
+    AfterInstall,
+    Edition,
+    InstallerType,
+    OsMajor,
+    PowerScheme,
+    Scope,
+)
 
 Hive = Literal["HKLM", "HKCU"]
 RegType = Literal["dword", "qword", "sz", "expand_sz", "multi_sz", "binary"]
@@ -132,7 +139,7 @@ class Tweak(_Model):
     id: Annotated[str, Field(pattern=r"^[a-z]+\.[a-z0-9_]+$")]
     title: str
     description: str
-    category: Literal["privacy", "visual", "power", "system", "maintenance"]
+    category: Literal["privacy", "visual", "power", "system", "maintenance", "gaming"]
     risk: Literal["safe", "caution"] = "safe"
     scope: Scope
     windows: OsFilter = Field(default_factory=OsFilter)
@@ -306,6 +313,26 @@ class ProtectedEnv(_Model):
         return any(n.casefold() == key for n in self.names)
 
 
+# ------------------------------------------------------------------ perfis rápidos (V2-15)
+class Preset(_Model):
+    """Um clique marca itens que já existem nos outros catálogos (aplicar = mesclar, D-040)."""
+
+    id: Annotated[str, Field(pattern=r"^[a-z0-9_]+$")]
+    name: str
+    description: str
+    tweaks: list[str] = Field(default_factory=list)
+    #: Todos os ajustes "safe" destas categorias.
+    all_in_category: list[str] = Field(default_factory=list)
+    power_scheme: PowerScheme | None = None
+    features: list[str] = Field(default_factory=list)
+    #: Apps pré-instalados que o perfil nunca remove (ex.: Xbox Game Bar no Gamer).
+    bloatware_keep: list[str] = Field(default_factory=list)
+    dns_provider: str | None = None
+    blocklists: list[str] = Field(default_factory=list)
+    storage_sense: bool = False
+    winget_weekly: bool = False
+
+
 # ------------------------------------------------------------------ outros
 class EditionEntry(_Model):
     id: str
@@ -350,6 +377,10 @@ class Catalogs(_Model):
     dns_providers: list[DnsProvider] = Field(default_factory=list)
     hosts_blocklists: list[HostsBlocklist] = Field(default_factory=list)
     protected_env: ProtectedEnv = Field(default_factory=ProtectedEnv)
+    presets: list[Preset] = Field(default_factory=list)
+
+    def preset(self, preset_id: str) -> Preset | None:
+        return next((x for x in self.presets if x.id == preset_id), None)
 
     def dns_provider(self, provider_id: str) -> DnsProvider | None:
         return next((x for x in self.dns_providers if x.id == provider_id), None)

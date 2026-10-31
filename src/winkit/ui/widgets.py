@@ -379,6 +379,7 @@ KIND_STYLE: dict[str, tuple[str, str]] = {
     "network_drive": ("folder", "#5856D6"),
     "maintenance": ("refresh", "#34C759"),
     "env": ("sliders", "#8E8E93"),
+    "font": ("pencil", "#FF2D55"),
     "finalize": ("check", "#34C759"),
 }
 

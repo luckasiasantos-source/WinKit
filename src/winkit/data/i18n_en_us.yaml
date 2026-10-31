@@ -1,6 +1,21 @@
 # Traduções dos catálogos (inglês) — D-030, R-51.
 # Chave = id do item no catálogo base (pt-BR). `text` do bloatware = side_effect ou reason.
 tweaks:
+  gaming.game_mode:
+    title: "Game Mode"
+    description: "Windows gives priority to the open game and postpones updates and notifications."
+  gaming.hags:
+    title: "Hardware-accelerated GPU scheduling"
+    description: "The graphics card organizes its own work. Depends on the card and driver; needs a restart."
+  gaming.no_mouse_acceleration:
+    title: "No mouse acceleration"
+    description: "Turns off \"Enhance pointer precision\"; the pointer always moves in the same proportion as your hand."
+  gaming.no_background_recording:
+    title: "No background recording"
+    description: "Turns off the continuous Xbox Game Bar recording, which costs performance."
+  gaming.windowed_optimizations:
+    title: "Optimizations for windowed games"
+    description: "Windowed and borderless games get less latency and features such as Auto HDR."
   maintenance.storage_sense:
     title: Storage Sense
     description: Windows deletes temporary files and empties the old Recycle Bin by itself when the disk fills up.
@@ -336,3 +351,16 @@ hosts_blocklists:
   trackers_basic:
     name: Trackers (basic)
     description: Tracking and behavior analytics services. May break some website dashboards.
+presets:
+  gamer:
+    name: "Gamer"
+    description: "Fewer interruptions and more performance in games."
+  privacy_max:
+    name: "Maximum privacy"
+    description: "All privacy tweaks, DNS with tracker blocking and fewer suggestions."
+  office:
+    name: "Office"
+    description: "Fewer distractions and an always clean disk."
+  developer:
+    name: "Developer"
+    description: "WSL, SSH client and weekly app updates."

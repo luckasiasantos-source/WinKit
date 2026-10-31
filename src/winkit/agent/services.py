@@ -12,6 +12,7 @@ from winkit.platform.dns import DnsClient, WindowsDnsClient
 from winkit.platform.drivers import DriverManager, WindowsDriverManager
 from winkit.platform.environment import Environment, WindowsEnvironment
 from winkit.platform.features import SystemFeatures, WindowsSystemFeatures
+from winkit.platform.fonts import FontLoader, WindowsFontLoader
 from winkit.platform.installers import InstallerRunner, WindowsInstallerRunner
 from winkit.platform.inventory import AppInventory, WindowsAppInventory
 from winkit.platform.iso_mount import IsoMounter, WindowsIsoMounter
@@ -54,6 +55,7 @@ class AgentServices:
     devices: DeviceInspector
     dns: DnsClient
     drive_mapper: DriveMapper
+    font_loader: FontLoader
 
 
 def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windows
@@ -84,4 +86,5 @@ def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windo
         devices=WindowsDeviceInspector(ps),
         dns=WindowsDnsClient(ps),
         drive_mapper=WindowsDriveMapper(ps),
+        font_loader=WindowsFontLoader(),
     )

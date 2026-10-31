@@ -16,6 +16,7 @@ StepKind = Literal[
     "network_drive",
     "maintenance",
     "env",
+    "font",
     "bloat",
     "feature",
     "tweak",

@@ -49,6 +49,10 @@ def backups_dir(profile_id: str) -> str:
     return f"{profile_dir(profile_id)}/Backups"
 
 
+def fonts_dir(profile_id: str) -> str:
+    return f"{profile_dir(profile_id)}/Fontes"
+
+
 def wifi_dir(profile_id: str) -> str:
     """Perfis de Wi-Fi exportados (contêm a senha quando levada — D-036)."""
     return f"{profile_dir(profile_id)}/Wifi"

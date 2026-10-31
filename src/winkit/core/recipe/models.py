@@ -270,6 +270,21 @@ class Environment(_Model):
     path_entries: list[EnvPathEntry] = Field(default_factory=list)
 
 
+class FontItem(_Model):
+    """V2-07: fonte instalada no PC antigo; o arquivo vai para ``Perfis/<p>/Fontes``."""
+
+    id: ItemId
+    family: str
+    full_name: str
+    #: Arquivo no pendrive (relativo a ``WinKit``); vazio até a fonte ser marcada e copiada.
+    file: str = ""
+    source: str  # caminho no PC antigo (só para a tela)
+    origin: Scope = "user"
+    size: int = 0
+    sha256: str | None = None
+    selected: bool = False
+
+
 class RestorePoint(_Model):
     """V2-10: ponto de restauração "Windows pronto" no fim da instalação (M12)."""
 
@@ -301,6 +316,9 @@ class Recipe(_Model):
     network_drives: list[NetworkDrive] = Field(default_factory=list)
     maintenance: Maintenance = Field(default_factory=Maintenance)
     environment: Environment = Field(default_factory=Environment)
+    #: V2-15: perfis rápidos já aplicados (só histórico, para a tela).
+    presets_applied: list[str] = Field(default_factory=list)
+    fonts: list[FontItem] = Field(default_factory=list)
 
     # ---- consultas de conveniência (sem efeito colateral)
     def app(self, app_id: str) -> AppItem | None:

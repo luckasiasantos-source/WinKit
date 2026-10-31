@@ -1,6 +1,21 @@
 # Traduções dos catálogos (espanhol) — D-030, R-51.
 # Chave = id do item no catálogo base (pt-BR). `text` do bloatware = side_effect ou reason.
 tweaks:
+  gaming.game_mode:
+    title: "Modo de juego"
+    description: "Windows da prioridad al juego abierto y pospone actualizaciones y notificaciones."
+  gaming.hags:
+    title: "Programación de GPU acelerada por hardware"
+    description: "La tarjeta gráfica organiza su propio trabajo. Depende de la tarjeta y del controlador; requiere reiniciar."
+  gaming.no_mouse_acceleration:
+    title: "Sin aceleración del mouse"
+    description: "Desactiva \"Mejorar la precisión del puntero\"; el puntero se mueve siempre en la misma proporción que la mano."
+  gaming.no_background_recording:
+    title: "Sin grabación en segundo plano"
+    description: "Desactiva la grabación continua de Xbox Game Bar, que consume rendimiento."
+  gaming.windowed_optimizations:
+    title: "Optimizaciones para juegos en ventana"
+    description: "Los juegos en ventana o sin bordes tienen menos latencia y funciones como HDR automático."
   maintenance.storage_sense:
     title: Sensor de almacenamiento
     description: Windows borra por sí solo los archivos temporales y vacía la Papelera antigua cuando el disco se llena.
@@ -336,3 +351,16 @@ hosts_blocklists:
   trackers_basic:
     name: Rastreadores (básico)
     description: Servicios de rastreo y análisis de comportamiento. Puede romper algunos paneles de sitios.
+presets:
+  gamer:
+    name: "Gamer"
+    description: "Menos interrupciones y más rendimiento en los juegos."
+  privacy_max:
+    name: "Privacidad máxima"
+    description: "Todos los ajustes de privacidad, DNS con bloqueo de rastreadores y menos sugerencias."
+  office:
+    name: "Oficina"
+    description: "Menos distracciones y el disco siempre limpio."
+  developer:
+    name: "Programador"
+    description: "WSL, cliente SSH y actualización semanal de las aplicaciones."

@@ -1,6 +1,6 @@
 """Páginas do WinKit Studio, uma por seção da barra lateral (D-042)."""
 
-from winkit.studio.ui.pages.bring import AppsPage, BackupsPage, DriversPage
+from winkit.studio.ui.pages.bring import AppsPage, BackupsPage, DriversPage, FontsPage
 from winkit.studio.ui.pages.finish import BuildPage, ExecutionPage, LivePage
 from winkit.studio.ui.pages.network import DnsPage, NetworkDrivesPage, WifiPage
 from winkit.studio.ui.pages.prepare import AccountPage, PendrivePage
@@ -25,6 +25,7 @@ __all__ = [
     "EnvPage",
     "ExecutionPage",
     "FeaturesPage",
+    "FontsPage",
     "LivePage",
     "MaintenancePage",
     "NetworkDrivesPage",

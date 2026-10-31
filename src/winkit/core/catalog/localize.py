@@ -52,6 +52,7 @@ class CatalogTranslation(_Model):
     #: Só os nomes que não são marca (ex.: "para Famílias"); os outros ficam como estão.
     dns_providers: dict[str, NameText] = Field(default_factory=dict)
     hosts_blocklists: dict[str, FeatureText] = Field(default_factory=dict)
+    presets: dict[str, FeatureText] = Field(default_factory=dict)
 
 
 def localize(catalogs: Catalogs, tr: CatalogTranslation) -> Catalogs:
@@ -97,8 +98,13 @@ def localize(catalogs: Catalogs, tr: CatalogTranslation) -> Catalogs:
         else b
         for b in catalogs.hosts_blocklists
     ]
+    presets = [
+        x.model_copy(update=tr.presets[x.id].model_dump()) if x.id in tr.presets else x
+        for x in catalogs.presets
+    ]
     return catalogs.model_copy(
         update={
+            "presets": presets,
             "features": features,
             "dns_providers": providers,
             "hosts_blocklists": blocklists,
@@ -133,6 +139,7 @@ def missing_translations(catalogs: Catalogs, tr: CatalogTranslation) -> list[str
         for b in catalogs.hosts_blocklists
         if b.id not in tr.hosts_blocklists
     ]
+    out += [f"presets.{x.id}" for x in catalogs.presets if x.id not in tr.presets]
     return out
 
 
@@ -147,4 +154,5 @@ def orphan_translations(catalogs: Catalogs, tr: CatalogTranslation) -> list[str]
     out += [f"features.{k}" for k in tr.features if catalogs.feature(k) is None]
     out += [f"dns_providers.{k}" for k in tr.dns_providers if catalogs.dns_provider(k) is None]
     out += [f"hosts_blocklists.{k}" for k in tr.hosts_blocklists if catalogs.blocklist(k) is None]
+    out += [f"presets.{k}" for k in tr.presets if catalogs.preset(k) is None]
     return out

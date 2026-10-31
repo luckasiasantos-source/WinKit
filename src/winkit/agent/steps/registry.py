@@ -10,6 +10,7 @@ from winkit.agent.steps.driver_report import DriverReportStep
 from winkit.agent.steps.env import EnvStep
 from winkit.agent.steps.feature import FeatureStep
 from winkit.agent.steps.finalize import FinalizeStep
+from winkit.agent.steps.font import FontStep
 from winkit.agent.steps.maintenance import MaintenanceStep
 from winkit.agent.steps.network_drive import NetworkDriveStep
 from winkit.agent.steps.network_privacy import DnsStep, HostsStep
@@ -53,6 +54,7 @@ def default_handlers() -> dict[StepKind, StepHandler]:
     handlers["network_drive"] = NetworkDriveStep()
     handlers["maintenance"] = MaintenanceStep()
     handlers["env"] = EnvStep()
+    handlers["font"] = FontStep()
     handlers["feature"] = FeatureStep()
     handlers["driver_report"] = DriverReportStep()
     handlers["finalize"] = FinalizeStep()
