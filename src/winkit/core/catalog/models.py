@@ -101,15 +101,18 @@ class TweakOp(_Model):
     powercfg: Powercfg | None = None
     appx_remove: AppxRemove | None = None
 
+    def _present(self) -> list[str]:
+        return [name for name in type(self).model_fields if getattr(self, name) is not None]
+
     @model_validator(mode="after")
     def _exactly_one(self) -> Self:
-        if len(self.model_fields_set) != 1:
+        if len(self._present()) != 1:
             raise ValueError("cada operação deve ter exatamente um tipo")
         return self
 
     @property
     def kind(self) -> str:
-        return next(iter(self.model_fields_set))
+        return self._present()[0]
 
 
 class Tweak(_Model):

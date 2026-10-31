@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from winkit.agent.steps.app import AppStep, ShortcutStep
+from winkit.agent.steps.backup import BackupStep
 from winkit.agent.steps.base import StepContext, StepHandler, StepResult
 from winkit.agent.steps.driver import DriverStep
 from winkit.agent.steps.finalize import FinalizeStep
@@ -12,7 +13,6 @@ PLACEHOLDER_KINDS: tuple[StepKind, ...] = (
     "bloat",
     "tweak",
     "power",
-    "backup",
     "rename_computer",
     "windows_update",
 )
@@ -33,6 +33,7 @@ def default_handlers() -> dict[StepKind, StepHandler]:
     handlers: dict[StepKind, StepHandler] = dict.fromkeys(PLACEHOLDER_KINDS, placeholder)
     handlers["driver"] = DriverStep()
     handlers["app"] = AppStep()
+    handlers["backup"] = BackupStep()
     handlers["shortcut"] = ShortcutStep()
     handlers["finalize"] = FinalizeStep()
     return handlers

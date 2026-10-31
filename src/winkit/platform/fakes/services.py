@@ -2,22 +2,32 @@
 
 from __future__ import annotations
 
+import tempfile
+from pathlib import Path
 from typing import Any
 
+from winkit.platform.copy import PythonCopier
 from winkit.platform.fakes.apps import FakeInventory, FakeWinget
+from winkit.platform.fakes.backup import FakeOldPcFolders, FakeShadowCopies
 from winkit.platform.fakes.disks import FakeDiskInspector, windows_iso
 from winkit.platform.fakes.drivers import FakeDriverManager
 from winkit.platform.fakes.runner import FakeRunner
 from winkit.platform.services import Services
 
 
-def fake_services(**overrides: Any) -> Services:
+def fake_services(*, old_pc: Path | None = None, **overrides: Any) -> Services:
+    base = old_pc or Path(tempfile.mkdtemp(prefix="winkit-oldpc-"))
+    folders = FakeOldPcFolders(base)
     values: dict[str, Any] = {
         "runner": FakeRunner(),
         "disks": FakeDiskInspector(isos={"Windows11.iso": windows_iso()}),
         "drivers": FakeDriverManager(),
         "inventory": FakeInventory(),
         "winget": FakeWinget(),
+        "copier": PythonCopier(),
+        "vss": FakeShadowCopies(volume_roots={"C:": base}),
+        "folders": folders,
+        "volume_root": folders.volume_root,
     }
     values.update(overrides)
     return Services(**values)

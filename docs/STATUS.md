@@ -20,7 +20,7 @@
 | M3 | Esqueleto do Agente | ✅ código | ⬜ roteiro pronto (`docs/validacao/M3.md`) |
 | M4 | Drivers | ✅ código | ⬜ roteiro pronto (`docs/validacao/M4.md`) |
 | M5 | Aplicativos | ✅ código | ⬜ roteiro pronto (`docs/validacao/M5.md`) |
-| M6 | Backups | ⬜ | ⬜ pendente |
+| M6 | Backups | ✅ código | ⬜ roteiro pronto (`docs/validacao/M6.md`) |
 | M7 | Bloatware e ajustes | ⬜ | ⬜ pendente |
 | M8 | Windows Update, resumo e notificações | ⬜ | ⬜ pendente |
 | M9 | Interface do Agente | ⬜ | ⬜ pendente |
@@ -104,7 +104,14 @@
 - ✅ `agent/steps/app.py` — instalador offline (hash, cópia local, códigos de sucesso/reinício, dica para instalar manualmente), winget online (registro + espera, adiamento), pós-instalação (encerrar processos, remover inicialização automática, atalhos), atalhos de apps portáteis
 - ✅ `collector/apps.py` + CLI: `coletar apps`, `apps listar|marcar|desmarcar|baixar|adicionar` (com `--ordem` e `--decidir-na-hora`)
 - ✅ Roteiro `docs/validacao/M5.md`
-### M6 — Backups ⬜
+### M6 — Backups ✅ (código) · validação na VM pendente
+- ✅ `platform/copy.py` — `RobocopyCopier` (espelho com exclusões, mesclar `/XC /XN /XO`, sobrescrever, pular, caminhos longos, código ≥ 8 = falha) e `PythonCopier` com a mesma semântica; salvaguarda R-20 (espelho só em `Backups/<id>/dados`)
+- ✅ `platform/vss.py` — criar/apagar cópia de sombra via CIM, verificar se o volume suporta (NTFS interno), expor por link de diretório, lista de pendentes para limpar órfãs
+- ✅ `collector/backups.py` — sugestões a partir do catálogo para os apps marcados (item 28), adicionar pasta/arquivo com tradução para molde (item 30), captura com uma cópia de sombra por volume sempre apagada no fim, estimativa de espaço antes de copiar (item 25), avisos DPAPI (item 16), `item.json`, apps portáteis
+- ✅ `agent/steps/backup.py` — restauração no perfil Default (Fase 1) ou no perfil real (Fase 2/fallback), `{ABS}` com unidade ausente vira "pulado", arquivos soltos, políticas merge/overwrite/skip
+- ✅ CLI: `coletar backups [--adicionar-recomendados]`, `backup adicionar|listar|capturar|remover`, `apps portatil`, `sincronizar` (item 27)
+- ✅ `TweakOp` aceita catálogo exportado e lido de novo (contagem por campos preenchidos)
+- ✅ Roteiro `docs/validacao/M6.md`
 ### M7 — Bloatware e ajustes ⬜
 ### M8 — Windows Update, resumo e notificações ⬜
 ### M9 — Interface do Agente ⬜

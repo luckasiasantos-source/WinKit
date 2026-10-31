@@ -144,3 +144,67 @@ def test_apps_flow(tmp_path: Path, services: Services) -> None:
     assert code == 0, text
     code, text = run(["validar", *raiz], services)
     assert code == 0, text
+
+
+def test_backup_flow(tmp_path: Path) -> None:
+    old = tmp_path / "C"
+    d = old / "Users" / "Samuel" / "AppData" / "Roaming" / "discord"
+    d.mkdir(parents=True)
+    (d / "settings.json").write_text("{}")
+    tool = old / "Ferramentas" / "Tool"
+    tool.mkdir(parents=True)
+    (tool / "tool.exe").write_bytes(b"MZ")
+    services = fake_services(old_pc=old)
+    pen = tmp_path / "pen"
+    pen.mkdir()
+    raiz = ["--raiz", str(pen)]
+    run(["receita", "nova", *raiz, "--usuario", "Samuel"], services)
+    code, text = run(["coletar", "backups", *raiz], services)
+    assert code == 0 and "Nenhuma sugestão" in text
+    run(["coletar", "apps", *raiz], services)
+    run(["apps", "marcar", "discord", *raiz], services)
+    code, text = run(["coletar", "backups", *raiz, "--adicionar-recomendados"], services)
+    assert code == 0 and "[x] Discord" in text and "1 backup(s)" in text
+    code, text = run(
+        [
+            "backup",
+            "adicionar",
+            r"C:\Users\Samuel\AppData\Roaming\discord",
+            *raiz,
+            "--nome",
+            "Discord inteiro",
+            "--conflito",
+            "overwrite",
+        ],
+        services,
+    )
+    assert code == 0 and r"{APPDATA}\discord" in text
+    code, text = run(
+        [
+            "apps",
+            "portatil",
+            *raiz,
+            "--pasta",
+            r"C:\Ferramentas\Tool",
+            "--nome",
+            "Tool",
+            "--exe",
+            "tool.exe",
+        ],
+        services,
+    )
+    assert code == 0 and "ABS" in text
+    code, text = run(["backup", "capturar", *raiz], services)
+    assert code == 0, text
+    assert text.count("ok ") == 3 and "cópia de sombra" in text
+    code, text = run(["backup", "listar", *raiz], services)
+    assert "capturado" in text and "ainda não" not in text
+    code, text = run(["sincronizar", *raiz], services)
+    assert code == 0 and "Recapturando" in text and "Manifesto" in text
+    code, text = run(["validar", *raiz], services)
+    assert code == 0, text
+    code, text = run(["backup", "remover", "discord-inteiro", *raiz], services)
+    assert code == 0
+    assert not (pen / "WinKit" / "Perfis" / "padrao" / "Backups" / "discord-inteiro").exists()
+    code, text = run(["backup", "remover", "nao-existe", *raiz], services)
+    assert code == 1

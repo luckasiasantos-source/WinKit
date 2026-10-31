@@ -15,11 +15,12 @@ from __future__ import annotations
 import argparse
 import logging
 import os
+import shutil
 import sys
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from winkit import __version__
 from winkit.builder import target as targets
@@ -32,6 +33,7 @@ from winkit.builder.build import (
 )
 from winkit.builder.validate import validate_pendrive
 from winkit.collector import apps as app_collector
+from winkit.collector import backups as backup_collector
 from winkit.collector import drivers as driver_collector
 from winkit.core import layout
 from winkit.core.catalog.loader import default_catalogs
@@ -47,6 +49,7 @@ from winkit.i18n import t
 from winkit.platform.services import Services, real_services
 from winkit.platform.session import is_admin
 from winkit.platform.system import is_windows
+from winkit.platform.vss import PendingSnapshots
 
 Out = Callable[[str], None]
 
@@ -359,6 +362,177 @@ def cmd_apps_adicionar(args: argparse.Namespace, services: Services, out: Out) -
     return 0
 
 
+def _old_folders(services: Services) -> dict[str, str]:
+    return {**services.folders.machine(), **services.folders.current_user()}
+
+
+def _studio_dir() -> Path:
+    base = os.environ.get("LOCALAPPDATA")
+    return (Path(base) if base else Path.home() / ".cache") / "WinKit"
+
+
+def _free(tgt: targets.Target) -> int:
+    return targets.from_folder(tgt.root).free
+
+
+def cmd_coletar_backups(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    catalogs = default_catalogs()
+    suggestions = backup_collector.suggest(
+        recipe, catalogs, _old_folders(services), services.volume_root
+    )
+    if not suggestions:
+        out(
+            "Nenhuma sugestão: marque apps primeiro (winkit apps marcar ...) ou adicione "
+            "pastas com 'winkit backup adicionar'."
+        )
+        return 0
+    added = 0
+    for sug in suggestions:
+        pick = sug.recommended and sug.exists
+        mark = "x" if pick else " "
+        size = human_size(sug.size) if sug.exists else "não existe neste PC"
+        out(f"  [{mark}] {sug.app_name}: {sug.template}  ({size})")
+        if sug.warning:
+            out(f"        ! {sug.warning}")
+        if pick and args.adicionar_recomendados:
+            backup_collector.add_suggestion(recipe, catalogs, sug)
+            added += 1
+    if args.adicionar_recomendados:
+        _save(tgt, recipe)
+        out(f"{added} backup(s) recomendados incluídos. Capture com: winkit backup capturar")
+    return 0
+
+
+def cmd_backup_adicionar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    literal = args.caminho
+    local = backup_collector.local_source(services.volume_root(literal[:2].upper()), literal)
+    kind: Literal["file", "folder"] = "file" if local.is_file() else "folder"
+    item, warning = backup_collector.add_backup(
+        recipe,
+        default_catalogs(),
+        name=args.nome or Path(literal.replace("\\", "/")).name,
+        literal=literal,
+        old_folders=_old_folders(services),
+        windows_dir=services.folders.windows_dir(),
+        kind=kind,
+        on_conflict=args.conflito,
+        decide_at_runtime=args.decidir_na_hora,
+    )
+    _save(tgt, recipe)
+    out(f'Backup "{item.name}" ({item.id}) → {item.template}')
+    if warning:
+        out(f"  ! {warning}")
+    out("Capture com: winkit backup capturar " + item.id)
+    return 0
+
+
+def cmd_backup_listar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    for b in recipe.backups:
+        mark = "x" if b.selected else " "
+        data = layout.payload(tgt.root, b.data_path)
+        state = "capturado" if data.exists() else "ainda não capturado"
+        out(f"  [{mark}] {b.id:30} {b.template}  [{b.on_conflict}] {state}")
+        for w in b.warnings:
+            out(f"        ! {w}")
+    return 0
+
+
+def _capture(
+    args: argparse.Namespace,
+    services: Services,
+    tgt: targets.Target,
+    recipe: Recipe,
+    out: Out,
+    *,
+    only: set[str] | None,
+) -> bool:
+    _require_admin()
+    studio = _studio_dir()
+    report = backup_collector.capture(
+        tgt.root,
+        recipe,
+        default_catalogs(),
+        copier=services.copier,
+        vss=services.vss,
+        pending=PendingSnapshots(studio / "vss-pendentes.json"),
+        old_folders=_old_folders(services),
+        link_base=studio,
+        free_bytes=_free(tgt),
+        use_vss=not getattr(args, "sem_vss", False),
+        only=only,
+        volume_root=services.volume_root,
+        now=_now,
+    )
+    for note in report.notes:
+        out(f"  ! {note}")
+    for item in report.items:
+        flag = "ok " if item.ok else "não"
+        vss = " (cópia de sombra)" if item.used_vss else ""
+        out(f"  {flag} {item.backup_id}: {item.message}{vss}")
+        for w in item.warnings:
+            out(f"        ! {w}")
+    _save(tgt, recipe)
+    return report.ok
+
+
+def cmd_backup_capturar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    ok = _capture(args, services, tgt, recipe, out, only=set(args.ids) if args.ids else None)
+    return 0 if ok else 1
+
+
+def cmd_backup_remover(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    item = recipe.backup(args.id)
+    if item is None:
+        out(f"Backup não encontrado: {args.id}")
+        return 1
+    recipe.backups = [b for b in recipe.backups if b.id != args.id]
+    folder = layout.payload(tgt.root, item.data_path).parent
+    if folder.is_dir() and folder.parent.name == "Backups":
+        shutil.rmtree(folder)
+    _save(tgt, recipe)
+    out(f"Backup {args.id} removido da receita e do pendrive.")
+    return 0
+
+
+def cmd_apps_portatil(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    app, item = backup_collector.add_portable_app(
+        recipe,
+        default_catalogs(),
+        literal_folder=args.pasta,
+        old_folders=_old_folders(services),
+        name=args.nome,
+        exe=args.exe,
+        windows_dir=services.folders.windows_dir(),
+    )
+    _save(tgt, recipe)
+    out(f'App portátil "{app.name}": pasta {item.template}, atalho para {args.exe}.')
+    out("Capture com: winkit backup capturar " + item.id)
+    return 0
+
+
+def cmd_sincronizar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    if not args.sem_backups:
+        recipe = load_profile_recipe(tgt.root, args.perfil)
+        out("Recapturando backups...")
+        _capture(args, services, tgt, recipe, out, only=None)
+    args.somente_xml = False
+    args.agente = None
+    return cmd_construir(args, services, out)
+
+
 # ------------------------------------------------------------------ parser
 def _add_collect_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     col = sub.add_parser("coletar", help="coleta do PC atual: drivers, apps, backups")
@@ -370,6 +544,12 @@ def _add_collect_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     )
     cdrv.add_argument("--classe", action="append", help="só estas classes (ex.: Net, Display)")
     cdrv.set_defaults(func=cmd_coletar_drivers)
+
+    cbk = col_sub.add_parser(
+        "backups", parents=[common], help="sugere pastas de configuração dos apps marcados"
+    )
+    cbk.add_argument("--adicionar-recomendados", action="store_true")
+    cbk.set_defaults(func=cmd_coletar_backups)
 
     capp = col_sub.add_parser("apps", parents=[common], help="lê os apps instalados neste PC")
     capp.add_argument(
@@ -406,6 +586,44 @@ def _add_apps_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     ad.add_argument("--args", help="argumentos silenciosos (padrão: detectados pelo tipo)")
     ad.add_argument("--escopo", choices=["machine", "user"], default="machine")
     ad.set_defaults(func=cmd_apps_adicionar)
+    pt = apps_sub.add_parser("portatil", parents=[common], help="app sem instalador (só a pasta)")
+    pt.add_argument("--pasta", required=True, help="pasta do programa neste PC")
+    pt.add_argument("--nome", required=True)
+    pt.add_argument("--exe", required=True, help="executável dentro da pasta (ex.: app.exe)")
+    pt.set_defaults(func=cmd_apps_portatil)
+
+
+def _add_backup_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    bk = sub.add_parser("backup", help="pastas e arquivos de configuração")
+    bk_sub = bk.add_subparsers(dest="action", required=True)
+    add = bk_sub.add_parser("adicionar", parents=[common], help="inclui uma pasta ou arquivo")
+    add.add_argument("caminho", help=r"ex.: C:\Users\Voce\AppData\Roaming\discord")
+    add.add_argument("--nome")
+    add.add_argument(
+        "--conflito",
+        choices=["merge", "overwrite", "skip"],
+        default="merge",
+        help="se já existir no PC novo: mesclar (padrão), sobrescrever ou pular",
+    )
+    add.add_argument("--decidir-na-hora", action="store_true")
+    add.set_defaults(func=cmd_backup_adicionar)
+    bk_sub.add_parser("listar", parents=[common]).set_defaults(func=cmd_backup_listar)
+    cap = bk_sub.add_parser("capturar", parents=[common], help="copia para o pendrive")
+    cap.add_argument("ids", nargs="*")
+    cap.add_argument("--sem-vss", action="store_true", help="não usar cópia de sombra")
+    cap.set_defaults(func=cmd_backup_capturar)
+    rm = bk_sub.add_parser("remover", parents=[common])
+    rm.add_argument("id")
+    rm.set_defaults(func=cmd_backup_remover)
+
+    sync = sub.add_parser(
+        "sincronizar",
+        parents=[common],
+        help="recaptura backups e atualiza o pendrive (só o que mudou)",
+    )
+    sync.add_argument("--sem-backups", action="store_true")
+    sync.add_argument("--sem-vss", action="store_true")
+    sync.set_defaults(func=cmd_sincronizar)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -449,6 +667,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     _add_collect_parsers(sub, common)
     _add_apps_parsers(sub, common)
+    _add_backup_parsers(sub, common)
 
     val = sub.add_parser("validar", parents=[common], help="confere o pendrive sem alterar nada")
     val.set_defaults(func=cmd_validar)

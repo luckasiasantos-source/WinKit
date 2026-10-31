@@ -2,14 +2,19 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from pathlib import Path
 
+from winkit.platform.copy import Copier, RobocopyCopier
 from winkit.platform.disks import DiskInspector, WindowsDiskInspector
 from winkit.platform.drivers import DriverManager, WindowsDriverManager
 from winkit.platform.inventory import AppInventory, WindowsAppInventory
+from winkit.platform.known_folders import KnownFolders, WindowsKnownFolders
 from winkit.platform.powershell import PowerShell
 from winkit.platform.registry import WindowsRegistry
 from winkit.platform.runner import CommandRunner, SubprocessRunner
+from winkit.platform.vss import ShadowCopies, WindowsShadowCopies
 from winkit.platform.winget import WindowsWinget, Winget
 
 
@@ -20,15 +25,24 @@ class Services:
     drivers: DriverManager
     inventory: AppInventory
     winget: Winget
+    copier: Copier
+    vss: ShadowCopies
+    folders: KnownFolders
+    #: Letra de volume → pasta que dá acesso a ele (nos testes, uma pasta temporária).
+    volume_root: Callable[[str], Path] = field(default=lambda v: Path(v + "\\"))
 
 
 def real_services() -> Services:
     runner = SubprocessRunner()
     ps = PowerShell(runner)
+    registry = WindowsRegistry(runner)
     return Services(
         runner=runner,
         disks=WindowsDiskInspector(ps),
         drivers=WindowsDriverManager(runner, ps),
-        inventory=WindowsAppInventory(WindowsRegistry(runner), ps),
+        inventory=WindowsAppInventory(registry, ps),
         winget=WindowsWinget(runner, ps),
+        copier=RobocopyCopier(runner),
+        vss=WindowsShadowCopies(ps),
+        folders=WindowsKnownFolders(registry),
     )

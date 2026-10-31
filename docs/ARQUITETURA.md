@@ -101,8 +101,8 @@ Por que isso importa:
 | `registry.py` | Leitura/escrita via `winreg`; carga/descarga de hive | `Registry` |
 | `known_folders.py` | `SHGetKnownFolderPath` via `ctypes` | `KnownFoldersProvider` |
 | `fs.py` | Caminhos longos (`\\?\`), escrita atômica, espaço livre | `FileSystem` |
-| `copy.py` | robocopy (captura e restauração) | `Copier` |
-| `vss.py` | Cópias de sombra | `ShadowCopies` |
+| `copy.py` | robocopy e alternativa em Python (captura e restauração), salvaguarda R-20 | `Copier` |
+| `vss.py` | Cópias de sombra (CIM), exposição por link, pendentes | `ShadowCopies`, `PendingSnapshots` |
 | `drivers.py` | Listagem (`Get-WindowsDriver`), exportação e instalação (`pnputil`) de drivers | `DriverManager` |
 | `appx.py` | Pacotes MSIX: remoção e bloqueio de reinstalação | `AppxManager` |
 | `winget.py` | export, download, install, list, registro do App Installer | `Winget` |
@@ -123,7 +123,7 @@ Por que isso importa:
 |---|---|
 | `collector/apps.py` | Inventário → receita, `winget download` para o pendrive, instalador local |
 | `collector/drivers.py` | Candidatos (classe, prioridade, recomendado) e exportação idempotente para o pendrive |
-| `collector/backups.py` | Sugestão de pastas, captura com VSS, avisos DPAPI |
+| `collector/backups.py` | Sugestões (catálogo), adicionar pasta/arquivo/portátil, captura com VSS por volume, espaço, avisos DPAPI, `item.json` |
 | `builder/target.py` | Escolha do pendrive e checagens (sistema de arquivos, espaço) |
 | `builder/isos.py` | Leitura e cache das ISOs |
 | `builder/payload.py` | Gravação de Agent/Apps/Drivers/Backups + manifesto + marcador |

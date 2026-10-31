@@ -149,3 +149,9 @@ def test_blocked_requires_reason(tmp_path: Path) -> None:
     (d / "bloatware.yaml").write_text("- {id: A.B, name: x, risk: blocked}\n", encoding="utf-8")
     with pytest.raises(CatalogError):
         load_catalogs(d)
+
+
+def test_catalogs_roundtrip_through_dump() -> None:
+    from winkit.core.catalog.models import Catalogs
+
+    assert Catalogs.model_validate(CAT.model_dump()) == CAT

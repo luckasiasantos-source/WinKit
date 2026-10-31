@@ -28,6 +28,30 @@
 
 ---
 
+## 2026-10-31 — M6 — Backups de configuração
+**Tipo:** implementação + testes + documentação
+**Resumo:** o pedido central do usuário: escolher pastas (ou arquivos) de configuração no PC atual, guardar em pasta crua no pendrive com cópia de sombra e restaurar no lugar certo do Windows novo antes do primeiro uso do app.
+
+### Adicionado
+- `src/winkit/platform/copy.py` — `RobocopyCopier`, `PythonCopier`, `split_excludes`, `is_excluded`, `tree_stats`, `ensure_mirror_target`
+- `src/winkit/platform/vss.py` — `WindowsShadowCopies`, `Snapshot`, `PendingSnapshots`
+- `src/winkit/platform/fakes/backup.py` — `FakeShadowCopies`, `FakeOldPcFolders`
+- `src/winkit/collector/backups.py` — `suggest`, `add_backup`, `add_suggestion`, `add_portable_app`, `capture`, `dpapi_warnings`, `cleanup_orphan_snapshots`
+- `src/winkit/agent/steps/backup.py` — `BackupStep`
+- CLI: `coletar backups`, `backup adicionar|listar|capturar|remover`, `apps portatil`, `sincronizar`
+- Testes: `tests/platform/test_copy.py` (inclui robocopy real com caminho > 260 no Windows), `tests/collector/test_backups.py`, `tests/agent/test_backup_step.py`, fluxo completo em `tests/cli/test_cli.py`, `test_catalogs_roundtrip_through_dump`
+- `docs/validacao/M6.md`
+
+### Alterado
+- `src/winkit/platform/services.py` — `copier`, `vss`, `folders`, `volume_root`
+- `src/winkit/agent/services.py`, `agent/fakes.py` — `copier`
+- `src/winkit/core/catalog/models.py` — validação de `TweakOp` por campos preenchidos
+
+### Documentos vivos atualizados
+- STATUS — M6; ARQUITETURA — módulos
+
+---
+
 ## 2026-10-31 — M5 — Correção: arquivo inválido no repositório quebrava o CI Windows
 **Tipo:** correção
 **Resumo:** remove um log criado por engano com o nome literal `C:\ProgramData\...` (inválido no Windows), impede que isso se repita e adiciona testes de proteção.

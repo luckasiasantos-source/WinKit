@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from winkit.agent.services import AgentServices
+from winkit.platform.copy import PythonCopier
 from winkit.platform.fakes.apps import (
     FakeInstallerRunner,
     FakeInventory,
@@ -38,6 +39,7 @@ def fake_agent_services(*, pendrive: Path, system: Path, **overrides: Any) -> Ag
         "winget": FakeWinget(),
         "installers": FakeInstallerRunner(),
         "shortcuts": FakeShortcuts(),
+        "copier": PythonCopier(),
     }
     values.update(overrides)
     return AgentServices(**values)
