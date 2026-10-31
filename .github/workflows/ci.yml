@@ -42,7 +42,9 @@ jobs:
           uv run ruff format --check src tests
 
       - name: Tipos (mypy)
-        run: uv run mypy
+        run: |
+          uv run mypy
+          uv run mypy --platform win32
 
       - name: Contratos de arquitetura (import-linter)
         run: uv run lint-imports

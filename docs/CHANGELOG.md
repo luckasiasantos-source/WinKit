@@ -28,6 +28,19 @@
 
 ---
 
+## 2026-10-31 — M10 — Correção: mypy no modo Windows
+**Tipo:** correção + infraestrutura
+**Resumo:** corrige um erro de tipo que só o mypy no Windows enxergava e passa a rodar o mypy também em `--platform win32`, localmente e no CI (IN-010).
+
+### Alterado
+- `src/winkit/platform/power.py` — conversão explícita do contador do Windows
+- `scripts/check.sh`, `.github/workflows/ci.yml` — `mypy --platform win32`
+
+### Documentos vivos atualizados
+- INCIDENTES — IN-010; ARQUITETURA — §5.12
+
+---
+
 ## 2026-10-31 — M10 — WinKit Studio (GUI estilo macOS)
 **Tipo:** implementação + infraestrutura + testes + documentação
 **Resumo:** o aplicativo gráfico para o PC atual, com o visual pedido pelo usuário (estilo "Ajustes do Sistema" do Mac): todas as escolhas da receita sem editar arquivos, e "Construir pendrive" com um clique.

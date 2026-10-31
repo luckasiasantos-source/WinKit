@@ -292,7 +292,7 @@ runner.run(
 |---|---|
 | Camadas (seção 2) | import-linter (`pyproject.toml`, 5 contratos) + `tests/test_architecture.py` (pega imports dentro de funções) |
 | R-06 | `ruff check` e `ruff format --check` no CI |
-| R-07 | `mypy` no CI (`strict` em `winkit.core`) |
+| R-07 | `mypy` no CI e no `scripts/check.sh`, duas vezes: plataforma atual e `--platform win32` (IN-010); `strict` em `winkit.core` |
 | R-11 | contrato "subprocess só em platform.runner" + teste AST de `shell=` |
 | R-35 | `test_phase1_does_not_import_qt` |
 | R-50 | `test_todo_requires_debt_entry` |

@@ -99,6 +99,15 @@
 - Correção: `{ABS:pasta}\resto` passa a ser um caminho dentro da pasta absoluta; teste com unidade que nunca existe (`Q:`) e teste novo do caminho de sucesso com pasta do perfil; `open_file` substituível e substituído no teste.
 - Prevenção: testes de comportamento afirmam o resultado esperado exato (não "feito ou pulado"); testes nunca usam letras de unidade que podem existir (`C:`/`D:`) para gravar.
 
+### IN-010 — Erro de tipo só visível no Windows bloqueou três CIs seguidos
+- Data: 2026-10-31
+- Marco: M8 (descoberto ao conferir o CI do M10)
+- O que aconteceu: os CIs do M8, da correção do IN-009 e do M9 falharam no Windows no passo do mypy (`power.py: Returning Any from function declared to return "float"`); os testes do Windows nem rodaram nesses commits.
+- Causa raiz: no Linux, o mypy trata o código depois de `if sys.platform != "win32": return` como inalcançável e não o verifica; no Windows ele verifica. A verificação local (`scripts/check.sh`) só rodava o mypy do Linux. E eu conferi o CI tarde (só depois de três commits).
+- Impacto: três commits sem testes no Windows; nenhum efeito funcional (o valor era um `int` do ctypes).
+- Correção: conversão explícita em `power.py`.
+- Prevenção: `scripts/check.sh` e o CI rodam também `mypy --platform win32`; conferir o CI a cada commit, não a cada marco.
+
 ## Lições da fase de desenho
 
 Problemas encontrados na conversa anterior (PDF de referência) e corrigidos **antes** de virar código. Ficam registrados porque são erros fáceis de repetir.

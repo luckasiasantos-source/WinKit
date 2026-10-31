@@ -8,6 +8,7 @@ unset UV_NATIVE_TLS || true
 echo "== ruff (lint)";    uv run ruff check src tests
 echo "== ruff (formato)"; uv run ruff format --check src tests
 echo "== mypy";           uv run mypy
+echo "== mypy (Windows)"; uv run mypy --platform win32   # código só do Windows (IN-010)
 echo "== import-linter";  uv run lint-imports
 echo "== pytest";         uv run pytest -q "$@"
 echo "== OK"

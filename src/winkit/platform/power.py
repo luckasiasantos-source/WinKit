@@ -31,8 +31,9 @@ class WindowsSessionControl:
         info.cbSize = ctypes.sizeof(_LastInputInfo)
         if not ctypes.windll.user32.GetLastInputInfo(ctypes.byref(info)):
             return 0.0
-        now = ctypes.windll.kernel32.GetTickCount()
-        return max(0.0, ((now - info.dwTime) & 0xFFFFFFFF) / 1000.0)
+        now = int(ctypes.windll.kernel32.GetTickCount())
+        elapsed_ms = (now - int(info.dwTime)) & 0xFFFFFFFF
+        return max(0.0, elapsed_ms / 1000.0)
 
     def reboot(self, *, delay_seconds: int, message: str) -> None:
         self._runner.run(
