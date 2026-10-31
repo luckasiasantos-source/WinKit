@@ -88,6 +88,7 @@ SAME_AS_BASE: dict[str, set[str]] = {
         "step.browser.done",
         "studio.browsers.enabled",
         "cli.browser_search",
+        "studio.folders.default_base",
     },
 }
 ALWAYS_SAME = {

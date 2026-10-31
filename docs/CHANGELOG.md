@@ -28,6 +28,22 @@
 
 ---
 
+## 2026-10-31 — M16 — Resolver de volumes, pastas do usuário em outro disco (V2-14) e jogos (V2-13)
+**Tipo:** implementação
+**Resumo:** volumes passam a ser achados pelo número de série, nunca pela letra (D-035). Documentos, Downloads e as outras pastas podem ficar num outro disco, e o Windows novo já aponta para lá. Jogos da Steam e da Epic em outro disco aparecem instalados sem baixar de novo. A release 0.6.0 foi disparada antes deste commit.
+
+### Adicionado
+- `src/winkit/core/volumes.py`, `src/winkit/platform/volumes.py`, `src/winkit/platform/fakes/volumes.py`
+- `src/winkit/core/user_folders.py`, `src/winkit/collector/user_folders.py`, `src/winkit/agent/steps/user_folders.py`
+- `src/winkit/core/vdf.py`, `src/winkit/core/games.py`, `src/winkit/collector/games.py`, `src/winkit/agent/steps/game_library.py`
+- Receita: `VolumeRef`, `meta.source_system_volume`, `user_folders`, `game_libraries` (aditivos); plano: `user_folders` (Fase 1, R16) e `game_library` (Fase 2, R22)
+- Os moldes `{DOCUMENTS}` e afins seguem as pastas redirecionadas (R16)
+- Studio: seções "Pastas do usuário" e "Jogos"; CLI: `pastas mostrar|definir|copiar-agora`, `coletar jogos`, `jogos listar|marcar|desmarcar`
+- Testes: `tests/agent/test_user_folders.py` (inclui o de proteção da R-52), `tests/agent/test_games.py` e fixtures em `tests/fixtures/games/`
+
+### Documentos vivos atualizados
+- ARQUITETURA — módulos e verificação R-52; STATUS — M16 em andamento, H32, H33; PLANO_V2 — §5.1
+
 ## 2026-10-31 — Correção dos testes de fontes no Windows (IN-018)
 **Tipo:** correção
 **Resumo:** os testes das fontes dependiam de como o Linux trata a data dos arquivos e falharam no Windows. O id da fonte também saía com a extensão duplicada.

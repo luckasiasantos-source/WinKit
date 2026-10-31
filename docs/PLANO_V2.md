@@ -365,18 +365,22 @@ class BrowserSetup(_Model):         # M15 — V2-12
     search_provider: str | None = None   # id de search_providers.yaml
     policy_mode: Literal["recommended", "mandatory"] = "recommended"
 
-class UserFolders(_Model):          # M16 — V2-14
+class UserFolders(_Model):          # M16 — V2-14 (implementado assim)
     enabled: bool = False
     volume: VolumeRef | None = None
-    base: str = r"Usuarios\{USERNAME}"   # relativo à raiz do volume
-    folders: list[Literal["desktop", "documents", "downloads", "pictures", "videos", "music"]] = []
+    # pasta → caminho relativo ao volume, com %USERNAME% (ex.: Usuarios\%USERNAME%\Documentos);
+    # a "pasta base" vira só um atalho da tela para montar esses caminhos
+    folders: dict[Literal["desktop", "documents", "downloads", "pictures", "videos", "music"], str] = {}
 
-class GameLibrary(_Model):          # M16 — V2-13
+class GameLibrary(_Model):          # M16 — V2-13 (implementado assim: um jogo da Epic por item)
     id: ItemId
     launcher: Literal["steam", "epic"]
+    name: str
     volume: VolumeRef
-    relative_path: str              # ex.: "SteamLibrary" ou "Jogos\Epic\Fortnite"
-    manifests_file: PayloadPath | None = None   # .item da Epic, copiados
+    relative_path: str              # ex.: "SteamLibrary" ou "Epic Games\Fortnite" (sem letra, R-52)
+    games: int = 0
+    manifest: PayloadPath | None = None   # .item da Epic, copiado
+    selected: bool = True
 
 class Recipe(_Model):               # existente — seções novas
     ...

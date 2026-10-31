@@ -30,6 +30,7 @@ from winkit.i18n import t, tn
 # Ordem dos grupos dentro de cada fase (PLANO.md §11.2, tabela "Ordem dentro de cada fase").
 _G1 = {
     "driver": 10,
+    "user_folders": 12,  # R16: antes de backups e ajustes do usuário
     "wifi": 15,  # R17: logo depois dos drivers (precisa do driver de rede)
     "dns": 16,  # R18: depois do Wi-Fi
     "hosts": 17,
@@ -54,6 +55,7 @@ _G2 = {
     "feature": 35,
     "tweak": 40,
     "shortcut": 50,
+    "game_library": 52,  # R22: depois do app do launcher
     "maintenance": 55,  # R27: a tarefa do winget é do usuário
     "rename_computer": 60,
     "windows_update": 70,
@@ -108,6 +110,7 @@ def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> 
     excluded: list[ExcludedItem] = []
 
     _plan_drivers(recipe, drafts)
+    _plan_user_folders(recipe, drafts)
     _plan_wifi(recipe, drafts)
     _plan_network_privacy(recipe, catalogs, drafts)
     _plan_network_drives(recipe, drafts)
@@ -118,6 +121,7 @@ def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> 
     _plan_personal(recipe, catalogs, drafts)
     _plan_browsers(recipe, catalogs, drafts)
     _plan_start_layout(recipe, drafts)
+    _plan_games(recipe, drafts)
     _plan_power(recipe, drafts)
     _plan_bloat(recipe, catalogs, ctx, drafts, excluded)
     _plan_features(recipe, catalogs, ctx, drafts, excluded)
@@ -153,6 +157,21 @@ def _plan_drivers(recipe: Recipe, out: list[_Draft]) -> None:  # R3
                 "machine",
                 needs_pendrive=True,
                 sort=(_G1["driver"], d.priority, d.id),
+            )
+        )
+
+
+def _plan_user_folders(recipe: Recipe, out: list[_Draft]) -> None:  # R16
+    uf = recipe.user_folders
+    if uf.enabled and uf.volume is not None and uf.folders:
+        out.append(
+            _Draft(
+                "user_folders",
+                "default",
+                1,
+                t("plan.user_folders"),
+                "default_profile",
+                sort=(_G1["user_folders"], 0, "default"),
             )
         )
 
@@ -349,6 +368,33 @@ def _plan_start_layout(recipe: Recipe, out: list[_Draft]) -> None:  # R20
             sort=(_G1["start_layout"], 0, "default"),
         )
     )
+
+
+#: Launcher → ids do winget, para a etapa esperar o app (R22).
+LAUNCHER_WINGET = {"steam": ("Valve.Steam",), "epic": ("EpicGames.EpicGamesLauncher",)}
+
+
+def _plan_games(recipe: Recipe, out: list[_Draft]) -> None:  # R22
+    for lib in recipe.game_libraries:
+        if not lib.selected:
+            continue
+        apps = [
+            f"app:{a.id}"
+            for a in recipe.selected_apps()
+            if a.winget_id in LAUNCHER_WINGET[lib.launcher]
+        ]
+        out.append(
+            _Draft(
+                "game_library",
+                lib.id,
+                2,
+                t("plan.game_library", name=lib.name),
+                "machine",
+                needs_pendrive=lib.launcher == "epic",
+                depends_on=apps,
+                sort=(_G2["game_library"], 0, lib.id),
+            )
+        )
 
 
 def _plan_power(recipe: Recipe, out: list[_Draft]) -> None:  # R5

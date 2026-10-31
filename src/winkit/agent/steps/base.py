@@ -20,6 +20,8 @@ from winkit.core.paths import templates
 from winkit.core.planner.models import Plan, PlannedStep
 from winkit.core.recipe.models import Recipe
 from winkit.core.state.models import AgentState
+from winkit.core.user_folders import redirected
+from winkit.core.volumes import resolve as resolve_volume
 from winkit.i18n import Msg, msg
 
 Outcome = Literal["done", "skipped", "failed", "deferred"]
@@ -70,12 +72,23 @@ class StepContext:
     mode: Literal["install", "live"] = "install"
 
     def folders(self) -> dict[str, str]:
-        """Pastas para resolver moldes de caminho conforme o alvo da etapa."""
+        """Pastas para resolver moldes de caminho conforme o alvo da etapa.
+
+        Com as pastas do usuário em outro disco (V2-14, R16), ``{DOCUMENTS}`` e as outras
+        apontam para lá.
+        """
         f = self.services.folders
         machine = f.machine()
         if self.step.target == "default_profile":
-            return templates.retarget(machine, f.default_profile_root())
-        return {**machine, **f.current_user()}
+            out = templates.retarget(machine, f.default_profile_root())
+        else:
+            out = {**machine, **f.current_user()}
+        uf = self.recipe.user_folders
+        if uf.enabled and uf.volume is not None and uf.folders:
+            v = resolve_volume(uf.volume, self.services.volumes.volumes())
+            if v is not None and v.letter:
+                out.update(redirected(uf, v.letter, self.recipe.windows.account.username))
+        return out
 
     def payload(self, rel: str) -> Path:
         if self.pendrive is None:

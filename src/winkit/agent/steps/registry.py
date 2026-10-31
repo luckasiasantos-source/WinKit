@@ -13,6 +13,7 @@ from winkit.agent.steps.env import EnvStep
 from winkit.agent.steps.feature import FeatureStep
 from winkit.agent.steps.finalize import FinalizeStep
 from winkit.agent.steps.font import FontStep
+from winkit.agent.steps.game_library import GameLibraryStep
 from winkit.agent.steps.maintenance import MaintenanceStep
 from winkit.agent.steps.network_drive import NetworkDriveStep
 from winkit.agent.steps.network_privacy import DnsStep, HostsStep
@@ -21,6 +22,7 @@ from winkit.agent.steps.restore import RestorePointStep
 from winkit.agent.steps.start_layout import StartLayoutStep
 from winkit.agent.steps.system import BloatStep, PowerStep, RenameComputerStep
 from winkit.agent.steps.tweak import TweakStep
+from winkit.agent.steps.user_folders import UserFoldersStep
 from winkit.agent.steps.wifi import WifiStep
 from winkit.agent.steps.windows_update import WindowsUpdateStep
 from winkit.core.planner.models import StepKind
@@ -64,6 +66,8 @@ def default_handlers() -> dict[StepKind, StepHandler]:
     handlers["personal"] = PersonalStep()
     handlers["browser"] = BrowserStep()
     handlers["start_layout"] = StartLayoutStep()
+    handlers["user_folders"] = UserFoldersStep()
+    handlers["game_library"] = GameLibraryStep()
     handlers["feature"] = FeatureStep()
     handlers["driver_report"] = DriverReportStep()
     handlers["finalize"] = FinalizeStep()

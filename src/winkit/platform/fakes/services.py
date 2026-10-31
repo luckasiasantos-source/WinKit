@@ -15,6 +15,7 @@ from winkit.platform.fakes.drivers import FakeDriverManager
 from winkit.platform.fakes.registry import FakeRegistry
 from winkit.platform.fakes.runner import FakeRunner
 from winkit.platform.fakes.system import FakeScheduler
+from winkit.platform.fakes.volumes import FakeVolumes
 from winkit.platform.fakes.wifi import FakeWifi
 from winkit.platform.services import Services
 
@@ -36,6 +37,7 @@ def fake_services(*, old_pc: Path | None = None, **overrides: Any) -> Services:
         "registry": FakeRegistry(),
         "scheduler": FakeScheduler(),
         "associations": FakeAssociations(),
+        "volumes": FakeVolumes(),
     }
     values.update(overrides)
     return Services(**values)

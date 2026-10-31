@@ -36,9 +36,11 @@ from winkit.collector import drivers as driver_collector
 from winkit.collector import env as env_collector
 from winkit.collector import features as feature_collector
 from winkit.collector import fonts as font_collector
+from winkit.collector import games as games_collector
 from winkit.collector import netdrives as netdrive_collector
 from winkit.collector import personal as personal_collector
 from winkit.collector import start_layout as start_collector
+from winkit.collector import user_folders as folders_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import layout
 from winkit.core.browsers import suggested
@@ -66,8 +68,13 @@ from winkit.core.recipe.models import (
     WifiNetwork,
 )
 from winkit.core.recipe.validation import ValidationReport, validate_recipe
+from winkit.core.user_folders import ORDER, default_folders
+from winkit.core.volumes import VolumeInfo
+from winkit.core.volumes import ref_for as volume_ref
+from winkit.core.volumes import resolve as resolve_volume
 from winkit.core.winget_manifest import split_args
-from winkit.i18n import current_language
+from winkit.i18n import current_language, t
+from winkit.i18n.format import format_size
 from winkit.platform import hosts
 from winkit.platform.environment import WindowsEnvironment
 from winkit.platform.services import Services
@@ -477,6 +484,110 @@ class StudioController:
         )
         self.save()
         return result
+
+    def collect_games(self) -> games_collector.GamesReport:
+        """Bibliotecas da Steam e jogos da Epic em outros discos (V2-13)."""
+        recipe = self.require_recipe()
+        if self.services.registry is None:
+            return games_collector.GamesReport()
+        vols = self.all_volumes()
+        recipe.meta.source_system_volume = folders_collector.system_serial(vols)
+        report = games_collector.collect_games(
+            self.services.registry,
+            self.root,
+            recipe,
+            vols,
+            machine=self.services.folders.machine(),
+            volume_root=self.services.volume_root,
+        )
+        self.save()
+        return report
+
+    # ---- pastas do usuário em outro disco (V2-14)
+    def all_volumes(self) -> list[VolumeInfo]:
+        return self.services.volumes.volumes() if self.services.volumes else []
+
+    def data_volumes(self) -> list[VolumeInfo]:
+        """Volumes que não são o do sistema (o C: será formatado)."""
+        return [v for v in self.all_volumes() if not v.is_system and v.letter]
+
+    @staticmethod
+    def volume_label(v: VolumeInfo) -> str:
+        name = v.label or t("studio.folders.no_label")
+        free = t("studio.folders.free", size=format_size(v.free))
+        return f"{name} ({v.letter}:) · {format_size(v.size)} · {free}"
+
+    def user_folders_base(self) -> str:
+        uf = self.require_recipe().user_folders
+        first = next(iter(uf.folders.values()), None)
+        return (
+            first.rsplit("\\", 1)[0]
+            if first and "\\" in first
+            else t("studio.folders.default_base")
+        )
+
+    def user_folder_rows(self) -> list[tuple[str, str]]:
+        uf = self.require_recipe().user_folders
+        base = self.user_folders_base()
+        names = {f: t(f"folder.{f}") for f in ORDER}
+        defaults = default_folders(base, names, list(ORDER))
+        v = resolve_volume(uf.volume, self.all_volumes()) if uf.volume else None
+        letter = v.letter if v and v.letter else (uf.volume.letter_hint if uf.volume else "?")
+        return [(f, f"{letter}:\\{uf.folders.get(f, defaults[f])}") for f in ORDER]
+
+    def detect_user_folders(self) -> bool:
+        recipe = self.require_recipe()
+        vols = self.all_volumes()
+        recipe.meta.source_system_volume = folders_collector.system_serial(vols)
+        if self.services.registry is None:
+            return False
+        user = self.services.folders.current_user()
+        found = folders_collector.detect(
+            self.services.registry, vols, user["USERPROFILE"], recipe.windows.account.username
+        )
+        if found is not None:
+            recipe.user_folders = found
+        self.save()
+        return found is not None
+
+    def set_user_folders(
+        self,
+        *,
+        enabled: bool | None = None,
+        serial: str | None = None,
+        base: str | None = None,
+        folder: tuple[str, bool] | None = None,
+    ) -> None:
+        recipe = self.require_recipe()
+        uf = recipe.user_folders
+        if enabled is not None:
+            uf.enabled = enabled
+        if serial is not None or (uf.volume is None and self.data_volumes()):
+            chosen = next((v for v in self.data_volumes() if v.serial == serial), None)
+            chosen = chosen or self.data_volumes()[0]
+            uf.volume = volume_ref(chosen)
+        names = {f: t(f"folder.{f}") for f in ORDER}
+        if base is not None:
+            uf.folders = default_folders(base, names, list(uf.folders))
+        if folder is not None:
+            folder_id, on = folder
+            current = default_folders(self.user_folders_base(), names, [*uf.folders, folder_id])
+            chosen_ids = [f for f in current if f in uf.folders or (on and f == folder_id)]
+            if not on:
+                chosen_ids = [f for f in chosen_ids if f != folder_id]
+            uf.folders = {f: uf.folders.get(f, current[f]) for f in chosen_ids}
+        self.save()
+
+    def copy_user_folders_now(self) -> folders_collector.CopyReport:
+        if self.services.volumes is None:
+            return folders_collector.CopyReport()
+        return folders_collector.copy_now(
+            self.require_recipe(),
+            self.services.volumes,
+            self.services.copier,
+            self.services.folders.current_user(),
+            self.services.volume_root,
+        )
 
     def preset_preview(self, preset_id: str) -> PresetResult:
         preset = self.catalogs.preset(preset_id)

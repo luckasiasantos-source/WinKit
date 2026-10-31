@@ -37,6 +37,7 @@ from winkit.platform.fakes.system_tweaks import (
     FakeSession,
     FakeUpdater,
 )
+from winkit.platform.fakes.volumes import FakeVolumes
 from winkit.platform.fakes.wifi import FakeWifi
 
 
@@ -68,6 +69,7 @@ def fake_agent_services(*, pendrive: Path, system: Path, **overrides: Any) -> Ag
         "font_loader": FakeFontLoader(),
         "associations": FakeAssociations(),
         "appearance": FakeLiveAppearance(),
+        "volumes": FakeVolumes(),
     }
     values.update(overrides)
     return AgentServices(**values)

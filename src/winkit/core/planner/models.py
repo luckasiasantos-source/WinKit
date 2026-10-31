@@ -10,6 +10,7 @@ from winkit.core.recipe.models import ExecutionMode
 
 StepKind = Literal[
     "driver",
+    "user_folders",
     "wifi",
     "dns",
     "hosts",
@@ -28,6 +29,7 @@ StepKind = Literal[
     "backup",
     "app",
     "shortcut",
+    "game_library",
     "rename_computer",
     "windows_update",
     "driver_report",

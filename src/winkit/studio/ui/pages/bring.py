@@ -584,3 +584,53 @@ class StartLayoutPage(Page):
             QMessageBox.information(self, t("app.name"), "\n".join(lines))
 
         self.tasks.run(t("studio.start.reading"), self.ctl.collect_start_layout, done)
+
+
+class GamesPage(Page):
+    """V2-13: jogos da Steam e da Epic em outro disco aparecem instalados, sem baixar de novo."""
+
+    title_key = "studio.games.title"
+    subtitle_key = "studio.games.subtitle"
+
+    def refresh(self) -> None:
+        self.clear_content()
+        if self.needs_recipe():
+            return
+        r = self.ctl.recipe
+        assert r is not None  # noqa: S101
+        self.content.addLayout(self.toolbar(button(t("studio.games.read"), "Primary", self._read)))
+        card = Card()
+        for lib in r.game_libraries:
+            detail = t(f"studio.games.launcher_{lib.launcher}")
+            if lib.launcher == "steam":
+                detail += " · " + tn("studio.games.count", lib.games)
+            card.add_row(
+                choice_row(
+                    lib.name,
+                    detail,
+                    icon_kind="game_library",
+                    selected=lib.selected,
+                    on_select=partial(self._select, lib),
+                )
+            )
+        self.content.addWidget(
+            section(
+                "",
+                card if card.rows else empty(t("studio.games.none")),
+                footer=t("studio.games.footer"),
+            )
+        )
+
+    def _select(self, lib: Any, value: bool) -> None:
+        lib.selected = value
+        self.save()
+
+    def _read(self) -> None:
+        def done(report: Any) -> None:
+            self.refresh()
+            lines = [tn("studio.games.read_done", len(report.added))]
+            if report.on_system:
+                lines.append(t("studio.games.on_system", names=", ".join(report.on_system)))
+            QMessageBox.information(self, t("app.name"), "\n".join(lines))
+
+        self.tasks.run(t("studio.games.reading"), self.ctl.collect_games, done)

@@ -1,0 +1,11 @@
+{
+	"FormatVersion": 0,
+	"DisplayName": "Jogo de Exemplo",
+	"InstallLocation": "D:\\Epic Games\\JogoDeExemplo",
+	"ManifestLocation": "D:\\Epic Games\\JogoDeExemplo/.egstore",
+	"StagingLocation": "D:\\Epic Games\\JogoDeExemplo/.egstore/bps",
+	"AppName": "ExemploApp",
+	"CatalogNamespace": "exemplo-namespace",
+	"CatalogItemId": "0123456789abcdef",
+	"AppVersionString": "1.0.0"
+}

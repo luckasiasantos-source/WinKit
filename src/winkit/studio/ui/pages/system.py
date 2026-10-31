@@ -501,3 +501,109 @@ class EnvPage(Page):
             QMessageBox.information(self, t("app.name"), tn("studio.env.read_done", n))
 
         self.tasks.run(t("studio.env.reading"), self.ctl.collect_env, done)
+
+
+class UserFoldersPage(Page):
+    """V2-14: Documentos, Downloads… num outro disco, para a próxima formatação não apagar nada."""
+
+    title_key = "studio.folders.title"
+    subtitle_key = "studio.folders.subtitle"
+
+    def refresh(self) -> None:
+        self.clear_content()
+        if self.needs_recipe():
+            return
+        r = self.ctl.recipe
+        assert r is not None  # noqa: S101
+        uf = r.user_folders
+        self.content.addLayout(
+            self.toolbar(
+                button(t("studio.folders.read"), "Secondary", self._read),
+                button(t("studio.folders.copy_now"), "Secondary", self._copy_now),
+            )
+        )
+        volumes = self.ctl.data_volumes()
+        card = Card()
+        card.add_row(
+            Row(
+                t("studio.folders.enabled"),
+                None,
+                accessory=toggle(uf.enabled, self._enabled),
+                icon=kind_icon("user_folders"),
+            )
+        )
+        options = [(v.serial, self.ctl.volume_label(v)) for v in volumes]
+        current = uf.volume.serial if uf.volume else ""
+        if not options:
+            card.add_row(Row(t("studio.folders.no_volumes"), None))
+        else:
+            card.add_row(
+                Row(
+                    t("studio.folders.volume"),
+                    None,
+                    accessory=combo(options, current or options[0][0], self._volume),
+                )
+            )
+        base = QLineEdit(self.ctl.user_folders_base())
+        base.editingFinished.connect(lambda: self._base(base.text()))
+        card.add_row(Row(t("studio.folders.base"), t("studio.folders.base_hint"), accessory=base))
+        self.content.addWidget(section("", card))
+        folders = Card()
+        for folder_id, path in self.ctl.user_folder_rows():
+            folders.add_row(
+                choice_row(
+                    t(f"folder.{folder_id}"),
+                    path,
+                    icon_kind="user_folders",
+                    selected=folder_id in uf.folders,
+                    on_select=partial(self._folder, folder_id),
+                )
+            )
+        self.content.addWidget(section(t("studio.folders.which"), folders))
+        warn = Card()
+        warn.add_row(
+            Row(
+                t("studio.folders.warning_title"),
+                t("studio.folders.warning"),
+                icon=symbol_icon("!", "#FF9500"),
+            )
+        )
+        self.content.addWidget(section("", warn))
+
+    def _enabled(self, value: bool) -> None:
+        self.ctl.set_user_folders(enabled=value)
+        self.refresh()
+
+    def _volume(self, serial: str) -> None:
+        self.ctl.set_user_folders(serial=serial)
+        self.refresh()
+
+    def _base(self, text: str) -> None:
+        self.ctl.set_user_folders(base=text.strip())
+        self.refresh()
+
+    def _folder(self, folder_id: str, value: bool) -> None:
+        self.ctl.set_user_folders(folder=(folder_id, value))
+        self.refresh()
+
+    def _read(self) -> None:
+        def done(found: bool) -> None:
+            self.refresh()
+            key = "studio.folders.read_done" if found else "studio.folders.read_none"
+            QMessageBox.information(self, t("app.name"), t(key))
+
+        self.tasks.run(t("studio.folders.reading"), self.ctl.detect_user_folders, done)
+
+    def _copy_now(self) -> None:
+        answer = QMessageBox.question(
+            self, t("studio.folders.copy_now"), t("studio.folders.copy_confirm")
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+
+        def done(report: Any) -> None:
+            QMessageBox.information(
+                self, t("app.name"), tn("studio.folders.copied", len(report.copied))
+            )
+
+        self.tasks.run(t("studio.folders.copying"), self.ctl.copy_user_folders_now, done)

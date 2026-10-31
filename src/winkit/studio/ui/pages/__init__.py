@@ -7,6 +7,7 @@ from winkit.studio.ui.pages.bring import (
     DefaultAppsPage,
     DriversPage,
     FontsPage,
+    GamesPage,
     StartLayoutPage,
 )
 from winkit.studio.ui.pages.finish import BuildPage, ExecutionPage, LivePage
@@ -19,6 +20,7 @@ from winkit.studio.ui.pages.system import (
     FeaturesPage,
     MaintenancePage,
     TweaksPage,
+    UserFoldersPage,
 )
 
 __all__ = [
@@ -37,11 +39,13 @@ __all__ = [
     "ExecutionPage",
     "FeaturesPage",
     "FontsPage",
+    "GamesPage",
     "LivePage",
     "MaintenancePage",
     "NetworkDrivesPage",
     "PendrivePage",
     "StartLayoutPage",
     "TweaksPage",
+    "UserFoldersPage",
     "WifiPage",
 ]

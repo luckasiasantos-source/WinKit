@@ -42,9 +42,11 @@ from winkit.collector import drivers as driver_collector
 from winkit.collector import env as env_collector
 from winkit.collector import features as feature_collector
 from winkit.collector import fonts as font_collector
+from winkit.collector import games as games_collector
 from winkit.collector import netdrives as netdrive_collector
 from winkit.collector import personal as personal_collector
 from winkit.collector import start_layout as start_collector
+from winkit.collector import user_folders as folders_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import dns as dns_rules
 from winkit.core import layout
@@ -56,9 +58,14 @@ from winkit.core.planner.models import PlanContext
 from winkit.core.planner.planner import plan
 from winkit.core.presets import apply_preset, preview_preset
 from winkit.core.recipe.io import new_recipe
-from winkit.core.recipe.models import BrowserConfig, EnvScope, EnvVar, Recipe
+from winkit.core.recipe.models import BrowserConfig, EnvScope, EnvVar, Recipe, UserFolders
 from winkit.core.recipe.validation import validate_recipe
 from winkit.core.text import human_size
+from winkit.core.user_folders import ORDER as USER_FOLDER_ORDER
+from winkit.core.user_folders import default_folders
+from winkit.core.volumes import by_letter
+from winkit.core.volumes import ref_for as volume_ref
+from winkit.core.volumes import resolve as resolve_volume
 from winkit.core.winget_manifest import split_args
 from winkit.i18n import CHOICES, current_language, normalize, render, set_language, t, tn
 from winkit.platform import browsers as browser_policies
@@ -1270,6 +1277,162 @@ def _add_start_parsers(col_sub: Any, common: argparse.ArgumentParser) -> None:
     ci.set_defaults(func=cmd_coletar_iniciar)
 
 
+# ------------------------------------------------------------------ pastas do usuário (V2-14)
+_FOLDER_ALIASES = {
+    "area-de-trabalho": "desktop",
+    "desktop": "desktop",
+    "documentos": "documents",
+    "documents": "documents",
+    "downloads": "downloads",
+    "imagens": "pictures",
+    "pictures": "pictures",
+    "videos": "videos",
+    "musicas": "music",
+    "music": "music",
+}
+
+
+def cmd_pastas_mostrar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    uf = load_profile_recipe(tgt.root, args.perfil).user_folders
+    if not uf.enabled or uf.volume is None:
+        out(t("cli.folders_off"))
+        return 0
+    vols = services.volumes.volumes() if services.volumes else []
+    v = resolve_volume(uf.volume, vols)
+    letter = v.letter if v and v.letter else (uf.volume.letter_hint or "?")
+    out(t("cli.folders_volume", label=uf.volume.label or uf.volume.serial, serial=uf.volume.serial))
+    for folder, rel in uf.folders.items():
+        out(f"  {t(f'folder.{folder}')}: {letter}:\\{rel}")
+    return 0
+
+
+def cmd_pastas_definir(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    vols = services.volumes.volumes() if services.volumes else []
+    wanted = args.volume.upper().rstrip(":\\")
+    v = next((x for x in vols if x.serial == wanted), None) or by_letter(wanted, vols)
+    if v is None or v.is_system:
+        out(t("cli.folders_bad_volume", volume=args.volume))
+        return 1
+    chosen = []
+    for name in args.pastas.split(","):
+        folder = _FOLDER_ALIASES.get(name.strip().lower())
+        if folder is None:
+            out(t("cli.not_found", ids=name))
+            return 1
+        chosen.append(folder)
+    base = args.base if args.base is not None else t("studio.folders.default_base")
+    names = {f: t(f"folder.{f}") for f in USER_FOLDER_ORDER}
+    recipe.user_folders = UserFolders(
+        enabled=True, volume=volume_ref(v), folders=default_folders(base, names, chosen)
+    )
+    recipe.meta.source_system_volume = folders_collector.system_serial(vols)
+    _save(tgt, recipe)
+    return cmd_pastas_mostrar(args, services, out)
+
+
+def cmd_pastas_copiar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    if services.volumes is None:
+        out(t("cli.folders_off"))
+        return 1
+    try:
+        report = folders_collector.copy_now(
+            recipe,
+            services.volumes,
+            services.copier,
+            services.folders.current_user(),
+            services.volume_root,
+        )
+    except FileNotFoundError:
+        out(
+            t(
+                "cli.folders_bad_volume",
+                volume=recipe.user_folders.volume.serial if recipe.user_folders.volume else "?",
+            )
+        )
+        return 1
+    out(tn("studio.folders.copied", len(report.copied)))
+    return 0
+
+
+def _add_folder_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    pa = sub.add_parser("pastas", aliases=["folders"], help=t("cli.h.folders"))
+    pa_sub = pa.add_subparsers(dest="action", required=True)
+    pa_sub.add_parser("mostrar", aliases=["show"], parents=[common]).set_defaults(
+        func=cmd_pastas_mostrar
+    )
+    pd = pa_sub.add_parser("definir", aliases=["set"], parents=[common])
+    pd.add_argument("--volume", required=True, help=t("cli.h.folders_volume"))
+    pd.add_argument("--base", help=t("cli.h.folders_base"))
+    pd.add_argument(
+        "--pastas",
+        default="documentos,downloads,imagens,videos,musicas",
+        help=t("cli.h.folders_list"),
+    )
+    pd.set_defaults(func=cmd_pastas_definir)
+    pa_sub.add_parser(
+        "copiar-agora", aliases=["copy-now"], parents=[common], help=t("cli.h.folders_copy")
+    ).set_defaults(func=cmd_pastas_copiar)
+
+
+# ------------------------------------------------------------------ jogos (V2-13)
+def cmd_coletar_jogos(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    if services.registry is None:
+        out(t("cli.registry_unavailable"))
+        return 1
+    vols = services.volumes.volumes() if services.volumes else []
+    recipe.meta.source_system_volume = folders_collector.system_serial(vols)
+    report = games_collector.collect_games(
+        services.registry,
+        tgt.root,
+        recipe,
+        vols,
+        machine=services.folders.machine(),
+        volume_root=services.volume_root,
+    )
+    _save(tgt, recipe)
+    out(tn("studio.games.read_done", len(report.added)))
+    if report.on_system:
+        out(t("studio.games.on_system", names=", ".join(report.on_system)))
+    return cmd_jogos_listar(args, services, out)
+
+
+def cmd_jogos_listar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    for lib in load_profile_recipe(tgt.root, args.perfil).game_libraries:
+        out(f"  [{'x' if lib.selected else ' '}] {lib.id:40} {lib.name}")
+    return 0
+
+
+def cmd_jogos_marcar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    missing = games_collector.select(recipe, args.ids, selected=args.command_value)
+    _save(tgt, recipe)
+    if missing:
+        out(t("cli.not_found", ids=", ".join(missing)))
+        return 1
+    return cmd_jogos_listar(args, services, out)
+
+
+def _add_game_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    jg = sub.add_parser("jogos", aliases=["games"], help=t("cli.h.games"))
+    jg_sub = jg.add_subparsers(dest="action", required=True)
+    jg_sub.add_parser("listar", aliases=["list"], parents=[common]).set_defaults(
+        func=cmd_jogos_listar
+    )
+    for name, alias, value in (("marcar", "select", True), ("desmarcar", "deselect", False)):
+        jm = jg_sub.add_parser(name, aliases=[alias], parents=[common])
+        jm.add_argument("ids", nargs="+", help=t("cli.h.game_ids"))
+        jm.set_defaults(func=cmd_jogos_marcar, command_value=value)
+
+
 def _add_dns_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     dns = sub.add_parser("dns", help=t("cli.h.dns"))
     dns_sub = dns.add_subparsers(dest="action", required=True)
@@ -1410,6 +1573,10 @@ def _add_collect_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     )
     cnv.set_defaults(func=cmd_coletar_navegadores)
     _add_start_parsers(col_sub, common)
+    cjg = col_sub.add_parser(
+        "jogos", aliases=["games"], parents=[common], help=t("cli.h.collect_games")
+    )
+    cjg.set_defaults(func=cmd_coletar_jogos)
 
     capp = col_sub.add_parser("apps", parents=[common], help=t("cli.h.collect_apps"))
     capp.add_argument(
@@ -1528,6 +1695,8 @@ def _add_system_and_network_parsers(sub: Any, common: argparse.ArgumentParser) -
     _add_default_apps_parsers(sub, common)
     _add_appearance_parsers(sub, common)
     _add_browser_parsers(sub, common)
+    _add_folder_parsers(sub, common)
+    _add_game_parsers(sub, common)
 
 
 def build_parser() -> argparse.ArgumentParser:

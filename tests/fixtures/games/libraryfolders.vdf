@@ -1,0 +1,22 @@
+"libraryfolders"
+{
+	"0"
+	{
+		"path"		"C:\\Program Files (x86)\\Steam"
+		"label"		""
+		"apps"
+		{
+			"228980"		"426765271"
+		}
+	}
+	"1"
+	{
+		"path"		"D:\\SteamLibrary"
+		"label"		""
+		"apps"
+		{
+			"440"		"28000000000"
+			"570"		"35000000000"
+		}
+	}
+}

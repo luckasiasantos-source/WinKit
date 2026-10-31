@@ -385,6 +385,8 @@ KIND_STYLE: dict[str, tuple[str, str]] = {
     "personal": ("pencil", "#5856D6"),
     "browser": ("dot", "#FF9500"),
     "start_layout": ("sliders", "#0A84FF"),
+    "user_folders": ("folder", "#FF9F0A"),
+    "game_library": ("download", "#30D158"),
     "finalize": ("check", "#34C759"),
 }
 

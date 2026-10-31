@@ -78,6 +78,7 @@ GROUPS: tuple[SectionGroup, ...] = (
             Section("defaults", "check", "#007AFF", pages.DefaultAppsPage),
             Section("appearance", "pencil", "#5856D6", pages.AppearancePage),
             Section("start", "sliders", "#0A84FF", pages.StartLayoutPage),
+            Section("games", "download", "#30D158", pages.GamesPage),
         ),
     ),
     SectionGroup(
@@ -89,6 +90,7 @@ GROUPS: tuple[SectionGroup, ...] = (
             Section("features", "chip", "#5AC8FA", pages.FeaturesPage),
             Section("maintenance", "refresh", "#34C759", pages.MaintenancePage),
             Section("env", "sliders", "#8E8E93", pages.EnvPage),
+            Section("folders", "folder", "#FF9F0A", pages.UserFoldersPage),
         ),
     ),
     SectionGroup(

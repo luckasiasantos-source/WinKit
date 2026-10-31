@@ -61,6 +61,10 @@ def start_dir(profile_id: str) -> str:
     return f"{profile_dir(profile_id)}/Iniciar"
 
 
+def games_dir(profile_id: str) -> str:
+    return f"{profile_dir(profile_id)}/Jogos"
+
+
 def fonts_dir(profile_id: str) -> str:
     return f"{profile_dir(profile_id)}/Fontes"
 

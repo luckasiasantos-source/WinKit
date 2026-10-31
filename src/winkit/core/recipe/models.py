@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
 from winkit.i18n.languages import LanguageChoice
 
@@ -46,6 +46,16 @@ class _Model(BaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True, validate_assignment=True)
 
 
+class VolumeRef(_Model):
+    """Volume fora do disco do sistema, achado pelo número de série (D-035, R-52)."""
+
+    serial: Annotated[str, Field(pattern=r"^[0-9A-F]{8}$")]
+    label: str | None = None
+    #: Só informativo: a letra que o volume tinha no PC antigo. Nunca usada para achar o volume.
+    letter_hint: Annotated[str, Field(pattern=r"^[A-Z]$")] | None = None
+    size: int = 0
+
+
 class Meta(_Model):
     profile_id: Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9_-]{0,39}$")] = "padrao"
     pendrive_id: Annotated[str, Field(min_length=8, max_length=64)]
@@ -53,6 +63,8 @@ class Meta(_Model):
     updated_at: datetime
     winkit_version: str
     source_pc: str | None = None
+    #: Serial do volume do sistema antigo (V2-13/V2-14): o que estiver nele será formatado.
+    source_system_volume: Annotated[str, Field(pattern=r"^[0-9A-F]{8}$")] | None = None
 
 
 class Execution(_Model):
@@ -349,6 +361,42 @@ class StartLayout(_Model):
     taskbar_pins: list[PinRef] = Field(default_factory=list)
 
 
+UserFolderId = Literal["desktop", "documents", "downloads", "pictures", "videos", "music"]
+
+
+#: Caminho relativo à raiz de um volume: nunca com letra de unidade (R-52).
+def _volume_relative(value: str) -> str:
+    if (len(value) >= 2 and value[1] == ":") or value.startswith(("\\", "/")):
+        raise ValueError("caminho relativo ao volume, sem letra de unidade (R-52)")
+    return value
+
+
+VolumeRelative = Annotated[str, Field(min_length=1), AfterValidator(_volume_relative)]
+
+
+class UserFolders(_Model):
+    """V2-14: Documentos, Downloads… num outro disco, achado pelo serial (D-035)."""
+
+    enabled: bool = False
+    volume: VolumeRef | None = None
+    #: Pasta → caminho no volume (aceita ``%USERNAME%``), ex.: ``Usuarios\%USERNAME%\Documentos``.
+    folders: dict[UserFolderId, VolumeRelative] = Field(default_factory=dict)
+
+
+class GameLibrary(_Model):
+    """V2-13: biblioteca de jogos num outro disco (Steam) ou um jogo da Epic."""
+
+    id: ItemId
+    launcher: Literal["steam", "epic"]
+    name: str
+    volume: VolumeRef
+    relative_path: VolumeRelative  # ex.: "SteamLibrary" (nunca com letra, R-52)
+    games: int = 0
+    #: Manifesto ``.item`` da Epic copiado para o pendrive.
+    manifest: PayloadPath | None = None
+    selected: bool = True
+
+
 class RestorePoint(_Model):
     """V2-10: ponto de restauração "Windows pronto" no fim da instalação (M12)."""
 
@@ -387,6 +435,8 @@ class Recipe(_Model):
     personal: Personal = Field(default_factory=Personal)
     browsers: list[BrowserConfig] = Field(default_factory=list)
     start_layout: StartLayout = Field(default_factory=StartLayout)
+    user_folders: UserFolders = Field(default_factory=UserFolders)
+    game_libraries: list[GameLibrary] = Field(default_factory=list)
 
     # ---- consultas de conveniência (sem efeito colateral)
     def app(self, app_id: str) -> AppItem | None:
