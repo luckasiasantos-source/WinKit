@@ -17,7 +17,15 @@ class Target:
     root: Path
     file_system: str
     free: int
-    description: str
+    #: Rótulo do disco (Ventoy); ``None`` = pasta comum usada como pendrive.
+    disk_label: str | None = None
+
+    @property
+    def description(self) -> str:
+        """Montado na hora, no idioma atual (troca de idioma no Studio)."""
+        if self.disk_label is None:
+            return t("pendrive.folder_description", path=str(self.root))
+        return self.disk_label
 
     @property
     def is_fat32(self) -> bool:
@@ -33,7 +41,7 @@ def from_ventoy(v: VentoyTarget) -> Target:
         root=Path(v.root),
         file_system=v.file_system,
         free=v.free,
-        description=f"{v.data_letter} {v.disk_name} ({v.bus_type}, {v.file_system})",
+        disk_label=f"{v.data_letter} {v.disk_name} ({v.bus_type}, {v.file_system})",
     )
 
 
@@ -44,7 +52,6 @@ def from_folder(folder: Path, file_system: str = "exFAT") -> Target:
         root=folder,
         file_system=file_system,
         free=shutil.disk_usage(folder).free,
-        description=f"pasta {folder}",
     )
 
 

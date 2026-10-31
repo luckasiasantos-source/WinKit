@@ -190,7 +190,7 @@ def cmd_construir(args: argparse.Namespace, services: Services, out: Out) -> int
         for w in report.warnings:
             out(f"  ! {w}")
     if report.sizes:
-        used = ", ".join(f"{k} {human_size(v)}" for k, v in report.sizes.items())
+        used = ", ".join(f"{t(f'size.{k}')} {human_size(v)}" for k, v in report.sizes.items())
         out(f"Espaço usado no pendrive: {used}; livre: {human_size(tgt.free)}")
     if report.manifest_files:
         a, c, r = report.manifest_changes

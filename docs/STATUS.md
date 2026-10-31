@@ -163,7 +163,8 @@
 - ✅ Decisões D-030 a D-042 e regras R-51 a R-55 no `ARQUITETURA.md`
 - ✅ `winkit/i18n`: idiomas, `t`/`tn` com plural, `Msg`, formatação por idioma, tabelas pt-BR/en-US/es com paridade testada (R-51); contrato de pureza no import-linter
 - ✅ `Msg` no estado (schema 2, com migração da v1), nas etapas, no executor e no resumo (HTML com `lang` e datas por idioma)
-- ⬜ Extração dos textos do Studio, da janela do Agente e da CLI; teste AST (R-55)
+- ✅ Studio: textos por chave nos três idiomas; páginas divididas em `studio/ui/pages/`; barra lateral agrupada com busca; Preferências (idioma e tema) com troca sem reiniciar (D-042)
+- ⬜ Extração dos textos da janela do Agente e da CLI; teste AST (R-55)
 - ⬜ Catálogos traduzidos, detecção do idioma, troca no Studio, idioma do Agente pela receita
 - ⬜ README, NOTICE, LEIA-ME e notas da release trilíngues; capturas; roteiro `M11.md`
 

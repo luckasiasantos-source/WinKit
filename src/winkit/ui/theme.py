@@ -101,7 +101,12 @@ def system_is_dark() -> bool:
         return QGuiApplication.palette().color(QPalette.ColorRole.Window).lightness() < 128
 
 
-def current() -> Palette:
+def current(mode: str = "auto") -> Palette:
+    """``auto`` segue o Windows; ``light``/``dark`` forçam (Preferências do Studio)."""
+    if mode == "light":
+        return LIGHT
+    if mode == "dark":
+        return DARK
     return DARK if system_is_dark() else LIGHT
 
 
@@ -192,8 +197,8 @@ QToolTip {{ background: {p.card}; color: {p.text}; border: 1px solid {p.card_bor
 """
 
 
-def apply(app: QApplication) -> Palette:
-    p = current()
+def apply(app: QApplication, mode: str = "auto") -> Palette:
+    p = current(mode)
     font = QFont()
     font.setFamilies(FONT_STACK)
     font.setPointSizeF(10)

@@ -72,7 +72,7 @@ def test_full_flow(ctl: StudioController, tmp_path: Path) -> None:
     report = ctl.build()
     assert report.manifest_files > 0 and report.templates
     assert ctl.validate_pendrive().ok
-    assert ctl.sizes()["Apps"] > 0
+    assert ctl.sizes()["apps"] > 0
     assert [i.name for i in ctl.isos()] == ["Windows11.iso"]
     # reabrir o pendrive carrega a receita salva
     ctl.open_folder(ctl.root)

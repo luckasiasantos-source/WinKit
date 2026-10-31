@@ -258,8 +258,8 @@ def _tree_size(path: Path) -> int:
 def payload_sizes(root: Path, profile_id: str) -> dict[str, int]:
     """Espaço ocupado por categoria no pendrive (item 25)."""
     return {
-        "Agente": _tree_size(root / layout.AGENT_DIR),
-        "Apps": _tree_size(root / layout.APPS),
-        "Drivers": _tree_size(root / layout.DRIVERS),
-        "Backups": _tree_size(root / layout.backups_dir(profile_id)),
+        "agent": _tree_size(root / layout.AGENT_DIR),
+        "apps": _tree_size(root / layout.APPS),
+        "drivers": _tree_size(root / layout.DRIVERS),
+        "backups": _tree_size(root / layout.backups_dir(profile_id)),
     }

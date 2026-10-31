@@ -142,7 +142,9 @@ Por que isso importa:
 | `agent/steps/tweak.py`, `steps/system.py` | Motor de ajustes (onde gravar conforme o alvo); bloatware, energia, nome do PC |
 | `agent/steps/*.py` | Uma classe por tipo de etapa: `DriverStep`, `BloatStep`, `TweakStep`, `BackupStep`, `AppStep`, `ShortcutStep`, `WindowsUpdateStep`, `CleanupStep` |
 | `studio/controller.py` | Fachada do Studio sem Qt: pendrive, receita, apps, drivers, backups, plano, construir |
-| `studio/ui/` (`base.py`, `pages.py`, `window.py`), `studio/main.py` | GUI do Studio: barra lateral, 10 páginas, tarefas em segundo plano |
+| `studio/ui/` (`base.py`, `window.py`, `pages/{common,prepare,bring,system,finish}.py`), `studio/main.py` | GUI do Studio: barra lateral agrupada com busca (D-042), uma página por seção, tarefas em segundo plano, troca de idioma e tema sem reiniciar |
+| `studio/preferences.py` | Preferências do Studio (idioma, tema) em `%APPDATA%\WinKit\studio.json` |
+| `platform/locale.py` | Idioma de exibição do Windows (`GetUserDefaultUILanguage`) para o modo automático (D-030) |
 | `agent/ui/qt.py` | Janela da Fase 2 (Início, Progresso, Concluído), diálogo de reinício, bandeja; ponte entre threads (import tardio) |
 | `ui/theme.py`, `ui/widgets.py` | Kit visual compartilhado estilo macOS (D-026) |
 
@@ -452,7 +454,7 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 ### D-028 — Código aberto sob Apache-2.0, com aviso de "100% vibe-codado"
 2026-10-31 · aceita
 **Contexto:** o dono vai publicar o repositório como código aberto e escolheu a licença Apache 2.0. Todo o código foi escrito por IA e ainda não foi validado em instalação real; o dono não quer nenhuma responsabilidade pelo uso.
-**Decisão:** `LICENSE` com o texto da Apache-2.0; `NOTICE` com direitos autorais e o aviso de isenção ("pré-alpha, projeto pessoal, quem usa é testador; 100% vibe-codado, uso por conta e risco, toda a responsabilidade é de quem usa"). O mesmo aviso aparece em destaque no README, no `LEIA-ME.txt` do pacote (que leva também `LICENSE` e `NOTICE`) e numa seção "Aviso" da primeira página do Studio (`DISCLAIMER` em `studio/ui/pages.py`).
+**Decisão:** `LICENSE` com o texto da Apache-2.0; `NOTICE` com direitos autorais e o aviso de isenção ("pré-alpha, projeto pessoal, quem usa é testador; 100% vibe-codado, uso por conta e risco, toda a responsabilidade é de quem usa"). O mesmo aviso aparece em destaque no README, no `LEIA-ME.txt` do pacote (que leva também `LICENSE` e `NOTICE`) e numa seção "Aviso" da primeira página do Studio (chaves `studio.disclaimer.*`, nos três idiomas).
 **Consequências:** o aviso acompanha o programa, não só o repositório. Contribuições entram sob a mesma licença (seção 5 da Apache-2.0). O PySide6 (LGPL) continua compatível, porque é usado como biblioteca dinâmica.
 
 ### D-029 — Releases prontas para baixar, publicadas por tag

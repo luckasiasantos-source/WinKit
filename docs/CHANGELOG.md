@@ -28,6 +28,34 @@
 
 ---
 
+## 2026-10-31 — M11 — Studio em três idiomas, com grupos, busca e preferências
+**Tipo:** implementação + refatoração
+**Resumo:** todos os textos do Studio passam a vir das tabelas de tradução. As páginas saem de um arquivo único e viram um pacote por grupo. A barra lateral ganha grupos (Preparar, O que levar, Sistema, Concluir), busca por título e palavras-chave, e um botão de Preferências para idioma e tema que reconstrói a janela sem reiniciar (D-042).
+
+### Adicionado
+- `src/winkit/studio/ui/pages/{common,prepare,bring,system,finish}.py` — páginas por grupo
+- `src/winkit/studio/preferences.py` — idioma e tema salvos (`studio.json`)
+- `src/winkit/platform/locale.py` — idioma de exibição do Windows
+- Campo `execution.language` na receita (idioma do primeiro login; aditivo, D-039)
+- ~230 chaves `studio.*`, `size.*` e `pendrive.folder_description` nos três idiomas
+- Lista maior de teclados (inclui espanhol e inglês do Reino Unido) e de fusos
+
+### Alterado
+- `src/winkit/studio/ui/window.py` — `GROUPS`/`Section`, busca, Preferências, `apply_preferences`, `go_to(id)`
+- `src/winkit/studio/ui/base.py` — `title_key`/`subtitle_key`, `needs_recipe()`, widgets limpos somem na hora
+- `src/winkit/studio/main.py` — idioma e tema na abertura; fumaça percorre as seções nos três idiomas
+- `src/winkit/ui/theme.py` — tema forçado claro ou escuro
+- `src/winkit/builder/build.py` — `payload_sizes` com ids (`agent`, `apps`…) traduzidos na borda
+- `src/winkit/builder/target.py` — descrição do destino montada no idioma atual
+- Página "Windows e conta": problemas calculados direto, sem filtrar texto traduzido
+- `tests/ui/test_studio_ui.py` — todas as páginas nos três idiomas, troca de idioma, busca, preferências, aviso traduzido
+
+### Removido
+- `src/winkit/studio/ui/pages.py` — virou o pacote `pages/`
+
+### Documentos vivos atualizados
+- ARQUITETURA — módulos do Studio; STATUS — item do M11
+
 ## 2026-10-31 — M11 — Correção: tabelas de tradução no executável
 **Tipo:** correção
 **Resumo:** o executável empacotado não tinha as tabelas de tradução (importação dinâmica invisível ao PyInstaller, IN-013).

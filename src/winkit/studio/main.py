@@ -6,21 +6,26 @@ import sys
 
 from PySide6.QtWidgets import QApplication, QMessageBox
 
+from winkit.i18n import SUPPORTED, set_language, t
+from winkit.platform.locale import detect_language
 from winkit.platform.services import real_services
 from winkit.platform.session import is_admin
 from winkit.platform.system import is_windows
+from winkit.studio import preferences
 from winkit.studio.controller import StudioController
-from winkit.studio.ui.window import SECTIONS, StudioWindow
+from winkit.studio.ui.window import StudioWindow, all_sections, resolve_language
 from winkit.ui import theme
 
 
 def main() -> int:
     smoke = "--teste-fumaca" in sys.argv  # CI: abre e fecha a janela sem interação
+    prefs = preferences.load()
+    set_language(resolve_language(prefs.language, detect_language))  # type: ignore[arg-type]
     app = QApplication(sys.argv)
     app.setApplicationName("WinKit Studio")
-    theme.apply(app)
+    theme.apply(app, prefs.theme)
     if not is_windows() and not smoke:
-        QMessageBox.critical(None, "WinKit Studio", "O WinKit Studio funciona no Windows.")
+        QMessageBox.critical(None, "WinKit Studio", t("studio.windows_only"))
         return 1
     ctl = StudioController(services=real_services())
     try:
@@ -29,20 +34,17 @@ def main() -> int:
             ctl.open_ventoy(drives[0])
     except Exception:  # noqa: BLE001, S110 — a página Pendrive mostra o erro
         pass
-    window = StudioWindow(ctl)
+    window = StudioWindow(ctl, detect_language=detect_language)
     window.show()
     if smoke:
-        for title, *_ in SECTIONS:
-            window.go_to(title)
-            app.processEvents()
+        for lang in SUPPORTED:  # toda seção abre em todos os idiomas
+            window.apply_preferences(preferences.Preferences(language=lang))
+            for s in all_sections():
+                window.go_to(s.id)
+                app.processEvents()
         return 0
     if is_windows() and not is_admin():
-        QMessageBox.warning(
-            window,
-            "WinKit Studio",
-            "Abra o WinKit Studio como administrador: ler ISOs, drivers e "
-            "copiar arquivos em uso exige isso.",
-        )
+        QMessageBox.warning(window, "WinKit Studio", t("studio.needs_admin"))
     return app.exec()
 
 

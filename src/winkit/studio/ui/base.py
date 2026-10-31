@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
 )
 
 from winkit.core.errors import WinKitError
+from winkit.i18n import t
 from winkit.studio.controller import StudioController
 from winkit.ui.widgets import app_icon, label
 
@@ -47,7 +48,7 @@ class WorkingSheet(QDialog):
 
     def __init__(self, text: str, parent: QWidget | None) -> None:
         super().__init__(parent)
-        self.setWindowTitle("WinKit")
+        self.setWindowTitle(t("app.name"))
         self.setModal(True)
         self.setMinimumWidth(360)
         self.setWindowFlag(Qt.WindowType.WindowCloseButtonHint, False)
@@ -58,7 +59,7 @@ class WorkingSheet(QDialog):
         bar = QProgressBar()
         bar.setRange(0, 0)
         lay.addWidget(bar)
-        lay.addWidget(label("Isso pode levar alguns minutos.", "Caption"))
+        lay.addWidget(label(t("studio.working.hint"), "Caption"))
 
 
 class TaskRunner:
@@ -103,9 +104,9 @@ class TaskRunner:
 
 def show_error(parent: QWidget | None, exc: BaseException) -> None:
     box = QMessageBox(parent)
-    box.setWindowTitle("WinKit")
+    box.setWindowTitle(t("app.name"))
     box.setIconPixmap(app_icon(48).pixmap(48, 48))
-    box.setText("Não foi possível concluir.")
+    box.setText(t("studio.error.title"))
     box.setInformativeText(
         str(exc)
         if isinstance(exc, WinKitError)
@@ -115,10 +116,10 @@ def show_error(parent: QWidget | None, exc: BaseException) -> None:
 
 
 class Page(QWidget):
-    """Página com título grande, subtítulo e conteúdo rolável."""
+    """Página com título grande, subtítulo e conteúdo rolável. Textos por chave (R-55)."""
 
-    title_text = ""
-    subtitle_text = ""
+    title_key = ""
+    subtitle_key = ""
 
     def __init__(self, ctl: StudioController, tasks: TaskRunner) -> None:
         super().__init__()
@@ -136,9 +137,9 @@ class Page(QWidget):
         self.body.setSpacing(18)
         head = QVBoxLayout()
         head.setSpacing(4)
-        head.addWidget(label(self.title_text, "Title"))
-        if self.subtitle_text:
-            head.addWidget(label(self.subtitle_text, "Secondary"))
+        head.addWidget(label(t(self.title_key), "Title"))
+        if self.subtitle_key:
+            head.addWidget(label(t(self.subtitle_key), "Secondary"))
         self.body.addLayout(head)
         self.content = QVBoxLayout()
         self.content.setSpacing(18)
@@ -160,12 +161,20 @@ class Page(QWidget):
                 break
             widget = item.widget()
             if widget is not None:
+                widget.hide()  # some na hora; o deleteLater só roda no próximo ciclo
                 widget.deleteLater()
             elif item.layout() is not None:
                 _drop_layout(item.layout())
 
     def refresh(self) -> None:
         """Reconstrói o conteúdo a partir do controlador."""
+
+    def needs_recipe(self) -> bool:
+        """Mostra o aviso e devolve ``True`` quando ainda não há receita."""
+        if self.ctl.recipe is not None:
+            return False
+        self.content.addWidget(label(t("studio.needs_recipe"), "Secondary"))
+        return True
 
     def save(self) -> None:
         if self.ctl.recipe is not None:
@@ -176,6 +185,7 @@ def _drop_layout(layout: Any) -> None:
     while layout.count():
         item = layout.takeAt(0)
         if item.widget() is not None:
+            item.widget().hide()
             item.widget().deleteLater()
         elif item.layout() is not None:
             _drop_layout(item.layout())

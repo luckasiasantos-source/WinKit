@@ -12,6 +12,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from winkit.i18n.languages import LanguageChoice
+
 #: Identificadores de itens: minúsculas, números, ponto, hífen e sublinhado (R-05).
 ItemId = Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9._-]{0,79}$")]
 #: Caminho relativo à pasta ``WinKit`` do pendrive, sempre com barras normais.
@@ -60,6 +62,8 @@ class Execution(_Model):
     notify_on_finish: bool = True
     desktop_summary_shortcut: bool = True
     reboot_policy: RebootPolicy = "ask"
+    #: Idioma da janela do primeiro login e do resumo (D-030); ``auto`` = idioma do Windows novo.
+    language: LanguageChoice = "auto"
 
 
 class Account(_Model):
