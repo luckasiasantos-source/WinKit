@@ -97,6 +97,7 @@ ALLOWED = {
     "Español",
     "abc123",  # exemplo de id pessoal do NextDNS
     "https://…/dns-query",  # exemplo de modelo DoH
+    "https://",  # dica do campo de página inicial
 }
 
 

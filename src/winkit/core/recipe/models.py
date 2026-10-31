@@ -307,6 +307,28 @@ class Personal(_Model):
     wallpaper_file: PayloadPath | None = None
 
 
+class BrowserExtension(_Model):
+    """Extensão pelo id da loja (Chromium: 32 letras a–p; Firefox: e-mail ou GUID)."""
+
+    id: Annotated[str, Field(min_length=3, max_length=80)]
+    name: str = ""
+    #: Nome curto no addons.mozilla.org (só Firefox; sem ele, usa o id).
+    slug: str | None = None
+    selected: bool = True
+
+
+class BrowserConfig(_Model):
+    """V2-12: um navegador pronto. Senhas, cookies e login nunca são levados."""
+
+    id: ItemId  # id de browsers.yaml
+    extensions: list[BrowserExtension] = Field(default_factory=list)
+    homepage: Annotated[str, Field(pattern=r"^https?://")] | None = None
+    search: str | None = None  # id de search_providers.yaml
+    #: ``suggest`` = o usuário pode mudar (D-038); ``force`` = políticas obrigatórias.
+    mode: Literal["suggest", "force"] = "suggest"
+    selected: bool = True
+
+
 class RestorePoint(_Model):
     """V2-10: ponto de restauração "Windows pronto" no fim da instalação (M12)."""
 
@@ -343,6 +365,7 @@ class Recipe(_Model):
     fonts: list[FontItem] = Field(default_factory=list)
     default_apps: DefaultApps = Field(default_factory=DefaultApps)
     personal: Personal = Field(default_factory=Personal)
+    browsers: list[BrowserConfig] = Field(default_factory=list)
 
     # ---- consultas de conveniência (sem efeito colateral)
     def app(self, app_id: str) -> AppItem | None:

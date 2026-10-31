@@ -1,0 +1,32 @@
+# Navegadores que o WinKit configura por política oficial (V2-12, M15; D-038).
+- id: chrome
+  name: Google Chrome
+  engine: chromium
+  policy_key: 'SOFTWARE\Policies\Google\Chrome'
+  extensions_key: 'SOFTWARE\WOW6432Node\Google\Chrome\Extensions'
+  user_data: 'LOCALAPPDATA\Google\Chrome\User Data'
+  winget_ids: [Google.Chrome]
+  source: https://chromeenterprise.google/policies/
+- id: edge
+  name: Microsoft Edge
+  engine: chromium
+  policy_key: 'SOFTWARE\Policies\Microsoft\Edge'
+  extensions_key: 'SOFTWARE\WOW6432Node\Microsoft\Edge\Extensions'
+  user_data: 'LOCALAPPDATA\Microsoft\Edge\User Data'
+  winget_ids: [Microsoft.Edge]
+  source: https://learn.microsoft.com/deployedge/microsoft-edge-policies
+- id: brave
+  name: Brave
+  engine: chromium
+  policy_key: 'SOFTWARE\Policies\BraveSoftware\Brave'
+  extensions_key: 'SOFTWARE\WOW6432Node\BraveSoftware\Brave-Browser\Extensions'
+  user_data: 'LOCALAPPDATA\BraveSoftware\Brave-Browser\User Data'
+  winget_ids: [Brave.Brave]
+  source: https://support.brave.com/hc/en-us/articles/360039248271-Group-Policy
+- id: firefox
+  name: Mozilla Firefox
+  engine: firefox
+  policy_key: 'SOFTWARE\Policies\Mozilla\Firefox'
+  user_data: 'APPDATA\Mozilla\Firefox'
+  winget_ids: [Mozilla.Firefox]
+  source: https://mozilla.github.io/policy-templates/

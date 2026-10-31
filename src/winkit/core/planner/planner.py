@@ -42,6 +42,7 @@ _G1 = {
     "env": 48,
     "font": 49,
     "personal": 42,  # R23: perfil Default, junto dos ajustes de aparência
+    "browser": 44,  # R21: políticas antes dos apps; valem quando o navegador for instalado
     "backup": 50,
     "default_apps": 65,  # depois dos apps offline, para que os ProgIds já existam
     "app": 60,
@@ -114,6 +115,7 @@ def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> 
     _plan_fonts(recipe, drafts)
     _plan_default_apps(recipe, ctx, drafts)
     _plan_personal(recipe, catalogs, drafts)
+    _plan_browsers(recipe, catalogs, drafts)
     _plan_power(recipe, drafts)
     _plan_bloat(recipe, catalogs, ctx, drafts, excluded)
     _plan_features(recipe, catalogs, ctx, drafts, excluded)
@@ -308,6 +310,23 @@ def _plan_personal(recipe: Recipe, catalogs: Catalogs, out: list[_Draft]) -> Non
                 "default_profile",
                 needs_pendrive=group.file,
                 sort=(_G1["personal"], 0, group_id),
+            )
+        )
+
+
+def _plan_browsers(recipe: Recipe, catalogs: Catalogs, out: list[_Draft]) -> None:  # R21
+    for cfg in recipe.browsers:
+        entry = catalogs.browser(cfg.id)
+        if not cfg.selected or entry is None:
+            continue
+        out.append(
+            _Draft(
+                "browser",
+                cfg.id,
+                1,
+                t("plan.browser", name=entry.name),
+                "machine",
+                sort=(_G1["browser"], 0, cfg.id),
             )
         )
 

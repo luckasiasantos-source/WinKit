@@ -184,9 +184,15 @@ def _validate_ids_and_paths(recipe: Recipe, err: Sink) -> None:
             err(f"{label}: {problem}")
 
 
-def _validate_catalog_refs(recipe: Recipe, catalogs: Catalogs, err: Sink) -> None:
+def _validate_v2_refs(recipe: Recipe, catalogs: Catalogs, err: Sink) -> None:
+    """Referências das funções da v2 aos catálogos (DNS, navegadores, variáveis, recursos)."""
     for problem in dns_problems(recipe.dns, catalogs):
         err(render(problem))
+    for cfg in recipe.browsers:
+        if catalogs.browser(cfg.id) is None:
+            err(t("recipe.unknown_browser", id=cfg.id))
+        if cfg.search and catalogs.search_provider(cfg.search) is None:
+            err(t("recipe.unknown_search", id=cfg.search))
     seen_vars: set[tuple[str, str]] = set()
     for var in recipe.environment.variables:
         key = (var.scope, var.name.casefold())
@@ -198,6 +204,10 @@ def _validate_catalog_refs(recipe: Recipe, catalogs: Catalogs, err: Sink) -> Non
     for feature_id in recipe.windows.optional_features:
         if catalogs.feature(feature_id) is None:
             err(t("recipe.unknown_feature", id=feature_id))
+
+
+def _validate_catalog_refs(recipe: Recipe, catalogs: Catalogs, err: Sink) -> None:
+    _validate_v2_refs(recipe, catalogs, err)
     for sel in recipe.tweaks:
         if catalogs.tweak(sel.id) is None:
             err(t("recipe.unknown_tweak", id=sel.id))

@@ -37,6 +37,7 @@ from winkit.builder.validate import validate_pendrive
 from winkit.collector import apps as app_collector
 from winkit.collector import associations as assoc_collector
 from winkit.collector import backups as backup_collector
+from winkit.collector import browsers as browser_collector
 from winkit.collector import drivers as driver_collector
 from winkit.collector import env as env_collector
 from winkit.collector import features as feature_collector
@@ -46,6 +47,7 @@ from winkit.collector import personal as personal_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import dns as dns_rules
 from winkit.core import layout
+from winkit.core.browsers import undo_operations
 from winkit.core.catalog.loader import default_catalogs
 from winkit.core.errors import RecipeError, WinKitError
 from winkit.core.maintenance import DAYS, TASK_FOLDER
@@ -53,11 +55,12 @@ from winkit.core.planner.models import PlanContext
 from winkit.core.planner.planner import plan
 from winkit.core.presets import apply_preset, preview_preset
 from winkit.core.recipe.io import new_recipe
-from winkit.core.recipe.models import EnvScope, EnvVar, Recipe
+from winkit.core.recipe.models import BrowserConfig, EnvScope, EnvVar, Recipe
 from winkit.core.recipe.validation import validate_recipe
 from winkit.core.text import human_size
 from winkit.core.winget_manifest import split_args
 from winkit.i18n import CHOICES, current_language, normalize, render, set_language, t, tn
+from winkit.platform import browsers as browser_policies
 from winkit.platform import hosts
 from winkit.platform.locale import detect_language
 from winkit.platform.services import Services, real_services
@@ -1138,6 +1141,103 @@ def _add_appearance_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
         am.set_defaults(func=cmd_aparencia_marcar, command_value=value)
 
 
+# ------------------------------------------------------------------ navegadores (V2-12)
+def cmd_coletar_navegadores(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    f = services.folders
+    found = browser_collector.collect_browsers(
+        recipe, default_catalogs(), {**f.machine(), **f.current_user()}, services.volume_root
+    )
+    _save(tgt, recipe)
+    out(tn("cli.browsers_found", len(found)))
+    return cmd_navegador_listar(args, services, out)
+
+
+def cmd_navegador_listar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    catalogs = default_catalogs()
+    for cfg in load_profile_recipe(tgt.root, args.perfil).browsers:
+        entry = catalogs.browser(cfg.id)
+        mode = t(f"studio.browsers.{cfg.mode}")
+        out(
+            f"[{'x' if cfg.selected else ' '}] {cfg.id}: {entry.name if entry else cfg.id} ({mode})"
+        )
+        if cfg.homepage:
+            out("    " + t("cli.browser_homepage", url=cfg.homepage))
+        if cfg.search:
+            out("    " + t("cli.browser_search", id=cfg.search))
+        for e in cfg.extensions:
+            out(f"    [{'x' if e.selected else ' '}] {e.name or e.id}  {e.id}")
+    return 0
+
+
+def cmd_navegador_definir(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    catalogs = default_catalogs()
+    if catalogs.browser(args.id) is None:
+        out(t("cli.not_found", ids=args.id))
+        return 1
+    cfg = next((b for b in recipe.browsers if b.id == args.id), None)
+    if cfg is None:
+        cfg = BrowserConfig(id=args.id)
+        recipe.browsers = [*recipe.browsers, cfg]
+    if args.extensoes:
+        missing = browser_collector.add_suggested(cfg, catalogs, args.extensoes.split(","))
+        if missing:
+            out(t("cli.not_found", ids=", ".join(missing)))
+            return 1
+    if args.busca is not None:
+        if args.busca and catalogs.search_provider(args.busca) is None:
+            out(t("cli.not_found", ids=args.busca))
+            return 1
+        cfg.search = args.busca or None
+    if args.pagina is not None:
+        try:
+            cfg.homepage = args.pagina or None
+        except ValueError:
+            out(t("studio.browsers.bad_url"))
+            return 1
+    if args.forcar is not None:
+        cfg.mode = "force" if args.forcar else "suggest"
+    _save(tgt, recipe)
+    return cmd_navegador_listar(args, services, out)
+
+
+def cmd_navegador_remover(args: argparse.Namespace, services: Services, out: Out) -> int:
+    _require_admin()
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    cfg = next((b for b in recipe.browsers if b.id == args.id), None)
+    if cfg is None or services.registry is None:
+        out(t("cli.not_found", ids=args.id))
+        return 1
+    n = browser_policies.undo(services.registry, undo_operations(cfg, default_catalogs()))
+    out(tn("cli.browser_removed", n))
+    return 0
+
+
+def _add_browser_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    nv = sub.add_parser("navegador", aliases=["browser"], help=t("cli.h.browsers"))
+    nv_sub = nv.add_subparsers(dest="action", required=True)
+    nv_sub.add_parser("listar", aliases=["list"], parents=[common]).set_defaults(
+        func=cmd_navegador_listar
+    )
+    nd = nv_sub.add_parser("definir", aliases=["set"], parents=[common])
+    nd.add_argument("id", help=t("cli.h.browser_id"))
+    nd.add_argument("--extensoes", help=t("cli.h.browser_extensions"))
+    nd.add_argument("--busca", help=t("cli.h.browser_search"))
+    nd.add_argument("--pagina", help=t("cli.h.browser_homepage"))
+    nd.add_argument(
+        "--forcar", action=argparse.BooleanOptionalAction, help=t("cli.h.browser_force")
+    )
+    nd.set_defaults(func=cmd_navegador_definir)
+    nr = nv_sub.add_parser("remover-do-pc", aliases=["remove-from-pc"], parents=[common])
+    nr.add_argument("id", help=t("cli.h.browser_id"))
+    nr.set_defaults(func=cmd_navegador_remover)
+
+
 def _add_dns_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     dns = sub.add_parser("dns", help=t("cli.h.dns"))
     dns_sub = dns.add_subparsers(dest="action", required=True)
@@ -1273,6 +1373,10 @@ def _add_collect_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
         "aparencia", aliases=["appearance"], parents=[common], help=t("cli.h.collect_appearance")
     )
     cap.set_defaults(func=cmd_coletar_aparencia)
+    cnv = col_sub.add_parser(
+        "navegadores", aliases=["browsers"], parents=[common], help=t("cli.h.collect_browsers")
+    )
+    cnv.set_defaults(func=cmd_coletar_navegadores)
 
     capp = col_sub.add_parser("apps", parents=[common], help=t("cli.h.collect_apps"))
     capp.add_argument(
@@ -1390,6 +1494,7 @@ def _add_system_and_network_parsers(sub: Any, common: argparse.ArgumentParser) -
     _add_font_parsers(sub, common)
     _add_default_apps_parsers(sub, common)
     _add_appearance_parsers(sub, common)
+    _add_browser_parsers(sub, common)
 
 
 def build_parser() -> argparse.ArgumentParser:

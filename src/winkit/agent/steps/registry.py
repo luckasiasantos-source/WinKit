@@ -5,6 +5,7 @@ from __future__ import annotations
 from winkit.agent.steps.app import AppStep, ShortcutStep
 from winkit.agent.steps.backup import BackupStep
 from winkit.agent.steps.base import StepBase, StepContext, StepHandler, StepResult
+from winkit.agent.steps.browser import BrowserStep
 from winkit.agent.steps.default_apps import DefaultAppsStep, DefaultAppsVerifyStep
 from winkit.agent.steps.driver import DriverStep
 from winkit.agent.steps.driver_report import DriverReportStep
@@ -60,6 +61,7 @@ def default_handlers() -> dict[StepKind, StepHandler]:
     handlers["default_apps"] = DefaultAppsStep()
     handlers["default_apps_verify"] = DefaultAppsVerifyStep()
     handlers["personal"] = PersonalStep()
+    handlers["browser"] = BrowserStep()
     handlers["feature"] = FeatureStep()
     handlers["driver_report"] = DriverReportStep()
     handlers["finalize"] = FinalizeStep()

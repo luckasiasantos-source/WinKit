@@ -1,0 +1,30 @@
+# Extensões sugeridas (V2-12). Ids das lojas oficiais; `firefox_slug` é o nome curto no AMO.
+- id: ublock_origin_lite
+  name: uBlock Origin Lite
+  chromium_id: ddkjiahejlhfcafbddmgiahcphecmpfh
+  firefox_id: uBOLite@raymondhill.net
+  firefox_slug: ublock-origin-lite
+- id: ublock_origin
+  name: uBlock Origin
+  firefox_id: uBlock0@raymondhill.net
+  firefox_slug: ublock-origin
+- id: bitwarden
+  name: Bitwarden
+  chromium_id: nngceckbapebfimnlniiiahkandclblb
+  firefox_id: '{446900e4-71c2-419f-a6a7-df9c091e268b}'
+  firefox_slug: bitwarden-password-manager
+- id: dark_reader
+  name: Dark Reader
+  chromium_id: eimadpbcbfnmbkopoojfekhnkhdbieeh
+  firefox_id: addon@darkreader.org
+  firefox_slug: darkreader
+- id: privacy_badger
+  name: Privacy Badger
+  chromium_id: pkehgijcmpdhfbdbbnkijodmdjhbjlgp
+  firefox_id: jid1-MnnxcxisBPnSXQ@jetpack
+  firefox_slug: privacy-badger17
+- id: sponsorblock
+  name: SponsorBlock
+  chromium_id: mnjggcdmjocbbbhaepdhchncahnbgone
+  firefox_id: sponsorBlocker@ajay.app
+  firefox_slug: sponsorblock

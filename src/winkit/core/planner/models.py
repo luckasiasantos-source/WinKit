@@ -19,6 +19,7 @@ StepKind = Literal[
     "font",
     "default_apps",
     "personal",
+    "browser",
     "bloat",
     "feature",
     "tweak",

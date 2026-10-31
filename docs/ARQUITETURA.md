@@ -148,6 +148,7 @@ Por que isso importa:
 | `core/fonts.py`, `collector/fonts.py`, `platform/fonts.py`, `agent/steps/font.py` | Fontes (V2-07): leitor da tabela `name`, cópia ao marcar, instalação sem sobrescrever (`_winkit`) |
 | `data/file_associations.yaml`, `core/associations.py`, `platform/associations.py`, `collector/associations.py`, `agent/steps/default_apps.py` | Apps padrão (V2-05): XML do `dism` inteiro no pendrive, filtrado por grupo na hora; importação só na Fase 1; conferência do `UserChoice` na Fase 2 |
 | `data/personal_settings.yaml`, `core/personal.py`, `collector/personal.py`, `platform/personal.py`, `agent/steps/personal.py` | Aparência pessoal (V2-06, D-037): só valores do catálogo, validados na captura; papel de parede em `%SystemRoot%\Web\Wallpaper\WinKit` |
+| `data/browsers.yaml`, `data/extensions.yaml`, `data/search_providers.yaml`, `core/browsers.py`, `collector/browsers.py`, `platform/browsers.py`, `agent/steps/browser.py` | Navegadores prontos (V2-12, D-038): receita → operações tipadas de registro por navegador e modo; leitura só de ids e nomes de extensões; desfazer só o que o WinKit grava |
 | `core/secrets.py` | Registro único de segredos do processo (R-53); `runner` e `EventLog` mascaram |
 | `core/wifi.py`, `collector/wifi.py`, `platform/wifi.py`, `agent/steps/wifi.py` | Wi-Fi (V2-02): XML do perfil, coleta, `netsh` só por código de saída e arquivos, etapa antes do login |
 | `core/media.py` | Pendrive comum (D-034): reconhecer a mídia de instalação, marcar o `autounattend.xml` do WinKit |

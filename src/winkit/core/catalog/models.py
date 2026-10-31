@@ -373,6 +373,38 @@ class PersonalGroup(_Model):
     source: Annotated[str, Field(min_length=5)]
 
 
+# ------------------------------------------------------------------ navegadores (V2-12)
+CHROMIUM_ID = r"^[a-p]{32}$"
+FIREFOX_ID = r"^(\{[0-9a-fA-F-]{36}\}|[A-Za-z0-9._+-]+@[A-Za-z0-9._-]+)$"
+
+
+class BrowserEntry(_Model):
+    id: Annotated[str, Field(pattern=r"^[a-z0-9_]+$")]
+    name: str
+    engine: Literal["chromium", "firefox"]
+    policy_key: str
+    #: Extensões externas (modo "sugerir") — só Chromium.
+    extensions_key: str | None = None
+    #: Pasta de dados, começando pela variável (``LOCALAPPDATA\...`` ou ``APPDATA\...``).
+    user_data: str
+    winget_ids: list[str] = Field(default_factory=list)
+    source: Annotated[str, Field(min_length=5)]
+
+
+class ExtensionEntry(_Model):
+    id: Annotated[str, Field(pattern=r"^[a-z0-9_]+$")]
+    name: str
+    chromium_id: Annotated[str, Field(pattern=CHROMIUM_ID)] | None = None
+    firefox_id: Annotated[str, Field(pattern=FIREFOX_ID)] | None = None
+    firefox_slug: str | None = None
+
+
+class SearchProvider(_Model):
+    id: Annotated[str, Field(pattern=r"^[a-z0-9_]+$")]
+    name: str
+    search_url: Annotated[str, Field(pattern=r"^https://.*\{searchTerms\}")]
+
+
 # ------------------------------------------------------------------ outros
 class EditionEntry(_Model):
     id: str
@@ -420,6 +452,18 @@ class Catalogs(_Model):
     presets: list[Preset] = Field(default_factory=list)
     association_groups: list[AssociationGroup] = Field(default_factory=list)
     personal_groups: list[PersonalGroup] = Field(default_factory=list)
+    browsers: list[BrowserEntry] = Field(default_factory=list)
+    extensions: list[ExtensionEntry] = Field(default_factory=list)
+    search_providers: list[SearchProvider] = Field(default_factory=list)
+
+    def browser(self, browser_id: str) -> BrowserEntry | None:
+        return next((x for x in self.browsers if x.id == browser_id), None)
+
+    def extension(self, ext_id: str) -> ExtensionEntry | None:
+        return next((x for x in self.extensions if x.id == ext_id), None)
+
+    def search_provider(self, provider_id: str) -> SearchProvider | None:
+        return next((x for x in self.search_providers if x.id == provider_id), None)
 
     def personal_group(self, group_id: str) -> PersonalGroup | None:
         return next((x for x in self.personal_groups if x.id == group_id), None)

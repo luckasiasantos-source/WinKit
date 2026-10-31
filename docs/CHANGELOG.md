@@ -28,6 +28,20 @@
 
 ---
 
+## 2026-10-31 — M15 — Navegadores prontos (V2-12)
+**Tipo:** implementação
+**Resumo:** Chrome, Edge, Brave e Firefox chegam com as extensões de sempre, página inicial e buscador, pelas políticas oficiais e no modo "sugerir" por padrão (D-038). Senhas, cookies e login nunca são lidos nem levados.
+
+### Adicionado
+- `src/winkit/data/browsers.yaml`, `extensions.yaml`, `search_providers.yaml`
+- `src/winkit/core/browsers.py`, `src/winkit/collector/browsers.py`, `src/winkit/platform/browsers.py`, `src/winkit/agent/steps/browser.py`
+- Receita: `browsers` (aditivo) e validação; plano: tipo `browser` na Fase 1 (R21)
+- Studio: seção "Navegadores" (grupo Rede); CLI: `coletar navegadores`, `navegador listar|definir|remover-do-pc`
+- Testes: `tests/agent/test_browsers.py` (tabela de casos por navegador e modo; perfis de exemplo sem dados pessoais)
+
+### Documentos vivos atualizados
+- ARQUITETURA — módulos; STATUS — V2-12, H30–H32; PLANO_V2 — §10.5
+
 ## 2026-10-31 — M15 — Aparência pessoal (V2-06)
 **Tipo:** implementação
 **Resumo:** papel de parede, cor de destaque, tema, mouse, ponteiro e repetição do teclado iguais aos do PC antigo. Só valores conhecidos e dentro do padrão do Windows são levados. A release 0.5.0 foi publicada.

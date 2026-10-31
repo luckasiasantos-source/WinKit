@@ -1667,7 +1667,7 @@ As sete funções funcionam na instalação e no modo ao vivo (com prévia), os 
   - aviso: "O navegador vai mostrar 'Gerenciado pela sua organização' porque o WinKit usa as políticas oficiais".
 - **CLI:** `winkit coletar navegadores`, `winkit navegador definir chrome --extensoes ublock-lite,bitwarden --busca duckduckgo --pagina https://...`.
 
-**Dados.** `recipe.browsers[]` (§5.1); catálogos `browsers.yaml`, `extensions.yaml`, `search_providers.yaml` (§5.2); `Perfis/<p>/Navegadores/<nav>.json` (só ids e nomes, para a tela).
+**Dados.** `recipe.browsers[]` (§5.1), com as extensões (id da loja, nome, nome curto no AMO) dentro da própria receita; catálogos `browsers.yaml`, `extensions.yaml`, `search_providers.yaml` (§5.2). O arquivo `Navegadores/<nav>.json` previsto ficou desnecessário.
 
 **Captura** (`collector/browsers.py`):
 - **Chromium** (Chrome/Edge/Brave): para cada perfil em `User Data\*\`, lê `Secure Preferences` e `Preferences` (JSON), `extensions.settings`, e ignora extensões de componente e do sistema (`location` 5/10). O nome vem do `manifest.json` da extensão (resolvendo `__MSG_name__` pelo `_locales`).

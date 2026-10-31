@@ -31,6 +31,7 @@ from winkit.builder.validate import PendriveReport, validate_pendrive
 from winkit.collector import apps as app_collector
 from winkit.collector import associations as assoc_collector
 from winkit.collector import backups as backup_collector
+from winkit.collector import browsers as browser_collector
 from winkit.collector import drivers as driver_collector
 from winkit.collector import env as env_collector
 from winkit.collector import features as feature_collector
@@ -39,6 +40,7 @@ from winkit.collector import netdrives as netdrive_collector
 from winkit.collector import personal as personal_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import layout
+from winkit.core.browsers import suggested
 from winkit.core.catalog.loader import default_catalogs
 from winkit.core.catalog.models import AssociationGroup, Catalogs
 from winkit.core.errors import RecipeError, WinKitError
@@ -51,6 +53,8 @@ from winkit.core.recipe.io import new_recipe
 from winkit.core.recipe.models import (
     AppItem,
     BackupItem,
+    BrowserConfig,
+    BrowserExtension,
     ConflictPolicy,
     EnvPathEntry,
     EnvVar,
@@ -424,6 +428,35 @@ class StudioController:
 
     def set_personal_group(self, group_id: str, selected: bool) -> None:
         personal_collector.set_group(self.require_recipe(), group_id, selected)
+        self.save()
+
+    def collect_browsers(self) -> list[BrowserConfig]:
+        """Navegadores e extensões deste PC (V2-12). Senhas e cookies nunca são lidos."""
+        f = self.services.folders
+        found = browser_collector.collect_browsers(
+            self.require_recipe(),
+            self.catalogs,
+            {**f.machine(), **f.current_user()},
+            self.services.volume_root,
+        )
+        self.save()
+        return found
+
+    def add_browser(self, browser_id: str) -> None:
+        recipe = self.require_recipe()
+        if not any(b.id == browser_id for b in recipe.browsers):
+            recipe.browsers = [*recipe.browsers, BrowserConfig(id=browser_id)]
+            self.save()
+
+    def suggested_extensions(self, browser_id: str) -> list[tuple[str, str, str | None]]:
+        entry = self.catalogs.browser(browser_id)
+        return suggested(entry, self.catalogs) if entry else []
+
+    def add_browser_extension(self, browser_id: str, store_id: str) -> None:
+        cfg = next(b for b in self.require_recipe().browsers if b.id == browser_id)
+        for sid, name, slug in self.suggested_extensions(browser_id):
+            if sid == store_id and not any(e.id == sid for e in cfg.extensions):
+                cfg.extensions = [*cfg.extensions, BrowserExtension(id=sid, name=name, slug=slug)]
         self.save()
 
     def preset_preview(self, preset_id: str) -> PresetResult:

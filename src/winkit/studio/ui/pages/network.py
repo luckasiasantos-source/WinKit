@@ -10,7 +10,7 @@ from winkit.core.recipe.models import WifiNetwork
 from winkit.i18n import t, tn
 from winkit.studio.ui.base import Page
 from winkit.studio.ui.pages.common import choice_row, combo, empty, toggle
-from winkit.ui.widgets import Card, Row, button, label, section, symbol_icon
+from winkit.ui.widgets import Card, Row, button, kind_icon, label, section, symbol_icon
 
 
 class WifiPage(Page):
@@ -257,3 +257,131 @@ class NetworkDrivesPage(Page):
             QMessageBox.warning(self, t("app.name"), t("studio.drives.invalid"))
             return
         self.refresh()
+
+
+class BrowsersPage(Page):
+    """V2-12: extensões, página inicial e buscador pelas políticas oficiais (D-038)."""
+
+    title_key = "studio.browsers.title"
+    subtitle_key = "studio.browsers.subtitle"
+
+    def refresh(self) -> None:
+        self.clear_content()
+        if self.needs_recipe():
+            return
+        r = self.ctl.recipe
+        assert r is not None  # noqa: S101
+        self.content.addLayout(
+            self.toolbar(
+                button(t("studio.browsers.read"), "Primary", self._read),
+                *[
+                    button(b.name, "Secondary", partial(self._add, b.id))
+                    for b in self.ctl.catalogs.browsers
+                    if not any(c.id == b.id for c in r.browsers)
+                ],
+            )
+        )
+        searches = [("", t("studio.browsers.search_keep"))]
+        searches += [(s.id, s.name) for s in self.ctl.catalogs.search_providers]
+        for cfg in r.browsers:
+            entry = self.ctl.catalogs.browser(cfg.id)
+            if entry is None:
+                continue
+            card = Card()
+            card.add_row(
+                Row(
+                    t("studio.browsers.enabled"),
+                    None,
+                    accessory=toggle(cfg.selected, partial(self._set, cfg, "selected")),
+                    icon=kind_icon("browser"),
+                )
+            )
+            card.add_row(
+                Row(
+                    t("studio.browsers.mode"),
+                    t("studio.browsers.mode_hint"),
+                    accessory=combo(
+                        [
+                            ("suggest", t("studio.browsers.suggest")),
+                            ("force", t("studio.browsers.force")),
+                        ],
+                        cfg.mode,
+                        partial(self._set, cfg, "mode"),
+                    ),
+                )
+            )
+            home = QLineEdit(cfg.homepage or "")
+            home.setPlaceholderText("https://")
+            home.editingFinished.connect(partial(self._homepage, cfg, home))
+            card.add_row(Row(t("studio.browsers.homepage"), None, accessory=home))
+            card.add_row(
+                Row(
+                    t("studio.browsers.search"),
+                    None,
+                    accessory=combo(
+                        searches,
+                        cfg.search or "",
+                        partial(self._search, cfg),
+                    ),
+                )
+            )
+            for ext in cfg.extensions:
+                card.add_row(
+                    choice_row(
+                        ext.name or ext.id,
+                        ext.id,
+                        icon_kind="browser",
+                        selected=ext.selected,
+                        on_select=partial(self._set, ext, "selected"),
+                    )
+                )
+            for store_id, name, _slug in self.ctl.suggested_extensions(cfg.id):
+                if not any(e.id == store_id for e in cfg.extensions):
+                    card.add_row(
+                        Row(
+                            name,
+                            t("studio.browsers.suggested"),
+                            accessory=button(
+                                t("studio.browsers.add"),
+                                "Secondary",
+                                partial(self._add_ext, cfg.id, store_id),
+                            ),
+                        )
+                    )
+            self.content.addWidget(section(entry.name, card))
+        warn = Card()
+        warn.add_row(
+            Row(
+                t("studio.browsers.warning_title"),
+                t("studio.browsers.warning"),
+                icon=symbol_icon("!", "#FF9500"),
+            )
+        )
+        self.content.addWidget(section("", warn))
+
+    def _set(self, obj: object, name: str, value: object) -> None:
+        setattr(obj, name, value)
+        self.save()
+
+    def _search(self, cfg: object, value: str) -> None:
+        self._set(cfg, "search", value or None)
+
+    def _homepage(self, cfg: object, edit: QLineEdit) -> None:
+        text = edit.text().strip() or None
+        try:
+            self._set(cfg, "homepage", text)
+        except ValueError:
+            QMessageBox.warning(self, t("app.name"), t("studio.browsers.bad_url"))
+
+    def _add(self, browser_id: str) -> None:
+        self.ctl.add_browser(browser_id)
+        self.refresh()
+
+    def _add_ext(self, browser_id: str, store_id: str) -> None:
+        self.ctl.add_browser_extension(browser_id, store_id)
+        self.refresh()
+
+    def _read(self) -> None:
+        self.tasks.run(
+            t("studio.browsers.reading"), self.ctl.collect_browsers, lambda _: self.refresh()
+        )

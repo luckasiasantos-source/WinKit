@@ -1,0 +1,7 @@
+# Buscadores (V2-12). `{searchTerms}` é trocado pelo texto buscado (formato das políticas).
+- {id: duckduckgo, name: DuckDuckGo, search_url: 'https://duckduckgo.com/?q={searchTerms}'}
+- {id: google, name: Google, search_url: 'https://www.google.com/search?q={searchTerms}'}
+- {id: bing, name: Bing, search_url: 'https://www.bing.com/search?q={searchTerms}'}
+- {id: brave, name: Brave Search, search_url: 'https://search.brave.com/search?q={searchTerms}'}
+- {id: startpage, name: Startpage, search_url: 'https://www.startpage.com/sp/search?query={searchTerms}'}
+- {id: ecosia, name: Ecosia, search_url: 'https://www.ecosia.org/search?q={searchTerms}'}

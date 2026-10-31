@@ -84,6 +84,10 @@ SAME_AS_BASE: dict[str, set[str]] = {
         "cli.h.default_groups",
         "step.personal.applied",
         "cli.h.appearance_groups",
+        "plan.browser",
+        "step.browser.done",
+        "studio.browsers.enabled",
+        "cli.browser_search",
     },
 }
 ALWAYS_SAME = {
