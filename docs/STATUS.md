@@ -32,6 +32,7 @@
 - ✅ Análise da conversa anterior (PDF) e correções técnicas
 - ✅ Decisões D-001 a D-019 (`ARQUITETURA.md`)
 - ✅ `PLANO.md`, `ARQUITETURA.md`, `STATUS.md`, `DIVIDAS_TECNICAS.md`, `INCIDENTES.md`, `CHANGELOG.md`, `CLAUDE.md`
+- ✅ `README.md` e `CONTRIBUTING.md` para código aberto · ⬜ licença a definir (DT-015)
 
 ### M0 — Fundação ✅
 - ✅ `pyproject.toml` (hatchling, src layout) + uv + `uv.lock`

@@ -1,25 +1,153 @@
+<div align="center">
+
+<img src="docs/imagens/studio-apps.png" alt="WinKit Studio" width="820">
+
 # WinKit
 
-Prepara um pendrive **Ventoy** para que qualquer ISO **original** do Windows 11 (e futuramente 10) instale já com:
+**Instale o Windows já do seu jeito — drivers, apps, configurações e privacidade — a partir de um pendrive Ventoy, sem modificar a ISO.**
 
-- conta local, sem conta Microsoft, idioma/teclado/fuso definidos
-- drivers do seu PC
-- seus aplicativos instalados automaticamente (offline ou via winget)
-- as pastas de configuração dos seus aplicativos restauradas no lugar certo
-- bloatware removido e ajustes de privacidade, visual e energia aplicados
+[![CI](https://github.com/luckasiasantos-source/Iso-Modify-Win11/actions/workflows/ci.yml/badge.svg)](https://github.com/luckasiasantos-source/Iso-Modify-Win11/actions/workflows/ci.yml)
+![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
+![Windows 11](https://img.shields.io/badge/Windows-11-0078D4)
 
-**A ISO nunca é modificada.** Tudo fica numa pasta `WinKit\` do pendrive.
+</div>
 
-> Estado: **planejamento concluído, implementação não iniciada.** Veja `docs/STATUS.md`.
+> **English summary.** WinKit prepares a [Ventoy](https://www.ventoy.net) USB drive so that any *unmodified* Windows 11 ISO installs unattended with a local account, your drivers, your apps (offline installers or winget), your app settings restored to the right folders, bloatware removed and privacy/UI tweaks applied. Everything lives in a `WinKit\` folder on the USB drive; the ISO is never touched. The UI is in Brazilian Portuguese.
 
-## Documentação
+---
 
-| Documento | Para quê |
+## Por que existe
+
+Reinstalar o Windows é rápido; deixar ele do seu jeito é que demora: caçar drivers, baixar e instalar app por app, reconfigurar cada um, remover o que veio de brinde, desligar telemetria, arrumar a barra de tarefas…
+
+O WinKit faz isso de uma vez. Você monta uma **receita** no seu PC atual, e o pendrive Ventoy instala o Windows já pronto, com a mesma ISO original que você baixou da Microsoft.
+
+## O que ele faz
+
+| | |
 |---|---|
-| [`docs/PLANO.md`](docs/PLANO.md) | O que o produto é, como funciona e em que ordem será construído |
-| [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) | Arquitetura, regras do código e registro de decisões |
-| [`docs/STATUS.md`](docs/STATUS.md) | O que já está implementado |
-| [`docs/DIVIDAS_TECNICAS.md`](docs/DIVIDAS_TECNICAS.md) | O que está provisório ou incompleto |
-| [`docs/INCIDENTES.md`](docs/INCIDENTES.md) | O que deu errado e como foi resolvido |
-| [`docs/CHANGELOG.md`](docs/CHANGELOG.md) | Mapa de todas as mudanças |
-| [`CLAUDE.md`](CLAUDE.md) | Regras obrigatórias para quem mexe no código |
+| 🔌 **Ventoy, sem tocar na ISO** | Usa o plugin `auto_install` do Ventoy. Troque a ISO por uma versão nova e tudo continua funcionando. Um pendrive serve a várias ISOs. |
+| 👤 **Conta local** | Sem conta Microsoft, sem telas de rede e privacidade. Idioma, teclado ABNT2, fuso e edição definidos na receita. |
+| 💽 **Disco nunca criptografado sozinho** | Por padrão o Windows não liga a criptografia automática do dispositivo — nem depois de entrar com conta Microsoft. |
+| 🧩 **Drivers do seu PC** | Exporta os drivers de terceiros (rede primeiro) e instala com `pnputil` antes do primeiro login. |
+| 📦 **Seus aplicativos** | Lê os apps instalados no seu PC; você marca os que quer. Instala offline (instaladores baixados com `winget download`) ou pelo winget online. Fecha os apps abertos pelo instalador e desliga a inicialização automática. |
+| 🗂️ **Configurações dos apps** | Escolha pastas e arquivos de configuração (Discord, VS Code, OBS, saves de jogos…). São copiados para o pendrive com cópia de sombra (mesmo com o app aberto) e restaurados no lugar certo **antes** de você abrir o app no Windows novo. |
+| 🧹 **Apps pré-instalados** | Remove o que você escolher (lista em níveis de risco) e impede que voltem com as atualizações. |
+| 🎛️ **Ajustes** | Privacidade (telemetria mínima, ID de anúncios, Bing no Iniciar, Copilot, Recall…), aparência (tema escuro, barra à esquerda, menu de contexto clássico…), energia. Aplicados ao perfil padrão: a conta já nasce configurada. |
+| 🔄 **Windows Update** | Opcional, no final, pela API oficial. |
+| 🪟 **Primeiro login do seu jeito** | Silencioso (só um aviso no fim), com contagem regressiva ou interativo — e itens marcados como "perguntar" para decidir na hora. |
+| 🧾 **Resumo e logs** | Resumo em HTML na área de trabalho e logs gravados de volta no pendrive. |
+
+<div align="center">
+<img src="docs/imagens/agente-inicio.png" alt="Janela do primeiro login" width="420">
+<img src="docs/imagens/agente-progresso.png" alt="Progresso" width="420">
+</div>
+
+## Como funciona
+
+```
+ Seu PC atual                 Pendrive Ventoy                         Windows novo
+┌──────────────┐   grava    ┌────────────────────────────┐   boot   ┌───────────────────────────┐
+│ WinKit Studio│ ─────────► │ ISOs originais (intactas)  │ ───────► │ instalação automatizada    │
+│  receita     │            │ ventoy/ventoy.json + XML   │          │ Fase 1 (antes do login):   │
+│  apps        │            │ WinKit/                    │          │  drivers, bloatware,       │
+│  drivers     │            │   receita, instaladores,   │          │  ajustes, apps, backups    │
+│  backups     │            │   drivers, backups, Agente │          │ Fase 2 (depois do login):  │
+└──────────────┘            └────────────────────────────┘          │  apps por usuário, winget, │
+                                                                     │  Windows Update, resumo    │
+                                                                     └───────────────────────────┘
+```
+
+1. O **Studio** (ou a linha de comando) lê o seu PC e grava a receita e todo o conteúdo na pasta `WinKit\` do pendrive.
+2. O Ventoy injeta um `autounattend.xml` na instalação. Você só escolhe o disco: o WinKit **nunca** particiona nem formata nada sozinho.
+3. Durante a instalação, um pequeno script encontra o pendrive e prepara o **Agente**.
+4. O Agente faz quase tudo antes da tela de login. O que precisa do seu usuário ou da internet acontece logo depois, em segundo plano ou com janela, como você escolher.
+
+## Começando
+
+### Requisitos
+
+- Windows 10 ou 11 no PC onde você monta o pendrive (o Studio pede administrador).
+- Um pendrive com o [Ventoy](https://www.ventoy.net) instalado e uma ISO original do Windows 11.
+
+### Usar
+
+1. Baixe o pacote **WinKit-windows** na [última execução do CI](https://github.com/luckasiasantos-source/Iso-Modify-Win11/actions/workflows/ci.yml) (aba *Artifacts*) e extraia.
+2. Abra `winkit-studio\winkit-studio.exe`.
+3. Siga a barra lateral: **Pendrive → Windows e conta → Aplicativos → Configurações dos apps → Drivers → Apps pré-instalados → Ajustes → Energia → Primeiro login → Revisar e construir**.
+4. Dê boot pelo Ventoy, escolha a ISO e o modelo `winkit-…`.
+
+<div align="center">
+<img src="docs/imagens/studio-conta.png" alt="Windows e conta" width="420">
+<img src="docs/imagens/studio-conta-escuro.png" alt="Tema escuro" width="420">
+</div>
+
+### Linha de comando
+
+Tudo que o Studio faz também existe na CLI (rode como administrador):
+
+```powershell
+winkit pendrive listar
+winkit receita nova --pendrive E: --usuario Samuel --nome-pc MEU-PC
+winkit coletar apps --pendrive E:
+winkit apps marcar discord 7zip vscode --pendrive E:
+winkit apps baixar --pendrive E:
+winkit coletar backups --pendrive E: --adicionar-recomendados
+winkit backup capturar --pendrive E:
+winkit coletar drivers --pendrive E:
+winkit plano --pendrive E:
+winkit construir --pendrive E:
+winkit validar --pendrive E:
+```
+
+## Estado do projeto
+
+A versão 1 está implementada e testada automaticamente: 569 testes em Linux e Windows, com executáveis gerados e testados no CI. A validação em máquina virtual e em PC real segue os roteiros de [`docs/validacao/`](docs/validacao/). Veja [`docs/STATUS.md`](docs/STATUS.md).
+
+> ⚠️ Use primeiro numa máquina virtual ([`docs/validacao/AMBIENTE_VM.md`](docs/validacao/AMBIENTE_VM.md)). Valores de registro e nomes de pacotes do Windows mudam entre versões.
+
+## Compilar a partir do código
+
+```powershell
+git clone https://github.com/luckasiasantos-source/Iso-Modify-Win11
+cd Iso-Modify-Win11
+uv sync                     # Python 3.12 e dependências
+uv run pytest               # testes
+powershell -ExecutionPolicy Bypass -File packaging\build.ps1   # gera dist\WinKit-<versão>
+```
+
+## Arquitetura
+
+O código é Python 3.12 + PySide6, em camadas com regras verificadas automaticamente:
+
+| Camada | O que tem |
+|---|---|
+| `core/` | Lógica pura (receita, planejador de fases, moldes de caminho, XML, Ventoy, manifesto), testável sem Windows |
+| `platform/` | Tudo que toca o Windows (registro, PowerShell, robocopy, VSS, pnputil, winget, Appx), atrás de interfaces com versões falsas para testes |
+| `collector/`, `builder/`, `agent/` | Casos de uso: coletar do PC atual, montar o pendrive, configurar o Windows novo |
+| `ui/`, `studio/`, `agent/ui/` | Interface no estilo macOS (tema claro/escuro) |
+| `data/` | Catálogos versionados: apps conhecidos, ajustes (com fonte e "desfazer"), bloatware, edições |
+
+Documentação completa:
+
+- [`docs/PLANO.md`](docs/PLANO.md): o produto e o desenho
+- [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md): camadas, regras do código e registro de decisões
+- [`docs/STATUS.md`](docs/STATUS.md), [`docs/DIVIDAS_TECNICAS.md`](docs/DIVIDAS_TECNICAS.md), [`docs/INCIDENTES.md`](docs/INCIDENTES.md), [`docs/CHANGELOG.md`](docs/CHANGELOG.md)
+
+## Contribuir
+
+Contribuições são bem-vindas, principalmente:
+
+- entradas no catálogo de apps (`src/winkit/data/app_catalog.yaml`): pastas de configuração e parâmetros silenciosos;
+- ajustes e bloatware validados em versões novas do Windows;
+- relatos de teste em VM ou PC real, seguindo os roteiros de `docs/validacao/`.
+
+Antes de abrir um PR, leia o [`CONTRIBUTING.md`](CONTRIBUTING.md) e rode `scripts/check.sh`.
+
+## Aviso
+
+O WinKit automatiza a instalação de um Windows que você tem direito de usar. Ele não ativa o Windows nem contorna licenciamento: as chaves usadas só selecionam a edição no instalador. Use por sua conta e risco; faça backup dos seus dados antes de reinstalar.
+
+## Licença
+
+A definir.

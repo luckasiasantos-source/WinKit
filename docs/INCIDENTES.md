@@ -108,6 +108,15 @@
 - Correção: conversão explícita em `power.py`.
 - Prevenção: `scripts/check.sh` e o CI rodam também `mypy --platform win32`; conferir o CI a cada commit, não a cada marco.
 
+### IN-011 — Duas dívidas marcadas como quitadas por engano
+- Data: 2026-10-31
+- Marco: M9 (descoberto na revisão final dos documentos)
+- O que aconteceu: no commit do M9, DT-013 (códigos de reinício do winget) e DT-014 (casamento nome ↔ ID do winget) apareceram como "✅ quitada no M9 (janela Qt…)", mas só a DT-012 tinha sido resolvida.
+- Causa raiz: a troca do estado da DT-012 foi feita por substituição de texto em todas as ocorrências de `- Estado: aberta` a partir dela, e não só na primeira.
+- Impacto: só documental; o documento escondia duas dívidas abertas.
+- Correção: DT-013 e DT-014 voltaram para "aberta".
+- Prevenção: editar documento vivo trocando o bloco inteiro da entrada (título + estado), nunca uma linha genérica que se repete; conferir o `git diff` dos documentos antes do commit.
+
 ## Lições da fase de desenho
 
 Problemas encontrados na conversa anterior (PDF de referência) e corrigidos **antes** de virar código. Ficam registrados porque são erros fáceis de repetir.

@@ -28,6 +28,21 @@
 
 ---
 
+## 2026-10-31 — Fechamento — README e guia de contribuição
+**Tipo:** documentação
+**Resumo:** README completo para código aberto (o que é, recursos, capturas, como funciona, uso pelo Studio e pela CLI, compilação, arquitetura) e guia de contribuição. Revisão final dos documentos vivos.
+
+### Adicionado
+- `CONTRIBUTING.md` — como preparar o ambiente, regras do código, documentos vivos, o que é bem-vindo e como relatar testes em VM
+
+### Alterado
+- `README.md` — reescrito para código aberto, com capturas de `docs/imagens/`
+
+### Documentos vivos atualizados
+- DIVIDAS — DT-013 e DT-014 voltam a "aberta" (IN-011); DT-015 nova (licença não definida)
+- INCIDENTES — IN-011
+- STATUS — README e guia de contribuição no item de planejamento
+
 ## 2026-10-31 — M10 — Correção: mypy no modo Windows
 **Tipo:** correção + infraestrutura
 **Resumo:** corrige um erro de tipo que só o mypy no Windows enxergava e passa a rodar o mypy também em `--platform win32`, localmente e no CI (IN-010).

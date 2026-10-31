@@ -125,7 +125,7 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Prioridade: alta (é funcionalidade pedida)
 
 ### DT-013 — Códigos de reinício do winget não confirmados
-- Estado: ✅ quitada no M9 (janela Qt, bandeja e notificações)
+- Estado: aberta
 - Origem: M5
 - Onde: `src/winkit/platform/winget.py` (`REBOOT_CODES`)
 - Descrição: os códigos `0x8A150109`/`0x8A15010A` como "instalado, precisa reiniciar" vêm da documentação de memória, não de teste real.
@@ -134,7 +134,7 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Prioridade: baixa
 
 ### DT-014 — Correspondência nome do app ↔ ID do winget é heurística
-- Estado: ✅ quitada no M9 (janela Qt, bandeja e notificações)
+- Estado: aberta
 - Origem: M5
 - Onde: `src/winkit/core/inventory.py` (`_heuristic_id`)
 - Descrição: o `winget export` traz só IDs; o nome exibido no Windows é casado por heurística (última parte do ID × primeira palavra do nome). Apps da Loja (msstore) não são casados.
@@ -142,3 +142,11 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Plano: usar o módulo `Microsoft.WinGet.Client` (`Get-WinGetPackage`, saída em objetos) quando estiver instalado; manter a heurística como alternativa.
 - Prioridade: média
 
+### DT-015 — Licença do projeto não definida
+- Estado: aberta
+- Origem: fechamento da v1 (README para código aberto)
+- Onde: `pyproject.toml` (`license = "Proprietary"`), `README.md` (seção Licença), falta o arquivo `LICENSE`
+- Descrição: o projeto deve virar código aberto, mas a licença ainda não foi escolhida pelo dono.
+- Impacto: sem licença, ninguém pode legalmente usar, modificar ou redistribuir o código, mesmo com o repositório público.
+- Plano: escolher (MIT, Apache-2.0 ou GPL-3.0), criar `LICENSE`, ajustar `pyproject.toml` e o README. O PySide6 é LGPL; qualquer uma delas é compatível com o uso dinâmico atual.
+- Prioridade: alta antes de tornar o repositório público
