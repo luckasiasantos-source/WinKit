@@ -75,6 +75,7 @@ SAME_AS_BASE: dict[str, set[str]] = {
         "cli.iso_ignored",
         "collect.portable_name",
         "restore.description_before",
+        "studio.dns.custom",
     },
 }
 ALWAYS_SAME = {
@@ -89,6 +90,7 @@ ALWAYS_SAME = {
     "plan.wifi",
     "studio.wifi.security.enterprise",
     "summary.backup_warning",
+    "cli.dns_servers",
 }
 
 

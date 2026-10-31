@@ -10,6 +10,7 @@ import heapq
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
+from winkit.core import dns as dns_rules
 from winkit.core.catalog.models import Catalogs
 from winkit.core.errors import PathTemplateError, PlanError
 from winkit.core.paths import templates
@@ -24,12 +25,14 @@ from winkit.core.planner.models import (
 )
 from winkit.core.recipe.models import AppItem, BackupItem, Recipe
 from winkit.core.recipe.validation import find_cycle
-from winkit.i18n import t
+from winkit.i18n import t, tn
 
 # Ordem dos grupos dentro de cada fase (PLANO.md §11.2, tabela "Ordem dentro de cada fase").
 _G1 = {
     "driver": 10,
     "wifi": 15,  # R17: logo depois dos drivers (precisa do driver de rede)
+    "dns": 16,  # R18: depois do Wi-Fi
+    "hosts": 17,
     "power": 20,
     "bloat": 30,
     "feature": 35,
@@ -95,6 +98,7 @@ def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> 
 
     _plan_drivers(recipe, drafts)
     _plan_wifi(recipe, drafts)
+    _plan_network_privacy(recipe, catalogs, drafts)
     _plan_power(recipe, drafts)
     _plan_bloat(recipe, catalogs, ctx, drafts, excluded)
     _plan_features(recipe, catalogs, ctx, drafts, excluded)
@@ -149,6 +153,17 @@ def _plan_wifi(recipe: Recipe, out: list[_Draft]) -> None:  # R17
                 sort=(_G1["wifi"], 0, n.id),
             )
         )
+
+
+def _plan_network_privacy(recipe: Recipe, catalogs: Catalogs, out: list[_Draft]) -> None:  # R18
+    if dns_rules.resolve(recipe.dns, catalogs) is not None:
+        out.append(
+            _Draft("dns", "servers", 1, t("plan.dns"), "machine", sort=(_G1["dns"], 0, "servers"))
+        )
+    domains = dns_rules.blocked_domains(recipe.dns, catalogs)
+    if domains:
+        title = tn("plan.hosts", len(domains))
+        out.append(_Draft("hosts", "block", 1, title, "machine", sort=(_G1["hosts"], 0, "block")))
 
 
 def _plan_power(recipe: Recipe, out: list[_Draft]) -> None:  # R5

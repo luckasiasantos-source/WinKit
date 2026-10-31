@@ -39,12 +39,19 @@ class FeatureText(_Model):
     description: str
 
 
+class NameText(_Model):
+    name: str
+
+
 class CatalogTranslation(_Model):
     tweaks: dict[str, TweakText] = Field(default_factory=dict)
     bloatware: dict[str, BloatText] = Field(default_factory=dict)
     driver_classes: dict[str, LabelText] = Field(default_factory=dict)
     dpapi_patterns: dict[str, WhatText] = Field(default_factory=dict)
     features: dict[str, FeatureText] = Field(default_factory=dict)
+    #: Só os nomes que não são marca (ex.: "para Famílias"); os outros ficam como estão.
+    dns_providers: dict[str, NameText] = Field(default_factory=dict)
+    hosts_blocklists: dict[str, FeatureText] = Field(default_factory=dict)
 
 
 def localize(catalogs: Catalogs, tr: CatalogTranslation) -> Catalogs:
@@ -80,9 +87,21 @@ def localize(catalogs: Catalogs, tr: CatalogTranslation) -> Catalogs:
         f.model_copy(update=tr.features[f.id].model_dump()) if f.id in tr.features else f
         for f in catalogs.features
     ]
+    providers = [
+        d.model_copy(update=tr.dns_providers[d.id].model_dump()) if d.id in tr.dns_providers else d
+        for d in catalogs.dns_providers
+    ]
+    blocklists = [
+        b.model_copy(update=tr.hosts_blocklists[b.id].model_dump())
+        if b.id in tr.hosts_blocklists
+        else b
+        for b in catalogs.hosts_blocklists
+    ]
     return catalogs.model_copy(
         update={
             "features": features,
+            "dns_providers": providers,
+            "hosts_blocklists": blocklists,
             "tweaks": tweaks,
             "bloatware": bloatware,
             "driver_classes": classes,
@@ -109,6 +128,11 @@ def missing_translations(catalogs: Catalogs, tr: CatalogTranslation) -> list[str
         f"dpapi_patterns.{p.id}" for p in catalogs.dpapi_patterns if p.id not in tr.dpapi_patterns
     ]
     out += [f"features.{f.id}" for f in catalogs.features if f.id not in tr.features]
+    out += [
+        f"hosts_blocklists.{b.id}"
+        for b in catalogs.hosts_blocklists
+        if b.id not in tr.hosts_blocklists
+    ]
     return out
 
 
@@ -121,4 +145,6 @@ def orphan_translations(catalogs: Catalogs, tr: CatalogTranslation) -> list[str]
     ids = {p.id for p in catalogs.dpapi_patterns}
     out += [f"dpapi_patterns.{k}" for k in tr.dpapi_patterns if k not in ids]
     out += [f"features.{k}" for k in tr.features if catalogs.feature(k) is None]
+    out += [f"dns_providers.{k}" for k in tr.dns_providers if catalogs.dns_provider(k) is None]
+    out += [f"hosts_blocklists.{k}" for k in tr.hosts_blocklists if catalogs.blocklist(k) is None]
     return out

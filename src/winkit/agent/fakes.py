@@ -13,6 +13,7 @@ from winkit.platform.fakes.apps import (
     FakeShortcuts,
     FakeWinget,
 )
+from winkit.platform.fakes.dns import FakeDns
 from winkit.platform.fakes.drivers import FakeDriverManager
 from winkit.platform.fakes.powershell import FakePowerShell
 from winkit.platform.fakes.registry import FakeRegistry
@@ -58,6 +59,7 @@ def fake_agent_services(*, pendrive: Path, system: Path, **overrides: Any) -> Ag
         "wifi": FakeWifi(),
         "iso": FakeIsoMounter(),
         "devices": FakeDevices(),
+        "dns": FakeDns(),
     }
     values.update(overrides)
     return AgentServices(**values)

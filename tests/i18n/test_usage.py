@@ -88,7 +88,16 @@ UI_FUNCS: dict[str, tuple[int, ...]] = {
 }
 UI_KEYWORDS = {"help", "description", "footer"}
 #: Nomes próprios que não se traduzem.
-ALLOWED = {"WinKit", "WinKit Studio", "Windows 11", "Português (Brasil)", "English", "Español"}
+ALLOWED = {
+    "WinKit",
+    "WinKit Studio",
+    "Windows 11",
+    "Português (Brasil)",
+    "English",
+    "Español",
+    "abc123",  # exemplo de id pessoal do NextDNS
+    "https://…/dns-query",  # exemplo de modelo DoH
+}
 
 
 def _has_text(node: ast.AST) -> bool:

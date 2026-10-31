@@ -11,6 +11,8 @@ from winkit.core.recipe.models import ExecutionMode
 StepKind = Literal[
     "driver",
     "wifi",
+    "dns",
+    "hosts",
     "bloat",
     "feature",
     "tweak",

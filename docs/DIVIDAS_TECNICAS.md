@@ -195,3 +195,12 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Impacto: raro (o pendrive costuma estar conectado na Fase 1), mas a instalação pode terminar sem a limpeza final.
 - Plano: avaliar por tipo quais etapas podem rodar na Fase 2 com o alvo trocado (Default → usuário, como no fallback D-012) e marcá-las.
 - Prioridade: média
+
+### DT-021 — DNS não chega a adaptadores que aparecerem depois
+- Estado: aberta
+- Origem: M14 (V2-16)
+- Onde: `agent/steps/network_privacy.py` (`DnsStep`)
+- Descrição: os servidores DNS são gravados em cada adaptador físico que existe na hora (`Get-NetAdapter -Physical`). Um adaptador novo (um Wi-Fi USB ligado depois) fica com o DNS da rede. A política global `DoHPolicy` é gravada para reduzir o efeito, mas não troca os servidores.
+- Impacto: baixo; o usuário pode rodar "Aplicar neste PC" de novo só com "Servidor DNS".
+- Plano: avaliar uma tarefa agendada no evento de adaptador novo, ou a política de servidores DNS por GPO (`NameServer`).
+- Prioridade: baixa

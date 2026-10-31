@@ -323,3 +323,13 @@ features:
   iis:
     name: Servidor web IIS (básico)
     description: El servidor de páginas de Microsoft con las opciones predeterminadas.
+dns_providers:
+  cloudflare_family:
+    name: Cloudflare para Familias
+hosts_blocklists:
+  ads_basic:
+    name: Anuncios (básico)
+    description: Los servidores de anuncios más comunes. Algunos sitios pueden mostrar espacios vacíos.
+  trackers_basic:
+    name: Rastreadores (básico)
+    description: Servicios de rastreo y análisis de comportamiento. Puede romper algunos paneles de sitios.

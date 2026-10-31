@@ -12,10 +12,11 @@ from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 
 from winkit.core.catalog.models import Catalogs
+from winkit.core.dns import problems as dns_problems
 from winkit.core.errors import PathTemplateError, RecipeValidationError
 from winkit.core.paths import templates
 from winkit.core.recipe.models import AppItem, Recipe
-from winkit.i18n import t
+from winkit.i18n import render, t
 
 RESERVED_USERNAMES = frozenset(
     name.casefold()
@@ -184,6 +185,11 @@ def _validate_ids_and_paths(recipe: Recipe, err: Sink) -> None:
 
 
 def _validate_catalog_refs(recipe: Recipe, catalogs: Catalogs, err: Sink) -> None:
+    for problem in dns_problems(recipe.dns, catalogs):
+        err(render(problem))
+    for feature_id in recipe.windows.optional_features:
+        if catalogs.feature(feature_id) is None:
+            err(t("recipe.unknown_feature", id=feature_id))
     for sel in recipe.tweaks:
         if catalogs.tweak(sel.id) is None:
             err(t("recipe.unknown_tweak", id=sel.id))

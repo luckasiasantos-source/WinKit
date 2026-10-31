@@ -205,6 +205,20 @@ class Wifi(_Model):
     networks: list[WifiNetwork] = Field(default_factory=list)
 
 
+class Dns(_Model):
+    """V2-16: servidor DNS e bloqueios pelo ``hosts`` (M14)."""
+
+    #: ``unchanged``, id de ``dns_providers.yaml`` ou ``custom``.
+    provider: str = "unchanged"
+    #: Id pessoal dos serviços que exigem (NextDNS).
+    provider_id: str | None = None
+    custom_servers: list[str] = Field(default_factory=list)
+    custom_doh_template: str | None = None
+    #: Exigir DNS criptografado (só Windows 11); desligado = permitir.
+    require_doh: bool = False
+    hosts_blocklists: list[ItemId] = Field(default_factory=list)
+
+
 class RestorePoint(_Model):
     """V2-10: ponto de restauração "Windows pronto" no fim da instalação (M12)."""
 
@@ -232,6 +246,7 @@ class Recipe(_Model):
     power: Power = Field(default_factory=Power)
     restore_point: RestorePoint = Field(default_factory=RestorePoint)
     wifi: Wifi = Field(default_factory=Wifi)
+    dns: Dns = Field(default_factory=Dns)
 
     # ---- consultas de conveniência (sem efeito colateral)
     def app(self, app_id: str) -> AppItem | None:

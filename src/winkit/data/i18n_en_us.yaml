@@ -323,3 +323,13 @@ features:
   iis:
     name: IIS web server (basic)
     description: Microsoft's web server with the default options.
+dns_providers:
+  cloudflare_family:
+    name: Cloudflare for Families
+hosts_blocklists:
+  ads_basic:
+    name: Ads (basic)
+    description: The most common ad servers. Some sites may show empty spaces.
+  trackers_basic:
+    name: Trackers (basic)
+    description: Tracking and behavior analytics services. May break some website dashboards.

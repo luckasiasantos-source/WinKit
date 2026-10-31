@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import ipaddress
+import re
 from typing import Annotated, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -246,6 +248,54 @@ class FeatureEntry(_Model):
         return self
 
 
+# ------------------------------------------------------------------ DNS e bloqueios (V2-16)
+def _valid_ip(value: str, version: int) -> str:
+    addr = ipaddress.ip_address(value)
+    if addr.version != version:
+        raise ValueError(f"{value}: não é IPv{version}")
+    return value
+
+
+class DnsProvider(_Model):
+    id: Annotated[str, Field(pattern=r"^[a-z0-9_]+$")]
+    name: str
+    ipv4: Annotated[list[str], Field(min_length=1)]
+    ipv6: list[str] = Field(default_factory=list)
+    #: Modelo DoH (``https://``); ``{id}`` é trocado pelo id pessoal quando ``needs_id``.
+    doh_template: str
+    family: bool = False
+    needs_id: bool = False
+    source: Annotated[str, Field(min_length=5)]
+
+    @model_validator(mode="after")
+    def _check(self) -> Self:
+        for v4 in self.ipv4:
+            _valid_ip(v4, 4)
+        for v6 in self.ipv6:
+            _valid_ip(v6, 6)
+        if not self.doh_template.startswith("https://"):
+            raise ValueError(f"{self.id}: o modelo DoH deve começar com https://")
+        if self.needs_id != ("{id}" in self.doh_template):
+            raise ValueError(f"{self.id}: 'needs_id' e '{{id}}' no modelo devem andar juntos")
+        return self
+
+
+class HostsBlocklist(_Model):
+    id: Annotated[str, Field(pattern=r"^[a-z0-9_]+$")]
+    name: str
+    description: str
+    source: str
+    license: str
+    domains: Annotated[list[str], Field(min_length=1)]
+
+    @model_validator(mode="after")
+    def _check(self) -> Self:
+        for d in self.domains:
+            if not re.fullmatch(r"(?:[a-z0-9-]+\.)+[a-z]{2,}", d):
+                raise ValueError(f"{self.id}: domínio inválido {d!r}")
+        return self
+
+
 # ------------------------------------------------------------------ outros
 class EditionEntry(_Model):
     id: str
@@ -287,6 +337,14 @@ class Catalogs(_Model):
     default_excludes: list[str]
     driver_classes: list[DriverClass]
     features: list[FeatureEntry] = Field(default_factory=list)
+    dns_providers: list[DnsProvider] = Field(default_factory=list)
+    hosts_blocklists: list[HostsBlocklist] = Field(default_factory=list)
+
+    def dns_provider(self, provider_id: str) -> DnsProvider | None:
+        return next((x for x in self.dns_providers if x.id == provider_id), None)
+
+    def blocklist(self, list_id: str) -> HostsBlocklist | None:
+        return next((x for x in self.hosts_blocklists if x.id == list_id), None)
 
     def feature(self, feature_id: str) -> FeatureEntry | None:
         return next((x for x in self.features if x.id == feature_id), None)

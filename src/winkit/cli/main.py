@@ -39,6 +39,7 @@ from winkit.collector import backups as backup_collector
 from winkit.collector import drivers as driver_collector
 from winkit.collector import features as feature_collector
 from winkit.collector import wifi as wifi_collector
+from winkit.core import dns as dns_rules
 from winkit.core import layout
 from winkit.core.catalog.loader import default_catalogs
 from winkit.core.errors import RecipeError, WinKitError
@@ -50,6 +51,7 @@ from winkit.core.recipe.validation import validate_recipe
 from winkit.core.text import human_size
 from winkit.core.winget_manifest import split_args
 from winkit.i18n import CHOICES, current_language, normalize, render, set_language, t, tn
+from winkit.platform import hosts
 from winkit.platform.locale import detect_language
 from winkit.platform.services import Services, real_services
 from winkit.platform.session import is_admin
@@ -622,6 +624,94 @@ def cmd_coletar_recursos(args: argparse.Namespace, services: Services, out: Out)
     return cmd_recursos_listar(args, services, out)
 
 
+# ------------------------------------------------------------------ DNS e bloqueios (V2-16)
+def cmd_dns_mostrar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    catalogs = default_catalogs()
+    d = recipe.dns
+    target = dns_rules.resolve(d, catalogs)
+    if target is None:
+        out(t("cli.dns_unchanged"))
+    else:
+        out(t("cli.dns_servers", servers=", ".join(target.servers)))
+        if target.doh_template:
+            mode = t("cli.dns_required") if d.require_doh else t("cli.dns_allowed")
+            out(t("cli.dns_doh", template=target.doh_template, mode=mode))
+    out(t("cli.dns_providers", ids=", ".join(p.id for p in catalogs.dns_providers)))
+    for b in catalogs.hosts_blocklists:
+        mark = "x" if b.id in d.hosts_blocklists else " "
+        out(f"  [{mark}] {b.id:16} {b.name} — {tn('studio.dns.domains', len(b.domains))}")
+    return 0
+
+
+def cmd_dns_definir(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    d = recipe.dns
+    d.provider = args.provedor
+    d.provider_id = args.id
+    d.require_doh = args.exigir_criptografia
+    if args.servidores is not None:
+        d.custom_servers = [s.strip() for s in args.servidores.split(",") if s.strip()]
+    if args.modelo_doh is not None:
+        d.custom_doh_template = args.modelo_doh or None
+    problems = dns_rules.problems(d, default_catalogs())
+    if problems:
+        for p in problems:
+            out(render(p))
+        return 1
+    _save(tgt, recipe)
+    return cmd_dns_mostrar(args, services, out)
+
+
+def cmd_dns_bloqueios(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    catalogs = default_catalogs()
+    missing = [i for i in args.ids if catalogs.blocklist(i) is None]
+    chosen = [x for x in recipe.dns.hosts_blocklists if x not in args.ids]
+    if args.command_value:
+        chosen += [i for i in args.ids if i not in missing]
+    recipe.dns.hosts_blocklists = chosen
+    _save(tgt, recipe)
+    if missing:
+        out(t("cli.not_found", ids=", ".join(missing)))
+        return 1
+    return cmd_dns_mostrar(args, services, out)
+
+
+def cmd_dns_remover_do_pc(args: argparse.Namespace, services: Services, out: Out) -> int:
+    _require_admin()
+    removed = hosts.remove_block(hosts.hosts_file(services.folders.windows_dir()))
+    out(t("studio.dns.removed" if removed else "studio.dns.nothing_to_remove"))
+    return 0
+
+
+def _add_dns_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    dns = sub.add_parser("dns", help=t("cli.h.dns"))
+    dns_sub = dns.add_subparsers(dest="action", required=True)
+    dns_sub.add_parser("mostrar", aliases=["show"], parents=[common]).set_defaults(
+        func=cmd_dns_mostrar
+    )
+    df = dns_sub.add_parser("definir", aliases=["set"], parents=[common])
+    df.add_argument("provedor", help=t("cli.h.dns_provider"))
+    df.add_argument("--id", help=t("cli.h.dns_id"))
+    df.add_argument("--servidores", help=t("cli.h.dns_servers"))
+    df.add_argument("--modelo-doh", help=t("cli.h.dns_template"))
+    df.add_argument("--exigir-criptografia", action="store_true", help=t("cli.h.dns_require"))
+    df.set_defaults(func=cmd_dns_definir)
+    bl = dns_sub.add_parser("bloqueios", aliases=["blocklists"], help=t("cli.h.blocklists"))
+    bl_sub = bl.add_subparsers(dest="subaction", required=True)
+    for name, alias, value in (("marcar", "select", True), ("desmarcar", "deselect", False)):
+        bm = bl_sub.add_parser(name, aliases=[alias], parents=[common])
+        bm.add_argument("ids", nargs="+", help=t("cli.h.blocklist_ids"))
+        bm.set_defaults(func=cmd_dns_bloqueios, command_value=value)
+    bl_sub.add_parser(
+        "remover-do-pc", aliases=["remove-from-pc"], parents=[common], help=t("cli.h.unblock")
+    ).set_defaults(func=cmd_dns_remover_do_pc)
+
+
 def _agent_runtime() -> Runtime:
     from winkit.agent.main import build_runtime  # noqa: PLC0415 — só o "aplicar" precisa do Agente
 
@@ -877,6 +967,7 @@ def build_parser() -> argparse.ArgumentParser:
         wm.set_defaults(func=cmd_wifi_marcar, command_value=value)
 
     _add_feature_parsers(sub, common)
+    _add_dns_parsers(sub, common)
 
     ap = sub.add_parser("aplicar", aliases=["apply"], parents=[common], help=t("cli.h.apply"))
     ap.add_argument("--simular", action="store_true", help=t("cli.h.simulate"))

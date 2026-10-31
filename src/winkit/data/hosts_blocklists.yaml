@@ -1,0 +1,50 @@
+# Listas de bloqueio pelo arquivo hosts (V2-16, M14).
+# Pequenas e curadas à mão pelo projeto, gravadas aqui (nada é baixado na instalação).
+# Nunca entram domínios da Microsoft: o Defender trata isso como sequestro do hosts.
+- id: ads_basic
+  name: Anúncios (básico)
+  description: Servidores de anúncio mais comuns. Alguns sites podem mostrar espaços vazios.
+  source: Curadoria do projeto WinKit
+  license: CC0-1.0
+  domains:
+    - doubleclick.net
+    - ad.doubleclick.net
+    - googleadservices.com
+    - pagead2.googlesyndication.com
+    - adservice.google.com
+    - ads.yahoo.com
+    - adnxs.com
+    - ib.adnxs.com
+    - adsrvr.org
+    - criteo.com
+    - static.criteo.net
+    - taboola.com
+    - cdn.taboola.com
+    - outbrain.com
+    - widgets.outbrain.com
+    - pubmatic.com
+    - ads.pubmatic.com
+    - rubiconproject.com
+    - openx.net
+    - amazon-adsystem.com
+- id: trackers_basic
+  name: Rastreadores (básico)
+  description: Serviços de rastreamento e análise de comportamento. Pode quebrar alguns painéis de sites.
+  source: Curadoria do projeto WinKit
+  license: CC0-1.0
+  domains:
+    - scorecardresearch.com
+    - sb.scorecardresearch.com
+    - quantserve.com
+    - hotjar.com
+    - static.hotjar.com
+    - mouseflow.com
+    - fullstory.com
+    - crazyegg.com
+    - script.crazyegg.com
+    - chartbeat.com
+    - static.chartbeat.com
+    - mixpanel.com
+    - api.mixpanel.com
+    - segment.io
+    - api.segment.io

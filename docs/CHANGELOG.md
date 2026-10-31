@@ -28,6 +28,21 @@
 
 ---
 
+## 2026-10-31 — M14 — DNS seguro e bloqueio pelo hosts (V2-16)
+**Tipo:** implementação
+**Resumo:** a receita troca o DNS do Windows novo por um serviço mais rápido e privado, com DNS criptografado no Windows 11, e pode bloquear anúncios e rastreadores pelo arquivo `hosts` num bloco marcado que dá para desfazer.
+
+### Adicionado
+- `src/winkit/data/dns_providers.yaml`, `src/winkit/data/hosts_blocklists.yaml` (+ traduções)
+- `src/winkit/core/dns.py`, `src/winkit/platform/dns.py`, `src/winkit/platform/hosts.py`, `src/winkit/platform/fakes/dns.py`, `src/winkit/agent/steps/network_privacy.py`
+- Receita: `dns` (aditivo), validação dos servidores e listas; validação dos ids de recursos do Windows
+- Plano: tipos `dns` e `hosts` na Fase 1 depois do Wi-Fi (R18)
+- Studio: seção "DNS e bloqueios" (grupo Rede) com desfazer; CLI: `dns mostrar|definir`, `dns bloqueios marcar|desmarcar|remover-do-pc`
+- Testes: `tests/agent/test_network_privacy.py` (inclui o de proteção do `hosts`)
+
+### Documentos vivos atualizados
+- ARQUITETURA — módulos e verificação do `hosts`; STATUS — V2-16, H23; DIVIDAS — DT-021
+
 ## 2026-10-31 — Correção de lint do commit anterior (IN-016)
 **Tipo:** correção
 **Resumo:** o commit do diagnóstico de drivers entrou com dois erros de lint num teste porque um pipe escondeu a falha do `check.sh`. Corrigido e registrado.

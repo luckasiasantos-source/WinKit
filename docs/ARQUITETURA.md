@@ -141,6 +141,7 @@ Por que isso importa:
 | `core/live.py` | Modelos da prévia (`PreviewItem`, `LivePreview`) |
 | `data/features.yaml`, `platform/features.py`, `platform/iso_mount.py`, `collector/features.py`, `agent/steps/feature.py` | Recursos do Windows (V2-08): catálogo, liga recursos e capacidades, monta a ISO só para leitura (D-043) |
 | `core/devices.py`, `platform/devices.py`, `agent/steps/driver_report.py` | Dispositivos sem driver (V2-09): tabela de códigos, CIM `Win32_PnPEntity`, busca dirigida no Windows Update, seção do resumo |
+| `core/dns.py`, `platform/dns.py`, `platform/hosts.py`, `agent/steps/network_privacy.py`, `data/dns_providers.yaml`, `data/hosts_blocklists.yaml` | DNS seguro e bloqueio pelo `hosts` (V2-16): bloco marcado, resto do arquivo preservado byte a byte |
 | `core/secrets.py` | Registro único de segredos do processo (R-53); `runner` e `EventLog` mascaram |
 | `core/wifi.py`, `collector/wifi.py`, `platform/wifi.py`, `agent/steps/wifi.py` | Wi-Fi (V2-02): XML do perfil, coleta, `netsh` só por código de saída e arquivos, etapa antes do login |
 | `core/media.py` | Pendrive comum (D-034): reconhecer a mídia de instalação, marcar o `autounattend.xml` do WinKit |
@@ -326,6 +327,7 @@ runner.run(
 | R-53 | `tests/agent/test_wifi.py::test_wifi_password_never_logged` (a senha da fixture não aparece em log, estado nem resumo) |
 | R-54 | `tests/agent/test_live.py::test_preview_never_writes` (todo serviço de escrita falha durante a prévia) |
 | D-002 (V2-08) | `tests/agent/test_features.py::test_iso_is_dismounted_even_when_enabling_fails` (a ISO é sempre desmontada) |
+| `hosts` (V2-16) | `tests/agent/test_network_privacy.py::test_hosts_block_roundtrip_keeps_user_bytes` (CRLF, LF, BOM, Latin-1) e `test_catalogs_are_safe` (nenhum domínio da Microsoft) |
 | XML (IN-015) | `test_no_global_xml_namespace_registration` e `test_strip_key_does_not_change_other_xml` |
 | R-55 | `tests/i18n/test_usage.py::test_no_loose_ui_strings` (AST em `studio`, `agent/ui`, `ui`, `cli`) |
 | Empacotamento | `test_no_dynamic_imports_in_package` (IN-013) |

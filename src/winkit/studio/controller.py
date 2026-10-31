@@ -53,6 +53,7 @@ from winkit.core.recipe.models import (
 from winkit.core.recipe.validation import ValidationReport, validate_recipe
 from winkit.core.winget_manifest import split_args
 from winkit.i18n import current_language
+from winkit.platform import hosts
 from winkit.platform.services import Services
 from winkit.platform.vss import PendingSnapshots
 
@@ -316,6 +317,10 @@ class StudioController:
     def set_feature(self, feature_id: str, enabled: bool) -> None:
         feature_collector.set_feature(self.require_recipe(), feature_id, enabled)
         self.save()
+
+    def remove_hosts_block(self) -> bool:
+        """Desfazer (V2-16): tira o bloco do WinKit do ``hosts`` deste PC."""
+        return hosts.remove_block(hosts.hosts_file(self.services.folders.windows_dir()))
 
     def set_wifi_include_key(self, network_id: str, include: bool) -> bool:
         ok = wifi_collector.set_include_key(self.root, self.require_recipe(), network_id, include)

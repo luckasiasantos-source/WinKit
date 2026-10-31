@@ -374,6 +374,8 @@ KIND_STYLE: dict[str, tuple[str, str]] = {
     "wifi": ("dot", "#32ADE6"),
     "feature": ("chip", "#5AC8FA"),
     "driver_report": ("check", "#636366"),
+    "dns": ("check", "#30B0C7"),
+    "hosts": ("minus", "#30B0C7"),
     "finalize": ("check", "#34C759"),
 }
 
