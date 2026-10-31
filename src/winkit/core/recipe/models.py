@@ -88,6 +88,8 @@ class WindowsSettings(_Model):
     #: D-020: ligado por padrão — o Windows não criptografa o disco sozinho.
     prevent_device_encryption: bool = True
     account: Account
+    #: V2-08: ids de ``features.yaml`` a ligar (nunca desliga nada).
+    optional_features: list[ItemId] = Field(default_factory=list)
 
 
 class Updates(_Model):

@@ -58,3 +58,49 @@ def language_code(raw: str) -> str | None:
     """Extrai só o código de cultura (``"pt-BR (Padrão)"`` → ``"pt-BR"``) — R-13."""
     match = _LANG_RE.match(raw.strip())
     return match.group(1) if match else None
+
+
+# ------------------------------------------------------------------ índice para o Agente (V2-08)
+class IsoIndexEntry(BaseModel):
+    """O que o Agente precisa saber de cada ISO para achar a fonte offline do .NET 3.5."""
+
+    model_config = ConfigDict(frozen=True)
+    image: str  # "/pasta/x.iso", relativo à raiz do pendrive
+    build: int | None = None
+    architecture: IsoArch = "unknown"
+    languages: tuple[str, ...] = ()
+
+
+class IsoIndex(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    isos: tuple[IsoIndexEntry, ...] = ()
+
+
+def iso_index(infos: list[IsoInfo]) -> IsoIndex:
+    return IsoIndex(
+        isos=tuple(
+            IsoIndexEntry(
+                image=i.image, build=i.build, architecture=i.architecture, languages=i.languages
+            )
+            for i in infos
+            if i.is_windows
+        )
+    )
+
+
+def pick_iso(
+    index: IsoIndex, *, build: int | None, architecture: str, language: str | None
+) -> IsoIndexEntry | None:
+    """A ISO do mesmo build e arquitetura do Windows em execução; prefere o mesmo idioma.
+
+    Sem o build não há como garantir que os arquivos batem: nenhuma ISO é escolhida.
+    """
+    if build is None:
+        return None
+    same = [i for i in index.isos if i.build == build and i.architecture == architecture]
+    if language:
+        lang = language.casefold()
+        preferred = [i for i in same if lang in (x.casefold() for x in i.languages)]
+        if preferred:
+            return preferred[0]
+    return same[0] if same else None

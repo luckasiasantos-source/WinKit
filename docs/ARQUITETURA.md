@@ -139,6 +139,7 @@ Por que isso importa:
 | `agent/live.py` | Modo "aplicar neste PC" (D-033): plano ao vivo, prévia sem escrita, ponto de restauração antes, estado e resumo por aplicação em `ProgramData\WinKit\Aplicacoes` |
 | `agent/steps/restore.py`, `platform/restore.py` | Ponto de restauração (V2-10) por CIM `SystemRestore` e `Win32_ShadowStorage` |
 | `core/live.py` | Modelos da prévia (`PreviewItem`, `LivePreview`) |
+| `data/features.yaml`, `platform/features.py`, `platform/iso_mount.py`, `collector/features.py`, `agent/steps/feature.py` | Recursos do Windows (V2-08): catálogo, liga recursos e capacidades, monta a ISO só para leitura (D-043) |
 | `core/secrets.py` | Registro único de segredos do processo (R-53); `runner` e `EventLog` mascaram |
 | `core/wifi.py`, `collector/wifi.py`, `platform/wifi.py`, `agent/steps/wifi.py` | Wi-Fi (V2-02): XML do perfil, coleta, `netsh` só por código de saída e arquivos, etapa antes do login |
 | `core/media.py` | Pendrive comum (D-034): reconhecer a mídia de instalação, marcar o `autounattend.xml` do WinKit |
@@ -323,6 +324,7 @@ runner.run(
 | R-51 | `tests/i18n/test_parity.py` (chaves, marcadores, plurais) e `tests/i18n/test_usage.py` (toda chave usada existe; toda chave existente é usada) |
 | R-53 | `tests/agent/test_wifi.py::test_wifi_password_never_logged` (a senha da fixture não aparece em log, estado nem resumo) |
 | R-54 | `tests/agent/test_live.py::test_preview_never_writes` (todo serviço de escrita falha durante a prévia) |
+| D-002 (V2-08) | `tests/agent/test_features.py::test_iso_is_dismounted_even_when_enabling_fails` (a ISO é sempre desmontada) |
 | XML (IN-015) | `test_no_global_xml_namespace_registration` e `test_strip_key_does_not_change_other_xml` |
 | R-55 | `tests/i18n/test_usage.py::test_no_loose_ui_strings` (AST em `studio`, `agent/ui`, `ui`, `cli`) |
 | Empacotamento | `test_no_dynamic_imports_in_package` (IN-013) |
@@ -536,3 +538,9 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 ### D-042 — Barra lateral do Studio agrupada e com busca
 2026-10-31 · aceita
 **Decisão:** seções em grupos (Preparar, O que levar, Sistema, Rede, Concluir), campo de busca e Preferências (idioma e tema) no rodapé.
+
+### D-043 — Segunda chance na Fase 2 e ISO montada só para leitura
+2026-10-31 · aceita
+**Contexto:** o .NET 3.5 precisa da pasta `sources\sxs` da mídia de instalação; sem ela, só pela internet (Fase 2). Um mesmo modelo do Ventoy serve a várias ISOs, então o nome da ISO não pode ir no XML.
+**Decisão:** o Construtor grava `WinKit/isos.json` (imagem, build, arquitetura, idiomas) no modo Ventoy. A etapa `feature` usa, nesta ordem, `sources\sxs` do pendrive comum, a ISO do mesmo build montada com `Mount-DiskImage -Access ReadOnly` (desmontada sempre em `finally`, D-002) ou, na Fase 2, o Windows Update. Etapas da Fase 1 com `PlannedStep.phase2_fallback` que ficarem pendentes rodam de novo no começo da Fase 2, sem esperar o pendrive.
+**Consequências:** o .NET 3.5 instala sem internet antes do login quando há ISO do mesmo build; sem ela, a instalação continua e o recurso entra depois do login. Os outros tipos de etapa não ganharam a segunda chance (DT-020).

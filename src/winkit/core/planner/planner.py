@@ -32,6 +32,7 @@ _G1 = {
     "wifi": 15,  # R17: logo depois dos drivers (precisa do driver de rede)
     "power": 20,
     "bloat": 30,
+    "feature": 35,
     "tweak": 40,
     "backup": 50,
     "app": 60,
@@ -39,6 +40,7 @@ _G1 = {
 _G2 = {
     "backup": 20,
     "app": 30,
+    "feature": 35,
     "tweak": 40,
     "shortcut": 50,
     "rename_computer": 60,
@@ -71,6 +73,7 @@ class _Draft:
     needs_network: bool = False
     depends_on: list[str] = field(default_factory=list)
     user_choice: bool = False
+    phase2_fallback: bool = False
     sort: tuple[int, int, str] = (0, 0, "")
 
     @property
@@ -93,6 +96,7 @@ def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> 
     _plan_wifi(recipe, drafts)
     _plan_power(recipe, drafts)
     _plan_bloat(recipe, catalogs, ctx, drafts, excluded)
+    _plan_features(recipe, catalogs, ctx, drafts, excluded)
     _plan_tweaks(recipe, catalogs, ctx, ask, out=drafts, excluded=excluded)
     post_install = {b for a in recipe.selected_apps() for b in a.restore_backups_after_install}
     _plan_backups(recipe, ask, post_install, drafts)
@@ -187,6 +191,58 @@ def _plan_bloat(
                 sort=(_G1["bloat"], 0, pkg),
             )
         )
+
+
+def _plan_features(
+    recipe: Recipe,
+    catalogs: Catalogs,
+    ctx: PlanContext,
+    out: list[_Draft],
+    excluded: list[ExcludedItem],
+) -> None:  # R19
+    for feature_id in dict.fromkeys(recipe.windows.optional_features):
+        entry = catalogs.feature(feature_id)
+        if entry is None:
+            reason = t("plan.excluded_unknown_feature")
+            excluded.append(ExcludedItem(kind="feature", ref=feature_id, reason=reason))
+            continue
+        if not entry.windows.applies(ctx.os_major, ctx.build):
+            excluded.append(
+                ExcludedItem(kind="feature", ref=feature_id, reason=t("plan.excluded_os"))
+            )
+            continue
+        if not entry.windows.allows_edition(recipe.windows.edition):
+            reason = t("plan.excluded_edition")
+            excluded.append(ExcludedItem(kind="feature", ref=feature_id, reason=reason))
+            continue
+        offline = entry.offline_source is not None
+        title = t("plan.feature", name=entry.name)
+        if not entry.needs_network or offline:
+            # sem internet ou com fonte offline: antes do login; sem a fonte, tenta na Fase 2
+            out.append(
+                _Draft(
+                    "feature",
+                    feature_id,
+                    1,
+                    title,
+                    "machine",
+                    needs_pendrive=offline,
+                    phase2_fallback=offline and entry.needs_network,
+                    sort=(_G1["feature"], 0, feature_id),
+                )
+            )
+        else:
+            out.append(
+                _Draft(
+                    "feature",
+                    feature_id,
+                    2,
+                    title,
+                    "machine",
+                    needs_network=True,
+                    sort=(_G2["feature"], 0, feature_id),
+                )
+            )
 
 
 def _plan_tweaks(
@@ -494,6 +550,7 @@ def _finalize(drafts: list[_Draft], ctx: PlanContext) -> list[PlannedStep]:
                     depends_on=tuple(x for x in d.depends_on if x in known),
                     user_choice=d.user_choice,
                     moved_from_phase1=moved,
+                    phase2_fallback=d.phase2_fallback and not moved,
                 ),
             )
         )

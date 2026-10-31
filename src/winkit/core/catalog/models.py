@@ -6,7 +6,7 @@ from typing import Annotated, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from winkit.core.recipe.models import AfterInstall, InstallerType, OsMajor, Scope
+from winkit.core.recipe.models import AfterInstall, Edition, InstallerType, OsMajor, Scope
 
 Hive = Literal["HKLM", "HKCU"]
 RegType = Literal["dword", "qword", "sz", "expand_sz", "multi_sz", "binary"]
@@ -24,6 +24,11 @@ class OsFilter(_Model):
     os: list[OsMajor] = Field(default_factory=_both_os)
     min_build: int | None = None
     max_build: int | None = None
+    #: Edições em que o item existe (vazio = todas), ex.: Sandbox só a partir do Pro.
+    editions: list[Edition] = Field(default_factory=list)
+
+    def allows_edition(self, edition: str | None) -> bool:
+        return not self.editions or edition is None or edition in self.editions
 
     def applies(self, os_major: int | None, build: int | None) -> bool:
         if os_major is not None and os_major not in self.os:
@@ -74,6 +79,10 @@ class OptionalFeature(_Model):
     feature: str
 
 
+class Capability(_Model):
+    name: str
+
+
 class Powercfg(_Model):
     args: list[str]
 
@@ -98,6 +107,8 @@ class TweakOp(_Model):
     service_start_type: ServiceStartType | None = None
     optional_feature_disable: OptionalFeature | None = None
     optional_feature_enable: OptionalFeature | None = None
+    capability_add: Capability | None = None
+    capability_remove: Capability | None = None
     powercfg: Powercfg | None = None
     appx_remove: AppxRemove | None = None
 
@@ -191,6 +202,50 @@ class AppCatalogEntry(_Model):
     close_before_capture: bool = False
 
 
+# ------------------------------------------------------------------ recursos do Windows
+class FeaturePart(_Model):
+    """Uma parte de um recurso: um *optional feature* ou uma *capability* (nunca as duas)."""
+
+    feature: str | None = None
+    capability: str | None = None
+    #: Pasta da mídia de instalação com os arquivos do recurso (ex.: ``sources/sxs``).
+    offline_source: str | None = None
+
+    @model_validator(mode="after")
+    def _one(self) -> Self:
+        if (self.feature is None) == (self.capability is None):
+            raise ValueError("cada parte deve ter 'feature' ou 'capability'")
+        if self.offline_source is not None and self.feature is None:
+            raise ValueError("'offline_source' só vale para 'feature'")
+        return self
+
+    @property
+    def name(self) -> str:
+        return self.feature or self.capability or ""
+
+
+class FeatureEntry(_Model):
+    id: Annotated[str, Field(pattern=r"^[a-z0-9_]+$")]
+    name: str
+    description: str
+    parts: Annotated[list[FeaturePart], Field(min_length=1)]
+    #: Precisa de internet quando não há fonte offline (capacidades sempre precisam).
+    needs_network: bool = False
+    restart: bool = False
+    windows: OsFilter = Field(default_factory=OsFilter)
+    source: Annotated[str, Field(min_length=5)]
+
+    @property
+    def offline_source(self) -> str | None:
+        return next((p.offline_source for p in self.parts if p.offline_source), None)
+
+    @model_validator(mode="after")
+    def _capability_needs_network(self) -> Self:
+        if any(p.capability for p in self.parts) and not self.needs_network:
+            raise ValueError(f"{self.id}: capacidades são baixadas e exigem 'needs_network'")
+        return self
+
+
 # ------------------------------------------------------------------ outros
 class EditionEntry(_Model):
     id: str
@@ -231,6 +286,10 @@ class Catalogs(_Model):
     dpapi_patterns: list[DpapiPattern]
     default_excludes: list[str]
     driver_classes: list[DriverClass]
+    features: list[FeatureEntry] = Field(default_factory=list)
+
+    def feature(self, feature_id: str) -> FeatureEntry | None:
+        return next((x for x in self.features if x.id == feature_id), None)
 
     def tweak(self, tweak_id: str) -> Tweak | None:
         return next((x for x in self.tweaks if x.id == tweak_id), None)

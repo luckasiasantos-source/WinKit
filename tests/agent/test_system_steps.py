@@ -112,7 +112,7 @@ def test_already_applied_is_checked(world: World) -> None:
 def test_optional_feature_and_failure(world: World) -> None:
     feats = world.services.features
     assert isinstance(feats, FakeFeatures)
-    feats.states["Recall"] = True
+    feats.known["Recall"] = True
     feats.restart = True
     r = world.recipe()
     r.tweaks = [tweak("privacy.recall"), tweak("visual.dark_theme")]
@@ -120,7 +120,7 @@ def test_optional_feature_and_failure(world: World) -> None:
     reg(world).fail_on.add("Themes")
     run_phase1(world.runtime())
     s = state(world)
-    assert feats.states["Recall"] is False
+    assert feats.known["Recall"] is False
     assert s.step("tweak:privacy.recall").reboot_required
     assert s.step("tweak:visual.dark_theme").status == "failed"
     assert reg(world).mounted == {}  # desmontado mesmo com erro
@@ -233,7 +233,7 @@ def test_every_catalog_tweak_applies_cleanly(world: World, target: str) -> None:
 
     feats = world.services.features
     assert isinstance(feats, FakeFeatures)
-    feats.states["Recall"] = True
+    feats.known["Recall"] = True
     rt = world.runtime()
     s = open_session(rt, EventLog(rt.paths.logs, rt.clock), phase=1)
     assert s is not None

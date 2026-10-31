@@ -10,6 +10,7 @@ from winkit.core.regional import RegionalDefaults
 from winkit.platform.copy import Copier, RobocopyCopier
 from winkit.platform.disks import DiskInspector, WindowsDiskInspector
 from winkit.platform.drivers import DriverManager, WindowsDriverManager
+from winkit.platform.features import SystemFeatures, WindowsSystemFeatures
 from winkit.platform.inventory import AppInventory, WindowsAppInventory
 from winkit.platform.known_folders import KnownFolders, WindowsKnownFolders
 from winkit.platform.locale import read_regional
@@ -36,6 +37,7 @@ class Services:
     #: Formatos, teclado e fuso do PC atual para a receita nova (D-030).
     regional: Callable[[], RegionalDefaults] = field(default=RegionalDefaults)
     wifi: WifiManager | None = None
+    features: SystemFeatures | None = None
 
 
 def real_services() -> Services:
@@ -53,4 +55,5 @@ def real_services() -> Services:
         folders=WindowsKnownFolders(registry),
         regional=lambda: read_regional(registry),
         wifi=WindowsWifi(runner),
+        features=WindowsSystemFeatures(ps),
     )

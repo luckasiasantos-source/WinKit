@@ -371,6 +371,8 @@ KIND_STYLE: dict[str, tuple[str, str]] = {
     "rename_computer": ("pencil", "#AF52DE"),
     "windows_update": ("refresh", "#0A84FF"),
     "restore_point": ("check", "#FF9500"),
+    "wifi": ("dot", "#32ADE6"),
+    "feature": ("chip", "#5AC8FA"),
     "finalize": ("check", "#34C759"),
 }
 

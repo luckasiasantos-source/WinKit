@@ -18,6 +18,8 @@ from winkit.core.errors import PendriveError
 WINKIT = "WinKit"
 MARKER = f"{WINKIT}/winkit.marker"
 MANIFEST = f"{WINKIT}/manifesto.json"
+#: Índice das ISOs do pendrive para o Agente achar a fonte do .NET 3.5 (V2-08).
+ISOS_INDEX = f"{WINKIT}/isos.json"
 AGENT_DIR = f"{WINKIT}/Agent"
 AGENT_BIN_DIR = f"{AGENT_DIR}/winkit-agent"
 AGENT_EXE_NAME = "winkit-agent.exe"

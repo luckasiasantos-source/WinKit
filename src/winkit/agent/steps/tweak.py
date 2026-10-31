@@ -87,6 +87,13 @@ def apply_op(ctx: StepContext, tweak: Tweak, op: TweakOp) -> bool:
         result = ctx.services.features.set_optional_feature(feature.feature, enabled=enable)
         ctx.log.info(f"recurso {feature.feature}: {result}", step=ctx.step.id)
         return result == "restart"
+    elif op.capability_add is not None or op.capability_remove is not None:
+        cap = op.capability_add or op.capability_remove
+        assert cap is not None  # noqa: S101 — garantido pelo ramo
+        installed = op.capability_add is not None
+        result = ctx.services.features.set_capability(cap.name, installed=installed)
+        ctx.log.info(f"capacidade {cap.name}: {result}", step=ctx.step.id)
+        return result == "restart"
     elif op.powercfg is not None:
         res = ctx.services.runner.run(
             [str(system32("powercfg.exe")), *op.powercfg.args], timeout=120

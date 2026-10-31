@@ -292,3 +292,34 @@ dpapi_patterns:
     what: Windows DPAPI keys cannot be transferred
   dpapi_generic:
     what: file protected by Windows; it will not work on another machine
+features:
+  wsl:
+    name: Windows Subsystem for Linux (WSL)
+    description: Run Linux inside Windows. The kernel is downloaded the first time you use the wsl command.
+  vm_platform:
+    name: Virtual Machine Platform
+    description: Virtualization base used by WSL 2 and by third-party Android apps.
+  sandbox:
+    name: Windows Sandbox
+    description: A disposable Windows to try programs without risk to yours.
+  hyperv:
+    name: Hyper-V
+    description: Full virtual machines with Hyper-V Manager.
+  netfx3:
+    name: .NET Framework 3.5
+    description: Required by old programs and games. Installed without internet from the setup media when possible.
+  openssh_client:
+    name: OpenSSH Client
+    description: The ssh command to reach other computers.
+  openssh_server:
+    name: OpenSSH Server
+    description: Lets you reach this computer over SSH. Opens port 22 in the firewall.
+  telnet_client:
+    name: Telnet Client
+    description: The telnet command, useful to test network ports.
+  tftp_client:
+    name: TFTP Client
+    description: The tftp command, used to update routers and other devices.
+  iis:
+    name: IIS web server (basic)
+    description: Microsoft's web server with the default options.

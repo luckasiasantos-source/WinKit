@@ -31,6 +31,7 @@ from winkit.builder.validate import PendriveReport, validate_pendrive
 from winkit.collector import apps as app_collector
 from winkit.collector import backups as backup_collector
 from winkit.collector import drivers as driver_collector
+from winkit.collector import features as feature_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import layout
 from winkit.core.catalog.loader import default_catalogs
@@ -301,6 +302,20 @@ class StudioController:
         added = wifi_collector.collect_wifi(self.services.wifi, self.root, recipe)
         self.save()
         return added
+
+    def read_features(self) -> list[str]:
+        """Marca os recursos do Windows ligados neste PC (V2-08); devolve os novos."""
+        recipe = self.require_recipe()
+        if self.services.features is None:
+            return []
+        added = feature_collector.add_enabled_here(self.services.features, self.catalogs, recipe)
+        if added:
+            self.save()
+        return added
+
+    def set_feature(self, feature_id: str, enabled: bool) -> None:
+        feature_collector.set_feature(self.require_recipe(), feature_id, enabled)
+        self.save()
 
     def set_wifi_include_key(self, network_id: str, include: bool) -> bool:
         ok = wifi_collector.set_include_key(self.root, self.require_recipe(), network_id, include)

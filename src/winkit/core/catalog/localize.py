@@ -34,11 +34,17 @@ class WhatText(_Model):
     what: str
 
 
+class FeatureText(_Model):
+    name: str
+    description: str
+
+
 class CatalogTranslation(_Model):
     tweaks: dict[str, TweakText] = Field(default_factory=dict)
     bloatware: dict[str, BloatText] = Field(default_factory=dict)
     driver_classes: dict[str, LabelText] = Field(default_factory=dict)
     dpapi_patterns: dict[str, WhatText] = Field(default_factory=dict)
+    features: dict[str, FeatureText] = Field(default_factory=dict)
 
 
 def localize(catalogs: Catalogs, tr: CatalogTranslation) -> Catalogs:
@@ -70,8 +76,13 @@ def localize(catalogs: Catalogs, tr: CatalogTranslation) -> Catalogs:
         else p
         for p in catalogs.dpapi_patterns
     ]
+    features = [
+        f.model_copy(update=tr.features[f.id].model_dump()) if f.id in tr.features else f
+        for f in catalogs.features
+    ]
     return catalogs.model_copy(
         update={
+            "features": features,
             "tweaks": tweaks,
             "bloatware": bloatware,
             "driver_classes": classes,
@@ -97,6 +108,7 @@ def missing_translations(catalogs: Catalogs, tr: CatalogTranslation) -> list[str
     out += [
         f"dpapi_patterns.{p.id}" for p in catalogs.dpapi_patterns if p.id not in tr.dpapi_patterns
     ]
+    out += [f"features.{f.id}" for f in catalogs.features if f.id not in tr.features]
     return out
 
 
@@ -108,4 +120,5 @@ def orphan_translations(catalogs: Catalogs, tr: CatalogTranslation) -> list[str]
     out += [f"driver_classes.{k}" for k in tr.driver_classes if k not in names]
     ids = {p.id for p in catalogs.dpapi_patterns}
     out += [f"dpapi_patterns.{k}" for k in tr.dpapi_patterns if k not in ids]
+    out += [f"features.{k}" for k in tr.features if catalogs.feature(k) is None]
     return out

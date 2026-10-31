@@ -28,6 +28,26 @@
 
 ---
 
+## 2026-10-31 — M14 — Recursos do Windows (V2-08)
+**Tipo:** implementação
+**Resumo:** a receita liga recursos do Windows já na instalação (WSL, Área Restrita, Hyper-V, .NET 3.5, OpenSSH, Telnet, TFTP, IIS). Os que não precisam de internet entram antes do login; o .NET 3.5 instala sem internet pela mídia de instalação, montando a ISO original só para leitura (D-043).
+
+### Adicionado
+- `src/winkit/data/features.yaml` (+ traduções em `i18n_en_us.yaml` e `i18n_es.yaml`)
+- `src/winkit/platform/iso_mount.py`, `src/winkit/collector/features.py`, `src/winkit/agent/steps/feature.py`
+- Catálogo: `FeatureEntry`, `FeaturePart`, `OsFilter.editions`; operações `capability_add`/`capability_remove` (R-34)
+- Receita: `windows.optional_features`; plano: tipo `feature` e `PlannedStep.phase2_fallback`
+- Construtor: `WinKit/isos.json` no modo Ventoy; `core/isos.py`: `IsoIndex`, `pick_iso`
+- Studio: seção "Recursos do Windows" (grupo Sistema); CLI: `recursos listar|marcar|desmarcar`, `coletar recursos`
+- Testes: `tests/agent/test_features.py`
+
+### Alterado
+- `src/winkit/platform/features.py` — recursos com fonte offline (`-Source -LimitAccess`), capacidades e consulta de estados por enum
+- `src/winkit/agent/executor.py` — segunda chance na Fase 2 para etapas marcadas
+
+### Documentos vivos atualizados
+- ARQUITETURA — D-043, módulos, verificação D-002; STATUS — V2-08, H21, H22; DIVIDAS — DT-020
+
 ## 2026-10-31 — M14 — Wi-Fi e registro de segredos
 **Tipo:** implementação + correção
 **Resumo:** as redes Wi-Fi salvas no PC atual passam a ser conectadas no Windows novo antes do primeiro login, com opção de levar sem a senha (V2-02, D-036). Novo registro de segredos (R-53) mascarado em todo log. Corrige um efeito colateral global do ElementTree que alterava o `autounattend.xml` (IN-015). A release 0.4.0 foi publicada antes deste commit.

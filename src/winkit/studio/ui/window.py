@@ -82,6 +82,7 @@ GROUPS: tuple[SectionGroup, ...] = (
             Section("bloat", "trash", "#FF3B30", pages.BloatPage),
             Section("tweaks", "sliders", "#5856D6", pages.TweaksPage),
             Section("energy", "bolt", "#FF9500", pages.EnergyPage),
+            Section("features", "chip", "#5AC8FA", pages.FeaturesPage),
         ),
     ),
     SectionGroup(

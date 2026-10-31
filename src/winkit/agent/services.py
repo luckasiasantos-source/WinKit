@@ -12,6 +12,7 @@ from winkit.platform.environment import Environment, WindowsEnvironment
 from winkit.platform.features import SystemFeatures, WindowsSystemFeatures
 from winkit.platform.installers import InstallerRunner, WindowsInstallerRunner
 from winkit.platform.inventory import AppInventory, WindowsAppInventory
+from winkit.platform.iso_mount import IsoMounter, WindowsIsoMounter
 from winkit.platform.known_folders import KnownFolders, WindowsKnownFolders
 from winkit.platform.power import SessionControl, WindowsSessionControl
 from winkit.platform.powershell import PowerShell
@@ -46,6 +47,7 @@ class AgentServices:
     session: SessionControl
     restore: RestorePoints
     wifi: WifiManager
+    iso: IsoMounter
 
 
 def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windows
@@ -72,4 +74,5 @@ def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windo
         session=WindowsSessionControl(runner),
         restore=WindowsRestorePoints(ps),
         wifi=WindowsWifi(runner),
+        iso=WindowsIsoMounter(ps),
     )

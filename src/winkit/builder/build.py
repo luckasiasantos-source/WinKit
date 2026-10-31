@@ -22,7 +22,7 @@ from winkit.core import layout, media
 from winkit.core.catalog.models import Catalogs
 from winkit.core.errors import PendriveError, RecipeError, WinKitError
 from winkit.core.fsutil import atomic_write_text, write_if_changed
-from winkit.core.isos import IsoInfo
+from winkit.core.isos import IsoInfo, iso_index
 from winkit.core.manifest.manifest import Manifest, diff, dump_manifest, load_manifest, scan
 from winkit.core.recipe.io import dump_recipe, load_recipe
 from winkit.core.recipe.models import Recipe
@@ -286,6 +286,8 @@ def build(
             report=report,
         )
         _update_ventoy_json(root, recipe, entries)
+        index = iso_index(isos)
+        atomic_write_text(root / layout.ISOS_INDEX, index.model_dump_json(indent=2) + "\n")
     _copy_agent(root, options, report)
     if not options.xml_only:
         _write_manifest(root, report)

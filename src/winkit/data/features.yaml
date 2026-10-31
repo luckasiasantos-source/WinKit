@@ -1,0 +1,75 @@
+# Recursos do Windows que o WinKit sabe ligar (V2-08, M14).
+# Cada item liga uma ou mais partes: "feature" (Enable-WindowsOptionalFeature) ou
+# "capability" (Add-WindowsCapability). O WinKit nunca desliga recursos por aqui.
+# "offline_source" é uma pasta relativa à raiz da mídia de instalação (sources/sxs).
+- id: wsl
+  name: Subsistema do Windows para Linux (WSL)
+  description: Rodar Linux dentro do Windows. O kernel é baixado no primeiro uso do comando wsl.
+  parts:
+    - {feature: Microsoft-Windows-Subsystem-Linux}
+    - {feature: VirtualMachinePlatform}
+  restart: true
+  source: https://learn.microsoft.com/windows/wsl/install-manual
+- id: vm_platform
+  name: Plataforma de Máquina Virtual
+  description: Base de virtualização usada pelo WSL 2 e pelo Android de outros fornecedores.
+  parts:
+    - {feature: VirtualMachinePlatform}
+  restart: true
+  source: https://learn.microsoft.com/windows/wsl/install-manual
+- id: sandbox
+  name: Área Restrita do Windows (Sandbox)
+  description: Um Windows descartável para testar programas sem risco para o seu.
+  parts:
+    - {feature: Containers-DisposableClientVM}
+  restart: true
+  windows: {editions: [pro, pro_n, pro_workstations, education, enterprise]}
+  source: https://learn.microsoft.com/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-install
+- id: hyperv
+  name: Hyper-V
+  description: Máquinas virtuais completas com o Gerenciador do Hyper-V.
+  parts:
+    - {feature: Microsoft-Hyper-V-All}
+  restart: true
+  windows: {editions: [pro, pro_n, pro_workstations, education, enterprise]}
+  source: https://learn.microsoft.com/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v
+- id: netfx3
+  name: .NET Framework 3.5
+  description: Exigido por programas e jogos antigos. Instalado sem internet a partir da mídia de instalação, quando possível.
+  parts:
+    - {feature: NetFx3, offline_source: sources/sxs}
+  needs_network: true
+  source: https://learn.microsoft.com/windows-hardware/manufacture/desktop/deploy-net-framework-35-by-using-deployment-image-servicing-and-management--dism
+- id: openssh_client
+  name: Cliente OpenSSH
+  description: O comando ssh para acessar outros computadores.
+  parts:
+    - {capability: OpenSSH.Client~~~~0.0.1.0}
+  needs_network: true
+  source: https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
+- id: openssh_server
+  name: Servidor OpenSSH
+  description: Permite acessar este computador por SSH. Abre a porta 22 no firewall.
+  parts:
+    - {capability: OpenSSH.Server~~~~0.0.1.0}
+  needs_network: true
+  source: https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
+- id: telnet_client
+  name: Cliente Telnet
+  description: O comando telnet, útil para testar portas de rede.
+  parts:
+    - {feature: TelnetClient}
+  source: https://learn.microsoft.com/windows-server/administration/windows-commands/telnet
+- id: tftp_client
+  name: Cliente TFTP
+  description: O comando tftp, usado para atualizar roteadores e outros aparelhos.
+  parts:
+    - {feature: TFTP}
+  source: https://learn.microsoft.com/windows-server/administration/windows-commands/tftp
+- id: iis
+  name: Servidor web IIS (básico)
+  description: Servidor de páginas da Microsoft com as opções padrão.
+  parts:
+    - {feature: IIS-WebServerRole}
+    - {feature: IIS-WebServer}
+  source: https://learn.microsoft.com/iis/install/installing-iis-85/installing-iis-85-on-windows-server-2012-r2

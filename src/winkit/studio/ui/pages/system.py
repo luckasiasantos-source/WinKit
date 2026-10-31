@@ -5,13 +5,21 @@ from __future__ import annotations
 from collections.abc import Callable
 from functools import partial
 
-from PySide6.QtWidgets import QSpinBox
+from PySide6.QtWidgets import QMessageBox, QSpinBox
 
 from winkit.core.recipe.models import Recipe, TweakSelection
-from winkit.i18n import t
+from winkit.i18n import t, tn
 from winkit.studio.ui.base import Page
 from winkit.studio.ui.pages.common import choice_row, combo, toggle
-from winkit.ui.widgets import Card, Row, SegmentedControl, kind_icon, section, symbol_icon
+from winkit.ui.widgets import (
+    Card,
+    Row,
+    SegmentedControl,
+    button,
+    kind_icon,
+    section,
+    symbol_icon,
+)
 
 
 class BloatPage(Page):
@@ -256,3 +264,55 @@ class EnergyPage(Page):
         if self.ctl.recipe is not None:
             setattr(self.ctl.recipe.updates, attr, value)
             self.save()
+
+
+class FeaturesPage(Page):
+    """V2-08: recursos do Windows ligados já na instalação (nunca desliga nada)."""
+
+    title_key = "studio.features.title"
+    subtitle_key = "studio.features.subtitle"
+
+    def refresh(self) -> None:
+        self.clear_content()
+        if self.needs_recipe():
+            return
+        r = self.ctl.recipe
+        assert r is not None  # noqa: S101
+        self.content.addLayout(
+            self.toolbar(button(t("studio.features.read"), "Secondary", self._read))
+        )
+        chosen = set(r.windows.optional_features)
+        card = Card()
+        for f in self.ctl.catalogs.features:
+            if not any(o in r.windows.target_os for o in f.windows.os):
+                continue
+            allowed = f.windows.allows_edition(r.windows.edition)
+            badges = []
+            if f.needs_network:
+                key = "studio.features.offline" if f.offline_source else "studio.features.network"
+                badges.append(t(key))
+            if f.restart:
+                badges.append(t("studio.features.restart"))
+            if not allowed:
+                badges.append(t("studio.features.needs_pro"))
+            detail = f.description + ("\n" + " · ".join(badges) if badges else "")
+            card.add_row(
+                choice_row(
+                    f.name,
+                    detail,
+                    icon_kind="feature",
+                    selected=allowed and f.id in chosen,
+                    enabled=allowed,
+                    on_select=partial(self.ctl.set_feature, f.id),
+                )
+            )
+        self.content.addWidget(section("", card, footer=t("studio.features.footer")))
+
+    def _read(self) -> None:
+        def done(added: list[str]) -> None:
+            self.refresh()
+            QMessageBox.information(
+                self, t("app.name"), tn("studio.features.read_done", len(added))
+            )
+
+        self.tasks.run(t("studio.features.reading"), self.ctl.read_features, done)

@@ -24,6 +24,7 @@ FILES: dict[str, str] = {
     "dpapi_patterns": "dpapi_patterns.yaml",
     "default_excludes": "default_excludes.yaml",
     "driver_classes": "driver_classes.yaml",
+    "features": "features.yaml",
 }
 
 
@@ -65,6 +66,7 @@ def _check_unique(c: Catalogs) -> None:
         "editions.yaml": [e.id for e in c.editions],
         "dpapi_patterns.yaml": [d.id for d in c.dpapi_patterns],
         "driver_classes.yaml": [d.name.casefold() for d in c.driver_classes],
+        "features.yaml": [f.id for f in c.features],
     }
     for name, ids in groups.items():
         dupes = sorted({i for i in ids if ids.count(i) > 1})

@@ -109,6 +109,13 @@ class Executor:
     def run_phase(self, phase: int, selection: frozenset[str] | None = None) -> PhaseOutcome:
         outcome = PhaseOutcome()
         steps = self.plan.phase(phase)
+        if phase == 2:  # etapas da Fase 1 adiadas que têm uma segunda chance (V2-08)
+            leftovers = [
+                s
+                for s in self.plan.phase(1)
+                if s.phase2_fallback and st.should_run(self.state.step(s.id))
+            ]
+            steps = leftovers + steps
         total = len(steps)
         for index, step in enumerate(steps):
             self.ui.progress(index, total, step.title)
@@ -160,8 +167,13 @@ class Executor:
             self.store.save(state)
             return "deferred"
 
-        if step.needs_pendrive and not self._wait_for(
-            lambda: self.pendrive() is not None, self.waits.pendrive_seconds, "pendrive"
+        second_chance = phase == 2 and step.phase2_fallback
+        if (
+            step.needs_pendrive
+            and not second_chance
+            and not self._wait_for(
+                lambda: self.pendrive() is not None, self.waits.pendrive_seconds, "pendrive"
+            )
         ):
             sst.reason = msg("agent.reconnect_pendrive")
             self.log.warning("pendrive ausente; etapa adiada", step=step.id)

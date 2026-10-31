@@ -37,6 +37,7 @@ from winkit.builder.validate import validate_pendrive
 from winkit.collector import apps as app_collector
 from winkit.collector import backups as backup_collector
 from winkit.collector import drivers as driver_collector
+from winkit.collector import features as feature_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import layout
 from winkit.core.catalog.loader import default_catalogs
@@ -572,6 +573,55 @@ def cmd_wifi_marcar(args: argparse.Namespace, services: Services, out: Out) -> i
     return cmd_wifi_listar(args, services, out)
 
 
+# ------------------------------------------------------------------ recursos do Windows (V2-08)
+def cmd_recursos_listar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    catalogs = default_catalogs()
+    chosen = set(recipe.windows.optional_features)
+    for f in catalogs.features:
+        mark = "x" if f.id in chosen else " "
+        notes = []
+        if f.needs_network:
+            notes.append(
+                t("studio.features.offline" if f.offline_source else "studio.features.network")
+            )
+        if f.restart:
+            notes.append(t("studio.features.restart"))
+        if not f.windows.allows_edition(recipe.windows.edition):
+            notes.append(t("studio.features.needs_pro"))
+        out(f"  [{mark}] {f.id:16} {f.name}" + (f"  ({', '.join(notes)})" if notes else ""))
+    return 0
+
+
+def cmd_recursos_marcar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    catalogs = default_catalogs()
+    missing = [i for i in args.ids if catalogs.feature(i) is None]
+    for feature_id in args.ids:
+        if feature_id not in missing:
+            feature_collector.set_feature(recipe, feature_id, args.command_value)
+    _save(tgt, recipe)
+    if missing:
+        out(t("cli.not_found", ids=", ".join(missing)))
+        return 1
+    return cmd_recursos_listar(args, services, out)
+
+
+def cmd_coletar_recursos(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    _require_admin()
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    if services.features is None:
+        out(t("cli.features_unavailable"))
+        return 1
+    added = feature_collector.add_enabled_here(services.features, default_catalogs(), recipe)
+    _save(tgt, recipe)
+    out(tn("studio.features.read_done", len(added)))
+    return cmd_recursos_listar(args, services, out)
+
+
 def _agent_runtime() -> Runtime:
     from winkit.agent.main import build_runtime  # noqa: PLC0415 — só o "aplicar" precisa do Agente
 
@@ -632,6 +682,18 @@ def cmd_sincronizar(args: argparse.Namespace, services: Services, out: Out) -> i
 
 
 # ------------------------------------------------------------------ parser
+def _add_feature_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    rec = sub.add_parser("recursos", aliases=["features"], help=t("cli.h.features"))
+    rec_sub = rec.add_subparsers(dest="action", required=True)
+    rec_sub.add_parser("listar", aliases=["list"], parents=[common]).set_defaults(
+        func=cmd_recursos_listar
+    )
+    for name, alias, value in (("marcar", "select", True), ("desmarcar", "deselect", False)):
+        rm = rec_sub.add_parser(name, aliases=[alias], parents=[common])
+        rm.add_argument("ids", nargs="+", help=t("cli.h.feature_ids"))
+        rm.set_defaults(func=cmd_recursos_marcar, command_value=value)
+
+
 def _add_collect_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     col = sub.add_parser("coletar", aliases=["collect"], help=t("cli.h.collect"))
     col_sub = col.add_subparsers(dest="what", required=True)
@@ -647,6 +709,10 @@ def _add_collect_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
 
     cwifi = col_sub.add_parser("wifi", parents=[common], help=t("cli.h.collect_wifi"))
     cwifi.set_defaults(func=cmd_coletar_wifi)
+    crec = col_sub.add_parser(
+        "recursos", aliases=["features"], parents=[common], help=t("cli.h.collect_features")
+    )
+    crec.set_defaults(func=cmd_coletar_recursos)
 
     capp = col_sub.add_parser("apps", parents=[common], help=t("cli.h.collect_apps"))
     capp.add_argument(
@@ -809,6 +875,8 @@ def build_parser() -> argparse.ArgumentParser:
         wm.add_argument("ids", nargs="+", help=t("cli.h.wifi_ids"))
         wm.add_argument("--sem-senha", action="store_true", help=t("cli.h.wifi_no_key"))
         wm.set_defaults(func=cmd_wifi_marcar, command_value=value)
+
+    _add_feature_parsers(sub, common)
 
     ap = sub.add_parser("aplicar", aliases=["apply"], parents=[common], help=t("cli.h.apply"))
     ap.add_argument("--simular", action="store_true", help=t("cli.h.simulate"))

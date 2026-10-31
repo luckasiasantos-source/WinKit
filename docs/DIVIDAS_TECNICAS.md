@@ -187,3 +187,11 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Plano: aviso permanente no Studio e na CLI; opção de levar a rede sem a senha; a cópia temporária no PC novo é apagada logo após o uso e o registro de segredos impede que vá para logs.
 - Prioridade: baixa
 
+### DT-020 — Etapas da Fase 1 adiadas só têm segunda chance quando marcadas
+- Estado: aberta
+- Origem: M14 (V2-08, D-043)
+- Onde: `agent/executor.py` (`run_phase`), `core/planner/planner.py`
+- Descrição: uma etapa da Fase 1 adiada (ex.: um driver com o pendrive ausente) volta a pendente, mas a Fase 2 só roda as etapas da Fase 2 e as marcadas com `phase2_fallback` (hoje só o .NET 3.5). As outras ficam pendentes e o resumo final espera por elas; o atalho "Tentar de novo" não as alcança.
+- Impacto: raro (o pendrive costuma estar conectado na Fase 1), mas a instalação pode terminar sem a limpeza final.
+- Plano: avaliar por tipo quais etapas podem rodar na Fase 2 com o alvo trocado (Default → usuário, como no fallback D-012) e marcá-las.
+- Prioridade: média

@@ -12,6 +12,7 @@ StepKind = Literal[
     "driver",
     "wifi",
     "bloat",
+    "feature",
     "tweak",
     "power",
     "backup",
@@ -45,6 +46,8 @@ class PlannedStep(_Frozen):
     user_choice: bool = False
     #: Estava na Fase 1, mas a Fase 1 não rodou (fallback de D-012).
     moved_from_phase1: bool = False
+    #: Etapa da Fase 1 que, se adiada (ex.: sem fonte offline), tenta de novo na Fase 2.
+    phase2_fallback: bool = False
 
 
 class ExcludedItem(_Frozen):
