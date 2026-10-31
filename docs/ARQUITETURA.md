@@ -44,7 +44,7 @@ Os objetos que atravessam as fronteiras são sempre **modelos Pydantic do `core`
 ## 2. Camadas e regra de dependência
 
 ```
-nível 5   ui/            studio/ui, agent/ui                (PySide6)
+nível 5   ui/            winkit/ui (kit visual), studio/ui, agent/ui   (PySide6)
 nível 4   cli/           agent/main.py                      (pontos de entrada)
 nível 3   collector/     builder/     agent/ (exceto ui)    (casos de uso)
 nível 2   platform/                                          (efeitos colaterais no Windows)
@@ -141,7 +141,8 @@ Por que isso importa:
 | `agent/reboot.py`, `steps/windows_update.py` | Política de reinício; Windows Update |
 | `agent/steps/tweak.py`, `steps/system.py` | Motor de ajustes (onde gravar conforme o alvo); bloatware, energia, nome do PC |
 | `agent/steps/*.py` | Uma classe por tipo de etapa: `DriverStep`, `BloatStep`, `TweakStep`, `BackupStep`, `AppStep`, `ShortcutStep`, `WindowsUpdateStep`, `CleanupStep` |
-| `agent/ui/` | Janela da Fase 2, bandeja, resumo (import tardio) |
+| `agent/ui/qt.py` | Janela da Fase 2 (Início, Progresso, Concluído), diálogo de reinício, bandeja; ponte entre threads (import tardio) |
+| `ui/theme.py`, `ui/widgets.py` | Kit visual compartilhado estilo macOS (D-026) |
 
 ---
 
@@ -425,3 +426,9 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 ### D-025 — Pacote de distribuição em duas pastas onedir
 2026-10-31 · aceita
 **Decisão:** `WinKit-<versão>\winkit\` (CLI, com console, sem Qt) e `WinKit-<versão>\winkit-agent\` (Agente, sem console). O `construir` copia `winkit-agent` para o pendrive automaticamente quando roda a partir do pacote. O CI gera o pacote no Windows e o testa com os executáveis prontos.
+
+### D-026 — Interface no estilo macOS
+2026-10-31 · aceita
+**Contexto:** pedido do usuário: "uma interface bonita, bem feitinha, estilo Mac".
+**Decisão:** kit visual próprio em `winkit/ui` (folha de estilo gerada de tokens de cor claro/escuro, inspirada no "Ajustes do Sistema"): barra lateral, listas agrupadas em cartões arredondados, chaves animadas, botões em pílula com o azul de destaque, títulos grandes, ícones de símbolo em quadrados coloridos. A moldura da janela continua a do Windows (sem imitar os botões de semáforo do Mac). Fonte: Segoe UI Variable/Segoe UI no Windows.
+**Consequências:** o mesmo kit serve ao Agente e ao Studio; o import-linter garante que o kit não dependa de casos de uso nem da plataforma.

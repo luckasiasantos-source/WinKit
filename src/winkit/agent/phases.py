@@ -87,7 +87,7 @@ class Session:
 
 
 # ------------------------------------------------------------------ carga
-def _load_recipe(rt: Runtime, log: EventLog) -> Recipe | None:
+def load_agent_recipe(rt: Runtime, log: EventLog) -> Recipe | None:
     if rt.paths.recipe.is_file():
         try:
             return load_recipe(rt.paths.recipe.read_text(encoding="utf-8-sig"))
@@ -118,7 +118,7 @@ def _load_recipe(rt: Runtime, log: EventLog) -> Recipe | None:
 
 
 def open_session(rt: Runtime, log: EventLog, *, phase: int) -> Session | None:
-    recipe = _load_recipe(rt, log)
+    recipe = load_agent_recipe(rt, log)
     if recipe is None:
         return None
     store = StateStore(rt.paths.state)

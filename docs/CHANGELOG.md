@@ -28,6 +28,34 @@
 
 ---
 
+## 2026-10-31 — M9 — Janela do Agente (estilo macOS)
+**Tipo:** implementação + testes + documentação
+**Resumo:** a Fase 2 ganha a interface pedida: janela no estilo macOS com contagem regressiva, modo interativo, escolhas na hora e progresso por etapa; modo silencioso só com bandeja e notificação.
+
+### Adicionado
+- `src/winkit/ui/__init__.py`, `ui/theme.py`, `ui/widgets.py` — kit visual (D-026)
+- `src/winkit/agent/ui/qt.py` — `QtAgentUi`, `AgentWindow`, `ChoosePage`, `ProgressPage`, `DonePage`, `RebootDialog`
+- `docs/imagens/agente-*.png` — capturas (claro e escuro)
+- Testes: `tests/ui/conftest.py`, `tests/ui/test_agent_ui.py` (offscreen)
+- `docs/validacao/M9.md`
+
+### Alterado
+- `src/winkit/agent/ui_select.py` — escolhe janela/bandeja/nada conforme o modo
+- `src/winkit/agent/main.py` — `run_phase2_with_ui`
+- `src/winkit/agent/phases.py` — `load_agent_recipe` público
+- `src/winkit/agent/progress.py`, `executor.py` — `step_result`
+- `src/winkit/i18n/pt_br.py` — textos da interface
+- `pyproject.toml` — contratos do import-linter para o kit visual; regras de lint para código de interface
+- `.gitattributes` — PNG como binário
+
+### Documentos vivos atualizados
+- STATUS — M9; ARQUITETURA — D-026, módulos; DIVIDAS — DT-012 quitada
+
+### Decisões
+- D-026 (interface estilo macOS)
+
+---
+
 ## 2026-10-31 — M8 — Correção: atalho de app portátil e isolamento dos testes
 **Tipo:** correção
 **Resumo:** corrige o molde `{ABS:pasta}\arquivo` usado pelos atalhos de apps portáteis e isola os testes de discos e do navegador reais (IN-009).

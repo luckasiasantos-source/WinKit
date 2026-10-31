@@ -7,11 +7,13 @@ import os
 import sys
 import traceback
 from collections.abc import Sequence
+from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 
 from winkit import __version__
 from winkit.agent import phases
+from winkit.agent.eventlog import EventLog
 from winkit.agent.paths import AgentPaths
 from winkit.agent.phases import Runtime
 from winkit.agent.services import real_agent_services
@@ -67,6 +69,20 @@ def _ensure_streams() -> None:
         sys.stderr = open(os.devnull, "w", encoding="utf-8")  # noqa: SIM115, PTH123
 
 
+def run_phase2_with_ui(rt: Runtime, *, retry: bool = False) -> int:
+    """Cria a interface conforme o modo da receita e roda a Fase 2 dentro dela."""
+    recipe = phases.load_agent_recipe(rt, EventLog(rt.paths.logs, rt.clock))
+    if recipe is None:
+        return phases.run_phase2(rt, retry_failed=retry)
+    ui = rt.ui_factory(recipe)
+    host = getattr(ui, "host", None)
+    if host is None:
+        return phases.run_phase2(rt, retry_failed=retry)
+    fixed = replace(rt, ui_factory=lambda _recipe: ui)
+    code: int = host(lambda: phases.run_phase2(fixed, retry_failed=retry))
+    return code
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     _ensure_streams()
     parser = argparse.ArgumentParser(prog="winkit-agent", description="Agente do WinKit")
@@ -84,9 +100,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "phase1":
             return phases.run_phase1(rt)
         if args.command == "phase2":
-            return phases.run_phase2(rt)
+            return run_phase2_with_ui(rt)
         if args.command == "retry":
-            return phases.run_phase2(rt, retry_failed=True)
+            return run_phase2_with_ui(rt, retry=True)
         html = phases.open_summary(rt.paths)
         if html is not None:
             open_file(html)

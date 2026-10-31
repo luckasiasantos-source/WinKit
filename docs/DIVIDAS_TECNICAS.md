@@ -113,8 +113,10 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Plano: confirmar na VM; se falhar, marcar o ajuste como "só Fase 1" no catálogo.
 - Prioridade: baixa
 
+## Quitadas
+
 ### DT-012 — Fase 2 sem janela até o M9
-- Estado: aberta
+- Estado: ✅ quitada no M9 (janela Qt, bandeja e notificações)
 - Origem: M3
 - Onde: `src/winkit/agent/ui_select.py`
 - Descrição: todos os modos de início usam `NullUi` (nenhuma janela, sem bandeja); contagem regressiva, modo interativo e escolhas na hora entram no M9.
@@ -123,7 +125,7 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Prioridade: alta (é funcionalidade pedida)
 
 ### DT-013 — Códigos de reinício do winget não confirmados
-- Estado: aberta
+- Estado: ✅ quitada no M9 (janela Qt, bandeja e notificações)
 - Origem: M5
 - Onde: `src/winkit/platform/winget.py` (`REBOOT_CODES`)
 - Descrição: os códigos `0x8A150109`/`0x8A15010A` como "instalado, precisa reiniciar" vêm da documentação de memória, não de teste real.
@@ -132,7 +134,7 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Prioridade: baixa
 
 ### DT-014 — Correspondência nome do app ↔ ID do winget é heurística
-- Estado: aberta
+- Estado: ✅ quitada no M9 (janela Qt, bandeja e notificações)
 - Origem: M5
 - Onde: `src/winkit/core/inventory.py` (`_heuristic_id`)
 - Descrição: o `winget export` traz só IDs; o nome exibido no Windows é casado por heurística (última parte do ID × primeira palavra do nome). Apps da Loja (msstore) não são casados.
@@ -140,6 +142,3 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Plano: usar o módulo `Microsoft.WinGet.Client` (`Get-WinGetPackage`, saída em objetos) quando estiver instalado; manter a heurística como alternativa.
 - Prioridade: média
 
-## Quitadas
-
-(nenhuma)

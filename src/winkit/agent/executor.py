@@ -110,6 +110,8 @@ class Executor:
         for index, step in enumerate(steps):
             self.ui.progress(index, total, step.title)
             result = self._run_one(step, phase, selection)
+            final = self.state.step(step.id)
+            self.ui.step_result(step.id, final.status, final.error or final.reason)
             if result == "ran":
                 outcome.ran += 1
             elif result == "deferred":

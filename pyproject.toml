@@ -61,11 +61,12 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S105", "S106", "S108", "PLR0915", "T20", "PLC0415", "A005", "S314"]
-"src/winkit/agent/ui/**" = ["N802"]
+"src/winkit/agent/ui/**" = ["N802", "PLR0915"]
+"src/winkit/ui/**" = ["N802", "PLR0915", "E501"]
 "src/winkit/i18n/**" = ["E501"]
 "src/winkit/cli/**" = ["T20"]           # textos longos ficam inteiros para facilitar a revisão
 "src/winkit/platform/*.py" = ["E501"]  # trechos de script PowerShell embutidos
-"src/winkit/studio/**" = ["N802"]
+"src/winkit/studio/**" = ["N802", "PLR0915"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["winkit"]
@@ -144,8 +145,16 @@ ignore_imports = [
     "winkit.agent.ui -> PySide6",
     "winkit.agent.main -> winkit.agent.ui.**",
     "winkit.agent.main -> winkit.agent.ui",
+    "winkit.agent.ui.** -> winkit.ui.**",
+    "winkit.agent.ui_select -> winkit.agent.ui.**",
 ]
 unmatched_ignore_imports_alerting = "none"
+
+[[tool.importlinter.contracts]]
+name = "kit visual (winkit.ui) não depende de casos de uso nem da plataforma"
+type = "forbidden"
+source_modules = ["winkit.ui"]
+forbidden_modules = ["winkit.collector", "winkit.builder", "winkit.agent", "winkit.cli", "winkit.studio", "winkit.platform"]
 
 [[tool.importlinter.contracts]]
 name = "casos de uso são independentes entre si"

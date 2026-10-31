@@ -27,6 +27,8 @@ class AgentUi(Protocol):
 
     def progress(self, done: int, total: int, current: str) -> None: ...
 
+    def step_result(self, step_id: str, status: str, message: str | None) -> None: ...
+
     def waiting(self, reason: Literal["pendrive", "network", "winget"], active: bool) -> None: ...
 
     def notify(self, title: str, message: str) -> None: ...
@@ -50,6 +52,9 @@ class NullUi:
 
     def progress(self, done: int, total: int, current: str) -> None:
         self.events.append(("progress", (done, total, current)))
+
+    def step_result(self, step_id: str, status: str, message: str | None) -> None:
+        self.events.append(("step_result", (step_id, status)))
 
     def waiting(self, reason: Literal["pendrive", "network", "winget"], active: bool) -> None:
         self.events.append(("waiting", (reason, active)))

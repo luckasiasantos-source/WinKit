@@ -23,7 +23,7 @@
 | M6 | Backups | ✅ código | ⬜ roteiro pronto (`docs/validacao/M6.md`) |
 | M7 | Bloatware e ajustes | ✅ código | ⬜ roteiro pronto (`docs/validacao/M7.md`) |
 | M8 | Windows Update, resumo e notificações | ✅ código | ⬜ roteiro pronto (`docs/validacao/M8.md`) |
-| M9 | Interface do Agente | ⬜ | ⬜ pendente |
+| M9 | Interface do Agente | ✅ código | ⬜ roteiro pronto (`docs/validacao/M9.md`) |
 | M10 | WinKit Studio (GUI) | ⬜ | — |
 
 ## Detalhe por marco
@@ -128,7 +128,14 @@
 - ✅ Atalho "Tentar de novo os que falharam (WinKit)" quando há falha (o Agente fica instalado — D-024)
 - ✅ Resumo HTML e notificação final (M3) agora com todos os tipos de etapa reais
 - ✅ Roteiro `docs/validacao/M8.md`
-### M9 — Interface do Agente ⬜
+### M9 — Interface do Agente ✅ (código) · validação na VM pendente
+- ✅ `winkit/ui/` — kit visual no estilo macOS (D-026): tema claro/escuro com tokens, chave liga/desliga animada, grupos arredondados, linhas, ícones desenhados por tipo de etapa, ícone do app
+- ✅ `agent/ui/qt.py` — janela com páginas Início (já feito / a fazer, chaves "decidir na hora", nome do PC, contagem regressiva que pausa ao interagir), Progresso (status por etapa, avisos de espera), Concluído; diálogo de reinício; bandeja com progresso e notificações; ponte segura entre a thread de trabalho e o Qt
+- ✅ `agent/ui_select.py` — janela para `countdown`/`interactive`, só bandeja para `silent`, nada se tudo desligado; Qt importado só ali (R-35)
+- ✅ `agent/main.py` — a Fase 2 roda dentro da interface (`run_phase2_with_ui`)
+- ✅ Protocolo `AgentUi.step_result` (status real de cada etapa na lista)
+- ✅ Capturas em `docs/imagens/`
+- ✅ Roteiro `docs/validacao/M9.md`
 ### M10 — WinKit Studio ⬜
 
 (Itens detalhados de M4–M10 em `PLANO.md` §20; são desdobrados aqui quando o marco começar.)
