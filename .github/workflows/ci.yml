@@ -50,6 +50,7 @@ jobs:
         run: uv run lint-imports
 
       - name: Testes
+        timeout-minutes: 25
         run: uv run pytest --cov --cov-report=term --cov-report=xml -o junit_family=xunit2 --junitxml=pytest-${{ matrix.os }}.xml
 
       - name: Publicar resultados

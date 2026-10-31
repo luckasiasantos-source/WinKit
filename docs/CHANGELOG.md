@@ -28,6 +28,17 @@
 
 ---
 
+## 2026-10-31 — Limite de tempo e diagnóstico nos testes da CI e da release (IN-017)
+**Tipo:** correção (infraestrutura)
+**Resumo:** a release 0.4.0 travou no passo de testes sem dizer onde. Agora um teste preso imprime a pilha e os passos de teste têm limite de tempo.
+
+### Alterado
+- `pyproject.toml` — `faulthandler_timeout = 300`
+- `.github/workflows/ci.yml`, `.github/workflows/release.yml` — `timeout-minutes: 25` nos testes; a release fixa `QT_QPA_PLATFORM=offscreen`
+
+### Documentos vivos atualizados
+- INCIDENTES — IN-017
+
 ## 2026-10-31 — M14 — Variáveis de ambiente e PATH (V2-22) e fechamento do M14 (0.5.0)
 **Tipo:** implementação
 **Resumo:** quem programa leva as variáveis de ambiente e as pastas extras do PATH. Uma variável que já existe com outro valor nunca é trocada sem pedir, e o PATH só ganha entradas. Fecha o M14 com o roteiro de validação e a versão 0.5.0.

@@ -43,6 +43,9 @@ jobs:
 
       - name: Testes
         shell: pwsh
+        timeout-minutes: 25
+        env:
+          QT_QPA_PLATFORM: offscreen
         run: |
           uv run pytest -q
           if ($LASTEXITCODE -ne 0) { throw "testes falharam" }

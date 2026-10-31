@@ -162,6 +162,15 @@
 - Correção: commit seguinte corrige o lint, com `check.sh` terminando em `== OK`.
 - Prevenção: rodar a verificação sem pipe antes do commit (`scripts/check.sh > log; echo $?`) ou com `set -o pipefail`; nunca encadear `git commit` depois de um pipe.
 
+### IN-017 — Release 0.4.0 travou no passo de testes
+- Data: 2026-10-31
+- Marco: M13/M14 (execução da release de `b652529`)
+- O que aconteceu: o passo "Testes" da release ficou mais de 50 minutos parado no Windows, sem saída, enquanto a CI do **mesmo commit** tinha passado em 6 minutos. A execução foi cancelada; a 0.4.0 não foi publicada separadamente (as mudanças dela saem na 0.5.0).
+- Causa raiz: não identificada. O job não tinha limite de tempo e o `pytest -q` não diz qual teste está rodando, então o log não mostra onde parou. Suspeita: um teste que toca o Windows real (mutex, PowerShell) travando de forma intermitente no runner.
+- Impacto: uma release a menos; nenhum efeito no aplicativo.
+- Correção: `faulthandler_timeout = 300` no pytest (um teste preso imprime a pilha de todas as threads) e `timeout-minutes: 25` nos passos de teste da CI e da release; a release também fixa `QT_QPA_PLATFORM=offscreen`, como a CI.
+- Prevenção: se acontecer de novo, o log mostra o teste e a linha; o achado vira um incidente com causa raiz.
+
 ## Lições da fase de desenho
 
 Problemas encontrados na conversa anterior (PDF de referência) e corrigidos **antes** de virar código. Ficam registrados porque são erros fáceis de repetir.

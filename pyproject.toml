@@ -94,6 +94,8 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"
+# Um teste preso por mais de 5 minutos imprime a pilha de todas as threads (IN-017).
+faulthandler_timeout = 300
 markers = [
     "windows: teste que toca o sistema Windows real (só roda no Windows)",
     "admin: teste que exige administrador no Windows",
