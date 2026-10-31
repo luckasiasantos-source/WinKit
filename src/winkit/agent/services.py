@@ -20,6 +20,7 @@ from winkit.platform.restore import RestorePoints, WindowsRestorePoints
 from winkit.platform.runner import CommandRunner, SubprocessRunner
 from winkit.platform.scheduler import TaskScheduler, WindowsTaskScheduler
 from winkit.platform.shortcuts import Shortcuts, WindowsShortcuts
+from winkit.platform.wifi import WifiManager, WindowsWifi
 from winkit.platform.windows_update import ComWindowsUpdater, WindowsUpdater
 from winkit.platform.winget import WindowsWinget, Winget
 
@@ -44,6 +45,7 @@ class AgentServices:
     updater: WindowsUpdater
     session: SessionControl
     restore: RestorePoints
+    wifi: WifiManager
 
 
 def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windows
@@ -69,4 +71,5 @@ def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windo
         updater=ComWindowsUpdater(ps),
         session=WindowsSessionControl(runner),
         restore=WindowsRestorePoints(ps),
+        wifi=WindowsWifi(runner),
     )

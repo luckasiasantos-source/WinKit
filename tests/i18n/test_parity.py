@@ -86,6 +86,8 @@ ALWAYS_SAME = {
     "summary.phase_time",
     "studio.window_title",
     "studio.live.kind.windows_update",
+    "plan.wifi",
+    "studio.wifi.security.enterprise",
     "summary.backup_warning",
 }
 

@@ -119,3 +119,19 @@ def test_no_dynamic_imports_in_package() -> None:
             if isinstance(node, ast.Call) and getattr(node.func, "id", "") == "__import__":
                 offenders.append(str(path))
     assert offenders == []
+
+
+def test_no_global_xml_namespace_registration() -> None:
+    """IN-015: ``ET.register_namespace`` muda todo XML gerado depois no mesmo processo."""
+    import ast
+    from pathlib import Path
+
+    allowed = {Path("src/winkit/core/unattend/generator.py")}  # reafirma antes de cada uso
+    offenders = [
+        str(p)
+        for p in Path("src/winkit").rglob("*.py")
+        if p not in allowed
+        for node in ast.walk(ast.parse(p.read_text(encoding="utf-8")))
+        if isinstance(node, ast.Attribute) and node.attr == "register_namespace"
+    ]
+    assert offenders == []

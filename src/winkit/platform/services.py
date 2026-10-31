@@ -17,6 +17,7 @@ from winkit.platform.powershell import PowerShell
 from winkit.platform.registry import WindowsRegistry
 from winkit.platform.runner import CommandRunner, SubprocessRunner
 from winkit.platform.vss import ShadowCopies, WindowsShadowCopies
+from winkit.platform.wifi import WifiManager, WindowsWifi
 from winkit.platform.winget import WindowsWinget, Winget
 
 
@@ -34,6 +35,7 @@ class Services:
     volume_root: Callable[[str], Path] = field(default=lambda v: Path(v + "\\"))
     #: Formatos, teclado e fuso do PC atual para a receita nova (D-030).
     regional: Callable[[], RegionalDefaults] = field(default=RegionalDefaults)
+    wifi: WifiManager | None = None
 
 
 def real_services() -> Services:
@@ -50,4 +52,5 @@ def real_services() -> Services:
         vss=WindowsShadowCopies(ps),
         folders=WindowsKnownFolders(registry),
         regional=lambda: read_regional(registry),
+        wifi=WindowsWifi(runner),
     )

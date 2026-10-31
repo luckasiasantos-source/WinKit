@@ -28,6 +28,25 @@
 
 ---
 
+## 2026-10-31 — M14 — Wi-Fi e registro de segredos
+**Tipo:** implementação + correção
+**Resumo:** as redes Wi-Fi salvas no PC atual passam a ser conectadas no Windows novo antes do primeiro login, com opção de levar sem a senha (V2-02, D-036). Novo registro de segredos (R-53) mascarado em todo log. Corrige um efeito colateral global do ElementTree que alterava o `autounattend.xml` (IN-015). A release 0.4.0 foi publicada antes deste commit.
+
+### Adicionado
+- `src/winkit/core/secrets.py` — `SECRETS` (R-53)
+- `src/winkit/core/wifi.py`, `src/winkit/collector/wifi.py`, `src/winkit/platform/wifi.py`, `src/winkit/platform/services_base.py`, `src/winkit/platform/fakes/wifi.py`, `src/winkit/agent/steps/wifi.py`
+- Receita: `wifi.networks` (aditivo); planejador: tipo `wifi` na Fase 1 depois dos drivers (R17)
+- Studio: grupo "Rede" com a página Wi-Fi; CLI: `coletar wifi`, `wifi listar|marcar|desmarcar [--sem-senha]`
+- Testes: `tests/agent/test_wifi.py` (inclui o de proteção R-53), testes de arquitetura do IN-015; fixtures `tests/fixtures/wifi/*_doc.xml`
+
+### Alterado
+- `src/winkit/platform/runner.py`, `src/winkit/agent/eventlog.py` — mascaram o registro de segredos
+- `src/winkit/core/unattend/generator.py` — reafirma os prefixos XML antes de serializar (IN-015)
+- `tests/conftest.py` — limpa o registro de segredos entre testes
+
+### Documentos vivos atualizados
+- ARQUITETURA — módulos e verificações R-53/IN-015; STATUS — M14 em andamento; DIVIDAS — DT-019; INCIDENTES — IN-015
+
 ## 2026-10-31 — M13 — Pendrive comum: Rufus e ferramenta da Microsoft (0.4.0)
 **Tipo:** implementação
 **Resumo:** além do Ventoy, o WinKit prepara um pendrive de instalação gravado pelo Rufus ou pela Ferramenta de Criação de Mídia: grava só o `autounattend.xml` na raiz (com o idioma da imagem) e a pasta `WinKit\`, guarda as respostas do Rufus e nunca formata nada (V2-01, D-034). A release 0.3.0 foi publicada antes deste commit.

@@ -183,6 +183,24 @@ class TweakSelection(_Model):
     decide_at_runtime: bool = False
 
 
+WifiSecurity = Literal["open", "wpa2_personal", "wpa3_personal", "enterprise", "other"]
+
+
+class WifiNetwork(_Model):
+    """V2-02: rede Wi-Fi levada do PC antigo (M14). A senha fica no arquivo, nunca aqui (D-036)."""
+
+    id: ItemId
+    ssid: str
+    security: WifiSecurity = "wpa2_personal"
+    include_key: bool = True
+    selected: bool = True
+    file: PayloadPath
+
+
+class Wifi(_Model):
+    networks: list[WifiNetwork] = Field(default_factory=list)
+
+
 class RestorePoint(_Model):
     """V2-10: ponto de restauração "Windows pronto" no fim da instalação (M12)."""
 
@@ -209,6 +227,7 @@ class Recipe(_Model):
     tweaks: list[TweakSelection] = Field(default_factory=list)
     power: Power = Field(default_factory=Power)
     restore_point: RestorePoint = Field(default_factory=RestorePoint)
+    wifi: Wifi = Field(default_factory=Wifi)
 
     # ---- consultas de conveniência (sem efeito colateral)
     def app(self, app_id: str) -> AppItem | None:

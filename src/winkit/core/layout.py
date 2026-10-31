@@ -47,6 +47,11 @@ def backups_dir(profile_id: str) -> str:
     return f"{profile_dir(profile_id)}/Backups"
 
 
+def wifi_dir(profile_id: str) -> str:
+    """Perfis de Wi-Fi exportados (contêm a senha quando levada — D-036)."""
+    return f"{profile_dir(profile_id)}/Wifi"
+
+
 def payload(root: Path, rel_to_winkit: str) -> Path:
     """Caminho absoluto de um item da receita (relativo a ``WinKit/``)."""
     return root / WINKIT / rel_to_winkit

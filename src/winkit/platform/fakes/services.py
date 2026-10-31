@@ -12,6 +12,7 @@ from winkit.platform.fakes.backup import FakeOldPcFolders, FakeShadowCopies
 from winkit.platform.fakes.disks import FakeDiskInspector, windows_iso
 from winkit.platform.fakes.drivers import FakeDriverManager
 from winkit.platform.fakes.runner import FakeRunner
+from winkit.platform.fakes.wifi import FakeWifi
 from winkit.platform.services import Services
 
 
@@ -28,6 +29,7 @@ def fake_services(*, old_pc: Path | None = None, **overrides: Any) -> Services:
         "vss": FakeShadowCopies(volume_roots={"C:": base}),
         "folders": folders,
         "volume_root": folders.volume_root,
+        "wifi": FakeWifi(),
     }
     values.update(overrides)
     return Services(**values)

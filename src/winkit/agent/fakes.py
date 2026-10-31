@@ -25,6 +25,7 @@ from winkit.platform.fakes.system import (
     FakeScheduler,
 )
 from winkit.platform.fakes.system_tweaks import FakeAppx, FakeFeatures, FakeSession, FakeUpdater
+from winkit.platform.fakes.wifi import FakeWifi
 
 
 def fake_agent_services(*, pendrive: Path, system: Path, **overrides: Any) -> AgentServices:
@@ -47,6 +48,7 @@ def fake_agent_services(*, pendrive: Path, system: Path, **overrides: Any) -> Ag
         "updater": FakeUpdater(),
         "session": FakeSession(),
         "restore": FakeRestorePoints(),
+        "wifi": FakeWifi(),
     }
     values.update(overrides)
     return AgentServices(**values)

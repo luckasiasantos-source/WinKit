@@ -178,3 +178,12 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Plano: passar o progresso do executor para a interface (sinal Qt a partir de um `AgentUi` próprio) e, se necessário, rodar `winkit-agent apply` como processo.
 - Prioridade: média
 
+### DT-019 — Senhas de Wi-Fi legíveis no pendrive
+- Estado: aceita (como a DT-006)
+- Origem: M14 (V2-02, D-036)
+- Onde: `WinKit\Perfis\<perfil>\Wifi\*.xml`
+- Descrição: o Windows só exporta e importa a senha da rede em texto (`key=clear`); sem DPAPI portátil não há como protegê-la no pendrive.
+- Impacto: quem pegar o pendrive lê as senhas das redes levadas.
+- Plano: aviso permanente no Studio e na CLI; opção de levar a rede sem a senha; a cópia temporária no PC novo é apagada logo após o uso e o registro de segredos impede que vá para logs.
+- Prioridade: baixa
+

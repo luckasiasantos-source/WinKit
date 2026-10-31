@@ -139,6 +139,8 @@ Por que isso importa:
 | `agent/live.py` | Modo "aplicar neste PC" (D-033): plano ao vivo, prévia sem escrita, ponto de restauração antes, estado e resumo por aplicação em `ProgramData\WinKit\Aplicacoes` |
 | `agent/steps/restore.py`, `platform/restore.py` | Ponto de restauração (V2-10) por CIM `SystemRestore` e `Win32_ShadowStorage` |
 | `core/live.py` | Modelos da prévia (`PreviewItem`, `LivePreview`) |
+| `core/secrets.py` | Registro único de segredos do processo (R-53); `runner` e `EventLog` mascaram |
+| `core/wifi.py`, `collector/wifi.py`, `platform/wifi.py`, `agent/steps/wifi.py` | Wi-Fi (V2-02): XML do perfil, coleta, `netsh` só por código de saída e arquivos, etapa antes do login |
 | `core/media.py` | Pendrive comum (D-034): reconhecer a mídia de instalação, marcar o `autounattend.xml` do WinKit |
 | `builder/target.py` | Destino com tipo `ventoy` ou `setup`; lista os dois tipos de pendrive |
 | `agent/integrity.py` | Confere arquivo ou pasta do pendrive contra o `manifesto.json` (R-22) |
@@ -319,7 +321,9 @@ runner.run(
 | R-35 | `test_phase1_does_not_import_qt` |
 | R-50 | `test_todo_requires_debt_entry` |
 | R-51 | `tests/i18n/test_parity.py` (chaves, marcadores, plurais) e `tests/i18n/test_usage.py` (toda chave usada existe; toda chave existente é usada) |
+| R-53 | `tests/agent/test_wifi.py::test_wifi_password_never_logged` (a senha da fixture não aparece em log, estado nem resumo) |
 | R-54 | `tests/agent/test_live.py::test_preview_never_writes` (todo serviço de escrita falha durante a prévia) |
+| XML (IN-015) | `test_no_global_xml_namespace_registration` e `test_strip_key_does_not_change_other_xml` |
 | R-55 | `tests/i18n/test_usage.py::test_no_loose_ui_strings` (AST em `studio`, `agent/ui`, `ui`, `cli`) |
 | Empacotamento | `test_no_dynamic_imports_in_package` (IN-013) |
 

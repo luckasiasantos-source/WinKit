@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from winkit.core.layout import LOGS
+from winkit.core.secrets import SECRETS
 
 Clock = Callable[[], datetime]
 _SAFE = re.compile(r"[^A-Za-z0-9._-]+")
@@ -52,6 +53,7 @@ class EventLog:
     # ---- eventos
     def event(self, level: str, message: str, *, step: str | None = None, **data: Any) -> None:
         now = self._clock()
+        message = SECRETS.mask(message)  # R-53: segredo nunca vai para o log
         record: dict[str, Any] = {
             "time": now.isoformat(),
             "level": level,
@@ -59,7 +61,7 @@ class EventLog:
             "message": message,
         }
         if data:
-            record["data"] = {k: str(v) for k, v in data.items()}
+            record["data"] = {k: SECRETS.mask(str(v)) for k, v in data.items()}
         with self._jsonl.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(record, ensure_ascii=False) + "\n")
         prefix = f"[{step}] " if step else ""

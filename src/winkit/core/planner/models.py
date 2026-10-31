@@ -10,6 +10,7 @@ from winkit.core.recipe.models import ExecutionMode
 
 StepKind = Literal[
     "driver",
+    "wifi",
     "bloat",
     "tweak",
     "power",

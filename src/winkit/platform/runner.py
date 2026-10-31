@@ -24,7 +24,7 @@ from winkit.platform.system import CREATE_NO_WINDOW, is_windows, system32
 
 log = logging.getLogger(__name__)
 
-MASK = "***"
+from winkit.core.secrets import MASK, SECRETS  # noqa: E402 — R-53
 
 
 @dataclass(frozen=True)
@@ -80,13 +80,14 @@ class CommandRunner(Protocol):
 
 
 def mask_secrets(args: Sequence[str], secrets: Sequence[str]) -> list[str]:
+    """Mascara os segredos da chamada e os do registro do processo (R-23, R-53)."""
     out = []
     for arg in args:
         masked = arg
         for secret in secrets:
             if secret:
                 masked = masked.replace(secret, MASK)
-        out.append(masked)
+        out.append(SECRETS.mask(masked))
     return out
 
 
@@ -207,4 +208,4 @@ def mask_text(text: str, secrets: Sequence[str]) -> str:
     for secret in secrets:
         if secret:
             text = text.replace(secret, MASK)
-    return text
+    return SECRETS.mask(text)

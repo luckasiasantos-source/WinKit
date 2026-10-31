@@ -23,8 +23,15 @@ from winkit.i18n import t
 
 NS = "urn:schemas-microsoft-com:unattend"
 WCM = "http://schemas.microsoft.com/WMIConfig/2002/State"
-ET.register_namespace("", NS)
-ET.register_namespace("wcm", WCM)
+
+
+def _register_prefixes() -> None:
+    """O registro de prefixos do ElementTree é global: reafirmado a cada geração (IN-015)."""
+    ET.register_namespace("", NS)
+    ET.register_namespace("wcm", WCM)
+
+
+_register_prefixes()
 
 #: Elementos que configurariam disco/partição — proibidos (R-18).
 FORBIDDEN_ELEMENTS = (
@@ -120,6 +127,7 @@ def generate_unattend(
     _oobe_system(root, recipe, arch, ui_lang)
 
     ET.indent(root, space="  ")
+    _register_prefixes()
     data: bytes = ET.tostring(root, encoding="utf-8", xml_declaration=True)
     check_safety(data)
     return data + b"\n"

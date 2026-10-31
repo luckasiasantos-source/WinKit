@@ -37,6 +37,7 @@ from winkit.builder.validate import validate_pendrive
 from winkit.collector import apps as app_collector
 from winkit.collector import backups as backup_collector
 from winkit.collector import drivers as driver_collector
+from winkit.collector import wifi as wifi_collector
 from winkit.core import layout
 from winkit.core.catalog.loader import default_catalogs
 from winkit.core.errors import RecipeError, WinKitError
@@ -526,6 +527,51 @@ def cmd_apps_portatil(args: argparse.Namespace, services: Services, out: Out) ->
     return 0
 
 
+# ------------------------------------------------------------------ Wi-Fi (V2-02)
+def cmd_coletar_wifi(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    _require_admin()
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    if services.wifi is None:
+        out(t("cli.wifi_unavailable"))
+        return 1
+    added = wifi_collector.collect_wifi(services.wifi, tgt.root, recipe)
+    _save(tgt, recipe)
+    out(tn("cli.wifi_found", len(added)))
+    out(t("cli.wifi_warning"))
+    return cmd_wifi_listar(args, services, out)
+
+
+def cmd_wifi_listar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    for n in recipe.wifi.networks:
+        mark = "x" if n.selected and n.security != "enterprise" else " "
+        key = t("cli.wifi_with_key") if n.include_key else t("cli.wifi_without_key")
+        security = t(f"studio.wifi.security.{n.security}")
+        out(f"  [{mark}] {n.id:28} {n.ssid[:30]:30} {security}  {key}")
+    return 0
+
+
+def cmd_wifi_marcar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    missing = []
+    for nid in args.ids:
+        item = next((n for n in recipe.wifi.networks if n.id == nid), None)
+        if item is None:
+            missing.append(nid)
+            continue
+        item.selected = args.command_value
+        if args.sem_senha:
+            wifi_collector.set_include_key(tgt.root, recipe, nid, include=False)
+    _save(tgt, recipe)
+    if missing:
+        out(t("cli.not_found", ids=", ".join(missing)))
+        return 1
+    return cmd_wifi_listar(args, services, out)
+
+
 def _agent_runtime() -> Runtime:
     from winkit.agent.main import build_runtime  # noqa: PLC0415 — só o "aplicar" precisa do Agente
 
@@ -598,6 +644,9 @@ def _add_collect_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     cbk = col_sub.add_parser("backups", parents=[common], help=t("cli.h.collect_backups"))
     cbk.add_argument("--adicionar-recomendados", action="store_true")
     cbk.set_defaults(func=cmd_coletar_backups)
+
+    cwifi = col_sub.add_parser("wifi", parents=[common], help=t("cli.h.collect_wifi"))
+    cwifi.set_defaults(func=cmd_coletar_wifi)
 
     capp = col_sub.add_parser("apps", parents=[common], help=t("cli.h.collect_apps"))
     capp.add_argument(
@@ -749,6 +798,17 @@ def build_parser() -> argparse.ArgumentParser:
     _add_collect_parsers(sub, common)
     _add_apps_parsers(sub, common)
     _add_backup_parsers(sub, common)
+
+    wifi = sub.add_parser("wifi", help=t("cli.h.wifi"))
+    wifi_sub = wifi.add_subparsers(dest="action", required=True)
+    wifi_sub.add_parser("listar", aliases=["list"], parents=[common]).set_defaults(
+        func=cmd_wifi_listar
+    )
+    for name, alias, value in (("marcar", "select", True), ("desmarcar", "deselect", False)):
+        wm = wifi_sub.add_parser(name, aliases=[alias], parents=[common])
+        wm.add_argument("ids", nargs="+", help=t("cli.h.wifi_ids"))
+        wm.add_argument("--sem-senha", action="store_true", help=t("cli.h.wifi_no_key"))
+        wm.set_defaults(func=cmd_wifi_marcar, command_value=value)
 
     ap = sub.add_parser("aplicar", aliases=["apply"], parents=[common], help=t("cli.h.apply"))
     ap.add_argument("--simular", action="store_true", help=t("cli.h.simulate"))

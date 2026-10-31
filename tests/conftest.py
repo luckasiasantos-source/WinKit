@@ -37,9 +37,11 @@ def _base_language(monkeypatch: pytest.MonkeyPatch) -> object:
     ``WINKIT_LANG`` fixo: sem isso a CLI e o Studio detectam o idioma do Windows da máquina
     de teste (o runner do CI é em inglês — IN-014).
     """
+    from winkit.core.secrets import SECRETS
     from winkit.i18n import set_language
 
     monkeypatch.setenv("WINKIT_LANG", "pt-BR")
     set_language("pt-BR")
     yield
     set_language("pt-BR")
+    SECRETS.clear()

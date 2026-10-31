@@ -144,6 +144,15 @@
 - Correção: o `conftest.py` fixa `WINKIT_LANG=pt-BR` em todo teste (os testes de idioma mudam de propósito).
 - Prevenção: todo teste de componente que detecta idioma roda com o idioma fixado; a detecção real tem testes próprios.
 
+### IN-015 — Tirar a senha de um Wi-Fi mudava o autounattend.xml gerado depois
+- Data: 2026-10-31
+- Marco: M14 (achado pela suíte completa, antes de qualquer commit)
+- O que aconteceu: depois de um teste que tirava a senha de um perfil de Wi-Fi, o `autounattend.xml` passou a sair com prefixo `ns0:` no lugar do namespace padrão, e o teste de snapshot falhou só quando os testes rodavam juntos.
+- Causa raiz: `ET.register_namespace("", ...)` altera um registro **global** do ElementTree. O código do Wi-Fi registrava o namespace dele como padrão e sobrescrevia o do gerador do XML de instalação, que só registrava o seu ao ser importado.
+- Impacto: no Studio, tirar a senha de uma rede e depois construir o pendrive geraria um XML com prefixos. É XML válido, mas o instalador do Windows nunca foi testado com ele.
+- Correção: o Wi-Fi usa `ET.tostring(..., default_namespace=...)` e não toca no registro; o gerador reafirma os prefixos imediatamente antes de serializar.
+- Prevenção: `test_no_global_xml_namespace_registration` (só o gerador pode registrar) e `test_strip_key_does_not_change_other_xml`.
+
 ## Lições da fase de desenho
 
 Problemas encontrados na conversa anterior (PDF de referência) e corrigidos **antes** de virar código. Ficam registrados porque são erros fáceis de repetir.

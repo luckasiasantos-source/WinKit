@@ -27,7 +27,15 @@ from winkit.core.recipe.validation import find_cycle
 from winkit.i18n import t
 
 # Ordem dos grupos dentro de cada fase (PLANO.md §11.2, tabela "Ordem dentro de cada fase").
-_G1 = {"driver": 10, "power": 20, "bloat": 30, "tweak": 40, "backup": 50, "app": 60}
+_G1 = {
+    "driver": 10,
+    "wifi": 15,  # R17: logo depois dos drivers (precisa do driver de rede)
+    "power": 20,
+    "bloat": 30,
+    "tweak": 40,
+    "backup": 50,
+    "app": 60,
+}
 _G2 = {
     "backup": 20,
     "app": 30,
@@ -82,6 +90,7 @@ def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> 
     excluded: list[ExcludedItem] = []
 
     _plan_drivers(recipe, drafts)
+    _plan_wifi(recipe, drafts)
     _plan_power(recipe, drafts)
     _plan_bloat(recipe, catalogs, ctx, drafts, excluded)
     _plan_tweaks(recipe, catalogs, ctx, ask, out=drafts, excluded=excluded)
@@ -116,6 +125,23 @@ def _plan_drivers(recipe: Recipe, out: list[_Draft]) -> None:  # R3
                 "machine",
                 needs_pendrive=True,
                 sort=(_G1["driver"], d.priority, d.id),
+            )
+        )
+
+
+def _plan_wifi(recipe: Recipe, out: list[_Draft]) -> None:  # R17
+    for n in recipe.wifi.networks:
+        if not n.selected or n.security == "enterprise":
+            continue
+        out.append(
+            _Draft(
+                "wifi",
+                n.id,
+                1,
+                t("plan.wifi", name=n.ssid),
+                "machine",
+                needs_pendrive=True,
+                sort=(_G1["wifi"], 0, n.id),
             )
         )
 

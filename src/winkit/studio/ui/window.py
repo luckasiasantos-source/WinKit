@@ -85,6 +85,10 @@ GROUPS: tuple[SectionGroup, ...] = (
         ),
     ),
     SectionGroup(
+        "network",
+        (Section("wifi", "dot", "#32ADE6", pages.WifiPage),),
+    ),
+    SectionGroup(
         "finish",
         (
             Section("execution", "dot", "#32ADE6", pages.ExecutionPage),

@@ -31,6 +31,7 @@ from winkit.builder.validate import PendriveReport, validate_pendrive
 from winkit.collector import apps as app_collector
 from winkit.collector import backups as backup_collector
 from winkit.collector import drivers as driver_collector
+from winkit.collector import wifi as wifi_collector
 from winkit.core import layout
 from winkit.core.catalog.loader import default_catalogs
 from winkit.core.catalog.models import Catalogs
@@ -40,7 +41,14 @@ from winkit.core.live import LivePreview
 from winkit.core.planner.models import Plan, PlanContext, StepKind
 from winkit.core.planner.planner import plan
 from winkit.core.recipe.io import new_recipe
-from winkit.core.recipe.models import AppItem, BackupItem, ConflictPolicy, Recipe, Scope
+from winkit.core.recipe.models import (
+    AppItem,
+    BackupItem,
+    ConflictPolicy,
+    Recipe,
+    Scope,
+    WifiNetwork,
+)
 from winkit.core.recipe.validation import ValidationReport, validate_recipe
 from winkit.core.winget_manifest import split_args
 from winkit.i18n import current_language
@@ -284,6 +292,20 @@ class StudioController:
 
     def plan(self, os_major: int = 11) -> Plan:
         return plan(self.require_recipe(), self.catalogs, PlanContext(os_major=os_major))
+
+    # ------------------------------------------------------------------ Wi-Fi (V2-02)
+    def collect_wifi(self) -> list[WifiNetwork]:
+        recipe = self.require_recipe()
+        if self.services.wifi is None:
+            return []
+        added = wifi_collector.collect_wifi(self.services.wifi, self.root, recipe)
+        self.save()
+        return added
+
+    def set_wifi_include_key(self, network_id: str, include: bool) -> bool:
+        ok = wifi_collector.set_include_key(self.root, self.require_recipe(), network_id, include)
+        self.save()
+        return ok
 
     # ------------------------------------------------------------------ aplicar neste PC (V2-03)
     def live_kinds(self) -> list[StepKind]:

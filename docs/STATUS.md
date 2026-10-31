@@ -28,7 +28,7 @@
 | M11 | Inglês e espanhol (V2-00) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M11.md`) |
 | M12 | Aplicar neste PC + ponto de restauração (V2-03, V2-10) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M12.md`) |
 | M13 | Pendrive comum: Rufus/Microsoft (V2-01) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M13.md`) |
-| M14 | Rede e sistema (V2-02, 08, 09, 16, 17, 18, 22) | ⬜ planejado | — |
+| M14 | Rede e sistema (V2-02, 08, 09, 16, 17, 18, 22) | 🟨 em andamento | — |
 | M15 | Personalização (V2-04, 05, 06, 07, 12, 15) | ⬜ planejado | — |
 | M16 | Contas, pastas e jogos (V2-11, 13, 14) | ⬜ planejado | — |
 | M17 | Inteligência do pendrive (V2-19, 20, 21, 23) | ⬜ planejado | — |
@@ -187,6 +187,11 @@
 - ✅ Construtor: `\autounattend.xml` na raiz com o idioma da imagem; respostas do Rufus guardadas uma vez (`.winkit-bak`); `$OEM$` movido; teste de proteção da R-19 no modo comum
 - ✅ Validação do modo comum; Studio e CLI mostram o tipo de cada pendrive
 - ✅ `docs/RUFUS.md` com as configurações recomendadas
+
+### M14 — Rede e sistema 🟨
+- ✅ R-53: registro de segredos (`core/secrets.py`) mascarado pelo `runner` e pelo `EventLog`
+- ✅ V2-02 Wi-Fi: coleta (`netsh wlan export key=clear`, só arquivos), opção sem senha, etapa antes do login logo após os drivers (R17), cópia temporária apagada, teste de proteção da senha; Studio (grupo Rede) e CLI (`coletar wifi`, `wifi listar|marcar|desmarcar --sem-senha`)
+- ⬜ V2-08 Recursos do Windows · V2-09 Diagnóstico de drivers · V2-16 DNS e hosts · V2-17 Unidades de rede · V2-18 Manutenção · V2-22 Variáveis de ambiente
 
 ## Hipóteses técnicas
 

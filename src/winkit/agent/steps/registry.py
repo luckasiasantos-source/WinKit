@@ -10,6 +10,7 @@ from winkit.agent.steps.finalize import FinalizeStep
 from winkit.agent.steps.restore import RestorePointStep
 from winkit.agent.steps.system import BloatStep, PowerStep, RenameComputerStep
 from winkit.agent.steps.tweak import TweakStep
+from winkit.agent.steps.wifi import WifiStep
 from winkit.agent.steps.windows_update import WindowsUpdateStep
 from winkit.core.planner.models import StepKind
 from winkit.i18n import msg
@@ -40,5 +41,6 @@ def default_handlers() -> dict[StepKind, StepHandler]:
     handlers["windows_update"] = WindowsUpdateStep()
     handlers["shortcut"] = ShortcutStep()
     handlers["restore_point"] = RestorePointStep()
+    handlers["wifi"] = WifiStep()
     handlers["finalize"] = FinalizeStep()
     return handlers
