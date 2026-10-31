@@ -38,6 +38,7 @@ from winkit.collector import apps as app_collector
 from winkit.collector import backups as backup_collector
 from winkit.collector import drivers as driver_collector
 from winkit.collector import features as feature_collector
+from winkit.collector import netdrives as netdrive_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import dns as dns_rules
 from winkit.core import layout
@@ -688,6 +689,65 @@ def cmd_dns_remover_do_pc(args: argparse.Namespace, services: Services, out: Out
     return 0
 
 
+# ------------------------------------------------------------------ unidades de rede (V2-17)
+def cmd_coletar_unidades(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    if services.registry is None:
+        out(t("cli.registry_unavailable"))
+        return 1
+    added = netdrive_collector.collect_drives(services.registry, recipe)
+    _save(tgt, recipe)
+    out(tn("studio.drives.read_done", len(added)))
+    return cmd_unidades_listar(args, services, out)
+
+
+def cmd_unidades_listar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    for d in sorted(recipe.network_drives, key=lambda x: x.letter):
+        out(f"  [{'x' if d.selected else ' '}] {d.letter}:  {d.remote_path}")
+    out(t("studio.drives.footer"))
+    return 0
+
+
+def cmd_unidades_adicionar(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    try:
+        netdrive_collector.add_drive(recipe, args.letra, args.caminho)
+    except ValueError:
+        out(t("studio.drives.invalid"))
+        return 1
+    _save(tgt, recipe)
+    return cmd_unidades_listar(args, services, out)
+
+
+def cmd_unidades_remover(args: argparse.Namespace, services: Services, out: Out) -> int:
+    tgt = _target(args, services)
+    recipe = load_profile_recipe(tgt.root, args.perfil)
+    if not netdrive_collector.remove_drive(recipe, args.letra):
+        out(t("cli.not_found", ids=args.letra))
+        return 1
+    _save(tgt, recipe)
+    return cmd_unidades_listar(args, services, out)
+
+
+def _add_drive_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
+    un = sub.add_parser("unidades", aliases=["drives"], help=t("cli.h.drives"))
+    un_sub = un.add_subparsers(dest="action", required=True)
+    un_sub.add_parser("listar", aliases=["list"], parents=[common]).set_defaults(
+        func=cmd_unidades_listar
+    )
+    ad = un_sub.add_parser("adicionar", aliases=["add"], parents=[common])
+    ad.add_argument("letra", help=t("cli.h.drive_letter"))
+    ad.add_argument("caminho", help=t("cli.h.drive_path"))
+    ad.set_defaults(func=cmd_unidades_adicionar)
+    rm = un_sub.add_parser("remover", aliases=["remove"], parents=[common])
+    rm.add_argument("letra", help=t("cli.h.drive_letter"))
+    rm.set_defaults(func=cmd_unidades_remover)
+
+
 def _add_dns_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
     dns = sub.add_parser("dns", help=t("cli.h.dns"))
     dns_sub = dns.add_subparsers(dest="action", required=True)
@@ -803,6 +863,10 @@ def _add_collect_parsers(sub: Any, common: argparse.ArgumentParser) -> None:
         "recursos", aliases=["features"], parents=[common], help=t("cli.h.collect_features")
     )
     crec.set_defaults(func=cmd_coletar_recursos)
+    cun = col_sub.add_parser(
+        "unidades", aliases=["drives"], parents=[common], help=t("cli.h.collect_drives")
+    )
+    cun.set_defaults(func=cmd_coletar_unidades)
 
     capp = col_sub.add_parser("apps", parents=[common], help=t("cli.h.collect_apps"))
     capp.add_argument(
@@ -968,6 +1032,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     _add_feature_parsers(sub, common)
     _add_dns_parsers(sub, common)
+    _add_drive_parsers(sub, common)
 
     ap = sub.add_parser("aplicar", aliases=["apply"], parents=[common], help=t("cli.h.apply"))
     ap.add_argument("--simular", action="store_true", help=t("cli.h.simulate"))

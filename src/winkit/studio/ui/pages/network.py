@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from functools import partial
 
-from PySide6.QtWidgets import QHBoxLayout, QLineEdit, QMessageBox, QWidget
+from PySide6.QtWidgets import QHBoxLayout, QInputDialog, QLineEdit, QMessageBox, QWidget
 
 from winkit.core.recipe.models import WifiNetwork
 from winkit.i18n import t, tn
@@ -190,3 +190,70 @@ class DnsPage(Page):
             return
         key = "studio.dns.removed" if removed else "studio.dns.nothing_to_remove"
         QMessageBox.information(self, t("app.name"), t(key))
+
+
+class NetworkDrivesPage(Page):
+    """V2-17: unidades de rede do PC atual (ex.: ``Z:`` → ``\\\\nas\\filmes``)."""
+
+    title_key = "studio.drives.title"
+    subtitle_key = "studio.drives.subtitle"
+
+    def refresh(self) -> None:
+        self.clear_content()
+        if self.needs_recipe():
+            return
+        r = self.ctl.recipe
+        assert r is not None  # noqa: S101
+        self.content.addLayout(
+            self.toolbar(
+                button(t("studio.drives.read"), "Primary", self._read),
+                button(t("studio.drives.add"), "Secondary", self._add),
+            )
+        )
+        card = Card()
+        for d in sorted(r.network_drives, key=lambda x: x.letter):
+            card.add_row(
+                choice_row(
+                    f"{d.letter}:  {d.remote_path}",
+                    d.label,
+                    icon_kind="network_drive",
+                    selected=d.selected,
+                    on_select=partial(self._set_selected, d.letter),
+                )
+            )
+        self.content.addWidget(
+            section(
+                t("studio.on_pendrive"),
+                card if card.rows else empty(t("studio.drives.none")),
+                footer=t("studio.drives.footer"),
+            )
+        )
+
+    def _set_selected(self, letter: str, value: bool) -> None:
+        r = self.ctl.recipe
+        assert r is not None  # noqa: S101
+        for d in r.network_drives:
+            if d.letter == letter:
+                d.selected = value
+        self.save()
+
+    def _read(self) -> None:
+        def done(added: list[object]) -> None:
+            self.refresh()
+            QMessageBox.information(self, t("app.name"), tn("studio.drives.read_done", len(added)))
+
+        self.tasks.run(t("studio.drives.reading"), self.ctl.collect_drives, done)
+
+    def _add(self) -> None:
+        letter, ok = QInputDialog.getText(self, t("studio.drives.add"), t("studio.drives.letter"))
+        if not ok or not letter.strip():
+            return
+        path, ok = QInputDialog.getText(self, t("studio.drives.add"), t("studio.drives.path"))
+        if not ok or not path.strip():
+            return
+        try:
+            self.ctl.add_drive(letter.strip(), path.strip())
+        except ValueError:
+            QMessageBox.warning(self, t("app.name"), t("studio.drives.invalid"))
+            return
+        self.refresh()

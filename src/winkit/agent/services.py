@@ -16,6 +16,7 @@ from winkit.platform.installers import InstallerRunner, WindowsInstallerRunner
 from winkit.platform.inventory import AppInventory, WindowsAppInventory
 from winkit.platform.iso_mount import IsoMounter, WindowsIsoMounter
 from winkit.platform.known_folders import KnownFolders, WindowsKnownFolders
+from winkit.platform.netdrives import DriveMapper, WindowsDriveMapper
 from winkit.platform.power import SessionControl, WindowsSessionControl
 from winkit.platform.powershell import PowerShell
 from winkit.platform.registry import Registry, WindowsRegistry
@@ -52,6 +53,7 @@ class AgentServices:
     iso: IsoMounter
     devices: DeviceInspector
     dns: DnsClient
+    drive_mapper: DriveMapper
 
 
 def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windows
@@ -81,4 +83,5 @@ def real_agent_services() -> AgentServices:  # pragma: no cover — só no Windo
         iso=WindowsIsoMounter(ps),
         devices=WindowsDeviceInspector(ps),
         dns=WindowsDnsClient(ps),
+        drive_mapper=WindowsDriveMapper(ps),
     )

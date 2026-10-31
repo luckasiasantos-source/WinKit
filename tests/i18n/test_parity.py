@@ -76,6 +76,8 @@ SAME_AS_BASE: dict[str, set[str]] = {
         "collect.portable_name",
         "restore.description_before",
         "studio.dns.custom",
+        "step.network_drive.mapped",
+        "studio.drives.letter",
     },
 }
 ALWAYS_SAME = {

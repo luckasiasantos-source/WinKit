@@ -142,6 +142,7 @@ Por que isso importa:
 | `data/features.yaml`, `platform/features.py`, `platform/iso_mount.py`, `collector/features.py`, `agent/steps/feature.py` | Recursos do Windows (V2-08): catálogo, liga recursos e capacidades, monta a ISO só para leitura (D-043) |
 | `core/devices.py`, `platform/devices.py`, `agent/steps/driver_report.py` | Dispositivos sem driver (V2-09): tabela de códigos, CIM `Win32_PnPEntity`, busca dirigida no Windows Update, seção do resumo |
 | `core/dns.py`, `platform/dns.py`, `platform/hosts.py`, `agent/steps/network_privacy.py`, `data/dns_providers.yaml`, `data/hosts_blocklists.yaml` | DNS seguro e bloqueio pelo `hosts` (V2-16): bloco marcado, resto do arquivo preservado byte a byte |
+| `platform/netdrives.py`, `collector/netdrives.py`, `agent/steps/network_drive.py` | Unidades de rede (V2-17): registro `Network` no perfil Default, `WScript.Network` ao vivo; `ProviderName` lido do Windows novo (R-13) |
 | `core/secrets.py` | Registro único de segredos do processo (R-53); `runner` e `EventLog` mascaram |
 | `core/wifi.py`, `collector/wifi.py`, `platform/wifi.py`, `agent/steps/wifi.py` | Wi-Fi (V2-02): XML do perfil, coleta, `netsh` só por código de saída e arquivos, etapa antes do login |
 | `core/media.py` | Pendrive comum (D-034): reconhecer a mídia de instalação, marcar o `autounattend.xml` do WinKit |

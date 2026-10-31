@@ -28,6 +28,7 @@ from winkit.platform.fakes.system import (
 from winkit.platform.fakes.system_tweaks import (
     FakeAppx,
     FakeDevices,
+    FakeDriveMapper,
     FakeFeatures,
     FakeIsoMounter,
     FakeSession,
@@ -60,6 +61,7 @@ def fake_agent_services(*, pendrive: Path, system: Path, **overrides: Any) -> Ag
         "iso": FakeIsoMounter(),
         "devices": FakeDevices(),
         "dns": FakeDns(),
+        "drive_mapper": FakeDriveMapper(),
     }
     values.update(overrides)
     return AgentServices(**values)

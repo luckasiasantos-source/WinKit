@@ -13,6 +13,7 @@ StepKind = Literal[
     "wifi",
     "dns",
     "hosts",
+    "network_drive",
     "bloat",
     "feature",
     "tweak",

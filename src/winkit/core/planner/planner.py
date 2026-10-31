@@ -37,6 +37,7 @@ _G1 = {
     "bloat": 30,
     "feature": 35,
     "tweak": 40,
+    "network_drive": 45,
     "backup": 50,
     "app": 60,
 }
@@ -99,6 +100,7 @@ def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> 
     _plan_drivers(recipe, drafts)
     _plan_wifi(recipe, drafts)
     _plan_network_privacy(recipe, catalogs, drafts)
+    _plan_network_drives(recipe, drafts)
     _plan_power(recipe, drafts)
     _plan_bloat(recipe, catalogs, ctx, drafts, excluded)
     _plan_features(recipe, catalogs, ctx, drafts, excluded)
@@ -164,6 +166,23 @@ def _plan_network_privacy(recipe: Recipe, catalogs: Catalogs, out: list[_Draft])
     if domains:
         title = tn("plan.hosts", len(domains))
         out.append(_Draft("hosts", "block", 1, title, "machine", sort=(_G1["hosts"], 0, "block")))
+
+
+def _plan_network_drives(recipe: Recipe, out: list[_Draft]) -> None:  # R25
+    for d in recipe.network_drives:
+        if not d.selected:
+            continue
+        title = t("plan.network_drive", letter=d.letter, path=d.remote_path)
+        out.append(
+            _Draft(
+                "network_drive",
+                d.letter,
+                1,
+                title,
+                "default_profile",
+                sort=(_G1["network_drive"], 0, d.letter),
+            )
+        )
 
 
 def _plan_power(recipe: Recipe, out: list[_Draft]) -> None:  # R5

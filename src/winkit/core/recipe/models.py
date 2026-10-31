@@ -219,6 +219,15 @@ class Dns(_Model):
     hosts_blocklists: list[ItemId] = Field(default_factory=list)
 
 
+class NetworkDrive(_Model):
+    """V2-17: unidade de rede mapeada (a senha do servidor nunca é levada)."""
+
+    letter: Annotated[str, Field(pattern=r"^[D-Z]$")]
+    remote_path: Annotated[str, Field(pattern=r"^\\\\[^\\]+\\.+")]
+    label: str | None = None
+    selected: bool = True
+
+
 class RestorePoint(_Model):
     """V2-10: ponto de restauração "Windows pronto" no fim da instalação (M12)."""
 
@@ -247,6 +256,7 @@ class Recipe(_Model):
     restore_point: RestorePoint = Field(default_factory=RestorePoint)
     wifi: Wifi = Field(default_factory=Wifi)
     dns: Dns = Field(default_factory=Dns)
+    network_drives: list[NetworkDrive] = Field(default_factory=list)
 
     # ---- consultas de conveniência (sem efeito colateral)
     def app(self, app_id: str) -> AppItem | None:

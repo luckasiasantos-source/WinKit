@@ -144,3 +144,15 @@ class FakeSession:
 
     def reboot(self, *, delay_seconds: int, message: str) -> None:
         self.reboots.append((delay_seconds, message))
+
+
+@dataclass
+class FakeDriveMapper:
+    online: set[str] = field(default_factory=set)  # caminhos de servidores "no ar"
+    mapped: dict[str, str] = field(default_factory=dict)
+
+    def map_now(self, letter: str, path: str) -> bool:
+        if path not in self.online:
+            return False
+        self.mapped[letter] = path
+        return True

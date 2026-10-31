@@ -194,7 +194,8 @@
 - ✅ V2-08 Recursos do Windows: catálogo `features.yaml` (WSL, Sandbox, Hyper-V, .NET 3.5, OpenSSH, Telnet, TFTP, IIS) com filtro de edição; sem internet antes do login, com internet depois (R19); .NET 3.5 sem internet pela mídia de instalação (`sources\sxs` ou ISO montada só para leitura, D-043); operações `capability_add`/`capability_remove` para os ajustes; Studio (grupo Sistema) e CLI (`recursos listar|marcar|desmarcar`, `coletar recursos`)
 - ✅ V2-09 Diagnóstico de drivers: lista os dispositivos com problema (CIM, código traduzido por tabela), procura no Windows Update só os drivers deles (`DriverHardwareID`), seção "Dispositivos sem driver" no resumo com os ids de hardware; chave no Studio (Drivers), ligada por padrão; a prévia do modo ao vivo só consulta
 - ✅ V2-16 DNS e bloqueios: Cloudflare, Cloudflare para Famílias, Quad9, Google, AdGuard, NextDNS (id pessoal) ou personalizado; DoH com política `DoHPolicy` no Windows 11 (só servidores no 10); bloqueio de anúncios e rastreadores por listas curadas no `hosts`, num bloco marcado, sem domínios da Microsoft; desfazer pelo Studio e pela CLI (`dns bloqueios remover-do-pc`)
-- ⬜ V2-17 Unidades de rede · V2-18 Manutenção · V2-22 Variáveis de ambiente
+- ✅ V2-17 Unidades de rede: coleta do `HKCU\Network` (sem o usuário do servidor), gravação no perfil Default na Fase 1 com o `ProviderName` lido do Windows novo; ao vivo mapeia na hora ou grava para reconectar; letra ocupada nunca é substituída; Studio (grupo Rede) e CLI (`coletar unidades`, `unidades listar|adicionar|remover`)
+- ⬜ V2-18 Manutenção · V2-22 Variáveis de ambiente
 
 ## Hipóteses técnicas
 
@@ -220,4 +221,5 @@
 | H18 | O instalador usa o `autounattend.xml` do pendrive de boot mesmo com outra mídia removível | ⬜ | — |
 | H21 | `Mount-DiskImage -Access ReadOnly` de uma ISO na partição exFAT do Ventoy funciona na Fase 1, como SYSTEM | ⬜ | — |
 | H22 | `Enable-WindowsOptionalFeature` funciona na Fase 1 sem o serviço Windows Update ativo | ⬜ | — |
+| H24 | Valores em `HKCU\Network` gravados no perfil Default são reconectados no primeiro login do usuário novo | ⬜ | — |
 | H23 | `Set-DnsClientServerAddress` funciona na Fase 1 para adaptadores cujo driver acabou de ser instalado pelo `pnputil` | ⬜ | — |

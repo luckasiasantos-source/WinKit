@@ -28,6 +28,20 @@
 
 ---
 
+## 2026-10-31 — M14 — Unidades de rede mapeadas (V2-17)
+**Tipo:** implementação
+**Resumo:** as unidades de rede do PC antigo (ex.: `Z:` → `\\nas\filmes`) reaparecem no Windows novo. A senha do servidor nunca é levada; o Windows pede na primeira vez.
+
+### Adicionado
+- `src/winkit/platform/netdrives.py`, `src/winkit/collector/netdrives.py`, `src/winkit/agent/steps/network_drive.py`
+- Receita: `network_drives` (aditivo); plano: tipo `network_drive` no perfil Default (R25)
+- Serviços do Studio: `registry`
+- Studio: seção "Unidades de rede" (grupo Rede); CLI: `coletar unidades`, `unidades listar|adicionar|remover`
+- Testes: `tests/agent/test_network_drives.py`
+
+### Documentos vivos atualizados
+- ARQUITETURA — módulos; STATUS — V2-17, H24
+
 ## 2026-10-31 — M14 — DNS seguro e bloqueio pelo hosts (V2-16)
 **Tipo:** implementação
 **Resumo:** a receita troca o DNS do Windows novo por um serviço mais rápido e privado, com DNS criptografado no Windows 11, e pode bloquear anúncios e rastreadores pelo arquivo `hosts` num bloco marcado que dá para desfazer.

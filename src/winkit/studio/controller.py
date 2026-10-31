@@ -32,6 +32,7 @@ from winkit.collector import apps as app_collector
 from winkit.collector import backups as backup_collector
 from winkit.collector import drivers as driver_collector
 from winkit.collector import features as feature_collector
+from winkit.collector import netdrives as netdrive_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import layout
 from winkit.core.catalog.loader import default_catalogs
@@ -46,6 +47,7 @@ from winkit.core.recipe.models import (
     AppItem,
     BackupItem,
     ConflictPolicy,
+    NetworkDrive,
     Recipe,
     Scope,
     WifiNetwork,
@@ -317,6 +319,22 @@ class StudioController:
     def set_feature(self, feature_id: str, enabled: bool) -> None:
         feature_collector.set_feature(self.require_recipe(), feature_id, enabled)
         self.save()
+
+    def collect_drives(self) -> list[NetworkDrive]:
+        """Unidades de rede mapeadas neste PC (V2-17); devolve as novas."""
+        recipe = self.require_recipe()
+        if self.services.registry is None:
+            return []
+        added = netdrive_collector.collect_drives(self.services.registry, recipe)
+        if added:
+            self.save()
+        return added
+
+    def add_drive(self, letter: str, path: str) -> NetworkDrive:
+        """``ValueError`` (do pydantic) se a letra ou o caminho forem inválidos."""
+        drive = netdrive_collector.add_drive(self.require_recipe(), letter, path)
+        self.save()
+        return drive
 
     def remove_hosts_block(self) -> bool:
         """Desfazer (V2-16): tira o bloco do WinKit do ``hosts`` deste PC."""
