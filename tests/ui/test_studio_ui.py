@@ -222,7 +222,7 @@ def test_wizard_steps_and_path_page(window: StudioWindow, qapp) -> None:
     window.step_skip()
     assert window.current_section() == "download"
     window.step_next()
-    assert window.current_section() == "pendrive"
+    assert window.current_section() == "customiso"
     window.step_back()
     assert window.current_section() == "download"
     window.ctl.create_recipe("Samuel", None)
@@ -314,3 +314,24 @@ def test_pc_backup_page_backs_up_and_health_says_ready(
     health = window.go_to("health")
     titles = [r.title_label.text() for r in health.findChildren(Row)]
     assert t("health.backup_ok") in titles and t("health.ready") in titles
+
+
+def test_custom_iso_page_builds_copy(window: StudioWindow, qapp, tmp_path: Path) -> None:
+    """V3-11: escolher a ISO, ler as edições e gerar a cópia (fakes do DISM, pycdlib real)."""
+    from winkit.platform.fakes.images import FakeIsoMounter
+
+    mounter = window.ctl.services.iso_mounter
+    assert isinstance(mounter, FakeIsoMounter)
+    for rel in ("boot/etfsboot.com", "efi/microsoft/boot/efisys.bin", "sources/install.wim"):
+        p = mounter.contents / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_bytes(b"x" * 2048)
+    original = tmp_path / "Win11.iso"
+    original.write_bytes(b"ISO")
+    page = window.go_to("customiso")
+    page.load_iso(original)  # type: ignore[attr-defined]
+    assert [e.name for e in page._editions] == ["Windows 11 Home", "Windows 11 Pro"]  # type: ignore[attr-defined]
+    page._edition(1, False)  # type: ignore[attr-defined]
+    page._start()  # type: ignore[attr-defined]
+    assert page._done == tmp_path / "Win11-winkit.iso" and page._done.is_file()  # type: ignore[attr-defined]
+    assert original.read_bytes() == b"ISO"

@@ -309,7 +309,7 @@ runner.run(
 
 ### 5.10 Dependências
 
-- **R-43** Dependências permitidas em produção: `pydantic`, `PyYAML`, `PySide6`. Em desenvolvimento: `pytest`, `pytest-cov`, `ruff`, `mypy`, `import-linter`, `pyinstaller`, `types-PyYAML`.
+- **R-43** Dependências permitidas em produção: `pydantic`, `PyYAML`, `PySide6`, `pycdlib` (D-048). Em desenvolvimento: `pytest`, `pytest-cov`, `ruff`, `mypy`, `import-linter`, `pyinstaller`, `types-PyYAML`.
 - **R-44** Adicionar dependência exige uma decisão nova na seção 6.
 - **R-45** Versões travadas em `uv.lock`.
 
@@ -333,6 +333,8 @@ runner.run(
 - **R-58** Toda tarefa de código usa a skill `ponytail` (`.claude/skills/`, cópia de github.com/DietrichGebert/ponytail, MIT). Em conflito, valem as regras deste documento e do `CLAUDE.md` (documentos vivos, pt-BR, cobertura da R-38); `shortcut:` exige entrada em `DIVIDAS_TECNICAS.md`, como `TODO` (R-50). Em vigor desde 2026-11-01.
 - **R-59** Nenhuma leitura lenta do sistema (PowerShell, CIM, varredura de disco, rede) roda na thread da interface: o `refresh()` de uma página lê o cache do controlador (`Page.slow`) e o resto carrega em segundo plano (D-054). Em vigor desde o M19.
 - **R-61** Programas e arquivos baixados só de fontes oficiais listadas em `data/downloads.yaml` (ou do site da Microsoft, M21), com SHA-256 conferido quando o fornecedor publica; nada baixado é aberto antes da conferência. Em vigor desde o M20.
+- **R-62** Imagem montada pelo DISM é sempre desmontada (salvando só se tudo deu certo; senão, descartando) em `finally`; antes e depois, montagens deixadas pelo WinKit na pasta de trabalho são descartadas. Em vigor desde o M23.
+- **R-64** A ISO original só é lida; a cópia nunca pode ter o mesmo caminho dela, e no fim tamanho e data da original são conferidos. Teste de proteção confere o SHA-256. Em vigor desde o M23.
 
 ### 5.12 Como as regras são verificadas automaticamente
 
@@ -359,6 +361,7 @@ runner.run(
 | R-50, R-58 | `test_todo_requires_debt_entry` também cobre `shortcut:` |
 | R-59 | `tests/ui/test_responsive.py` (com leituras de 2 s, toda página abre em menos de 0,5 s no CI) |
 | R-61 | `tests/platform/test_download.py` (hash errado apaga o arquivo; zip com caminho para fora é recusado) |
+| R-62, R-64 | `tests/builder/test_custom_iso.py` (falha no meio descarta e não deixa nada montado nem ISO pela metade; o SHA-256 da original não muda) |
 | R-56, R-57 | `tests/test_docs_sync.py` (README.md com a versão em inglês igual ao README.en.md; ESTRUTURA.md igual ao que o gerador produz) |
 | Empacotamento | `test_no_dynamic_imports_in_package` (IN-013) |
 
@@ -379,6 +382,7 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 **Contexto:** com D-001, a única coisa que iria para a ISO seria o `autounattend.xml`; o plugin `auto_install` do Ventoy injeta esse arquivo sem alterar a ISO.
 **Decisão:** o WinKit nunca regrava, converte ou altera ISO/WIM/ESD.
 **Consequências:** sem dependência de ADK/`oscdimg`/`xorriso`; trocar a ISO por uma mais nova não exige nada; o fluxo só funciona via Ventoy; depende de H1.
+**Alterada pela D-044 (2026-11-01):** a ISO **original** continua nunca modificada; o WinKit pode gerar uma **cópia** personalizada, a pedido.
 
 ### D-003 — Python 3.12 + PySide6
 2026-10-31 · aceita
@@ -577,6 +581,18 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 **Contexto:** o .NET 3.5 precisa da pasta `sources\sxs` da mídia de instalação; sem ela, só pela internet (Fase 2). Um mesmo modelo do Ventoy serve a várias ISOs, então o nome da ISO não pode ir no XML.
 **Decisão:** o Construtor grava `WinKit/isos.json` (imagem, build, arquitetura, idiomas) no modo Ventoy. A etapa `feature` usa, nesta ordem, `sources\sxs` do pendrive comum, a ISO do mesmo build montada com `Mount-DiskImage -Access ReadOnly` (desmontada sempre em `finally`, D-002) ou, na Fase 2, o Windows Update. Etapas da Fase 1 com `PlannedStep.phase2_fallback` que ficarem pendentes rodam de novo no começo da Fase 2, sem esperar o pendrive.
 **Consequências:** o .NET 3.5 instala sem internet antes do login quando há ISO do mesmo build; sem ela, a instalação continua e o recurso entra depois do login. Os outros tipos de etapa não ganharam a segunda chance (DT-020).
+
+### D-044 — Cópia personalizada da ISO, nunca a original
+2026-11-01 · aceita (M23, `PLANO_V3.md`; altera a D-002 e a D-001)
+**Contexto:** o dono quer modificar a ISO e ter uma ISO que funcione sozinha. Mexer na original arrisca a única cópia.
+**Decisão:** a ISO original é montada só para leitura e copiada para uma pasta de trabalho; tudo acontece na cópia, e o resultado é um arquivo novo. No fim, tamanho e data da original são conferidos (R-64). Na **ISO autossuficiente** (opcional) a pasta `WinKit\` inteira e o `autounattend.xml` vão dentro da cópia — a única exceção à "nada pesado dentro da ISO", e só na cópia.
+**Consequências:** precisa de cerca de 3× o tamanho da ISO livres e de tempo; a tela calcula e avisa antes.
+
+### D-048 — Cópia personalizada com DISM e ISO gravada pelo `pycdlib`
+2026-11-01 · aceita (M23)
+**Contexto:** gerar ISO de boot exige UDF + El Torito (BIOS e UEFI); o `oscdimg` vem no ADK, com redistribuição incerta.
+**Decisão:** imagens alteradas pelo módulo DISM do PowerShell (`platform/image_tools.py`: exportar edições — que também converte `.esd` em `.wim` —, drivers no `install.wim` e no `boot.wim` índices 1 e 2, atualizações `.msu`/`.cab`, apps de fábrica do catálogo), tudo em JSON (R-13). A ISO é gravada pelo **`pycdlib`** (nova dependência, LGPL, Python puro; R-43): arquivos em UDF 2.60, e só os arquivos de boot da **própria ISO original** no ISO9660 para o El Torito. Ajustes de registro e recursos do Windows não entram na imagem: o Agente já os aplica na instalação.
+**Consequências:** H36 precisa da VM; montagens órfãs do WinKit são descartadas antes e depois (R-62).
 
 ### D-046 — Ventoy e Rufus: baixados, abertos e detectados, nunca embutidos
 2026-11-01 · aceita (M20, `PLANO_V3.md`)

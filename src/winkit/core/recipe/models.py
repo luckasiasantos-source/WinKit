@@ -432,7 +432,7 @@ class Power(_Model):
 
 
 TargetVersion = Literal["11", "10"]
-MediaPath = Literal["ventoy", "rufus", "microsoft"]
+MediaPath = Literal["ventoy", "rufus", "microsoft", "custom_iso"]
 
 
 class PcBackup(_Model):

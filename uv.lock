@@ -283,6 +283,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pycdlib"
+version = "1.22.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c3/4a/894c8cb0fbc8a7f3846a3ff1d24cd05d6acca962b9610d61a65c74398aea/pycdlib-1.22.0.tar.gz", hash = "sha256:00456c146e2834eac96ddf738b6b2cbe81564d9efe2022ae6a155fc6649870c6", size = 362477, upload-time = "2026-10-09T13:56:15.768Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7c/64/5a5912a3f3ba47dba3eb7f707e51f91926b26be4bde25fe2da483f3c4a9b/pycdlib-1.22.0-py3-none-any.whl", hash = "sha256:bfa0b3631345a14b2741fe088398b6b8dc2838442ea607fd07d027dcc67b9e94", size = 238118, upload-time = "2026-10-09T13:56:14.117Z" },
+]
+
+[[package]]
 name = "pydantic"
 version = "2.14.2"
 source = { registry = "https://pypi.org/simple" }
@@ -604,6 +613,7 @@ wheels = [
 name = "winkit"
 source = { editable = "." }
 dependencies = [
+    { name = "pycdlib" },
     { name = "pydantic" },
     { name = "pyside6" },
     { name = "pyyaml" },
@@ -624,6 +634,7 @@ package = [
 
 [package.metadata]
 requires-dist = [
+    { name = "pycdlib", specifier = ">=1.22.0" },
     { name = "pydantic", specifier = ">=2.7,<3" },
     { name = "pyside6", specifier = ">=6.7,<7" },
     { name = "pyyaml", specifier = ">=6.0,<7" },

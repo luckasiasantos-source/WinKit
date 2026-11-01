@@ -14,7 +14,9 @@ from winkit.platform.disk_info import DiskInfo, WindowsDiskInfo
 from winkit.platform.disks import DiskInspector, WindowsDiskInspector
 from winkit.platform.drivers import DriverManager, WindowsDriverManager
 from winkit.platform.features import SystemFeatures, WindowsSystemFeatures
+from winkit.platform.image_tools import ImageTools, WindowsImageTools
 from winkit.platform.inventory import AppInventory, WindowsAppInventory
+from winkit.platform.iso_mount import IsoMounter, WindowsIsoMounter
 from winkit.platform.known_folders import KnownFolders, WindowsKnownFolders
 from winkit.platform.locale import read_regional
 from winkit.platform.powershell import PowerShell
@@ -54,6 +56,9 @@ class Services:
     iso_links: IsoLinks | None = None
     #: Discos de destino do backup e saúde do PC (V3-09, V3-15).
     disk_info: DiskInfo | None = None
+    #: ISO personalizada (V3-11): imagens do Windows e ISO montada só para leitura.
+    image_tools: ImageTools | None = None
+    iso_mounter: IsoMounter | None = None
 
 
 def real_services() -> Services:
@@ -79,4 +84,6 @@ def real_services() -> Services:
         devices=WindowsDeviceInspector(ps),
         iso_links=FidoLinks(ps, tools_dir()),
         disk_info=WindowsDiskInfo(ps),
+        image_tools=WindowsImageTools(ps),
+        iso_mounter=WindowsIsoMounter(ps),
     )

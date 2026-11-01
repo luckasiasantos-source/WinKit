@@ -55,8 +55,8 @@ Todo módulo Python começa com uma docstring cuja primeira linha diz o que ele 
 
 ## Regras inegociáveis (resumo — detalhes em ARQUITETURA.md)
 
-- **A ISO do Windows nunca é modificada.** Tudo vai para a pasta `WinKit/` no pendrive Ventoy.
-- **Nada pesado vai para dentro da ISO**, nem backup, nem instalador, nem driver.
+- **A ISO original do Windows nunca é modificada.** Tudo vai para a pasta `WinKit/` no pendrive. A ISO personalizada (D-044) é sempre uma **cópia** num arquivo novo.
+- **Nada pesado vai para dentro da ISO**, nem backup, nem instalador, nem driver — exceto na cópia autossuficiente que a pessoa pede (D-044).
 - **Nunca particionar, formatar ou apagar discos.** O `autounattend.xml` nunca contém `DiskConfiguration`.
 - **Restauração é aditiva por padrão** (mesclar sem sobrescrever). Sobrescrever só com escolha explícita na receita.
 - `winkit/core` não importa `winkit/platform`, Qt, `winreg`, `subprocess` nem nada específico de Windows.

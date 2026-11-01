@@ -550,7 +550,7 @@ class TemplatesPage(Page):
 
 
 #: Caminhos até o pendrive (V3-06), na ordem da tela.
-MEDIA_PATHS = ("ventoy", "rufus", "microsoft")
+MEDIA_PATHS = ("ventoy", "rufus", "microsoft", "custom_iso")
 
 
 class PathPage(Page):
@@ -631,7 +631,7 @@ class PathPage(Page):
             )
         else:
             steps.add_row(
-                Row(t("studio.path.tool_microsoft"), t("studio.path.tool_microsoft_hint"))
+                Row(t(f"studio.path.tool_{chosen}"), t(f"studio.path.tool_{chosen}_hint"))
             )
         for option in self.ctl.rufus_options():
             steps.add_row(

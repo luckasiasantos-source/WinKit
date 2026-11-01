@@ -37,7 +37,7 @@
 | M20 | Modo em etapas, caminho, Ventoy e Rufus (V3-05 a 07) | ✅ código · validação na VM pendente | `docs/validacao/M20.md` |
 | M21 | Baixar a ISO oficial (V3-08) | ✅ código · validação na VM pendente | `docs/validacao/M21.md` |
 | M22 | Backup para HD secundário (V3-09, 10, 15, 16) | ✅ código · validação na VM pendente | `docs/validacao/M22.md` |
-| M23 | ISO personalizada e autossuficiente (V3-11, 12, 17) | ⬜ | — |
+| M23 | ISO personalizada e autossuficiente (V3-11, 12, 17) | ✅ código · validação na VM pendente | `docs/validacao/M23.md` |
 | M24 | O WinKit grava o pendrive (V3-13) | ⬜ | — |
 | M25 | Windows 7 e 8.1 em modo limitado (V3-14) | ⬜ | — |
 | M26 | Fechamento da v3 | ⬜ | — |
@@ -264,6 +264,13 @@
 - ✅ V3-16 Exportar a chave de recuperação do BitLocker para um arquivo (disco de backup ou pendrive)
 - ✅ Roteiro `docs/validacao/M22.md` e versão 0.13.0
 
+### M23 — ISO personalizada e autossuficiente ✅ (código) · validação na VM pendente
+- ✅ V3-11 Etapa **ISO personalizada** e caminho na etapa Começar: a ISO original é montada só para leitura e copiada; edições escolhidas (exportar também converte `.esd`), drivers deste PC e de uma pasta no instalador e no Windows, atualizações `.msu`/`.cab`, apps de fábrica marcados removidos; ISO nova gravada pelo `pycdlib` com boot BIOS e UEFI (D-044, D-048, R-62, R-64)
+- ✅ V3-12 ISO autossuficiente: a pasta `WinKit` e o `autounattend.xml` dentro da cópia (pendrive comum dentro da ISO)
+- ✅ Espaço necessário calculado e conferido antes; progresso por etapa
+- ✅ Regras inegociáveis atualizadas no `CLAUDE.md` (a original nunca; a cópia, a pedido)
+- ✅ Roteiro `docs/validacao/M23.md` e versão 0.14.0
+
 ## Hipóteses técnicas
 
 | # | Hipótese (resumo) | Estado | Onde foi validada |
@@ -316,3 +323,4 @@
 | H46 | Ventoy e Rufus baixados pelo WinKit abrem sem bloqueio além do SmartScreen | ⬜ | — |
 | H47 | O Agente atual (Python 3.12) roda no Windows 8.1 | ⬜ | — |
 | H48 | Mídias antigas ainda dão boot com Secure Boot depois da troca de certificados (2026) | ⬜ | — |
+| H49 | Na ISO autossuficiente (mídia só de leitura), bootstrap e Agente funcionam sem gravar de volta na mídia | ⬜ | — |

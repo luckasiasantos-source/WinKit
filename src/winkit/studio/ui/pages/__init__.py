@@ -11,6 +11,7 @@ from winkit.studio.ui.pages.bring import (
     StartLayoutPage,
     SuggestionsPage,
 )
+from winkit.studio.ui.pages.customiso import CustomIsoPage
 from winkit.studio.ui.pages.finish import BuildPage, ExecutionPage, LivePage
 from winkit.studio.ui.pages.network import BrowsersPage, DnsPage, NetworkDrivesPage, WifiPage
 from winkit.studio.ui.pages.pcbackup import HealthPage, PcBackupPage
@@ -39,6 +40,7 @@ __all__ = [
     "BloatPage",
     "BrowsersPage",
     "BuildPage",
+    "CustomIsoPage",
     "DefaultAppsPage",
     "DnsPage",
     "DownloadPage",

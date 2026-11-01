@@ -46,3 +46,12 @@ tener errores o fallas de seguridad que causen pérdida de datos o un Windows
 inutilizable. El uso es totalmente bajo tu propio riesgo; el autor y los
 colaboradores no se responsabilizan por nada (secciones 7 y 8 de la licencia).
 Pruébalo primero en una máquina virtual y haz una copia de seguridad antes.
+
+Componentes de terceiros / Third-party components
+-------------------------------------------------
+- pycdlib (https://github.com/clalancette/pycdlib), LGPL-2.1: usado sem
+  modificação para gravar a ISO personalizada / used unmodified to write the
+  custom ISO / usado sin modificar para grabar la ISO personalizada.
+- Ventoy, Rufus e Fido não vêm no pacote: são baixados das releases oficiais
+  e abertos como estão / are not bundled: downloaded from the official releases
+  and run as-is / no se incluyen: se descargan de las versiones oficiales.

@@ -10,6 +10,7 @@ dependencies = [
     "pydantic>=2.7,<3",
     "PyYAML>=6.0,<7",
     "PySide6>=6.7,<7",
+    "pycdlib>=1.22.0",
 ]
 
 [project.scripts]

@@ -28,6 +28,7 @@ from winkit.builder.build import (
     payload_sizes,
     save_profile_recipe,
 )
+from winkit.builder.custom_iso import CustomIsoOptions, build_custom_iso, needed_space
 from winkit.builder.isos import scan_isos
 from winkit.builder.validate import PendriveReport, validate_pendrive
 from winkit.collector import app_updates, pc_backup, snapshot
@@ -92,6 +93,8 @@ from winkit.platform import download as dl
 from winkit.platform import external_tools, hosts
 from winkit.platform.disk_info import Destination, Health
 from winkit.platform.environment import WindowsEnvironment
+from winkit.platform.image_tools import ImageInfo
+from winkit.platform.iso_mount import mounted_iso
 from winkit.platform.runner import launch
 from winkit.platform.services import Services
 from winkit.platform.vss import PendingSnapshots
@@ -369,6 +372,48 @@ class StudioController:
         path = folder / "WinKit-chave-bitlocker.txt"
         atomic_write_text(path, "\n".join(lines))
         return path
+
+    # ---------------------------------------------------------- ISO personalizada (V3-11/12)
+    def iso_editions(self, iso: Path) -> list[ImageInfo]:
+        tools, mounter = self.services.image_tools, self.services.iso_mounter
+        if tools is None or mounter is None:
+            raise WinKitError("ISO personalizada indisponível neste sistema")
+        with mounted_iso(mounter, iso) as drive:
+            sources = drive / "sources"
+            wim = next(
+                (sources / n for n in ("install.wim", "install.esd") if (sources / n).is_file()),
+                None,
+            )
+            if wim is None:
+                raise WinKitError("a ISO não tem sources\\install.wim nem install.esd")
+            return tools.images(wim)
+
+    def custom_iso_space(self, opts: CustomIsoOptions) -> tuple[int, int]:
+        """(precisa, livre) na pasta de trabalho."""
+        extra = 0
+        if opts.self_contained_from is not None:
+            extra = sum(self.sizes().values())
+        opts.work_dir.mkdir(parents=True, exist_ok=True)
+        return needed_space(opts.original, extra), shutil.disk_usage(opts.work_dir).free
+
+    def make_custom_iso(self, opts: CustomIsoOptions, progress: Callable[[object], None]) -> Path:
+        tools, mounter = self.services.image_tools, self.services.iso_mounter
+        if tools is None or mounter is None:
+            raise WinKitError("ISO personalizada indisponível neste sistema")
+        need, free = self.custom_iso_space(opts)
+        if free < need:
+            raise WinKitError(
+                t("studio.customiso.no_space", need=format_size(need), free=format_size(free))
+            )
+        return build_custom_iso(
+            opts,
+            tools=tools,
+            mounter=mounter,
+            inspector=self.services.disks,
+            catalogs=self.catalogs,
+            now=self.clock(),
+            progress=lambda step, frac: progress((step, frac)),
+        )
 
     def rufus_options(self) -> list[rufus.RufusOption]:
         """O que o Rufus gravou neste pendrive (os originais guardados também contam)."""

@@ -8,7 +8,7 @@
 
 [Português](README.md) · **English** · [Español](README.es.md)
 
-**Install Windows already the way you like it — drivers, apps, settings and privacy — from a Ventoy USB drive (or one made by Rufus or Microsoft), without modifying the ISO. Or apply the same recipe to the Windows you already have.**
+**Install Windows already the way you like it — drivers, apps, settings and privacy — from a Ventoy USB drive (or one made by Rufus or Microsoft), without modifying the original ISO. Or apply the same recipe to the Windows you already have.**
 
 [![CI](https://github.com/luckasiasantos-source/WinKit/actions/workflows/ci.yml/badge.svg)](https://github.com/luckasiasantos-source/WinKit/actions/workflows/ci.yml)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
@@ -62,6 +62,7 @@ WinKit does it all at once. You build a **recipe** on your current PC, and the V
 | 🗃️ **Accounts, folders and games** | Extra accounts (administrator or standard), Documents and Downloads on another disk (found by serial number even if the letter changes), and Steam and Epic games on another disk showing up installed, without downloading again. |
 | 📋 **Templates and shareable recipes** | Start from a ready template or import someone else's recipe, always with a preview. Exports never include your account, password, Wi-Fi or personal paths. |
 | ⬆️ **Always-fresh installers** | "Check for updates" replaces old installers on the USB drive without redoing the recipe; the old version is only removed after the new one is in place. |
+| 💿 **Custom ISO** | A **copy** of the ISO with the editions you want, this PC's drivers (so the installer sees the SSD), updates and without the checked preinstalled apps. It can be **self-contained**: all of WinKit goes inside and the ISO installs everything by itself. The original is never modified. |
 | 🗄️ **Backup to another disk** | Copies your files to an HDD, SSD or USB drive before formatting, showing the disk type and the measured time; every file is checked and nothing is deleted. Later it brings them back by adding to what exists, by hand or during setup. The **Before formatting** step checks the backup, BitLocker (and exports the key) and activation. |
 | 🔍 **Comparison with the old PC** | At the end of the install, the summary shows missing apps, devices without a driver and features that were not turned on. |
 

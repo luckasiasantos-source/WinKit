@@ -28,6 +28,24 @@
 
 ---
 
+## 2026-11-01 — M23 — ISO personalizada e autossuficiente (0.14.0)
+**Tipo:** implementação
+**Resumo:** etapa ISO personalizada: uma cópia da ISO (a original só é lida) com edições, drivers, atualizações e apps de fábrica ajustados pelo DISM, gravada com boot BIOS e UEFI; opcionalmente com o WinKit inteiro dentro. Nova dependência `pycdlib`; regras inegociáveis atualizadas.
+
+### Adicionado
+- `src/winkit/builder/custom_iso.py`, `src/winkit/platform/image_tools.py` (DISM em PowerShell), `src/winkit/platform/iso_writer.py` (`pycdlib`), `src/winkit/platform/fakes/images.py`
+- Studio: página **ISO personalizada** (`studio/ui/pages/customiso.py`); caminho `custom_iso` na etapa Começar
+- Dependência `pycdlib` (`pyproject.toml`, `uv.lock`); `NOTICE` com os componentes de terceiros
+- Testes: `tests/builder/test_custom_iso.py` (ISO real lida de volta; falha descarta; original intacta), página em `tests/ui/test_studio_ui.py`; `docs/validacao/M23.md`
+
+### Alterado
+- `CLAUDE.md` — "a ISO **original** nunca é modificada"; exceção da cópia autossuficiente
+- READMEs (três idiomas) — ISO personalizada
+- `src/winkit/__init__.py` — 0.14.0; `packaging/NOTAS_DA_VERSAO.md`
+
+### Documentos vivos atualizados
+- ARQUITETURA — D-044, D-048, R-43, R-62, R-64, D-002 alterada; STATUS — M23 e H49; PLANO_V3 — H49; ESTRUTURA — regerado
+
 ## 2026-11-01 — M22 — Backup para HD secundário (0.13.0)
 **Tipo:** implementação
 **Resumo:** etapas Backup do PC e Antes de formatar. Backup conferido para outro disco (tipo e velocidade medidos, cópia de sombra, pausa e retomada, .zip opcional, nunca apaga); trazer de volta à mão ou na instalação, somando; BitLocker e ativação conferidos, com exportação da chave.

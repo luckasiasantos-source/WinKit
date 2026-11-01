@@ -130,6 +130,7 @@
 | `fakes/disks.py` | ``DiskInspector`` falso: partições e ISOs programadas. |
 | `fakes/dns.py` | Dublê do cliente DNS: adaptadores e DoH em memória. |
 | `fakes/drivers.py` | ``DriverManager`` falso. |
+| `fakes/images.py` | Dublê das imagens do Windows e do montador de ISO (V3-11). |
 | `fakes/powershell.py` | ``PowerShell`` falso: casa o corpo do script por trecho e devolve objetos prontos. |
 | `fakes/registry.py` | Registro falso em memória (chaves sem diferenciar maiúsculas, como no Windows). |
 | `fakes/restore.py` | Dublê dos pontos de restauração. |
@@ -142,9 +143,11 @@
 | `features.py` | Recursos opcionais e capacidades do Windows (Recall, WSL, OpenSSH…) e nome do computador. |
 | `fonts.py` | Carregar uma fonte na sessão atual sem sair dela (V2-07, modo ao vivo). |
 | `hosts.py` | O arquivo ``hosts`` do Windows (V2-16). As regras do bloco ficam em ``core/dns.py``. |
+| `image_tools.py` | Imagens do Windows (``install.wim``, ``boot.wim``) pelo módulo DISM do PowerShell (V3-11, D-048). |
 | `installers.py` | Execução de instaladores (PLANO.md §13.3): argumentos em lista, tempo limite, sem janela. |
 | `inventory.py` | Leitura dos apps instalados (registro de desinstalação + pacotes da Loja). |
 | `iso_mount.py` | Montagem **somente leitura** de uma ISO (V2-08: fonte offline do .NET 3.5). |
+| `iso_writer.py` | Grava uma pasta de instalação do Windows como ISO de boot (V3-11, D-048, H36). |
 | `known_folders.py` | Pastas conhecidas do Windows (``SHGetKnownFolderPath``) — PLANO.md §6.3. |
 | `locale.py` | Idioma e padrões regionais do Windows atual, por API e registro (R-13, D-030). |
 | `netdrives.py` | Unidades de rede (V2-17): registro ``Network`` e ``WScript.Network`` para o modo ao vivo. |
@@ -200,6 +203,7 @@
 |---|---|
 | `__init__.py` | Pacote. |
 | `build.py` | Orquestra a construção do pendrive (PLANO.md §8.4). |
+| `custom_iso.py` | ISO personalizada: uma **cópia** da ISO original com drivers, atualizações, edições e apps |
 | `isos.py` | Leitura das ISOs do pendrive, com cache (PLANO.md §8.2). |
 | `target.py` | Escolha do pendrive de destino (PLANO.md §8.1, D-034). |
 | `validate.py` | Validação do pendrive sem alterar nada (PLANO.md §8.6). |
@@ -283,6 +287,7 @@
 | `ui/pages/__init__.py` | Páginas do WinKit Studio, uma por seção da barra lateral (D-042). |
 | `ui/pages/bring.py` | Grupo "O que levar": aplicativos, configurações dos apps e drivers. |
 | `ui/pages/common.py` | Peças comuns às páginas do Studio. Todo texto vem do ``i18n`` (R-03, R-55). |
+| `ui/pages/customiso.py` | ISO personalizada (V3-11/12): uma cópia da ISO; a original nunca é modificada (D-044). |
 | `ui/pages/finish.py` | Grupo "Concluir": primeiro login e revisar/construir. |
 | `ui/pages/network.py` | Grupo "Rede": Wi-Fi, DNS e bloqueios, unidades de rede (M14). |
 | `ui/pages/pcbackup.py` | Backup do PC para outro disco e "Antes de formatar" (V3-09, V3-10, V3-15, V3-16). |
