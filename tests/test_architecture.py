@@ -61,13 +61,17 @@ def test_no_shell_true_anywhere() -> None:
 
 
 def test_todo_requires_debt_entry() -> None:
-    """Todo TODO no código precisa citar uma dívida técnica: TODO(DT-nnn)."""
+    """Todo TODO ou ``shortcut:`` no código cita uma dívida técnica: ``(DT-nnn)`` (R-50, R-58)."""
     debts = (ROOT / "docs" / "DIVIDAS_TECNICAS.md").read_text(encoding="utf-8")
     for path in SRC.rglob("*.py"):
         for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             if "TODO" in line:
                 assert "TODO(DT-" in line, f"{path}:{lineno} TODO sem referência a DT"
                 ref = line.split("TODO(")[1].split(")")[0]
+                assert f"### {ref} " in debts, f"{path}:{lineno} {ref} não existe"
+            if "# shortcut:" in line:  # atalho da skill Ponytail (R-58)
+                assert "(DT-" in line, f"{path}:{lineno} shortcut: sem referência a DT"
+                ref = "DT-" + line.split("(DT-")[1].split(")")[0]
                 assert f"### {ref} " in debts, f"{path}:{lineno} {ref} não existe"
 
 

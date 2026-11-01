@@ -2,6 +2,8 @@
 
 <img src="docs/imagens/studio-apps.png" alt="WinKit Studio" width="820">
 
+<img src="docs/imagens/logo.png" alt="WinKit logo" width="112">
+
 # WinKit
 
 **Português** · [English (below)](#english) · [Español](README.es.md)

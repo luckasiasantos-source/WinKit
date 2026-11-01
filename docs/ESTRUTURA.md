@@ -7,6 +7,7 @@
 | Caminho | O que tem |
 |---|---|
 | `CLAUDE.md` | regras obrigatórias para quem mexe no código (pessoas e agentes de IA) |
+| `.claude/skills/` | skills obrigatórias do Claude Code neste projeto (Ponytail, R-58) |
 | `README.md` | apresentação em português, com a versão em inglês logo abaixo |
 | `README.en.md, README.es.md` | a apresentação em inglês e em espanhol |
 | `CONTRIBUTING.md` | como contribuir |
@@ -16,7 +17,7 @@
 | `docs/` | plano, arquitetura, status, dívidas, incidentes, changelog e roteiros de validação |
 | `docs/validacao/` | roteiros de teste em VM ou PC real, um por marco |
 | `docs/imagens/` | capturas de tela usadas nos READMEs |
-| `packaging/` | specs do PyInstaller, build.ps1, smoke.ps1 e notas da versão |
+| `packaging/` | specs do PyInstaller, build.ps1, smoke.ps1, make_icon.py (gera o .ico) e notas da versão |
 | `scripts/` | check.sh (verificação antes de cada commit) e geradores de documentação |
 | `src/winkit/` | o código (detalhado abaixo) |
 | `tests/` | testes automáticos, espelhando as pastas de src/winkit |

@@ -24,6 +24,7 @@ from PySide6.QtGui import (
     QPainterPath,
     QPen,
     QPixmap,
+    QRadialGradient,
 )
 from PySide6.QtWidgets import (
     QAbstractButton,
@@ -339,24 +340,77 @@ def symbol_icon(kind: str, color: str, size: int = 22) -> QIcon:
     return icon
 
 
-def app_icon(size: int = 64) -> QIcon:
-    """Ícone do WinKit: quadrado arredondado com degradê azul e um "W"."""
+#: Tamanhos em que o ícone é desenhado (Windows escolhe o mais próximo; 512 para telas HiDPI).
+ICON_SIZES = (16, 20, 24, 32, 40, 48, 64, 96, 128, 256, 512)
 
-    pm, painter = _canvas(size)
-    grad = QLinearGradient(0, 0, 0, size)
-    grad.setColorAt(0, QColor("#4FA3FF"))
-    grad.setColorAt(1, QColor("#0063E0"))
+
+def paint_logo(painter: QPainter, s: float) -> None:
+    """Desenha o logo do WinKit num quadrado ``s`` × ``s``, só com vetores (nítido em qualquer tamanho).
+
+    Fundo arredondado em degradê azul → violeta, com brilho no alto; um "W" em traço contínuo
+    (não é fonte) com sombra; e uma faísca de quatro pontas verde-água, o "já pronto".
+    """
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
     painter.setPen(Qt.PenStyle.NoPen)
-    painter.setBrush(QBrush(grad))
-    painter.drawRoundedRect(QRectF(0, 0, size, size), size * 0.23, size * 0.23)
-    font = QFont()
-    font.setBold(True)
-    font.setPixelSize(int(size * 0.55))
-    painter.setFont(font)
-    painter.setPen(QColor("#FFFFFF"))
-    painter.drawText(QRectF(0, 0, size, size * 0.98), Qt.AlignmentFlag.AlignCenter, "W")
+    bg = QLinearGradient(0, 0, s, s)
+    bg.setColorAt(0.0, QColor("#3B82F6"))
+    bg.setColorAt(0.55, QColor("#4F46E5"))
+    bg.setColorAt(1.0, QColor("#7C3AED"))
+    rect = QRectF(0, 0, s, s)
+    radius = s * 0.235
+    painter.setBrush(QBrush(bg))
+    painter.drawRoundedRect(rect, radius, radius)
+    shine = QRadialGradient(QPointF(s * 0.3, s * 0.05), s * 0.85)
+    shine.setColorAt(0.0, QColor(255, 255, 255, 70))
+    shine.setColorAt(1.0, QColor(255, 255, 255, 0))
+    painter.setBrush(QBrush(shine))
+    painter.drawRoundedRect(rect, radius, radius)
+
+    w = QPainterPath()
+    pts = [(0.20, 0.33), (0.345, 0.73), (0.50, 0.44), (0.655, 0.73), (0.80, 0.33)]
+    w.moveTo(s * pts[0][0], s * pts[0][1])
+    for x, y in pts[1:]:
+        w.lineTo(s * x, s * y)
+    width = max(1.6, s * 0.115)
+    painter.setBrush(Qt.BrushStyle.NoBrush)
+    shadow = QPen(QColor(30, 27, 75, 90), width, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap)
+    shadow.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+    painter.setPen(shadow)
+    painter.drawPath(w.translated(0, s * 0.025))
+    ink = QLinearGradient(0, s * 0.3, 0, s * 0.75)
+    ink.setColorAt(0.0, QColor("#FFFFFF"))
+    ink.setColorAt(1.0, QColor("#E0E7FF"))
+    pen = QPen(QBrush(ink), width, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap)
+    pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+    painter.setPen(pen)
+    painter.drawPath(w)
+
+    if s < 28:  # a faísca vira ruído nos tamanhos pequenos
+        return
+    cx, cy, r = s * 0.80, s * 0.17, s * 0.105
+    star = QPainterPath()
+    star.moveTo(cx, cy - r)
+    for dx, dy in ((1, 0), (0, 1), (-1, 0), (0, -1)):
+        tip = QPointF(cx + dx * r, cy + dy * r)
+        star.quadTo(QPointF(cx, cy), tip)
+    painter.setPen(Qt.PenStyle.NoPen)
+    painter.setBrush(QColor("#5EEAD4"))
+    painter.drawPath(star)
+
+
+def logo_pixmap(size: int) -> QPixmap:
+    pm, painter = _canvas(size)
+    paint_logo(painter, size)
     painter.end()
-    return QIcon(pm)
+    return pm
+
+
+def app_icon(size: int = 64) -> QIcon:
+    """Ícone do WinKit em todos os tamanhos (o ``size`` pedido entra também)."""
+    icon = QIcon()
+    for s in sorted({*ICON_SIZES, size}):
+        icon.addPixmap(logo_pixmap(s))
+    return icon
 
 
 #: Cor e símbolo por tipo de etapa (ícones da lista, como nos Ajustes do Mac).

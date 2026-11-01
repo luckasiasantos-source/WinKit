@@ -28,6 +28,24 @@
 
 ---
 
+## 2026-11-01 — Logo novo e skill Ponytail obrigatória (R-58)
+**Tipo:** implementação
+**Resumo:** logo redesenhado em vetor (fundo azul → violeta, "W" em traço contínuo e uma faísca verde-água), nítido em qualquer tamanho; o `.ico` passa a ter 10 tamanhos (16 a 256 px) em vez de um só. A skill Ponytail passa a ser obrigatória em toda tarefa de código do projeto.
+
+### Adicionado
+- `src/winkit/ui/widgets.py` — `paint_logo` (desenho vetorial) e `logo_pixmap`; `app_icon` monta o ícone em 11 tamanhos (até 512 px para telas HiDPI)
+- `docs/imagens/logo.png` (512 px), no topo dos três READMEs
+- `.claude/skills/` — `ponytail`, `ponytail-review`, `ponytail-audit`, `ponytail-debt` (cópias sem alteração, MIT, commit `96608e0`; só os `SKILL.md`, sem hooks)
+
+### Alterado
+- `packaging/make_icon.py` — grava o `.ico` com entradas PNG em 10 tamanhos e o `logo.png`; `packaging/winkit.ico` regerado
+- `CLAUDE.md` — seção da skill obrigatória e o que vence em caso de conflito
+- `tests/test_architecture.py` — `shortcut:` também exige referência a uma DT
+- `scripts/gen_estrutura.py` — `.claude/skills/` e `make_icon.py` na árvore
+
+### Documentos vivos atualizados
+- ARQUITETURA — R-58 e a verificação; ESTRUTURA — regerado; README — logo nos três idiomas
+
 ## 2026-10-31 — Documentação — README bilíngue e estrutura do projeto (R-56, R-57)
 **Tipo:** documentação
 **Resumo:** o `README.md` passa a ter a versão em inglês logo abaixo da portuguesa, com aviso no começo. Nova regra: o README é atualizado sempre que o que ele descreve muda. Novo `docs/ESTRUTURA.md`, gerado a partir das docstrings, com a árvore do projeto e o que cada arquivo faz.

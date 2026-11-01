@@ -15,6 +15,16 @@ Leia, nesta ordem:
 6. `docs/CHANGELOG.md` — o mapa de todas as mudanças e implementações já feitas.
 7. `docs/ESTRUTURA.md` — a árvore do projeto, com o que cada arquivo de código faz.
 
+## Skill obrigatória: Ponytail
+
+Em **toda tarefa de código** neste repositório (escrever, corrigir, refatorar, revisar, escolher dependência), use a skill `ponytail` (nível `full`), em `.claude/skills/ponytail/`: a menor mudança que resolve o problema por inteiro, sem abstração nem opção que ninguém pediu, e uma resposta que diz o que ficou de fora e o risco. Para revisar uma mudança grande antes do commit, use `ponytail-review`; para o repositório inteiro, `ponytail-audit`; para listar os atalhos deixados, `ponytail-debt` (R-58).
+
+Quando a skill e estas regras divergirem, **estas regras vencem**:
+- os documentos vivos, o README e o `ESTRUTURA.md` fazem parte da "mudança completa", não são extra;
+- respostas, relatórios de revisão, documentos e commits continuam em pt-BR;
+- todo comentário `shortcut:` tem uma entrada correspondente em `docs/DIVIDAS_TECNICAS.md`, como um `TODO`;
+- a cobertura mínima da R-38 continua valendo, além do "um teste onde a lógica precisa".
+
 ## Antes de cada commit (obrigatório)
 
 ```bash
@@ -38,7 +48,7 @@ Toda mudança de código vem **no mesmo commit** com a atualização dos documen
 | Criou, moveu ou removeu um arquivo de código, ou mudou a docstring de um módulo | rode `uv run python scripts/gen_estrutura.py` para regerar `docs/ESTRUTURA.md` — R-57 |
 | **Qualquer commit** | `docs/CHANGELOG.md` — sempre, sem exceção |
 
-`TODO` no código sem uma entrada correspondente em `DIVIDAS_TECNICAS.md` não é permitido.
+`TODO` ou `shortcut:` no código sem uma entrada correspondente em `DIVIDAS_TECNICAS.md` não é permitido.
 
 Todo módulo Python começa com uma docstring cuja primeira linha diz o que ele faz: é dela que sai a descrição em `docs/ESTRUTURA.md`. O teste `tests/test_docs_sync.py` falha se o README ou a estrutura ficarem desatualizados.
 
