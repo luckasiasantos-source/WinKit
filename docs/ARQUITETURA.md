@@ -637,6 +637,11 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 2026-11-01 · aceita (M20)
 **Decisão:** cada página é uma etapa; a barra inferior (Voltar / Pular / Avançar, "Etapa n de N") segue a ordem da barra lateral, sem "Aplicar neste PC". Pular fica registrado e a revisão lista o que foi pulado. A primeira etapa (Começar) guarda o caminho e o Windows alvo no controlador até a receita existir, e aí passa para ela (`recipe.media`, `recipe.target_windows`).
 
+### D-053 — Central de tarefas com fila por disco (adiada)
+2026-11-01 · adiada (M22)
+**Contexto:** backup, download, ISO personalizada e gravação podem rodar enquanto a pessoa configura.
+**Decisão:** cada página roda a sua tarefa longa em segundo plano com progresso (`TaskRunner.with_progress`) e avisa ao terminar ou falhar; a central única com fila por disco físico ficou para depois (DT-028).
+
 ### D-054 — Leituras lentas do sistema nunca na thread da interface
 2026-11-01 · aceita (M19, `PLANO_V3.md`)
 **Contexto:** o Studio travava ao abrir: a lista de pendrives (PowerShell) era lida antes de mostrar a janela, e a página Pendrive somava o tamanho de tudo no pendrive a cada abertura.

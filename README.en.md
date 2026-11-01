@@ -69,6 +69,7 @@ WinKit does it all at once. You build a **recipe** on your current PC, and the V
 | 🔍 **Comparison with the old PC** | At the end of the install, the summary shows missing apps, devices without a driver and features that were not turned on. |
 
 <div align="center">
+<img src="docs/imagens/en/studio-get-started.png" alt="Get started step" width="820">
 <img src="docs/imagens/en/studio-templates.png" alt="Templates" width="820">
 </div>
 
@@ -131,7 +132,7 @@ winkit apply --pendrive E: --simular    # preview of "Apply to this PC"
 
 ## Project status
 
-**Pre-alpha.** Versions 1 and 2 are implemented and automatically tested (over 700 tests on Linux and Windows, with executables built and smoke-tested in CI). The v2 plan is in [`docs/PLANO_V2.md`](docs/PLANO_V2.md) (in Portuguese); what is still provisional is in [`docs/DIVIDAS_TECNICAS.md`](docs/DIVIDAS_TECNICAS.md). Validation in a virtual machine and on a real PC follows the scripts in [`docs/validacao/`](docs/validacao/).
+**Pre-alpha.** Versions 1, 2 and 3 are implemented and automatically tested (over 770 tests on Linux and Windows, with executables built and smoke-tested in CI). The v2 plan is in [`docs/PLANO_V2.md`](docs/PLANO_V2.md) (in Portuguese); what is still provisional is in [`docs/DIVIDAS_TECNICAS.md`](docs/DIVIDAS_TECNICAS.md). Validation in a virtual machine and on a real PC follows the scripts in [`docs/validacao/`](docs/validacao/).
 
 > ⚠️ Use it in a virtual machine first. Windows registry values and package names change between versions.
 

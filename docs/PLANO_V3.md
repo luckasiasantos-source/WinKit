@@ -1,6 +1,6 @@
 # WinKit v3 — Plano de implementação (M19 a M26)
 
-> **Estado deste documento:** **aprovado pelo dono do projeto em 2026-11-01**, com as sugestões do §14 e os pontos assumidos do §1.2; em implementação (ver `STATUS.md`).
+> **Estado deste documento:** **aprovado pelo dono do projeto em 2026-11-01**, com as sugestões do §14 e os pontos assumidos do §1.2; **implementado** (0.17.0). Falta a validação na VM (roteiros M19 a M25); o que ficou provisório está em DT-026 a DT-029.
 > Quando aprovado, vira documento vivo como o `PLANO.md` e o `PLANO_V2.md`: muda no mesmo commit que mudar o código (`CLAUDE.md`).
 >
 > **Relação com os outros documentos:** a v1 (`PLANO.md`, M0–M10) e a v2 (`PLANO_V2.md`, M11–M18) estão implementadas. Este arquivo descreve **só o que é novo**. Onde a v3 muda algo antigo, a seção diz "muda o PLANO.md §x" ou "muda a D-nnn". As decisões propostas (D-044 em diante) e as regras novas (R-59 em diante) só entram no `ARQUITETURA.md` no primeiro commit do marco que as usa, depois da aprovação.

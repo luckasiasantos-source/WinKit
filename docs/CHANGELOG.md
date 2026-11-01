@@ -28,6 +28,21 @@
 
 ---
 
+## 2026-11-01 — M26 — Fechamento da v3 (0.17.0)
+**Tipo:** implementação e documentação
+**Resumo:** fecha a v3: comandos da v3 na CLI, teste de fumaça com o backup simulado, capturas novas, documentos revisados e versão 0.17.0.
+
+### Adicionado
+- `src/winkit/cli/v3.py` — `iso baixar|personalizar`, `pendrive gravar`, `backup-pc fazer|restaurar`, `ferramenta baixar`
+- `tests/cli/test_v3_cli.py`; capturas `docs/imagens/studio-comecar.png`, `studio-backup-escuro.png`, `en/studio-get-started.png`, `es/studio-backup.png`
+
+### Alterado
+- `packaging/smoke.ps1` — `backup-pc fazer --simular`
+- READMEs (três idiomas) — capturas e estado da v3; `packaging/NOTAS_DA_VERSAO.md` — notas da 0.17.0; `src/winkit/__init__.py` — 0.17.0
+
+### Documentos vivos atualizados
+- PLANO e PLANO_V3 — v3 implementada; ARQUITETURA — D-053 adiada; STATUS — M26; ESTRUTURA — regerado
+
 ## 2026-11-01 — M25 — Windows 7 e 8.1 em modo limitado (0.16.0)
 **Tipo:** implementação
 **Resumo:** Windows 7 SP1 e 8.1 (32 e 64 bits) na etapa Começar, com agente legado em PowerShell 2.0, XML ciente da versão, etapas sem suporte esmaecidas (R-63), aviso de USB 3.0/NVMe e o 7 "SP2" na ISO personalizada.

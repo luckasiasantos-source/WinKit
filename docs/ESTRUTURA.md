@@ -270,6 +270,7 @@
 |---|---|
 | `__init__.py` | Pacote. |
 | `main.py` | Linha de comando do WinKit Studio (D-004). |
+| `v3.py` | Comandos da v3 na CLI (PLANO_V3 §5.5): ISO, gravar pendrive, backup do PC e ferramentas. |
 
 ### `ui/` — componentes visuais compartilhados (tema, widgets)
 

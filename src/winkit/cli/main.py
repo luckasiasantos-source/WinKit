@@ -35,6 +35,7 @@ from winkit.builder.build import (
     save_profile_recipe,
 )
 from winkit.builder.validate import validate_pendrive
+from winkit.cli import v3
 from winkit.collector import app_updates, snapshot
 from winkit.collector import apps as app_collector
 from winkit.collector import associations as assoc_collector
@@ -2008,6 +2009,7 @@ def _add_system_and_network_parsers(sub: Any, common: argparse.ArgumentParser) -
     _add_game_parsers(sub, common)
     _add_suggest_parsers(sub, common)
     _add_account_parsers(sub, common)
+    v3.add_parsers(sub, common)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -2028,6 +2030,7 @@ def build_parser() -> argparse.ArgumentParser:
     pend_sub.add_parser("listar", aliases=["list"], parents=[common]).set_defaults(
         func=cmd_pendrive_listar
     )
+    v3.add_pendrive_write(pend_sub, common)
 
     rec = sub.add_parser("receita", aliases=["recipe"], help=t("cli.h.recipe"))
     rec_sub = rec.add_subparsers(dest="action", required=True)

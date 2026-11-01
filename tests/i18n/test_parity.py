@@ -104,6 +104,7 @@ SAME_AS_BASE: dict[str, set[str]] = {
     },
 }
 ALWAYS_SAME = {
+    "cli.v3.progress",
     "studio.customiso.rollup",
     "studio.pcbackup.found_detail",
     "studio.download.windows",

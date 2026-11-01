@@ -7,7 +7,7 @@
 
 **Última atualização:** 2026-10-31
 **Versão do código:** 0.4.0 (pré-alpha, projeto pessoal)
-**Fase do projeto:** v1 implementada (M0–M10); falta a validação em VM/PC real pelos roteiros de `docs/validacao/`. v2 (M11–M18) implementada (0.9.0, `PLANO_V2.md`); falta a validação na VM pelos roteiros M11–M17. v3 (M19–M26) aprovada e em implementação (`PLANO_V3.md`)
+**Fase do projeto:** v1 implementada (M0–M10); falta a validação em VM/PC real pelos roteiros de `docs/validacao/`. v2 (M11–M18) implementada (0.9.0, `PLANO_V2.md`); falta a validação na VM pelos roteiros M11–M17. v3 (M19–M26) implementada (0.17.0, `PLANO_V3.md`); falta a validação na VM pelos roteiros M19–M25
 
 ## Resumo
 
@@ -40,7 +40,7 @@
 | M23 | ISO personalizada e autossuficiente (V3-11, 12, 17) | ✅ código · validação na VM pendente | `docs/validacao/M23.md` |
 | M24 | O WinKit grava o pendrive (V3-13) | ✅ código · validação na VM pendente | `docs/validacao/M24.md` |
 | M25 | Windows 7 e 8.1 em modo limitado (V3-14) | ✅ código · validação na VM pendente | `docs/validacao/M25.md` |
-| M26 | Fechamento da v3 | ⬜ | — |
+| M26 | Fechamento da v3 | ✅ | — |
 
 ## Detalhe por marco
 
@@ -284,6 +284,12 @@
 - ✅ Windows 7 "SP2" (KB3020369 + KB3125574) na ISO personalizada, conferido por SHA-1 (H50)
 - ✅ Baixar o Windows: 8.1 pelo Fido; 7 explica que a Microsoft não oferece mais
 - ✅ Roteiro `docs/validacao/M25.md` e versão 0.16.0
+
+### M26 — Fechamento da v3 ✅
+- ✅ CLI da v3 (`cli/v3.py`): `iso baixar|personalizar`, `pendrive gravar` (com `--confirmar` e `--simular`), `backup-pc fazer|restaurar`, `ferramenta baixar ventoy|rufus`
+- ✅ `smoke.ps1` com `backup-pc fazer --simular`; capturas novas (Começar em pt-BR e inglês, Backup do PC em espanhol e escuro); READMEs com o estado da v3
+- ✅ Documentos revisados: PLANO e PLANO_V3 com a v3 implementada; ARQUITETURA com D-044 a D-054 (exceto D-053, ver DT-028) e R-59 a R-64; hipóteses H36 a H51
+- ✅ Versão 0.17.0 com notas trilíngues
 
 ## Hipóteses técnicas
 

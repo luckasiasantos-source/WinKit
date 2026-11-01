@@ -39,6 +39,9 @@ Invoke-Cli receita, exportar, $shared
 if ((Get-Content $shared -Raw) -match 'Samuel|PC-CI') { throw "exportação levou dados pessoais" }
 Invoke-Cli receita, importar, $shared
 Invoke-Cli plano
+# v3 (M22): só mede o disco e mostra o tempo previsto, sem copiar nada
+& $cli backup-pc fazer --destino $env:SystemDrive --pasta $env:TEMP --simular | Out-Null
+if ($LASTEXITCODE -ne 0) { throw "backup-pc --simular falhou (código $LASTEXITCODE)" }
 & $cli construir --raiz $root --agente $agent
 if ($LASTEXITCODE -ne 0) { throw "construir falhou" }
 & $cli validar --raiz $root

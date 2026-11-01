@@ -71,6 +71,7 @@ O WinKit faz isso de uma vez. Você monta uma **receita** no seu PC atual, e o p
 | 🔍 **Comparação com o PC antigo** | No fim da instalação, o resumo mostra os apps que faltaram, os dispositivos sem driver e os recursos que não foram ligados. |
 
 <div align="center">
+<img src="docs/imagens/studio-comecar.png" alt="Etapa Começar" width="820">
 <img src="docs/imagens/studio-sugestoes.png" alt="Sugestões do que levar" width="820">
 </div>
 
@@ -143,7 +144,7 @@ winkit aplicar --pendrive E: --simular    # prévia do "Aplicar neste PC"
 
 ## Estado do projeto
 
-**Pré-alpha.** As versões 1 e 2 estão implementadas e testadas automaticamente (mais de 700 testes em Linux e Windows, com executáveis gerados e testados no CI). O plano da v2 está em [`docs/PLANO_V2.md`](docs/PLANO_V2.md); o que ainda é provisório está em [`docs/DIVIDAS_TECNICAS.md`](docs/DIVIDAS_TECNICAS.md). A validação em máquina virtual e em PC real segue os roteiros de [`docs/validacao/`](docs/validacao/). Veja [`docs/STATUS.md`](docs/STATUS.md).
+**Pré-alpha.** As versões 1, 2 e 3 estão implementadas e testadas automaticamente (mais de 770 testes em Linux e Windows, com executáveis gerados e testados no CI). O plano da v2 está em [`docs/PLANO_V2.md`](docs/PLANO_V2.md); o que ainda é provisório está em [`docs/DIVIDAS_TECNICAS.md`](docs/DIVIDAS_TECNICAS.md). A validação em máquina virtual e em PC real segue os roteiros de [`docs/validacao/`](docs/validacao/). Veja [`docs/STATUS.md`](docs/STATUS.md).
 
 > ⚠️ Use primeiro numa máquina virtual ([`docs/validacao/AMBIENTE_VM.md`](docs/validacao/AMBIENTE_VM.md)). Valores de registro e nomes de pacotes do Windows mudam entre versões.
 
@@ -265,6 +266,7 @@ WinKit does it all at once. You build a **recipe** on your current PC, and the V
 | 🔍 **Comparison with the old PC** | At the end of the install, the summary shows missing apps, devices without a driver and features that were not turned on. |
 
 <div align="center">
+<img src="docs/imagens/en/studio-get-started.png" alt="Get started step" width="820">
 <img src="docs/imagens/en/studio-templates.png" alt="Templates" width="820">
 </div>
 
@@ -327,7 +329,7 @@ winkit apply --pendrive E: --simular    # preview of "Apply to this PC"
 
 ## Project status
 
-**Pre-alpha.** Versions 1 and 2 are implemented and automatically tested (over 700 tests on Linux and Windows, with executables built and smoke-tested in CI). The v2 plan is in [`docs/PLANO_V2.md`](docs/PLANO_V2.md) (in Portuguese); what is still provisional is in [`docs/DIVIDAS_TECNICAS.md`](docs/DIVIDAS_TECNICAS.md). Validation in a virtual machine and on a real PC follows the scripts in [`docs/validacao/`](docs/validacao/).
+**Pre-alpha.** Versions 1, 2 and 3 are implemented and automatically tested (over 770 tests on Linux and Windows, with executables built and smoke-tested in CI). The v2 plan is in [`docs/PLANO_V2.md`](docs/PLANO_V2.md) (in Portuguese); what is still provisional is in [`docs/DIVIDAS_TECNICAS.md`](docs/DIVIDAS_TECNICAS.md). Validation in a virtual machine and on a real PC follows the scripts in [`docs/validacao/`](docs/validacao/).
 
 > ⚠️ Use it in a virtual machine first. Windows registry values and package names change between versions.
 

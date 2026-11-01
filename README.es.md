@@ -69,6 +69,7 @@ WinKit lo hace todo de una vez. Armas una **receta** en tu PC actual y la memori
 | 🔍 **Comparación con el PC antiguo** | Al final de la instalación, el resumen muestra las aplicaciones que faltaron, los dispositivos sin controlador y las características que no se activaron. |
 
 <div align="center">
+<img src="docs/imagens/es/studio-backup.png" alt="Backup del PC" width="820">
 <img src="docs/imagens/es/studio-sugerencias.png" alt="Sugerencias de qué llevar" width="820">
 </div>
 
@@ -131,7 +132,7 @@ winkit aplicar --pendrive E: --simular    # vista previa de «Aplicar en este PC
 
 ## Estado del proyecto
 
-**Pre-alfa.** Las versiones 1 y 2 están implementadas y probadas automáticamente (más de 700 pruebas en Linux y Windows, con ejecutables generados y probados en la CI). El plan de la v2 está en [`docs/PLANO_V2.md`](docs/PLANO_V2.md) (en portugués); lo que aún es provisional está en [`docs/DIVIDAS_TECNICAS.md`](docs/DIVIDAS_TECNICAS.md). La validación en máquina virtual y en un PC real sigue los guiones de [`docs/validacao/`](docs/validacao/).
+**Pre-alfa.** Las versiones 1, 2 y 3 están implementadas y probadas automáticamente (más de 770 pruebas en Linux y Windows, con ejecutables generados y probados en la CI). El plan de la v2 está en [`docs/PLANO_V2.md`](docs/PLANO_V2.md) (en portugués); lo que aún es provisional está en [`docs/DIVIDAS_TECNICAS.md`](docs/DIVIDAS_TECNICAS.md). La validación en máquina virtual y en un PC real sigue los guiones de [`docs/validacao/`](docs/validacao/).
 
 > ⚠️ Úsalo primero en una máquina virtual. Los valores del registro y los nombres de paquetes de Windows cambian entre versiones.
 
