@@ -65,6 +65,9 @@ SAME_AS_BASE: dict[str, set[str]] = {
         "cli.backup_for",
     },
     "es": {
+        "studio.download.pause",
+        "studio.download.resume",
+        "studio.download.cancel",
         "studio.path.section_windows",
         "validate.warnings",
         "ui.agent.progress_title",
@@ -95,6 +98,7 @@ SAME_AS_BASE: dict[str, set[str]] = {
     },
 }
 ALWAYS_SAME = {
+    "studio.download.windows",
     "legacy.text",
     "app.name",
     "plan.windows_update",

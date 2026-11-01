@@ -85,6 +85,7 @@ from winkit.core.volumes import resolve as resolve_volume
 from winkit.core.winget_manifest import split_args
 from winkit.i18n import current_language, t
 from winkit.i18n.format import format_size
+from winkit.platform import download as dl
 from winkit.platform import external_tools, hosts
 from winkit.platform.environment import WindowsEnvironment
 from winkit.platform.runner import launch
@@ -140,6 +141,7 @@ class StudioController:
     #: Baixa Ventoy/Rufus (V3-07) e abre programas; os testes passam dublês.
     tool_fetcher: Callable[[DownloadSource], Path] = field(default=fetch_tool)
     launcher: Callable[[list[str]], None] = field(default=launch)
+    iso_downloader: Callable[..., Path] = field(default=dl.download)
     #: Escolhas da primeira etapa (V3-06); vão para a receita quando ela existir.
     media: Media = field(default_factory=Media)
     target_windows: TargetWindows = field(default_factory=TargetWindows)
@@ -194,6 +196,34 @@ class StudioController:
         self.launcher(args)
         self.cache.pop("pendrives", None)  # o pendrive vai mudar
         return exe
+
+    def download_windows(
+        self,
+        dest: Path,
+        language: str,
+        progress: Callable[[dl.Progress], None],
+        should_stop: Callable[[], bool],
+    ) -> IsoInfo:
+        """Baixa a ISO oficial do Windows alvo (V3-08) e confere que é mesmo do Windows."""
+        if self.services.iso_links is None:
+            raise WinKitError("download da ISO indisponível neste sistema")
+        tw = self.target_windows
+        url = self.services.iso_links.url(tw.version, tw.arch, language)
+        path = self.iso_downloader(url, dest, progress=progress, should_stop=should_stop)
+        info = self.services.disks.read_iso(path, path.name)
+        if not info.is_windows:
+            raise WinKitError(f"o arquivo baixado não é uma ISO do Windows: {path}")
+        return info
+
+    def copy_iso_to_pendrive(self, iso: Path) -> Path:
+        """Ventoy: a ISO vai para a raiz do pendrive (V3-08)."""
+        dest = self.root / iso.name
+        if not dest.is_file() or dest.stat().st_size != iso.stat().st_size:
+            part = dest.with_name(dest.name + ".part")
+            shutil.copyfile(iso, part)
+            part.replace(dest)
+        self.cache.pop("sizes", None)
+        return dest
 
     def rufus_options(self) -> list[rufus.RufusOption]:
         """O que o Rufus gravou neste pendrive (os originais guardados também contam)."""

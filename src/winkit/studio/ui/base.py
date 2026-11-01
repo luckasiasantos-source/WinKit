@@ -26,6 +26,7 @@ from winkit.ui.widgets import app_icon, label
 class _Signals(QObject):
     done = Signal(object)
     failed = Signal(object)
+    progress = Signal(object)
 
 
 class _Job(QRunnable):
@@ -113,6 +114,35 @@ class TaskRunner:
 
         job.signals.done.connect(finish)
         job.signals.failed.connect(finish)
+        QThreadPool.globalInstance().start(job)
+
+    def with_progress(
+        self,
+        fn: Callable[[Callable[[object], None]], Any],
+        on_progress: Callable[[Any], None],
+        on_done: Callable[[Any], None],
+    ) -> None:
+        """Tarefa longa com progresso (download, backup): ``fn`` recebe a função de aviso."""
+        if self.synchronous:
+            try:
+                result: Any = fn(on_progress)
+            except Exception as exc:  # noqa: BLE001 — repassado à página
+                result = exc
+            on_done(result)
+            return
+        signals = _Signals()
+        job = _Job(lambda: fn(signals.progress.emit))
+        job.signals = signals  # um único objeto de sinais (progresso e fim)
+        self._jobs.append(job)
+
+        def finish(result: object) -> None:
+            if job in self._jobs:
+                self._jobs.remove(job)
+            on_done(result)
+
+        signals.progress.connect(on_progress)
+        signals.done.connect(finish)
+        signals.failed.connect(finish)
         QThreadPool.globalInstance().start(job)
 
 

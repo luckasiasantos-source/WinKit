@@ -584,6 +584,12 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 **Decisão:** `platform/external_tools.py` consulta a última release oficial (API do GitHub; fontes em `data/downloads.yaml`, R-61), baixa com `platform/download.py`, confere o SHA-256 (o `sha256.txt` do Ventoy; a soma no texto da release do Rufus, quando houver), extrai o zip sem aceitar caminhos para fora da pasta e abre o programa (`runner.launch`) para a pessoa usar; o Rufus abre já com a ISO (`-i`). Nada de terceiros vai no pacote. As opções que o Rufus gravou são lidas por `core/rufus.py` e mostradas com "o WinKit também faz".
 **Consequências:** precisa de internet na primeira vez; versões novas do Rufus podem mudar o que é detectado (H39).
 
+### D-047 — ISO oficial pelo Fido, download pelo WinKit
+2026-11-01 · aceita (M21, `PLANO_V3.md`)
+**Contexto:** a Microsoft não tem API pública de download; o Fido (GPLv3, do autor do Rufus) obtém o link oficial e é mantido em dia quando o site muda.
+**Decisão:** `platform/windows_download.py` baixa o `Fido.ps1` da última release oficial, confere a **assinatura digital** (Authenticode, assinante "Akeo Consulting", pelo número do status, não por texto) e só então o roda pedindo só o link (`-GetUrl`). O download é do WinKit (`platform/download.py`): progresso, pausa, retomada pelo `.part` e, no fim, a ISO é lida para conferir que é do Windows.
+**Consequências:** Windows 11 e 10 (e 8.1 no M25) baixáveis; o 7 não. O SHA-256 publicado pela Microsoft não é conferido (DT-027, H38). Se a Microsoft recusar o pedido, a tela explica e a pessoa pode usar uma ISO que já tem.
+
 ### D-052 — Modo em etapas e barra lateral sobre as mesmas páginas
 2026-11-01 · aceita (M20)
 **Decisão:** cada página é uma etapa; a barra inferior (Voltar / Pular / Avançar, "Etapa n de N") segue a ordem da barra lateral, sem "Aplicar neste PC". Pular fica registrado e a revisão lista o que foi pulado. A primeira etapa (Começar) guarda o caminho e o Windows alvo no controlador até a receita existir, e aí passa para ela (`recipe.media`, `recipe.target_windows`).

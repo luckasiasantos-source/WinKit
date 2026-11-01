@@ -249,3 +249,12 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Impacto: sugestões e comparação menos completas do que o plano; nada é feito sem o usuário escolher.
 - Plano: contar as capturas das outras funções sem gravar; baixar o manifesto do Ludusavi sob confirmação (atribuição no `NOTICE`); gravar a comparação também em JSON.
 - Prioridade: baixa
+
+### DT-027 — ISO baixada conferida só pela estrutura
+- Estado: aberta
+- Origem: M21 (V3-08, H38)
+- Onde: `platform/windows_download.py`, `studio/controller.py` (`download_windows`)
+- Descrição: o download confere que a ISO abre e é do Windows, mas não compara com o SHA-256 que a Microsoft publica na página de download (o Fido não devolve o hash).
+- Impacto: uma ISO corrompida que ainda abre passaria; o instalador acusaria depois.
+- Plano: ler os hashes da página oficial quando o Fido ou a Microsoft os expuserem de forma estável.
+- Prioridade: baixa

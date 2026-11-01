@@ -99,7 +99,7 @@ WinKit lo hace todo de una vez. Armas una **receta** en tu PC actual y la memori
 
 1. Descarga `WinKit-…-windows-x64.zip` de la página de [**Releases**](https://github.com/luckasiasantos-source/WinKit/releases) y descomprímelo. No hay que compilar nada. Los ejecutables no están firmados: si SmartScreen avisa, haz clic en "Más información" → "Ejecutar de todas formas".
 2. Abre `winkit-studio\winkit-studio.exe`.
-3. En el primer paso, **Empezar**, elige Windows (11 o 10) y cómo llega al PC: **Ventoy** o **Rufus** (WinKit lo descarga del sitio oficial y lo abre para que grabes la memoria USB) o la herramienta de Microsoft. Luego sigue con **Siguiente** (u **Omitir**) en la barra inferior, o haz clic en cualquier sección de la barra lateral. El botón **Preferencias** cambia el idioma y el tema.
+3. En el primer paso, **Empezar**, elige Windows (11 o 10) y cómo llega al PC: **Ventoy** o **Rufus** (WinKit lo descarga del sitio oficial y lo abre para que grabes la memoria USB) o la herramienta de Microsoft. ¿Sin ISO? El paso **Descargar Windows** baja la oficial de Microsoft, con pausa y reanudación. Luego sigue con **Siguiente** (u **Omitir**) en la barra inferior, o haz clic en cualquier sección de la barra lateral. El botón **Preferencias** cambia el idioma y el tema.
 4. Arranca desde Ventoy, elige la ISO y la plantilla `winkit-…`. Con una memoria USB de Rufus o de Microsoft, solo arranca desde ella (ver [`docs/RUFUS.md`](docs/RUFUS.md), en portugués).
 5. Para usar la receta en el Windows que ya tienes, abre **Aplicar en este PC** (grupo Terminar): WinKit muestra la vista previa y crea un punto de restauración antes.
 

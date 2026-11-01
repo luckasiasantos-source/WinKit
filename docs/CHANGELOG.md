@@ -28,6 +28,23 @@
 
 ---
 
+## 2026-11-01 — M21 — Baixar a ISO oficial (0.12.0)
+**Tipo:** implementação
+**Resumo:** etapa Baixar o Windows: a ISO oficial vem do site da Microsoft pelo Fido (assinatura conferida) e é baixada pelo WinKit com progresso, pausa e retomada, e conferida no fim.
+
+### Adicionado
+- `src/winkit/platform/windows_download.py` (Fido, D-047); `Services.iso_links` e `FakeIsoLinks`
+- `TaskRunner.with_progress`; `StudioController.download_windows`, `copy_iso_to_pendrive`
+- Studio: página **Baixar o Windows** (`DownloadPage`)
+- Testes: `tests/platform/test_windows_download.py`, página em `tests/ui/test_studio_ui.py`; `docs/validacao/M21.md`
+
+### Alterado
+- READMEs (três idiomas) — a etapa Baixar o Windows
+- `src/winkit/__init__.py` — 0.12.0; `packaging/NOTAS_DA_VERSAO.md`
+
+### Documentos vivos atualizados
+- ARQUITETURA — D-047; STATUS — M21; DIVIDAS — DT-027; ESTRUTURA — regerado
+
 ## 2026-11-01 — M20 — Modo em etapas, etapa Começar, Ventoy e Rufus (0.11.0)
 **Tipo:** implementação
 **Resumo:** o Studio ganhou o modo em etapas (Voltar / Pular / Avançar) junto com a barra lateral e a etapa Começar (caminho e Windows alvo). Ventoy e Rufus são baixados da release oficial, conferidos e abertos para a pessoa gravar o pendrive; as opções que o Rufus gravou são mostradas.

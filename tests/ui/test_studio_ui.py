@@ -220,11 +220,11 @@ def test_wizard_steps_and_path_page(window: StudioWindow, qapp) -> None:
     page._target("10", "x86")  # type: ignore[attr-defined]
     assert window.ctl.media.path == "rufus" and window.ctl.target_windows.arch == "x86"
     window.step_skip()
-    assert window.current_section() == "pendrive"
+    assert window.current_section() == "download"
     window.step_next()
-    assert window.current_section() == "account"
-    window.step_back()
     assert window.current_section() == "pendrive"
+    window.step_back()
+    assert window.current_section() == "download"
     window.ctl.create_recipe("Samuel", None)
     r = window.ctl.recipe
     assert r is not None and (r.media.path, r.target_windows.version) == ("rufus", "10")
@@ -248,3 +248,38 @@ def test_open_tool_downloads_and_launches(tmp_path: Path) -> None:
         [str(tmp_path / "rufus.exe"), "-i", str(tmp_path / "win.iso")],
         [str(tmp_path / "ventoy.exe")],
     ]
+
+
+def test_download_page_pause_resume_and_copy(
+    window: StudioWindow, qapp, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """V3-08: baixa a ISO do Windows alvo, pausa, continua e copia para o pendrive Ventoy."""
+    from winkit.platform.download import DownloadPaused, Progress
+    from winkit.platform.fakes.disks import FakeDiskInspector, windows_iso
+    from winkit.studio.ui.pages import prepare
+
+    monkeypatch.setattr(prepare.QMessageBox, "information", lambda *a, **k: None)
+
+    calls: list[str] = []
+
+    def fake_download(url, dest, *, progress, should_stop):  # type: ignore[no-untyped-def]
+        calls.append(url)
+        progress(Progress(3_000_000_000, 6_000_000_000, 50_000_000))
+        if len(calls) == 1:
+            raise DownloadPaused("pausado")
+        dest.write_bytes(b"iso")
+        return dest
+
+    window.ctl.iso_downloader = fake_download
+    disks = window.ctl.services.disks
+    assert isinstance(disks, FakeDiskInspector)
+    disks.isos["Win11.iso"] = windows_iso()
+    window.ctl.create_recipe("Samuel", None)
+    page = window.go_to("download")
+    page._dest = tmp_path / "Win11.iso"  # type: ignore[attr-defined]
+    page._start()  # type: ignore[attr-defined]
+    assert page._state == "paused" and "50%" in page._status.text()  # type: ignore[attr-defined]
+    page._start()  # type: ignore[attr-defined]
+    assert page._state == "done" and len(calls) == 2  # type: ignore[attr-defined]
+    page._copy()  # type: ignore[attr-defined]
+    assert (window.ctl.root / "Win11.iso").read_bytes() == b"iso"

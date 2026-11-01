@@ -106,7 +106,7 @@ O WinKit faz isso de uma vez. Você monta uma **receita** no seu PC atual, e o p
 
 1. Baixe o `WinKit-…-windows-x64.zip` na página de [**Releases**](https://github.com/luckasiasantos-source/WinKit/releases) e extraia. Não precisa compilar nada. Os executáveis não são assinados: se o SmartScreen avisar, clique em "Mais informações" → "Executar assim mesmo".
 2. Abra `winkit-studio\winkit-studio.exe`.
-3. Na primeira etapa, **Começar**, escolha o Windows (11 ou 10) e como ele chega ao PC: **Ventoy** ou **Rufus** (o WinKit baixa do site oficial e abre para você gravar o pendrive) ou a ferramenta da Microsoft. Depois siga com **Avançar** (ou **Pular**) na barra de baixo, ou clique direto em qualquer seção da barra lateral. O botão **Preferências** troca idioma e tema.
+3. Na primeira etapa, **Começar**, escolha o Windows (11 ou 10) e como ele chega ao PC: **Ventoy** ou **Rufus** (o WinKit baixa do site oficial e abre para você gravar o pendrive) ou a ferramenta da Microsoft. Sem ISO? A etapa **Baixar o Windows** baixa a oficial da Microsoft, com pausa e retomada. Depois siga com **Avançar** (ou **Pular**) na barra de baixo, ou clique direto em qualquer seção da barra lateral. O botão **Preferências** troca idioma e tema.
 4. Dê boot pelo Ventoy, escolha a ISO e o modelo `winkit-…`. Com um pendrive do Rufus ou da Microsoft, só dê boot por ele (veja [`docs/RUFUS.md`](docs/RUFUS.md)).
 5. Para usar a receita no Windows que você já tem, abra **Aplicar neste PC** (grupo Concluir): o WinKit mostra a prévia e cria um ponto de restauração antes.
 
@@ -291,7 +291,7 @@ WinKit does it all at once. You build a **recipe** on your current PC, and the V
 
 1. Download `WinKit-…-windows-x64.zip` from the [**Releases**](https://github.com/luckasiasantos-source/WinKit/releases) page and extract it. Nothing to compile. The executables are not signed: if SmartScreen warns you, click "More info" → "Run anyway".
 2. Open `winkit-studio\winkit-studio.exe`.
-3. In the first step, **Get started**, choose Windows (11 or 10) and how it gets to the PC: **Ventoy** or **Rufus** (WinKit downloads it from the official site and opens it for you to write the USB drive) or Microsoft's tool. Then go on with **Next** (or **Skip**) in the bottom bar, or click any section in the sidebar. The **Preferences** button changes language and theme.
+3. In the first step, **Get started**, choose Windows (11 or 10) and how it gets to the PC: **Ventoy** or **Rufus** (WinKit downloads it from the official site and opens it for you to write the USB drive) or Microsoft's tool. No ISO? The **Download Windows** step gets the official one from Microsoft, with pause and resume. Then go on with **Next** (or **Skip**) in the bottom bar, or click any section in the sidebar. The **Preferences** button changes language and theme.
 4. Boot from Ventoy, choose the ISO and the `winkit-…` template. With a Rufus or Microsoft USB drive, just boot from it (see [`docs/RUFUS.md`](docs/RUFUS.md), in Portuguese).
 5. To use the recipe on the Windows you already have, open **Apply to this PC** (Finish group): WinKit shows a preview and creates a restore point first.
 

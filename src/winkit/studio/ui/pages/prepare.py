@@ -7,14 +7,16 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtWidgets import QFileDialog, QInputDialog, QLineEdit, QMessageBox
+from PySide6.QtWidgets import QFileDialog, QInputDialog, QLineEdit, QMessageBox, QProgressBar
 
 from winkit.core.recipe.models import Recipe
 from winkit.core.recipe.validation import username_problem, validate_computer_name
 from winkit.core.text import slugify
-from winkit.i18n import render, t
-from winkit.i18n.format import format_size
-from winkit.studio.ui.base import Page
+from winkit.i18n import current_language, render, t
+from winkit.i18n.format import format_duration, format_size
+from winkit.platform import windows_download
+from winkit.platform.download import DownloadPaused
+from winkit.studio.ui.base import Page, show_error
 from winkit.studio.ui.pages.common import TIME_ZONES, combo, empty, keyboards, toggle
 from winkit.ui.widgets import Card, Row, SegmentedControl, button, label, section, symbol_icon
 
@@ -670,4 +672,192 @@ class PathPage(Page):
             t("studio.path.downloading", name=t(f"studio.path.{tool_id}")),
             lambda: self.ctl.open_tool(tool_id, iso),
             done,
+        )
+
+
+class DownloadPage(Page):
+    """V3-08: baixar a ISO oficial com progresso, pausa, retomada e conferência."""
+
+    title_key = "studio.download.title"
+    subtitle_key = "studio.download.subtitle"
+
+    def __init__(self, ctl: Any, tasks: Any) -> None:
+        self._dest: Path | None = None
+        self._language = {"pt-BR": "pt-BR", "en-US": "en-US", "es": "es-ES"}.get(
+            current_language(), "en-US"
+        )
+        self._state = "idle"  # idle | running | paused | done
+        self._stop = False
+        self._info: Any = None
+        self._bar = QProgressBar()
+        self._status = label("", "Caption")
+        super().__init__(ctl, tasks)
+
+    def refresh(self) -> None:
+        self.clear_content()
+        tw = self.ctl.target_windows
+        what = Card()
+        what.add_row(
+            Row(
+                t("studio.download.windows", version=tw.version),
+                t("studio.download.what", arch=t(f"studio.path.{tw.arch}")),
+                icon=symbol_icon("download", "#007AFF"),
+            )
+        )
+        what.add_row(
+            Row(
+                t("studio.download.language"),
+                None,
+                accessory=combo(
+                    [(k, k) for k in windows_download.LANGUAGES],
+                    self._language,
+                    partial(setattr, self, "_language"),
+                ),
+            )
+        )
+        dest = self._dest or self._default_dest()
+        what.add_row(
+            Row(
+                t("studio.download.where"),
+                str(dest),
+                accessory=button(t("studio.download.change"), None, self._choose_dest),
+                icon=symbol_icon("folder", "#34C759"),
+            )
+        )
+        self.content.addWidget(
+            section(t("studio.download.section"), what, footer=t("studio.download.footer"))
+        )
+        running = self._state == "running"
+        actions = {
+            "idle": button(t("studio.download.start"), "Primary", self._start),
+            "running": button(t("studio.download.pause"), None, self._pause),
+            "paused": button(t("studio.download.resume"), "Primary", self._start),
+            "done": button(t("studio.download.again"), None, self._start),
+        }
+        bar = [actions[self._state]]
+        if self._state in ("running", "paused"):
+            bar.append(button(t("studio.download.cancel"), "Destructive", self._cancel))
+        self.content.addLayout(self.toolbar(*bar))
+        self._bar = QProgressBar()
+        self._bar.setRange(0, 1000)
+        self._bar.setVisible(self._state != "idle")
+        self.content.addWidget(self._bar)
+        self._status = label(
+            self._status.text() if running or self._state == "paused" else "", "Caption"
+        )
+        self.content.addWidget(self._status)
+        if self._state == "done" and self._info is not None:
+            done = Card()
+            done.add_row(
+                Row(
+                    t("studio.download.done"),
+                    str(dest),
+                    icon=symbol_icon("check", "#34C759"),
+                )
+            )
+            if self.ctl.target is not None and self.ctl.target.kind == "ventoy":
+                done.add_row(
+                    Row(
+                        t("studio.download.copy"),
+                        t("studio.download.copy_hint"),
+                        accessory=button(t("studio.download.copy_button"), "Primary", self._copy),
+                    )
+                )
+            if self.ctl.media.path == "rufus":
+                done.add_row(
+                    Row(
+                        t("studio.download.rufus"),
+                        None,
+                        accessory=button(t("studio.path.download_open"), "Primary", self._rufus),
+                    )
+                )
+            self.content.addWidget(section("", done))
+
+    def _default_dest(self) -> Path:
+        tw = self.ctl.target_windows
+        return Path.home() / "Downloads" / f"Win{tw.version}_{self._language}_{tw.arch}.iso"
+
+    def _choose_dest(self) -> None:
+        name, _ = QFileDialog.getSaveFileName(
+            self,
+            t("studio.download.where"),
+            str(self._dest or self._default_dest()),
+            t("studio.path.iso_filter"),
+        )
+        if name:
+            self._dest = Path(name)
+            self.refresh()
+
+    def _start(self) -> None:
+        dest = self._dest or self._default_dest()
+        self._dest = dest
+        self._stop = False
+        self._state = "running"
+        self.refresh()
+        self.tasks.with_progress(
+            lambda report: self.ctl.download_windows(
+                dest, self._language, report, lambda: self._stop
+            ),
+            self._progress,
+            self._finished,
+        )
+
+    def _progress(self, p: Any) -> None:
+        if p.fraction is not None:
+            self._bar.setValue(int(p.fraction * 1000))
+        eta = p.eta
+        self._status.setText(
+            t(
+                "studio.download.progress",
+                percent=int((p.fraction or 0) * 100),
+                speed=format_size(int(p.speed)),
+                done=format_size(p.done),
+                total=format_size(p.total or 0),
+                eta=format_duration(eta) if eta is not None else "…",
+            )
+        )
+
+    def _finished(self, result: Any) -> None:
+        if isinstance(result, DownloadPaused):
+            self._state = "paused"
+        elif isinstance(result, BaseException):
+            self._state = "paused" if (self._dest and self._part().is_file()) else "idle"
+            self.refresh()
+            show_error(self, result)
+            return
+        else:
+            self._state, self._info = "done", result
+        self.refresh()
+
+    def _part(self) -> Path:
+        dest = self._dest or self._default_dest()
+        return dest.with_name(dest.name + ".part")
+
+    def _pause(self) -> None:
+        self._stop = True
+
+    def _cancel(self) -> None:
+        self._stop = True
+        if self._state == "paused":
+            self._part().unlink(missing_ok=True)
+        self._state = "idle"
+        self.refresh()
+
+    def _info_box(self, key: str) -> None:
+        QMessageBox.information(self, t("app.name"), t(key))
+
+    def _copy(self) -> None:
+        iso = self._dest or self._default_dest()
+        self.tasks.run(
+            t("studio.download.copying"),
+            lambda: self.ctl.copy_iso_to_pendrive(iso),
+            lambda _: self._info_box("studio.download.copied"),
+        )
+
+    def _rufus(self) -> None:
+        iso = self._dest or self._default_dest()
+        self.tasks.run(
+            t("studio.path.downloading", name=t("studio.path.rufus")),
+            lambda: self.ctl.open_tool("rufus", iso),
+            lambda _: self._info_box("studio.path.opened_rufus"),
         )

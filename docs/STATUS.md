@@ -35,7 +35,7 @@
 | M18 | Fechamento da v2 | ✅ | — |
 | M19 | Velocidade, nitidez, janela; testes na VM (V3-01 a 04) | ✅ código · validação na VM pendente | `docs/validacao/M19.md` |
 | M20 | Modo em etapas, caminho, Ventoy e Rufus (V3-05 a 07) | ✅ código · validação na VM pendente | `docs/validacao/M20.md` |
-| M21 | Baixar a ISO oficial (V3-08) | ⬜ | — |
+| M21 | Baixar a ISO oficial (V3-08) | ✅ código · validação na VM pendente | `docs/validacao/M21.md` |
 | M22 | Backup para HD secundário (V3-09, 10, 15, 16) | ⬜ | — |
 | M23 | ISO personalizada e autossuficiente (V3-11, 12, 17) | ⬜ | — |
 | M24 | O WinKit grava o pendrive (V3-13) | ⬜ | — |
@@ -251,6 +251,11 @@
 - ✅ V3-07 Ventoy e Rufus baixados da release oficial, conferidos e abertos (D-046, R-61); download com retomada e SHA-256 (`platform/download.py`); opções do Rufus lidas do pendrive (`core/rufus.py`, H39)
 - ✅ V3-17 (sugestão aprovada) já existia: o XML do WinKit sempre dispensou TPM, Secure Boot e memória no Windows 11 (LabConfig); agora aparece na etapa Começar com o aviso
 - ✅ Roteiro `docs/validacao/M20.md` e versão 0.11.0
+
+### M21 — Baixar a ISO oficial ✅ (código) · validação na VM pendente
+- ✅ V3-08 Etapa **Baixar o Windows**: versão e arquitetura da etapa Começar, idioma e onde salvar; link oficial pelo Fido com assinatura conferida (D-047); progresso com porcentagem, tamanho, velocidade e tempo restante; pausar, continuar (mesmo depois de fechar o WinKit) e cancelar; a ISO baixada é lida para conferir que é do Windows; copiar para o pendrive Ventoy ou abrir no Rufus
+- ✅ `TaskRunner.with_progress`: tarefas longas com progresso sem travar a janela
+- ✅ Roteiro `docs/validacao/M21.md` e versão 0.12.0
 
 ## Hipóteses técnicas
 

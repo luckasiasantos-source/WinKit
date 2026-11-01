@@ -94,3 +94,15 @@ def make_setup_folder(root: Path, image: str = "install.wim") -> Path:
     (root / "sources" / image).write_bytes(b"wim")
     (root / "efi" / "boot" / "bootx64.efi").write_bytes(b"efi")
     return root
+
+
+@dataclass
+class FakeIsoLinks:
+    """Link da ISO (V3-08): devolve ``url`` e registra os pedidos."""
+
+    url_value: str = "https://software.download.prss.microsoft.com/Win11_Portuguese_x64.iso"
+    calls: list[tuple[str, str, str]] = field(default_factory=list)
+
+    def url(self, version: str, arch: str, language: str) -> str:
+        self.calls.append((version, arch, language))
+        return self.url_value

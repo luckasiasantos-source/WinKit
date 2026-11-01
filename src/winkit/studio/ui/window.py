@@ -68,6 +68,7 @@ GROUPS: tuple[SectionGroup, ...] = (
         "prepare",
         (
             Section("path", "arrow", "#FF9500", pages.PathPage),
+            Section("download", "download", "#0A84FF", pages.DownloadPage),
             Section("pendrive", "chip", "#8E8E93", pages.PendrivePage),
             Section("account", "pencil", "#AF52DE", pages.AccountPage),
             Section("templates", "sliders", "#AF52DE", pages.TemplatesPage),

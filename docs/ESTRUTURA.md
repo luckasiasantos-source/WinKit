@@ -164,6 +164,7 @@
 | `vss.py` | Cópias de sombra (VSS) para capturar arquivos em uso (PLANO.md §7.4.2, D-006). |
 | `wifi.py` | Perfis de Wi-Fi pelo ``netsh wlan`` (V2-02). |
 | `window_style.py` | Barra de título, contorno e cantos da janela no tema do app (Windows 11, DWM; V3-03). |
+| `windows_download.py` | Link oficial da ISO do Windows, obtido pelo Fido (V3-08, D-047, H37). |
 | `windows_update.py` | Windows Update pela API COM ``Microsoft.Update.Session`` (PLANO.md §20, M8; D-011). |
 | `winget.py` | winget: export, download, install (PLANO.md §7.1.4, §13.4). |
 

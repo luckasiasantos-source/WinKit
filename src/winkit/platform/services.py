@@ -23,6 +23,7 @@ from winkit.platform.scheduler import TaskScheduler, WindowsTaskScheduler
 from winkit.platform.volumes import Volumes, WindowsVolumes
 from winkit.platform.vss import ShadowCopies, WindowsShadowCopies
 from winkit.platform.wifi import WifiManager, WindowsWifi
+from winkit.platform.windows_download import FidoLinks, IsoLinks, tools_dir
 from winkit.platform.winget import WindowsWinget, Winget
 
 
@@ -48,6 +49,8 @@ class Services:
     associations: AssociationsTool | None = None
     volumes: Volumes | None = None
     devices: DeviceInspector | None = None
+    #: Link oficial da ISO do Windows (V3-08).
+    iso_links: IsoLinks | None = None
 
 
 def real_services() -> Services:
@@ -71,4 +74,5 @@ def real_services() -> Services:
         associations=DismAssociations(runner),
         volumes=WindowsVolumes(ps),
         devices=WindowsDeviceInspector(ps),
+        iso_links=FidoLinks(ps, tools_dir()),
     )
