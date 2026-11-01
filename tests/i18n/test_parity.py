@@ -65,6 +65,8 @@ SAME_AS_BASE: dict[str, set[str]] = {
         "cli.backup_for",
     },
     "es": {
+        "health.key_id",
+        "studio.pcbackup.pause",
         "studio.download.pause",
         "studio.download.resume",
         "studio.download.cancel",
@@ -98,6 +100,7 @@ SAME_AS_BASE: dict[str, set[str]] = {
     },
 }
 ALWAYS_SAME = {
+    "studio.pcbackup.found_detail",
     "studio.download.windows",
     "legacy.text",
     "app.name",

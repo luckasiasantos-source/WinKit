@@ -590,6 +590,12 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 **Decisão:** `platform/windows_download.py` baixa o `Fido.ps1` da última release oficial, confere a **assinatura digital** (Authenticode, assinante "Akeo Consulting", pelo número do status, não por texto) e só então o roda pedindo só o link (`-GetUrl`). O download é do WinKit (`platform/download.py`): progresso, pausa, retomada pelo `.part` e, no fim, a ISO é lida para conferir que é do Windows.
 **Consequências:** Windows 11 e 10 (e 8.1 no M25) baixáveis; o 7 não. O SHA-256 publicado pela Microsoft não é conferido (DT-027, H38). Se a Microsoft recusar o pedido, a tela explica e a pessoa pode usar uma ISO que já tem.
 
+### D-051 — Backup do PC: cópia simples, aditiva, conferida
+2026-11-01 · aceita (M22, `PLANO_V3.md`)
+**Contexto:** o objetivo é formatar sem perder nada; o espelho propaga apagamentos e vírus de resgate; o dono não quer versões antigas nem senha.
+**Decisão:** `collector/pc_backup.py` copia arquivo a arquivo (para ter progresso), lê o arquivo aberto da cópia de sombra quando dá erro de acesso (a mesma do M6), relê cada cópia no destino e compara o SHA-256, e grava `WinKit-backup/<pc>/manifesto.json`. Nunca apaga nada, nem na origem nem no destino; refazer copia só o que mudou (tamanho e data); parar e continuar retoma pelo manifesto. `.zip` opcional (ZIP64). O disco de destino é lido por CIM (`platform/disk_info.py`: tipo, barramento, BitLocker) e a velocidade é **medida** antes de estimar o tempo. Trazer de volta (`core/pc_backup.py`, para o Agente também usar) **soma**: arquivo que já existe no destino nunca é trocado (D-007); na instalação, a etapa `pc_restore` (Fase 2) acha o disco pelo número de série (R-52).
+**Consequências:** o backup ocupa o mesmo espaço dos arquivos (ou menos, em .zip); arquivos apagados no PC continuam no backup. As tarefas longas não fazem fila por disco (DT-028).
+
 ### D-052 — Modo em etapas e barra lateral sobre as mesmas páginas
 2026-11-01 · aceita (M20)
 **Decisão:** cada página é uma etapa; a barra inferior (Voltar / Pular / Avançar, "Etapa n de N") segue a ordem da barra lateral, sem "Aplicar neste PC". Pular fica registrado e a revisão lista o que foi pulado. A primeira etapa (Começar) guarda o caminho e o Windows alvo no controlador até a receita existir, e aí passa para ela (`recipe.media`, `recipe.target_windows`).

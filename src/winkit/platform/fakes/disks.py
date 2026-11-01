@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 from winkit.core.errors import PlatformError
 from winkit.core.isos import IsoArch, IsoEdition, IsoInfo
@@ -106,3 +107,25 @@ class FakeIsoLinks:
     def url(self, version: str, arch: str, language: str) -> str:
         self.calls.append((version, arch, language))
         return self.url_value
+
+
+@dataclass
+class FakeDiskInfo:
+    """Discos de destino e saúde do PC (V3-09/15/16)."""
+
+    dests: list[Any] = field(default_factory=list)
+    health_value: Any = None
+    keys: list[tuple[str, str]] = field(default_factory=list)
+
+    def destinations(self) -> list[Any]:
+        return list(self.dests)
+
+    def health(self) -> Any:
+        from winkit.platform.disk_info import Health  # noqa: PLC0415
+
+        return self.health_value or Health(
+            bitlocker_on=False, recovery_keys=0, activated=True, free_system=50 * 1024**3
+        )
+
+    def recovery_keys(self) -> list[tuple[str, str]]:
+        return list(self.keys)

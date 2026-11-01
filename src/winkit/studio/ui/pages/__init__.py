@@ -13,6 +13,7 @@ from winkit.studio.ui.pages.bring import (
 )
 from winkit.studio.ui.pages.finish import BuildPage, ExecutionPage, LivePage
 from winkit.studio.ui.pages.network import BrowsersPage, DnsPage, NetworkDrivesPage, WifiPage
+from winkit.studio.ui.pages.pcbackup import HealthPage, PcBackupPage
 from winkit.studio.ui.pages.prepare import (
     AccountPage,
     DownloadPage,
@@ -48,10 +49,12 @@ __all__ = [
     "FeaturesPage",
     "FontsPage",
     "GamesPage",
+    "HealthPage",
     "LivePage",
     "MaintenancePage",
     "NetworkDrivesPage",
     "PathPage",
+    "PcBackupPage",
     "PendrivePage",
     "StartLayoutPage",
     "SuggestionsPage",

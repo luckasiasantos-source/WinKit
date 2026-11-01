@@ -10,6 +10,7 @@ from winkit.core.regional import RegionalDefaults
 from winkit.platform.associations import AssociationsTool, DismAssociations
 from winkit.platform.copy import Copier, RobocopyCopier
 from winkit.platform.devices import DeviceInspector, WindowsDeviceInspector
+from winkit.platform.disk_info import DiskInfo, WindowsDiskInfo
 from winkit.platform.disks import DiskInspector, WindowsDiskInspector
 from winkit.platform.drivers import DriverManager, WindowsDriverManager
 from winkit.platform.features import SystemFeatures, WindowsSystemFeatures
@@ -51,6 +52,8 @@ class Services:
     devices: DeviceInspector | None = None
     #: Link oficial da ISO do Windows (V3-08).
     iso_links: IsoLinks | None = None
+    #: Discos de destino do backup e saúde do PC (V3-09, V3-15).
+    disk_info: DiskInfo | None = None
 
 
 def real_services() -> Services:
@@ -75,4 +78,5 @@ def real_services() -> Services:
         volumes=WindowsVolumes(ps),
         devices=WindowsDeviceInspector(ps),
         iso_links=FidoLinks(ps, tools_dir()),
+        disk_info=WindowsDiskInfo(ps),
     )

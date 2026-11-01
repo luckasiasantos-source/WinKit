@@ -62,6 +62,7 @@ WinKit lo hace todo de una vez. Armas una **receta** en tu PC actual y la memori
 | 🗃️ **Cuentas, carpetas y juegos** | Cuentas adicionales (administrador o estándar), Documentos y Descargas en otro disco (encontrado por número de serie aunque cambie la letra) y juegos de Steam y Epic en otro disco que aparecen instalados, sin volver a descargarlos. |
 | 📋 **Plantillas y recetas compartibles** | Empieza desde una plantilla o importa la receta de otra persona, siempre con vista previa. La exportación nunca lleva tu cuenta, contraseña, Wi-Fi ni rutas personales. |
 | ⬆️ **Instaladores siempre nuevos** | «Buscar actualizaciones» reemplaza los instaladores viejos de la memoria USB sin rehacer la receta; la versión antigua solo se borra cuando la nueva ya está en su lugar. |
+| 🗄️ **Backup a otro disco** | Copia tus archivos a un HDD, SSD o memoria USB antes de formatear, mostrando el tipo de disco y el tiempo medido; cada archivo se verifica y no se borra nada. Después los trae de vuelta sumando a lo que existe, a mano o en la instalación. El paso **Antes de formatear** revisa el backup, BitLocker (y exporta la clave) y la activación. |
 | 🔍 **Comparación con el PC antiguo** | Al final de la instalación, el resumen muestra las aplicaciones que faltaron, los dispositivos sin controlador y las características que no se activaron. |
 
 <div align="center">

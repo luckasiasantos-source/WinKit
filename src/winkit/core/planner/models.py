@@ -31,6 +31,7 @@ StepKind = Literal[
     "app",
     "shortcut",
     "game_library",
+    "pc_restore",
     "rename_computer",
     "windows_update",
     "driver_report",

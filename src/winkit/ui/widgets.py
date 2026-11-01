@@ -450,6 +450,7 @@ KIND_STYLE: dict[str, tuple[str, str]] = {
     "start_layout": ("sliders", "#0A84FF"),
     "user_folders": ("folder", "#FF9F0A"),
     "game_library": ("download", "#30D158"),
+    "pc_restore": ("folder", "#FF9F0A"),
     "account": ("pencil", "#AF52DE"),
     "compare": ("check", "#5AC8FA"),
     "finalize": ("check", "#34C759"),

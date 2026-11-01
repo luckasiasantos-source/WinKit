@@ -30,7 +30,7 @@ from winkit.builder.build import (
 )
 from winkit.builder.isos import scan_isos
 from winkit.builder.validate import PendriveReport, validate_pendrive
-from winkit.collector import app_updates, snapshot
+from winkit.collector import app_updates, pc_backup, snapshot
 from winkit.collector import apps as app_collector
 from winkit.collector import associations as assoc_collector
 from winkit.collector import backups as backup_collector
@@ -47,6 +47,7 @@ from winkit.collector import suggest as suggest_collector
 from winkit.collector import user_folders as folders_collector
 from winkit.collector import wifi as wifi_collector
 from winkit.core import layout, media, rufus, share
+from winkit.core import pc_backup as core_pc
 from winkit.core.browsers import suggested
 from winkit.core.catalog.loader import default_catalogs
 from winkit.core.catalog.models import AssociationGroup, Catalogs, DownloadSource
@@ -73,6 +74,7 @@ from winkit.core.recipe.models import (
     Recipe,
     Scope,
     TargetWindows,
+    VolumeRef,
     WifiNetwork,
 )
 from winkit.core.recipe.validation import ValidationReport, username_problem, validate_recipe
@@ -85,8 +87,10 @@ from winkit.core.volumes import resolve as resolve_volume
 from winkit.core.winget_manifest import split_args
 from winkit.i18n import current_language, t
 from winkit.i18n.format import format_size
+from winkit.i18n.msg import Msg
 from winkit.platform import download as dl
 from winkit.platform import external_tools, hosts
+from winkit.platform.disk_info import Destination, Health
 from winkit.platform.environment import WindowsEnvironment
 from winkit.platform.runner import launch
 from winkit.platform.services import Services
@@ -102,6 +106,16 @@ def windows_build() -> int | None:
 def _studio_dir() -> Path:
     base = os.environ.get("LOCALAPPDATA")
     return (Path(base) if base else Path.home() / ".cache") / "WinKit"
+
+
+@dataclass(frozen=True)
+class PcEstimate:
+    files: int
+    total: int
+    seconds: float
+    speed: float  # MB/s
+    measured: bool
+    warnings: list[Msg]
 
 
 def fetch_tool(source: DownloadSource) -> Path:  # pragma: no cover — rede real
@@ -160,6 +174,8 @@ class StudioController:
             "pendrives": self.pendrives,
             "sizes": lambda: (self.sizes(), self.free_bytes()),
             "volumes": self.data_volumes,
+            "destinations": self.pc_destinations,
+            "health": self.pc_health,
         }
         try:
             value = readers[key]()
@@ -224,6 +240,135 @@ class StudioController:
             part.replace(dest)
         self.cache.pop("sizes", None)
         return dest
+
+    # ------------------------------------------------------------------ backup do PC (V3-09/10)
+    def pc_destinations(self) -> list[Destination]:
+        return self.services.disk_info.destinations() if self.services.disk_info else []
+
+    def pc_destination(self) -> Destination | None:
+        ref = self.require_recipe().pc_backup.destination
+        dests = self.cache.get("destinations")
+        if ref is None or not isinstance(dests, list):
+            return None
+        return next((d for d in dests if d.serial == ref.serial), None)
+
+    def set_pc_destination(self, d: Destination) -> None:
+        self.require_recipe().pc_backup.destination = VolumeRef(
+            serial=d.serial, label=d.label or None, letter_hint=d.letter[:1] or None, size=d.size
+        )
+        self.save()
+
+    def set_pc_sources(self, literals: list[str]) -> None:
+        self.require_recipe().pc_backup.sources = list(dict.fromkeys(literals))
+        self.save()
+
+    def default_pc_sources(self) -> list[str]:
+        return pc_backup.default_literals(self.old_folders())
+
+    def _source_root(self, literal: str) -> Path:
+        return backup_collector.local_source(
+            self.services.volume_root(literal[:2].upper()), literal
+        )
+
+    def pc_estimate(self) -> PcEstimate:
+        """Tamanho, avisos e tempo medido no destino de verdade (V3-09)."""
+        b = self.require_recipe().pc_backup
+        dest = self.pc_destination()
+        if dest is None:
+            raise WinKitError("escolha o disco de destino primeiro")
+        files = [f for lit in b.sources for f in pc_backup.scan(self._source_root(lit))]
+        total = sum(f.size for f in files)
+        root = self.services.volume_root(dest.letter)
+        try:
+            speed, per_file = pc_backup.measure_speed(root / core_pc.BACKUP_DIR)
+            measured = True
+        except OSError:
+            speed, per_file = core_pc.TYPICAL[dest.kind]
+            measured = False
+        return PcEstimate(
+            files=len(files),
+            total=total,
+            seconds=core_pc.estimate_seconds(total, len(files), speed, per_file),
+            speed=speed,
+            measured=measured,
+            warnings=core_pc.warnings(
+                files,
+                total=total,
+                free=dest.free,
+                file_system=dest.file_system,
+                same_disk=dest.system_disk,
+            ),
+        )
+
+    def run_pc_backup(
+        self,
+        progress: Callable[[core_pc.BackupProgress], None],
+        should_stop: Callable[[], bool],
+    ) -> core_pc.PcBackupManifest:
+        b = self.require_recipe().pc_backup
+        dest = self.pc_destination()
+        if dest is None:
+            raise WinKitError("escolha o disco de destino primeiro")
+        studio = _studio_dir()
+        notes: list[str] = []
+        snaps = backup_collector._Snapshots(
+            self.services.vss, PendingSnapshots(studio / "vss-pendentes.json"), studio, notes
+        )
+        try:
+            manifest = pc_backup.run_backup(
+                pc_backup.make_sources(b.sources, self.old_folders()),
+                self.services.volume_root(dest.letter),
+                computer=os.environ.get("COMPUTERNAME")
+                or self.require_recipe().meta.source_pc
+                or "pc",
+                now=self.clock(),
+                zip_mode=b.zip,
+                source_root=self._source_root,
+                snapshot_root=snaps.root,
+                progress=progress,
+                should_stop=should_stop,
+            )
+        finally:
+            snaps.close()
+        self.cache.pop("destinations", None)  # espaço livre mudou
+        return manifest
+
+    def pc_backups_found(self) -> list[tuple[Path, core_pc.PcBackupManifest]]:
+        dests = self.cache.get("destinations")
+        roots = (
+            [self.services.volume_root(d.letter) for d in dests] if isinstance(dests, list) else []
+        )
+        return core_pc.find_backups(roots)
+
+    def restore_pc_backup(
+        self,
+        base: Path,
+        manifest: core_pc.PcBackupManifest,
+        progress: Callable[[core_pc.BackupProgress], None],
+    ) -> core_pc.RestoreReport:
+        targets = core_pc.restore_targets(manifest, self.old_folders())
+        return core_pc.restore(
+            base, manifest, targets, target_root=self._source_root, progress=progress
+        )
+
+    # ---------------------------------------------------------- antes de formatar (V3-15/16)
+    def pc_health(self) -> Health | None:
+        return self.services.disk_info.health() if self.services.disk_info else None
+
+    def export_recovery_keys(self, folder: Path) -> Path:
+        """Chave de recuperação do BitLocker do C: num arquivo de texto (V3-16)."""
+        if self.services.disk_info is None:
+            raise WinKitError("indisponível neste sistema")
+        keys = self.services.disk_info.recovery_keys()
+        if not keys:
+            raise WinKitError("o C: não tem chave de recuperação do BitLocker")
+        lines = [t("health.key_file_header"), ""]
+        lines += [
+            f"{t('health.key_id')}: {kid}\n{t('health.key_value')}: {key}\n" for kid, key in keys
+        ]
+        path = folder / "WinKit-chave-bitlocker.txt"
+        atomic_write_text(path, "\n".join(lines))
+        return path
 
     def rufus_options(self) -> list[rufus.RufusOption]:
         """O que o Rufus gravou neste pendrive (os originais guardados também contam)."""

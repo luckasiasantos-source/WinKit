@@ -19,6 +19,7 @@ from winkit.agent.steps.game_library import GameLibraryStep
 from winkit.agent.steps.maintenance import MaintenanceStep
 from winkit.agent.steps.network_drive import NetworkDriveStep
 from winkit.agent.steps.network_privacy import DnsStep, HostsStep
+from winkit.agent.steps.pc_restore import PcRestoreStep
 from winkit.agent.steps.personal import PersonalStep
 from winkit.agent.steps.restore import RestorePointStep
 from winkit.agent.steps.start_layout import StartLayoutStep
@@ -70,6 +71,7 @@ def default_handlers() -> dict[StepKind, StepHandler]:
     handlers["start_layout"] = StartLayoutStep()
     handlers["user_folders"] = UserFoldersStep()
     handlers["game_library"] = GameLibraryStep()
+    handlers["pc_restore"] = PcRestoreStep()
     handlers["account"] = AccountStep()
     handlers["compare"] = CompareStep()
     handlers["feature"] = FeatureStep()

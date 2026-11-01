@@ -56,6 +56,7 @@
 | `media.py` | Pendrive de instalação comum, gravado pelo Rufus ou pela Ferramenta de Criação de Mídia |
 | `paths/__init__.py` | Pacote. |
 | `paths/templates.py` | Moldes de caminho portáveis entre máquinas (PLANO.md §6.3). |
+| `pc_backup.py` | Backup do PC para outro disco (V3-09/10, D-051): regras puras, sem Windows. |
 | `personal.py` | Aparência pessoal (V2-06, D-037): regras puras de captura e validação. |
 | `planner/__init__.py` | Pacote. |
 | `planner/models.py` | Modelos do plano de execução do Agente (PLANO.md §11). |
@@ -115,6 +116,7 @@
 | `browsers.py` | Gravar e desfazer as políticas de navegador (V2-12) no ``HKLM``. |
 | `copy.py` | Cópia de pastas e arquivos para captura e restauração de backups (PLANO.md §13.1, D-014). |
 | `devices.py` | Dispositivos com problema pelo CIM ``Win32_PnPEntity`` (V2-09). Só JSON, nunca texto. |
+| `disk_info.py` | Discos de destino do backup e saúde do PC antes de formatar (V3-09, V3-15, V3-16). |
 | `disks.py` | Discos, partições e leitura de ISO (somente leitura — D-002). Exige administrador. |
 | `dns.py` | Servidores DNS e DNS criptografado (DoH) pelo módulo ``DnsClient`` (V2-16). |
 | `download.py` | Download HTTP com progresso, pausa, retomada e conferência de SHA-256 (V3-07, V3-08; R-61). |
@@ -184,6 +186,7 @@
 | `fonts.py` | Fontes instaladas no PC atual (V2-07). |
 | `games.py` | Jogos instalados em outro disco (V2-13): bibliotecas da Steam e jogos da Epic. |
 | `netdrives.py` | Unidades de rede do PC atual (V2-17). |
+| `pc_backup.py` | Backup do PC para outro disco: copiar, conferir e trazer de volta (V3-09/10, D-051). |
 | `personal.py` | Aparência deste PC (V2-06): valores do HKCU validados e o papel de parede. |
 | `snapshot.py` | Inventário "antes" (V2-19): gravado no pendrive ao construir. |
 | `start_layout.py` | Iniciar e barra de tarefas deste PC (V2-04). |
@@ -237,6 +240,7 @@
 | `steps/maintenance.py` | Etapas de manutenção (V2-18, R27). |
 | `steps/network_drive.py` | Etapa: unidade de rede mapeada (V2-17, R25). |
 | `steps/network_privacy.py` | Etapas: servidores DNS / DoH e bloqueio pelo ``hosts`` (V2-16, R18). |
+| `steps/pc_restore.py` | Etapa: trazer o backup do PC de volta depois de instalar (V3-10, D-051). |
 | `steps/personal.py` | Etapa: aparência pessoal (V2-06, R23). |
 | `steps/registry.py` | Mapa tipo de etapa → implementação. |
 | `steps/restore.py` | Etapa: ponto de restauração "Windows pronto" ou "antes de aplicar" (V2-10, D-033). |
@@ -281,6 +285,7 @@
 | `ui/pages/common.py` | Peças comuns às páginas do Studio. Todo texto vem do ``i18n`` (R-03, R-55). |
 | `ui/pages/finish.py` | Grupo "Concluir": primeiro login e revisar/construir. |
 | `ui/pages/network.py` | Grupo "Rede": Wi-Fi, DNS e bloqueios, unidades de rede (M14). |
+| `ui/pages/pcbackup.py` | Backup do PC para outro disco e "Antes de formatar" (V3-09, V3-10, V3-15, V3-16). |
 | `ui/pages/prepare.py` | Grupo "Preparar": pendrive e Windows/conta (R-36: sem lógica de negócio). |
 | `ui/pages/system.py` | Grupo "Sistema": apps pré-instalados, ajustes, energia e atualizações. |
 | `ui/window.py` | Janela principal do WinKit Studio: barra lateral agrupada + páginas (D-042). |

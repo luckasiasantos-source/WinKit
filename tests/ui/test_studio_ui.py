@@ -82,7 +82,7 @@ def test_language_switch_keeps_current_section(window: StudioWindow, qapp) -> No
 
 
 def test_search_filters_sections_and_headers(window: StudioWindow, qapp) -> None:
-    window.search.setText("bitlocker")  # palavra-chave da seção "Windows e conta"
+    window.search.setText("fuso")  # palavra-chave só da seção "Windows e conta"
     visible = [
         window.nav.item(i).text()
         for i in range(window.nav.count())
@@ -283,3 +283,34 @@ def test_download_page_pause_resume_and_copy(
     assert page._state == "done" and len(calls) == 2  # type: ignore[attr-defined]
     page._copy()  # type: ignore[attr-defined]
     assert (window.ctl.root / "Win11.iso").read_bytes() == b"iso"
+
+
+def test_pc_backup_page_backs_up_and_health_says_ready(
+    window: StudioWindow, qapp, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """V3-09/15: escolher disco, pastas do usuário, fazer o backup conferido; "pode formatar"."""
+    from winkit.platform.disk_info import Destination
+    from winkit.platform.fakes.disks import FakeDiskInfo
+    from winkit.studio.ui.pages import pcbackup
+
+    monkeypatch.setattr(pcbackup.QMessageBox, "information", lambda *a, **k: None)
+    docs = tmp_path / "C" / "Users" / "Samuel" / "Documents"
+    docs.mkdir(parents=True, exist_ok=True)
+    (docs / "contrato.pdf").write_bytes(b"%PDF" * 1000)
+    info = window.ctl.services.disk_info
+    assert isinstance(info, FakeDiskInfo)
+    dest = Destination("D:", "Dados", "NTFS", 10**12, 10**11, "1A2B3C4D", "hdd", "WD", False, False)
+    info.dests = [dest]
+    window.ctl.create_recipe("Samuel", None)
+    page = window.go_to("pcbackup")
+    page._dest(dest)  # type: ignore[attr-defined]
+    page._defaults()  # type: ignore[attr-defined]
+    page._estimate_now()  # type: ignore[attr-defined]
+    assert page._estimate.files >= 1  # type: ignore[attr-defined]
+    page._start()  # type: ignore[attr-defined]
+    m = page._result  # type: ignore[attr-defined]
+    assert m is not None and not m.failed and any(k.endswith("contrato.pdf") for k in m.files)
+    assert (tmp_path / "D" / "WinKit-backup").is_dir()
+    health = window.go_to("health")
+    titles = [r.title_label.text() for r in health.findChildren(Row)]
+    assert t("health.backup_ok") in titles and t("health.ready") in titles

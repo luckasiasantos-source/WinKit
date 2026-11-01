@@ -435,6 +435,16 @@ TargetVersion = Literal["11", "10"]
 MediaPath = Literal["ventoy", "rufus", "microsoft"]
 
 
+class PcBackup(_Model):
+    """Backup do PC para outro disco (V3-09/10, D-051). Sem senha, sem versões antigas."""
+
+    sources: list[str] = Field(default_factory=list)  # pastas do PC atual (caminhos literais)
+    destination: VolumeRef | None = None
+    zip: bool = False
+    #: Na Fase 2, o Agente traz os arquivos de volta do disco de backup (soma, nunca troca).
+    restore_after_install: bool = False
+
+
 class TargetWindows(_Model):
     """Windows que vai ser instalado (V3-06). O 8.1 e o 7 entram no M25."""
 
@@ -480,6 +490,7 @@ class Recipe(_Model):
     #: V3-06: Windows a instalar e caminho até o pendrive (orienta o Studio).
     target_windows: TargetWindows = Field(default_factory=TargetWindows)
     media: Media = Field(default_factory=Media)
+    pc_backup: PcBackup = Field(default_factory=PcBackup)
 
     # ---- consultas de conveniência (sem efeito colateral)
     def app(self, app_id: str) -> AppItem | None:

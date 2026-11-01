@@ -258,3 +258,12 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Impacto: uma ISO corrompida que ainda abre passaria; o instalador acusaria depois.
 - Plano: ler os hashes da página oficial quando o Fido ou a Microsoft os expuserem de forma estável.
 - Prioridade: baixa
+
+### DT-028 — Tarefas longas sem fila por disco; .zip sem retomada
+- Estado: aberta
+- Origem: M22 (D-051, D-053)
+- Onde: `studio/ui/base.py` (`TaskRunner.with_progress`), `collector/pc_backup.py`
+- Descrição: (1) o plano previa uma central de tarefas com fila por disco físico; hoje cada página roda a sua tarefa em segundo plano, e um backup e um download no mesmo disco andam juntos (mais lentos). (2) No modo `.zip`, parar e continuar recomeça o arquivo em andamento, e um arquivo alterado entra de novo no `.zip` (a restauração usa a versão mais nova).
+- Impacto: lentidão quando duas tarefas usam o mesmo disco; `.zip` pode crescer ao refazer o backup.
+- Plano: central de tarefas com fila por disco; recriar o `.zip` só com a versão mais nova de cada arquivo.
+- Prioridade: baixa

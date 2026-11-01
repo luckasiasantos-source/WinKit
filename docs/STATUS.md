@@ -36,7 +36,7 @@
 | M19 | Velocidade, nitidez, janela; testes na VM (V3-01 a 04) | ✅ código · validação na VM pendente | `docs/validacao/M19.md` |
 | M20 | Modo em etapas, caminho, Ventoy e Rufus (V3-05 a 07) | ✅ código · validação na VM pendente | `docs/validacao/M20.md` |
 | M21 | Baixar a ISO oficial (V3-08) | ✅ código · validação na VM pendente | `docs/validacao/M21.md` |
-| M22 | Backup para HD secundário (V3-09, 10, 15, 16) | ⬜ | — |
+| M22 | Backup para HD secundário (V3-09, 10, 15, 16) | ✅ código · validação na VM pendente | `docs/validacao/M22.md` |
 | M23 | ISO personalizada e autossuficiente (V3-11, 12, 17) | ⬜ | — |
 | M24 | O WinKit grava o pendrive (V3-13) | ⬜ | — |
 | M25 | Windows 7 e 8.1 em modo limitado (V3-14) | ⬜ | — |
@@ -256,6 +256,13 @@
 - ✅ V3-08 Etapa **Baixar o Windows**: versão e arquitetura da etapa Começar, idioma e onde salvar; link oficial pelo Fido com assinatura conferida (D-047); progresso com porcentagem, tamanho, velocidade e tempo restante; pausar, continuar (mesmo depois de fechar o WinKit) e cancelar; a ISO baixada é lida para conferir que é do Windows; copiar para o pendrive Ventoy ou abrir no Rufus
 - ✅ `TaskRunner.with_progress`: tarefas longas com progresso sem travar a janela
 - ✅ Roteiro `docs/validacao/M21.md` e versão 0.12.0
+
+### M22 — Backup para HD secundário ✅ (código) · validação na VM pendente
+- ✅ V3-09 Etapa **Backup do PC**: discos com tipo (SSD, HD, NVMe, USB), espaço, BitLocker e aviso de "mesmo disco"; pastas do usuário ou escolhidas; tempo calculado com a velocidade medida no destino; avisos (espaço, arquivo acima de 4 GB em FAT32, nomes inválidos, permissões em exFAT, caminhos longos); cópia conferida por SHA-256, com cópia de sombra para arquivos abertos, pausa e retomada; `.zip` opcional; nunca apaga nada (D-051)
+- ✅ V3-10 Trazer de volta: à mão ("Restaurar aqui") ou na instalação (etapa `pc_restore` da Fase 2, disco pelo número de série); sempre soma, nunca troca
+- ✅ V3-15 Etapa **Antes de formatar**: backup conferido, BitLocker, ativação e "Pode formatar"
+- ✅ V3-16 Exportar a chave de recuperação do BitLocker para um arquivo (disco de backup ou pendrive)
+- ✅ Roteiro `docs/validacao/M22.md` e versão 0.13.0
 
 ## Hipóteses técnicas
 

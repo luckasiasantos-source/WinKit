@@ -64,6 +64,7 @@ O WinKit faz isso de uma vez. Você monta uma **receita** no seu PC atual, e o p
 | 🗃️ **Contas, pastas e jogos** | Contas extras (administrador ou padrão), Documentos e Downloads em outro disco (achado pelo número de série, mesmo se a letra mudar) e jogos da Steam e da Epic em outro disco aparecendo instalados, sem baixar de novo. |
 | 📋 **Modelos e receitas compartilháveis** | Comece de um modelo pronto ou importe a receita de outra pessoa, sempre com prévia. A exportação nunca leva conta, senha, Wi-Fi nem caminhos pessoais. |
 | ⬆️ **Instaladores sempre novos** | "Procurar atualizações" troca os instaladores velhos do pendrive sem refazer a receita; a versão antiga só sai depois que a nova está no lugar. |
+| 🗄️ **Backup para outro disco** | Copia seus arquivos para um HD, SSD ou pendrive antes de formatar, mostrando o tipo do disco e o tempo medido; cada arquivo é conferido e nada é apagado. Depois, traz de volta somando ao que existe, à mão ou na própria instalação. A etapa **Antes de formatar** confere o backup, o BitLocker (e exporta a chave) e a ativação. |
 | 🔍 **Comparação com o PC antigo** | No fim da instalação, o resumo mostra os apps que faltaram, os dispositivos sem driver e os recursos que não foram ligados. |
 
 <div align="center">
@@ -254,6 +255,7 @@ WinKit does it all at once. You build a **recipe** on your current PC, and the V
 | 🗃️ **Accounts, folders and games** | Extra accounts (administrator or standard), Documents and Downloads on another disk (found by serial number even if the letter changes), and Steam and Epic games on another disk showing up installed, without downloading again. |
 | 📋 **Templates and shareable recipes** | Start from a ready template or import someone else's recipe, always with a preview. Exports never include your account, password, Wi-Fi or personal paths. |
 | ⬆️ **Always-fresh installers** | "Check for updates" replaces old installers on the USB drive without redoing the recipe; the old version is only removed after the new one is in place. |
+| 🗄️ **Backup to another disk** | Copies your files to an HDD, SSD or USB drive before formatting, showing the disk type and the measured time; every file is checked and nothing is deleted. Later it brings them back by adding to what exists, by hand or during setup. The **Before formatting** step checks the backup, BitLocker (and exports the key) and activation. |
 | 🔍 **Comparison with the old PC** | At the end of the install, the summary shows missing apps, devices without a driver and features that were not turned on. |
 
 <div align="center">

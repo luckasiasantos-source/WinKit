@@ -28,6 +28,23 @@
 
 ---
 
+## 2026-11-01 — M22 — Backup para HD secundário (0.13.0)
+**Tipo:** implementação
+**Resumo:** etapas Backup do PC e Antes de formatar. Backup conferido para outro disco (tipo e velocidade medidos, cópia de sombra, pausa e retomada, .zip opcional, nunca apaga); trazer de volta à mão ou na instalação, somando; BitLocker e ativação conferidos, com exportação da chave.
+
+### Adicionado
+- `src/winkit/core/pc_backup.py` (regras, manifesto e restauração), `src/winkit/collector/pc_backup.py` (cópia conferida), `src/winkit/platform/disk_info.py` (discos, saúde, chave do BitLocker por CIM) e `FakeDiskInfo`
+- `src/winkit/agent/steps/pc_restore.py`; etapa `pc_restore` no plano (Fase 2); receita: `pc_backup` (aditivo)
+- Studio: páginas **Backup do PC** e **Antes de formatar** (`studio/ui/pages/pcbackup.py`)
+- Testes: `tests/core/test_pc_backup.py`, `tests/collector/test_pc_backup.py`, `tests/agent/test_pc_restore.py`, página em `tests/ui/test_studio_ui.py`; `docs/validacao/M22.md`
+
+### Alterado
+- READMEs (três idiomas) — backup para outro disco
+- `src/winkit/__init__.py` — 0.13.0; `packaging/NOTAS_DA_VERSAO.md`
+
+### Documentos vivos atualizados
+- ARQUITETURA — D-051; STATUS — M22; DIVIDAS — DT-028; ESTRUTURA — regerado
+
 ## 2026-11-01 — M21 — Baixar a ISO oficial (0.12.0)
 **Tipo:** implementação
 **Resumo:** etapa Baixar o Windows: a ISO oficial vem do site da Microsoft pelo Fido (assinatura conferida) e é baixada pelo WinKit com progresso, pausa e retomada, e conferida no fim.

@@ -62,6 +62,7 @@ _G2 = {
     "windows_update": 70,
     "driver_report": 75,  # R28: depois do Windows Update, que já resolve muitos drivers
     "default_apps_verify": 77,
+    "pc_restore": 74,  # V3-10: arquivos pessoais de volta, depois dos apps
     "compare": 78,  # R29: no fim, depois de instalar e procurar drivers
     "restore_point": 80,
     "finalize": 99,
@@ -125,6 +126,7 @@ def plan(recipe: Recipe, catalogs: Catalogs, ctx: PlanContext | None = None) -> 
     _plan_browsers(recipe, catalogs, drafts)
     _plan_start_layout(recipe, drafts)
     _plan_games(recipe, drafts)
+    _plan_pc_restore(recipe, drafts)
     _plan_power(recipe, drafts)
     _plan_bloat(recipe, catalogs, ctx, drafts, excluded)
     _plan_features(recipe, catalogs, ctx, drafts, excluded)
@@ -390,6 +392,21 @@ def _plan_start_layout(recipe: Recipe, out: list[_Draft]) -> None:  # R20
 
 #: Launcher → ids do winget, para a etapa esperar o app (R22).
 LAUNCHER_WINGET = {"steam": ("Valve.Steam",), "epic": ("EpicGames.EpicGamesLauncher",)}
+
+
+def _plan_pc_restore(recipe: Recipe, out: list[_Draft]) -> None:  # V3-10
+    b = recipe.pc_backup
+    if b.restore_after_install and b.destination is not None:
+        out.append(
+            _Draft(
+                "pc_restore",
+                "pc",
+                2,
+                t("plan.pc_restore"),
+                "user_profile",
+                sort=(_G2["pc_restore"], 0, "pc"),
+            )
+        )
 
 
 def _plan_games(recipe: Recipe, out: list[_Draft]) -> None:  # R22
