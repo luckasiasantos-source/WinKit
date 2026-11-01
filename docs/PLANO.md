@@ -1469,6 +1469,8 @@ Cada marco tem um **critério de pronto**. Um marco só é marcado como concluí
 
 ### Depois do v1 (backlog ordenado)
 
+> A v3 (M19–M26: modo em etapas, ISO oficial e personalizada, gravação do pendrive, backup para HD secundário, Windows 7 e 8.1) está **proposta** em [`PLANO_V3.md`](PLANO_V3.md), aguardando aprovação.
+>
 > A v2 (M11–M18) está detalhada em [`PLANO_V2.md`](PLANO_V2.md) e **implementada** (0.9.0); falta a validação na VM (roteiros `docs/validacao/M11.md` a `M17.md`). Os itens 3 (backup de `HKCU`, agora em forma curada, D-037) e 4 (fixar na barra, V2-04) deste backlog foram absorvidos por ela.
 
 1. Item 20 — Windows 10 (catálogos com `os: [10]`, validação em hardware).

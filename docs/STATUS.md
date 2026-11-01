@@ -7,7 +7,7 @@
 
 **Última atualização:** 2026-10-31
 **Versão do código:** 0.4.0 (pré-alpha, projeto pessoal)
-**Fase do projeto:** v1 implementada (M0–M10); falta a validação em VM/PC real pelos roteiros de `docs/validacao/`. v2 (M11–M18) implementada (0.9.0, `PLANO_V2.md`); falta a validação na VM pelos roteiros M11–M17
+**Fase do projeto:** v1 implementada (M0–M10); falta a validação em VM/PC real pelos roteiros de `docs/validacao/`. v2 (M11–M18) implementada (0.9.0, `PLANO_V2.md`); falta a validação na VM pelos roteiros M11–M17. v3 (M19–M26) **proposta** em `PLANO_V3.md`, aguardando aprovação
 
 ## Resumo
 

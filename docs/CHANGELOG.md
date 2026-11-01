@@ -28,6 +28,19 @@
 
 ---
 
+## 2026-11-01 — Documentação — plano da v3 (proposta)
+**Tipo:** documentação
+**Resumo:** plano da v3 (M19–M26) escrito a partir da conversa com o dono e de duas pesquisas, para aprovação. Nada implementado.
+
+### Adicionado
+- `docs/PLANO_V3.md` — 14 funções (V3-01 a V3-14), decisões D-044 a D-054, regras R-59 a R-64, hipóteses H36 a H48, ordem e versões (0.10.0 a 0.17.0), sugestões aguardando aprovação
+
+### Alterado
+- `CLAUDE.md` — lista o `PLANO_V3.md` como proposta, sem valor de regra até a aprovação
+
+### Documentos vivos atualizados
+- STATUS — v3 proposta; PLANO — §20 aponta para o `PLANO_V3.md`
+
 ## 2026-11-01 — Logo novo e skill Ponytail obrigatória (R-58)
 **Tipo:** implementação
 **Resumo:** logo redesenhado em vetor (fundo azul → violeta, "W" em traço contínuo e uma faísca verde-água), nítido em qualquer tamanho; o `.ico` passa a ter 10 tamanhos (16 a 256 px) em vez de um só. A skill Ponytail passa a ser obrigatória em toda tarefa de código do projeto.
