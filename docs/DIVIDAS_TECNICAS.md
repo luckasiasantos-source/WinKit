@@ -267,3 +267,12 @@ Ainda não há código. As entradas abaixo são **dívidas de desenho**: limita�
 - Impacto: lentidão quando duas tarefas usam o mesmo disco; `.zip` pode crescer ao refazer o backup.
 - Plano: central de tarefas com fila por disco; recriar o `.zip` só com a versão mais nova de cada arquivo.
 - Prioridade: baixa
+
+### DT-029 — Modo limitado do Windows 7/8.1
+- Estado: aberta
+- Origem: M25 (V3-14, D-050)
+- Onde: `core/legacy_agent.py`, `core/compat.py`, `core/unattend/generator.py`
+- Descrição: (1) sem chave genérica, o instalador do 7 pode perguntar a edição; (2) o agente legado não restaura backups do PC (V3-10), não aplica ajustes de registro nem fontes, e pula configurações cujo molde não tem pasta equivalente; (3) nenhum ajuste do catálogo está marcado para o 7/8.1; (4) a lista de sem suporte é por seção, não por item.
+- Impacto: menos automação no 7/8.1 do que no 10/11.
+- Plano: chaves por edição do 7/8.1; levar mais etapas para o agente legado conforme a validação na VM.
+- Prioridade: baixa

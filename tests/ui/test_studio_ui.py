@@ -3,8 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from PySide6.QtCore import Qt
 
 from tests.ui.conftest import wait
+from winkit.core.errors import WinKitError
 from winkit.i18n import SUPPORTED, current_language, t
 from winkit.platform.fakes.services import fake_services
 from winkit.studio import preferences
@@ -367,3 +369,27 @@ def test_write_usb_page_erases_only_confirmed(
     page._start()  # type: ignore[attr-defined]
     assert page._done == "F:" and (tmp_path / "F" / "setup.exe").is_file()  # type: ignore[attr-defined]
     assert window.ctl.target is not None and window.ctl.target.root == tmp_path / "F"
+
+
+def test_windows_7_greys_unsupported_steps(window: StudioWindow, qapp) -> None:
+    """R-63: no Windows 7 as etapas sem suporte saem do modo em etapas e ficam esmaecidas."""
+    window.ctl.create_recipe("Samuel", None)
+    page = window.go_to("path")
+    page._target("7", "x86")  # type: ignore[attr-defined]
+    steps = window.wizard_steps()
+    assert "bloat" not in steps and "apps" in steps
+    r = window.ctl.recipe
+    assert r is not None and r.windows.architecture == "x86" and r.target_windows.legacy
+    disabled = [
+        window.nav.item(i).text()
+        for i in range(window.nav.count())
+        if window.nav.item(i).flags() == Qt.ItemFlag.NoItemFlags and window.nav.item(i).toolTip()
+    ]
+    assert t("studio.bloat.title") in disabled
+    with pytest.raises(WinKitError):
+        window.ctl.download_windows(Path("x.iso"), "pt-BR", lambda p: None, lambda: False)
+    report = window.ctl.build()
+    assert (window.ctl.root / "WinKit" / "Agent" / "legado" / "winkit-legado.ps1").read_bytes()[
+        :3
+    ] == b"\xef\xbb\xbf"
+    assert report is not None

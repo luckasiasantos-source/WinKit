@@ -335,6 +335,7 @@ runner.run(
 - **R-60** Apagar, particionar ou formatar disco só em `platform/usb_writer.py`, com as travas da D-045 conferidas imediatamente antes. Teste de proteção: disco de sistema, interno, HD externo acima de 512 GB, pendrive trocado e letra errada são sempre recusados. Em vigor desde o M24.
 - **R-61** Programas e arquivos baixados só de fontes oficiais listadas em `data/downloads.yaml` (ou do site da Microsoft, M21), com SHA-256 conferido quando o fornecedor publica; nada baixado é aberto antes da conferência. Em vigor desde o M20.
 - **R-62** Imagem montada pelo DISM é sempre desmontada (salvando só se tudo deu certo; senão, descartando) em `finally`; antes e depois, montagens deixadas pelo WinKit na pasta de trabalho são descartadas. Em vigor desde o M23.
+- **R-63** Toda seção declara os Windows alvo que suporta (`core/compat.py`); o Studio esmaece as que não servem, com o motivo, e o modo em etapas as pula. Em vigor desde o M25.
 - **R-64** A ISO original só é lida; a cópia nunca pode ter o mesmo caminho dela, e no fim tamanho e data da original são conferidos. Teste de proteção confere o SHA-256. Em vigor desde o M23.
 
 ### 5.12 Como as regras são verificadas automaticamente
@@ -364,6 +365,7 @@ runner.run(
 | R-61 | `tests/platform/test_download.py` (hash errado apaga o arquivo; zip com caminho para fora é recusado) |
 | R-62, R-64 | `tests/builder/test_custom_iso.py` (falha no meio descarta e não deixa nada montado nem ISO pela metade; o SHA-256 da original não muda) |
 | R-60 | `tests/core/test_usb_safety.py` (todas as travas), `tests/builder/test_usb_media.py::test_wrong_letter_erases_nothing` |
+| R-63 | `tests/core/test_legacy.py` (XML do 7 e do 8.1 sem itens do 10/11; script só soma) e `tests/ui/test_studio_ui.py::test_windows_7_greys_unsupported_steps` |
 | R-56, R-57 | `tests/test_docs_sync.py` (README.md com a versão em inglês igual ao README.en.md; ESTRUTURA.md igual ao que o gerador produz) |
 | Empacotamento | `test_no_dynamic_imports_in_package` (IN-013) |
 
@@ -618,6 +620,12 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 **Contexto:** a Microsoft não tem API pública de download; o Fido (GPLv3, do autor do Rufus) obtém o link oficial e é mantido em dia quando o site muda.
 **Decisão:** `platform/windows_download.py` baixa o `Fido.ps1` da última release oficial, confere a **assinatura digital** (Authenticode, assinante "Akeo Consulting", pelo número do status, não por texto) e só então o roda pedindo só o link (`-GetUrl`). O download é do WinKit (`platform/download.py`): progresso, pausa, retomada pelo `.part` e, no fim, a ISO é lida para conferir que é do Windows.
 **Consequências:** Windows 11 e 10 (e 8.1 no M25) baixáveis; o 7 não. O SHA-256 publicado pela Microsoft não é conferido (DT-027, H38). Se a Microsoft recusar o pedido, a tela explica e a pessoa pode usar uma ISO que já tem.
+
+### D-050 — Windows 7 e 8.1: agente legado em PowerShell 2.0
+2026-11-01 · aceita (M25, `PLANO_V3.md`)
+**Contexto:** o Agente (Python 3.12 empacotado) não roda no Windows 7; o dono quer o modo limitado com as últimas versões do 7 e do 8.1, 32 e 64 bits.
+**Decisão:** com `target_windows` 7 ou 8.1, o `core` gera `WinKit\Agent\legado\winkit-legado.ps1` (`core/legacy_agent.py`, PowerShell 2.0, UTF-8 com BOM): drivers (`pnputil`), programas com instalador próprio, configurações dos apps (robocopy `/E /XC /XN /XO`, soma sem trocar), Wi-Fi, energia e recursos do Windows; log e resumo HTML; roda uma vez só. O `autounattend.xml` fica ciente da versão: sem chave genérica (as do catálogo são do 10/11), sem LabConfig, sem o bootstrap da Fase 1, sem os itens de OOBE que o 7 recusa, e o primeiro logon chama o agente legado. Etapas sem suporte (R-63, `core/compat.py`) ficam esmaecidas e fora do modo em etapas. O Windows 7 "SP2" (KB3020369 + KB3125574) vem do Catálogo do Microsoft Update, conferido pelo SHA-1 do nome do arquivo, e entra na ISO personalizada.
+**Consequências:** menos funções que no 10/11 (STATUS M25); 8.1 também usa o agente legado (H47 deixa de importar).
 
 ### D-051 — Backup do PC: cópia simples, aditiva, conferida
 2026-11-01 · aceita (M22, `PLANO_V3.md`)

@@ -418,9 +418,12 @@ class DownloadSource(_Model):
     id: Annotated[str, Field(pattern=r"^[a-z0-9_]+$")]
     name: str
     #: Repositório no GitHub (``dono/nome``): a última release é consultada pela API oficial.
-    repo: str
+    repo: str | None = None
     #: Expressão regular do nome do arquivo na release.
-    asset: str
+    asset: str | None = None
+    #: Download direto de servidor oficial (ex.: Catálogo do Microsoft Update), com SHA-1.
+    url: str | None = None
+    sha1: str | None = None
     #: Arquivo da release com as somas SHA-256 (``None`` = procurar no texto da release).
     checksum_asset: str | None = None
     #: Para ``.zip``: caminho do executável dentro dele (``{version}`` é trocado).

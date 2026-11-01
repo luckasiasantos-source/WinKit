@@ -176,8 +176,11 @@ def test_architecture() -> None:
     root = gen(arch="arm64")
     archs = {c.get("processorArchitecture") for c in root.iter(f"{{{NS}}}component")}
     assert archs == {"arm64"}
+    assert {c.get("processorArchitecture") for c in gen(arch="x86").iter(f"{{{NS}}}component")} == {
+        "x86"
+    }  # 32 bits: Windows 10, 8.1 e 7 (V3-14)
     with pytest.raises(UnattendError):
-        gen(arch="x86")
+        gen(arch="mips")
 
 
 def test_unknown_edition() -> None:

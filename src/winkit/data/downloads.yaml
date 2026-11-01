@@ -9,3 +9,21 @@
   name: Rufus
   repo: pbatard/rufus
   asset: '^rufus-[0-9.]+\.exe$'
+# Windows 7 "SP2" (V3-14): pré-requisito KB3020369 + Convenience Rollup KB3125574, do Catálogo do
+# Microsoft Update. O SHA-1 está no próprio nome do arquivo publicado pela Microsoft (H50).
+- id: win7_kb3020369_x64
+  name: KB3020369 (x64)
+  url: https://download.windowsupdate.com/d/msdownload/update/software/updt/2015/04/windows6.1-kb3020369-x64_5393066469758e619f21731fc31ff2d109595445.msu
+  sha1: 5393066469758e619f21731fc31ff2d109595445
+- id: win7_kb3125574_x64
+  name: KB3125574 (x64)
+  url: https://download.windowsupdate.com/d/msdownload/update/software/updt/2016/05/windows6.1-kb3125574-v4-x64_2dafb1d203c8964239af3048b5dd4b1264cd93b9.msu
+  sha1: 2dafb1d203c8964239af3048b5dd4b1264cd93b9
+- id: win7_kb3020369_x86
+  name: KB3020369 (x86)
+  url: https://download.windowsupdate.com/d/msdownload/update/software/updt/2015/04/windows6.1-kb3020369-x86_82e168117c23f7c479a97ee96c82af788d07452e.msu
+  sha1: 82e168117c23f7c479a97ee96c82af788d07452e
+- id: win7_kb3125574_x86
+  name: KB3125574 (x86)
+  url: https://download.windowsupdate.com/d/msdownload/update/software/updt/2016/05/windows6.1-kb3125574-v4-x86_ba1ff5537312561795cc04db0b02fbb0a74b2cbd.msu
+  sha1: ba1ff5537312561795cc04db0b02fbb0a74b2cbd

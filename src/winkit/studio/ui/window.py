@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from winkit.core import compat
 from winkit.i18n import normalize, set_language, t, tn
 from winkit.platform import window_style
 from winkit.studio import preferences
@@ -312,6 +313,7 @@ class StudioWindow(QWidget):
                 item.setData(_SECTION_ROLE, index)
                 index += 1
         self.nav.blockSignals(False)
+        self.apply_compat()
         self._select(current or self.sections[0].id)
         self._update_status()
 
@@ -364,8 +366,27 @@ class StudioWindow(QWidget):
 
     # ------------------------------------------------------------------ modo em etapas (V3-05)
     def wizard_steps(self) -> list[str]:
-        """Ordem das etapas: as seções da barra lateral, menos "Aplicar neste PC" (outro fluxo)."""
-        return [s.id for s in self.sections if s.id not in WIZARD_EXCLUDED]
+        """Ordem das etapas: as seções da barra lateral, menos "Aplicar neste PC" (outro fluxo)
+        e as que não servem para o Windows alvo (R-63)."""
+        version = self.ctl.target_windows.version
+        return [
+            s.id
+            for s in self.sections
+            if s.id not in WIZARD_EXCLUDED and compat.supported(s.id, version)
+        ]
+
+    def apply_compat(self) -> None:
+        """Esmaece as seções que não servem para o Windows alvo, com o motivo (R-63)."""
+        version = self.ctl.target_windows.version
+        for row in range(self.nav.count()):
+            item = self.nav.item(row)
+            index = item.data(_SECTION_ROLE)
+            if not isinstance(index, int):
+                continue
+            ok = compat.supported(self.sections[index].id, version)
+            flags = Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
+            item.setFlags(flags if ok else Qt.ItemFlag.NoItemFlags)
+            item.setToolTip("" if ok else t("studio.compat.unsupported", version=version))
 
     def _update_steps(self) -> None:
         steps = self.wizard_steps()

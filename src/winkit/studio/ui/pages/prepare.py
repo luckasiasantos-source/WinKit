@@ -9,6 +9,7 @@ from typing import Any
 
 from PySide6.QtWidgets import QFileDialog, QInputDialog, QLineEdit, QMessageBox, QProgressBar
 
+from winkit.core import compat
 from winkit.core.recipe.models import Recipe
 from winkit.core.recipe.validation import username_problem, validate_computer_name
 from winkit.core.text import slugify
@@ -585,7 +586,15 @@ class PathPage(Page):
 
         target = self.ctl.target_windows
         win = Card()
-        versions = SegmentedControl([("11", "Windows 11"), ("10", "Windows 10")], target.version)
+        versions = SegmentedControl(
+            [
+                ("11", "Windows 11"),
+                ("10", "Windows 10"),
+                ("8.1", "Windows 8.1"),
+                ("7", "Windows 7"),
+            ],
+            target.version,
+        )
         versions.changed.connect(lambda v: self._target(v, self.ctl.target_windows.arch))
         win.add_row(
             Row(
@@ -595,7 +604,7 @@ class PathPage(Page):
                 icon=symbol_icon("chip", "#007AFF"),
             )
         )
-        if target.version == "10":
+        if target.version != "11":
             win.add_row(
                 Row(
                     t("studio.path.arch"),
@@ -603,7 +612,7 @@ class PathPage(Page):
                     accessory=combo(
                         [("x64", t("studio.path.x64")), ("x86", t("studio.path.x86"))],
                         target.arch,
-                        lambda v: self._target("10", v),
+                        lambda v: self._target(self.ctl.target_windows.version, v),
                     ),
                 )
             )
@@ -615,6 +624,8 @@ class PathPage(Page):
                     icon=symbol_icon("!", "#FF9500"),
                 )
             )
+        if target.legacy:
+            self._legacy_rows(win, target.version)
         self.content.addWidget(section(t("studio.path.section_windows"), win))
 
         steps = Card()
@@ -649,12 +660,34 @@ class PathPage(Page):
             section(t("studio.path.section_steps"), steps, footer=t("studio.path.footer"))
         )
 
+    def _legacy_rows(self, card: Card, version: str) -> None:
+        """Modo limitado (V3-14): avisos obrigatórios e drivers que o Windows alvo não tem."""
+        for key in ("studio.path.legacy_security", "studio.path.legacy_limited"):
+            card.add_row(Row(t(key), None, icon=symbol_icon("!", "#FF3B30")))
+        ids = self.slow("devices")
+        missing = compat.missing_native_drivers(version, ids if isinstance(ids, list) else [])
+        for kind in missing:
+            card.add_row(
+                Row(
+                    t(f"studio.path.legacy_missing_{kind}"),
+                    t("studio.path.legacy_missing_hint"),
+                    accessory=button(t("studio.customiso.title"), "Primary", self._to_custom_iso),
+                    icon=symbol_icon("!", "#FF9500"),
+                )
+            )
+
+    def _to_custom_iso(self) -> None:
+        self.window().go_to("customiso")  # type: ignore[attr-defined]
+
     def _choose(self, path: str) -> None:
         self.ctl.set_media_path(path)
         self.refresh()
 
     def _target(self, version: str, arch: str) -> None:
         self.ctl.set_target_windows(version, arch)
+        apply = getattr(self.window(), "apply_compat", None)
+        if apply is not None:
+            apply()
         self.refresh()
 
     def _tool(self, tool_id: str) -> None:

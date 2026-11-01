@@ -18,7 +18,7 @@ from pathlib import Path
 from winkit import __version__
 from winkit.builder.isos import scan_isos
 from winkit.builder.target import Target
-from winkit.core import layout, media
+from winkit.core import layout, legacy_agent, media
 from winkit.core.catalog.models import Catalogs
 from winkit.core.errors import PendriveError, RecipeError, WinKitError
 from winkit.core.fsutil import atomic_write_text, write_if_changed
@@ -289,6 +289,9 @@ def build(
         index = iso_index(isos)
         atomic_write_text(root / layout.ISOS_INDEX, index.model_dump_json(indent=2) + "\n")
     _copy_agent(root, options, report)
+    if recipe.target_windows.legacy:  # 7/8.1: agente legado no primeiro logon (D-050)
+        script = legacy_agent.generate(recipe, catalogs).replace("\n", "\r\n")
+        write_if_changed(root / layout.LEGACY_AGENT, "\ufeff".encode() + script.encode("utf-8"))
     if not options.xml_only:
         _write_manifest(root, report)
     report.sizes = payload_sizes(root, recipe.meta.profile_id)

@@ -6,6 +6,7 @@ Nada de terceiros vai no pacote do WinKit: os programas ficam em
 
 from __future__ import annotations
 
+import hashlib
 import re
 import zipfile
 from collections.abc import Callable
@@ -45,6 +46,8 @@ def latest_release(
     get_json: Callable[[str], Any] = dl.get_json,
     get_text: Callable[[str], str] = dl.get_text,
 ) -> Release:
+    if source.repo is None or source.asset is None:
+        raise WinKitError(f"{source.name}: não é uma release do GitHub")
     data = get_json(API.format(repo=source.repo))
     version = str(data.get("tag_name", "")).lstrip("v")
     assets = data.get("assets", [])
@@ -87,3 +90,20 @@ def fetch(
     if not exe.is_file():
         raise WinKitError(f"{source.name}: executável não encontrado no pacote")
     return exe
+
+
+def fetch_direct(
+    source: DownloadSource, folder: Path, *, downloader: Callable[..., Path] = dl.download
+) -> Path:
+    """Download direto de servidor oficial, conferido pelo SHA-1 publicado (R-61)."""
+    if source.url is None or source.sha1 is None:
+        raise WinKitError(f"{source.name}: sem endereço direto")
+    path = downloader(source.url, folder / source.url.rsplit("/", 1)[-1])
+    h = hashlib.sha1()  # noqa: S324 — é o hash que a Microsoft publica, só para conferir
+    with path.open("rb") as f:
+        while block := f.read(dl.CHUNK):
+            h.update(block)
+    if h.hexdigest().lower() != source.sha1.lower():
+        path.unlink()
+        raise WinKitError(f"{source.name}: o arquivo baixado não confere (SHA-1)")
+    return path

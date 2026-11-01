@@ -29,6 +29,7 @@ class CustomIsoPage(Page):
         self._extra: Path | None = None
         self._updates: list[Path] = []
         self._remove_apps = True
+        self._rollup = True
         self._self_contained = False
         self._output: Path | None = None
         self._work: Path | None = None
@@ -123,6 +124,14 @@ class CustomIsoPage(Page):
                 accessory=button(t("studio.customiso.add_update"), None, self._add_update),
             )
         )
+        if self.ctl.target_windows.version == "7":
+            what.add_row(
+                Row(
+                    t("studio.customiso.rollup"),
+                    t("studio.customiso.rollup_hint"),
+                    accessory=toggle(self._rollup, partial(setattr, self, "_rollup")),
+                )
+            )
         n_apps = len(self.ctl.recipe.bloatware.remove) if self.ctl.recipe else 0
         what.add_row(
             Row(
@@ -239,11 +248,16 @@ class CustomIsoPage(Page):
             QMessageBox.warning(self, t("app.name"), t("studio.customiso.no_edition"))
             return
         opts = self.options()
+        rollup = self._rollup and self.ctl.target_windows.version == "7"
         self._running, self._done = True, None
         self.refresh()
-        self.tasks.with_progress(
-            lambda report: self.ctl.make_custom_iso(opts, report), self._progress, self._finished
-        )
+
+        def job(report: Any) -> Path:
+            if rollup:  # Windows 7 "SP2" (V3-14)
+                opts.updates = [*opts.updates, *self.ctl.win7_rollup()]
+            return self.ctl.make_custom_iso(opts, report)
+
+        self.tasks.with_progress(job, self._progress, self._finished)
 
     def _progress(self, step_frac: Any) -> None:
         step, frac = step_frac

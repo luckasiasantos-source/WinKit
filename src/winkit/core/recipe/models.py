@@ -24,7 +24,7 @@ RebootPolicy = Literal["ask", "auto_if_idle", "never"]
 Edition = Literal[
     "home", "home_single_language", "pro", "pro_n", "pro_workstations", "education", "enterprise"
 ]
-Architecture = Literal["amd64", "arm64"]
+Architecture = Literal["amd64", "arm64", "x86"]
 AppSource = Literal["offline", "winget_online", "portable"]
 Scope = Literal["machine", "user"]
 InstallerType = Literal[
@@ -431,7 +431,7 @@ class Power(_Model):
     fast_startup: bool | None = None
 
 
-TargetVersion = Literal["11", "10"]
+TargetVersion = Literal["11", "10", "8.1", "7"]
 MediaPath = Literal["ventoy", "rufus", "microsoft", "custom_iso", "winkit_usb"]
 
 
@@ -446,10 +446,15 @@ class PcBackup(_Model):
 
 
 class TargetWindows(_Model):
-    """Windows que vai ser instalado (V3-06). O 8.1 e o 7 entram no M25."""
+    """Windows que vai ser instalado (V3-06). 8.1 e 7 em modo limitado (V3-14, D-050)."""
 
     version: TargetVersion = "11"
     arch: Literal["x64", "x86"] = "x64"  # o Windows 11 só existe em 64 bits
+
+    @property
+    def legacy(self) -> bool:
+        """Windows 7 e 8.1: agente legado em PowerShell 2.0, funções limitadas (D-050)."""
+        return self.version in ("7", "8.1")
 
 
 class Media(_Model):

@@ -46,6 +46,17 @@ def bootstrap_command(pendrive_id: str, profile_id: str) -> str:
     )
 
 
+LEGACY_SCRIPT = r"WinKit\Agent\legado\winkit-legado.ps1"
+
+
+def legacy_logon_command() -> str:
+    """Windows 7/8.1 (D-050): acha o pendrive pelo marcador e roda o agente legado."""
+    return _check(
+        f"cmd.exe /c for %d in ({_LETTERS}) do @if exist %d:\\{LEGACY_SCRIPT} "
+        f"powershell.exe -NoProfile -ExecutionPolicy Bypass -File %d:\\{LEGACY_SCRIPT}"
+    )
+
+
 def first_logon_command() -> str:
     """Rede de segurança: inicia a Fase 2 no primeiro logon sem bloquear a área de trabalho."""
     return _check(f'cmd.exe /c if exist "{AGENT_EXE}" start "" "{AGENT_EXE}" phase2 --first-logon')

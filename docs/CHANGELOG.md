@@ -28,6 +28,24 @@
 
 ---
 
+## 2026-11-01 — M25 — Windows 7 e 8.1 em modo limitado (0.16.0)
+**Tipo:** implementação
+**Resumo:** Windows 7 SP1 e 8.1 (32 e 64 bits) na etapa Começar, com agente legado em PowerShell 2.0, XML ciente da versão, etapas sem suporte esmaecidas (R-63), aviso de USB 3.0/NVMe e o 7 "SP2" na ISO personalizada.
+
+### Adicionado
+- `src/winkit/core/legacy_agent.py` (agente legado, D-050), `src/winkit/core/compat.py` (R-63); `layout.LEGACY_AGENT`; `commands.legacy_logon_command`
+- `data/downloads.yaml` — KB3020369 e KB3125574 (diretos, SHA-1); `external_tools.fetch_direct`; `StudioController.win7_rollup`
+- Testes: `tests/core/test_legacy.py`, `test_windows_7_greys_unsupported_steps`; `docs/validacao/M25.md`
+
+### Alterado
+- Receita: `target_windows.version` aceita 8.1 e 7; arquitetura `x86` (aditivo)
+- `src/winkit/core/unattend/generator.py` — XML do 7/8.1; `src/winkit/builder/build.py` — grava o agente legado
+- Studio: etapa Começar com 4 versões e avisos; barra lateral esmaece o que não serve; ISO personalizada com o "SP2"
+- READMEs (três idiomas); `src/winkit/__init__.py` — 0.16.0; `packaging/NOTAS_DA_VERSAO.md`
+
+### Documentos vivos atualizados
+- ARQUITETURA — D-050, R-63; STATUS — M25, H50, H51; PLANO_V3 — H50, H51; DIVIDAS — DT-029; ESTRUTURA — regerado
+
 ## 2026-11-01 — M24 — O WinKit grava o pendrive (0.15.0)
 **Tipo:** implementação
 **Resumo:** etapa Gravar o pendrive: o WinKit apaga só o pendrive USB confirmado (letra digitada, travas relidas antes), grava a ISO em FAT32 para UEFI, BIOS ou os dois, divide o `install.wim` grande e segue com o pendrive como pendrive comum.

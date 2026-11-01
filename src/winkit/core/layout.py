@@ -27,6 +27,8 @@ BOOTSTRAP = f"{AGENT_DIR}/bootstrap.ps1"
 AGENT_VERSION = f"{AGENT_DIR}/VERSION"
 APPS = f"{WINKIT}/Apps"
 DRIVERS = f"{WINKIT}/Drivers"
+#: V3-14: agente legado do Windows 7/8.1 (PowerShell 2.0, D-050).
+LEGACY_AGENT = f"{WINKIT}/Agent/legado/winkit-legado.ps1"
 PROFILES = f"{WINKIT}/Perfis"
 LOGS = f"{WINKIT}/Logs"
 VENTOY_DIR = "ventoy"

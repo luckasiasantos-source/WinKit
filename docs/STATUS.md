@@ -39,7 +39,7 @@
 | M22 | Backup para HD secundário (V3-09, 10, 15, 16) | ✅ código · validação na VM pendente | `docs/validacao/M22.md` |
 | M23 | ISO personalizada e autossuficiente (V3-11, 12, 17) | ✅ código · validação na VM pendente | `docs/validacao/M23.md` |
 | M24 | O WinKit grava o pendrive (V3-13) | ✅ código · validação na VM pendente | `docs/validacao/M24.md` |
-| M25 | Windows 7 e 8.1 em modo limitado (V3-14) | ⬜ | — |
+| M25 | Windows 7 e 8.1 em modo limitado (V3-14) | ✅ código · validação na VM pendente | `docs/validacao/M25.md` |
 | M26 | Fechamento da v3 | ⬜ | — |
 
 ## Detalhe por marco
@@ -276,6 +276,15 @@
 - ✅ Regra inegociável "nunca formatar" com a única exceção no `CLAUDE.md`
 - ✅ Roteiro `docs/validacao/M24.md` e versão 0.15.0
 
+### M25 — Windows 7 e 8.1 em modo limitado ✅ (código) · validação na VM pendente
+- ✅ V3-14 Windows 7 SP1 e 8.1, 32 e 64 bits, na etapa Começar; avisos de segurança e de modo limitado; aviso de USB 3.0/NVMe que o 7 não reconhece, com atalho para a ISO personalizada
+- ✅ Agente legado em PowerShell 2.0 gerado da receita (D-050): drivers, programas com instalador próprio, configurações (soma), Wi-Fi, energia, recursos; resumo e log
+- ✅ `autounattend.xml` ciente da versão (sem chave genérica, LabConfig, bootstrap nem itens de OOBE do 8+ no 7); 32 bits (`x86`)
+- ✅ R-63: etapas sem suporte esmaecidas e fora do modo em etapas (`core/compat.py`)
+- ✅ Windows 7 "SP2" (KB3020369 + KB3125574) na ISO personalizada, conferido por SHA-1 (H50)
+- ✅ Baixar o Windows: 8.1 pelo Fido; 7 explica que a Microsoft não oferece mais
+- ✅ Roteiro `docs/validacao/M25.md` e versão 0.16.0
+
 ## Hipóteses técnicas
 
 | # | Hipótese (resumo) | Estado | Onde foi validada |
@@ -329,3 +338,5 @@
 | H47 | O Agente atual (Python 3.12) roda no Windows 8.1 | ⬜ | — |
 | H48 | Mídias antigas ainda dão boot com Secure Boot depois da troca de certificados (2026) | ⬜ | — |
 | H49 | Na ISO autossuficiente (mídia só de leitura), bootstrap e Agente funcionam sem gravar de volta na mídia | ⬜ | — |
+| H50 | Os endereços do Catálogo do Microsoft Update para KB3020369 e KB3125574 continuam no ar (o SHA-1 está no nome) | ⬜ | — |
+| H51 | A classe PCI (`CC_0C0330`, `CC_010802`) aparece nos ids lidos dos dispositivos, para avisar de USB 3.0/NVMe | ⬜ | — |

@@ -53,6 +53,7 @@ from winkit.core import pc_backup as core_pc
 from winkit.core.browsers import suggested
 from winkit.core.catalog.loader import default_catalogs
 from winkit.core.catalog.models import AssociationGroup, Catalogs, DownloadSource
+from winkit.core.devices import hardware_ids
 from winkit.core.errors import RecipeError, WinKitError
 from winkit.core.fsutil import atomic_write_text
 from winkit.core.isos import IsoInfo
@@ -182,6 +183,9 @@ class StudioController:
             "destinations": self.pc_destinations,
             "health": self.pc_health,
             "usbdisks": self.usb_disks,
+            "devices": lambda: (
+                hardware_ids(self.services.devices.all_devices()) if self.services.devices else []
+            ),
         }
         try:
             value = readers[key]()
@@ -204,6 +208,11 @@ class StudioController:
         self.target_windows = TargetWindows.model_validate({"version": version, "arch": arch})
         if self.recipe is not None:
             self.recipe.target_windows = self.target_windows
+            # o XML usa a arquitetura da receita (32 bits = "x86")
+            if arch == "x86":
+                self.recipe.windows.architecture = "x86"
+            elif self.recipe.windows.architecture == "x86":
+                self.recipe.windows.architecture = "amd64"
             self.save()
 
     def open_tool(self, tool_id: str, iso: Path | None = None) -> Path:
@@ -230,6 +239,8 @@ class StudioController:
         if self.services.iso_links is None:
             raise WinKitError("download da ISO indisponível neste sistema")
         tw = self.target_windows
+        if tw.version == "7":
+            raise WinKitError(t("studio.download.no_win7"))
         url = self.services.iso_links.url(tw.version, tw.arch, language)
         path = self.iso_downloader(url, dest, progress=progress, should_stop=should_stop)
         info = self.services.disks.read_iso(path, path.name)
@@ -398,6 +409,17 @@ class StudioController:
             extra = sum(self.sizes().values())
         opts.work_dir.mkdir(parents=True, exist_ok=True)
         return needed_space(opts.original, extra), shutil.disk_usage(opts.work_dir).free
+
+    def win7_rollup(self) -> list[Path]:
+        """Windows 7 "SP2": pré-requisito e Convenience Rollup, baixados e conferidos (V3-14)."""
+        arch = self.target_windows.arch
+        out = []
+        for kb in ("kb3020369", "kb3125574"):
+            source = self.catalogs.download(f"win7_{kb}_{arch}")
+            if source is None:
+                raise WinKitError(f"atualização {kb} ausente do catálogo")
+            out.append(external_tools.fetch_direct(source, _studio_dir() / "atualizacoes"))
+        return out
 
     def make_custom_iso(self, opts: CustomIsoOptions, progress: Callable[[object], None]) -> Path:
         tools, mounter = self.services.image_tools, self.services.iso_mounter

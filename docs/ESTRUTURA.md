@@ -36,6 +36,7 @@
 | `catalog/localize.py` | Tradução dos textos dos catálogos (D-030): a base fica em pt-BR, as outras línguas por cima. |
 | `catalog/models.py` | Modelos dos catálogos em ``winkit/data`` (PLANO.md §15, R-32 a R-34). |
 | `compare.py` | Relatório antes/depois (V2-19): o que o PC antigo tinha e o Windows novo não tem. Puro. |
+| `compat.py` | Quais etapas servem para cada Windows alvo (V3-14, R-63) e drivers que o 7 não tem. |
 | `devices.py` | Dispositivos com problema no Gerenciador de Dispositivos (V2-09). |
 | `dns.py` | DNS seguro e bloqueio pelo ``hosts`` (V2-16): regras puras, sem Windows. |
 | `env.py` | Variáveis de ambiente e PATH (V2-22): regras puras. |
@@ -49,6 +50,7 @@
 | `inventory_snapshot.py` | Inventário de um PC para o relatório antes/depois (V2-19). Só o que é preciso comparar. |
 | `isos.py` | Informações lidas de uma ISO do Windows (somente leitura — D-002). |
 | `layout.py` | Layout fixo do pendrive (PLANO.md §5) e o arquivo marcador. |
+| `legacy_agent.py` | Agente legado para Windows 7 e 8.1 (V3-14, D-050): um script PowerShell 2.0 gerado da receita. |
 | `live.py` | Prévia do modo "aplicar neste PC" (D-033, R-54): o que cada etapa faria, sem fazer nada. |
 | `maintenance.py` | Especificação das tarefas de manutenção (V2-18). Função pura: o mesmo pedido, a mesma tarefa. |
 | `manifest/__init__.py` | Pacote. |

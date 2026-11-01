@@ -17,6 +17,7 @@ from winkit.core.unattend.commands import (
     bootstrap_command,
     first_logon_command,
     labconfig_commands,
+    legacy_logon_command,
     reg_add_command,
 )
 from winkit.i18n import t
@@ -113,7 +114,7 @@ def generate_unattend(
     recipe: Recipe, catalogs: Catalogs, target: UnattendTarget, *, pendrive_id: str
 ) -> bytes:
     arch = target.architecture
-    if arch not in ("amd64", "arm64"):
+    if arch not in ("amd64", "arm64", "x86"):  # x86: Windows 10, 8.1 e 7 de 32 bits
         raise UnattendError(f"arquitetura sem suporte: {arch}")
     edition = catalogs.edition(recipe.windows.edition)
     if edition is None:
@@ -149,14 +150,15 @@ def _windows_pe(
     du = _sub(setup, "DynamicUpdate")
     _sub(du, "Enable", _bool(recipe.updates.during_setup))
     _sub(du, "WillShowUI", "OnError")
-    if os_major != 10:
+    if os_major != 10 and not recipe.target_windows.legacy:
         bypass = [("WinKit: requisitos do Windows 11", c) for c in labconfig_commands()]
         _run_sync(setup, "RunSynchronous", "RunSynchronousCommand", bypass)
     ud = _sub(setup, "UserData")
     _sub(ud, "AcceptEula", "true")
-    pk = _sub(ud, "ProductKey")
-    _sub(pk, "Key", key)
-    _sub(pk, "WillShowUI", "OnError")
+    if not recipe.target_windows.legacy:  # 7/8.1: as chaves genéricas do catálogo são do 10/11
+        pk = _sub(ud, "ProductKey")
+        _sub(pk, "Key", key)
+        _sub(pk, "WillShowUI", "OnError")
 
 
 def _specialize(
@@ -178,9 +180,10 @@ def _specialize(
             if op.reg_set is None:
                 raise UnattendError(f"{ENCRYPTION_TWEAK}: só reg_set é suportado na instalação")
             commands.append(("WinKit: não criptografar o disco", reg_add_command(op.reg_set)))
-    commands.append(
-        ("WinKit: preparar o agente", bootstrap_command(pendrive_id, recipe.meta.profile_id))
-    )
+    if not recipe.target_windows.legacy:  # 7/8.1 usam o agente legado no primeiro logon
+        commands.append(
+            ("WinKit: preparar o agente", bootstrap_command(pendrive_id, recipe.meta.profile_id))
+        )
     deploy = _component(sp, "Microsoft-Windows-Deployment", arch)
     _run_sync(deploy, "RunSynchronous", "RunSynchronousCommand", commands)
 
@@ -204,18 +207,20 @@ def _oobe_system(root: ET.Element, recipe: Recipe, arch: str, ui_lang: str) -> N
         _sub(al, "Username", account.username)
     flc = _sub(shell, "FirstLogonCommands")
     sc = ET.SubElement(flc, _q("SynchronousCommand"), {f"{{{WCM}}}action": "add"})
-    _sub(sc, "CommandLine", first_logon_command())
+    legacy = recipe.target_windows.legacy
+    _sub(sc, "CommandLine", legacy_logon_command() if legacy else first_logon_command())
     _sub(sc, "Description", "WinKit: iniciar a Fase 2")
     _sub(sc, "Order", "1")
     _sub(sc, "RequiresUserInput", "false")
     oobe = _sub(shell, "OOBE")
-    for flag in (
-        "HideEULAPage",
-        "HideLocalAccountScreen",
-        "HideOEMRegistrationScreen",
-        "HideOnlineAccountScreens",
-        "HideWirelessSetupInOOBE",
-    ):
+    flags = ["HideEULAPage", "HideWirelessSetupInOOBE"]
+    if recipe.target_windows.version != "7":  # o 7 recusa os itens que vieram no 8
+        flags[1:1] = [
+            "HideLocalAccountScreen",
+            "HideOEMRegistrationScreen",
+            "HideOnlineAccountScreens",
+        ]
+    for flag in flags:
         _sub(oobe, flag, "true")
     _sub(oobe, "ProtectYourPC", "3")
     _sub(shell, "TimeZone", win.time_zone)

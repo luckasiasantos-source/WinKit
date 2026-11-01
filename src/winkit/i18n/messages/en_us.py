@@ -1539,4 +1539,13 @@ MESSAGES: dict[str, Entry] = {
     "usb.warn_11_bios": "Windows 11 is not supported on BIOS-only PCs.",
     "usb.warn_7_uefi": "Windows 7 on UEFI needs legacy video (CSM) on many PCs and has no Secure Boot; prefer BIOS.",
     "usb.warn_x86_uefi": "32-bit Windows almost never boots on UEFI; prefer BIOS.",
+    "studio.path.legacy_security": "Windows 7 and 8.1 have had no security fixes since January 2023. Use them offline or at your own risk.",
+    "studio.path.legacy_limited": "Limited mode: no winget (only programs with their own installer); steps that do not apply are greyed out.",
+    "studio.path.legacy_missing_usb3": "This PC has USB 3.0, which Windows 7 does not recognize by itself",
+    "studio.path.legacy_missing_nvme": "This PC has an NVMe SSD, which Windows 7 does not recognize by itself",
+    "studio.path.legacy_missing_hint": "Without the driver, setup may not see the keyboard, mouse or disk. Go on as is or build the custom ISO with the drivers inside.",
+    "studio.compat.unsupported": "Does not work on Windows {version} (limited mode)",
+    "studio.download.no_win7": "Microsoft no longer offers Windows 7 for download. Use a Windows 7 SP1 ISO you already have.",
+    "studio.customiso.rollup": 'Windows 7 "SP2" (Convenience Rollup)',
+    "studio.customiso.rollup_hint": "Downloads KB3020369 and KB3125574 from the Microsoft Update Catalog, which bundle almost all SP1 updates, and adds them to the copy.",
 }

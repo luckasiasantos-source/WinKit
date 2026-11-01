@@ -418,6 +418,8 @@ Fora do escopo até o dono aprovar uma a uma:
 | H47 | O Agente atual (Python 3.12) roda no Windows 8.1 | 8.1 usa o agente legado (já previsto) | M25 |
 | H48 | Mídias antigas (7, 8.1, 10 antigo) ainda dão boot com Secure Boot ligado depois da troca de certificados da Microsoft (2026) | Aviso para desligar o Secure Boot na instalação | M24/M25 |
 | H49 | Na ISO autossuficiente (mídia só de leitura), bootstrap e Agente funcionam sem gravar de volta na mídia | Logs só no `C:`; instrução de copiar à mão | M23 |
+| H50 | Endereços do Catálogo do Microsoft Update para KB3020369 e KB3125574 continuam no ar | A pessoa baixa à mão e adiciona como atualização | M25 |
+| H51 | A classe PCI aparece nos ids lidos dos dispositivos | O aviso de USB 3.0/NVMe não aparece; o roteiro orienta | M25 |
 
 ## 16. Riscos novos
 - **Gravar o disco errado.** Mitigação: D-045, R-60, testes de proteção, conferência imediatamente antes.
