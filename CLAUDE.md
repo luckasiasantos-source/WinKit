@@ -57,7 +57,7 @@ Todo módulo Python começa com uma docstring cuja primeira linha diz o que ele 
 
 - **A ISO original do Windows nunca é modificada.** Tudo vai para a pasta `WinKit/` no pendrive. A ISO personalizada (D-044) é sempre uma **cópia** num arquivo novo.
 - **Nada pesado vai para dentro da ISO**, nem backup, nem instalador, nem driver — exceto na cópia autossuficiente que a pessoa pede (D-044).
-- **Nunca particionar, formatar ou apagar discos.** O `autounattend.xml` nunca contém `DiskConfiguration`.
+- **Nunca particionar, formatar ou apagar discos.** Única exceção: o pendrive USB que a pessoa escolheu e confirmou digitando a letra, só por `platform/usb_writer.py` e com as travas da D-045 (R-60). O `autounattend.xml` nunca contém `DiskConfiguration`.
 - **Restauração é aditiva por padrão** (mesclar sem sobrescrever). Sobrescrever só com escolha explícita na receita.
 - `winkit/core` não importa `winkit/platform`, Qt, `winreg`, `subprocess` nem nada específico de Windows.
 - Nenhum `subprocess` com `shell=True`. Todo comando externo passa por `winkit.platform.runner`.

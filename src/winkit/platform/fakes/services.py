@@ -12,7 +12,7 @@ from winkit.platform.fakes.associations import FakeAssociations
 from winkit.platform.fakes.backup import FakeOldPcFolders, FakeShadowCopies
 from winkit.platform.fakes.disks import FakeDiskInfo, FakeDiskInspector, FakeIsoLinks, windows_iso
 from winkit.platform.fakes.drivers import FakeDriverManager
-from winkit.platform.fakes.images import FakeImageTools, FakeIsoMounter
+from winkit.platform.fakes.images import FakeImageTools, FakeIsoMounter, FakeUsbWriter
 from winkit.platform.fakes.registry import FakeRegistry
 from winkit.platform.fakes.runner import FakeRunner
 from winkit.platform.fakes.system import FakeScheduler
@@ -43,6 +43,7 @@ def fake_services(*, old_pc: Path | None = None, **overrides: Any) -> Services:
         "disk_info": FakeDiskInfo(),
         "image_tools": FakeImageTools(),
         "iso_mounter": FakeIsoMounter(base / "unidade-iso"),
+        "usb_writer": FakeUsbWriter(),
     }
     values.update(overrides)
     return Services(**values)

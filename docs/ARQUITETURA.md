@@ -332,6 +332,7 @@ runner.run(
 - **R-57** `docs/ESTRUTURA.md` descreve a árvore do projeto e cada arquivo de código. É gerado por `scripts/gen_estrutura.py` a partir das docstrings (todo módulo tem docstring) e regerado no mesmo commit que cria, move, remove ou muda a descrição de um arquivo. Em vigor desde 2026-10-31.
 - **R-58** Toda tarefa de código usa a skill `ponytail` (`.claude/skills/`, cópia de github.com/DietrichGebert/ponytail, MIT). Em conflito, valem as regras deste documento e do `CLAUDE.md` (documentos vivos, pt-BR, cobertura da R-38); `shortcut:` exige entrada em `DIVIDAS_TECNICAS.md`, como `TODO` (R-50). Em vigor desde 2026-11-01.
 - **R-59** Nenhuma leitura lenta do sistema (PowerShell, CIM, varredura de disco, rede) roda na thread da interface: o `refresh()` de uma página lê o cache do controlador (`Page.slow`) e o resto carrega em segundo plano (D-054). Em vigor desde o M19.
+- **R-60** Apagar, particionar ou formatar disco só em `platform/usb_writer.py`, com as travas da D-045 conferidas imediatamente antes. Teste de proteção: disco de sistema, interno, HD externo acima de 512 GB, pendrive trocado e letra errada são sempre recusados. Em vigor desde o M24.
 - **R-61** Programas e arquivos baixados só de fontes oficiais listadas em `data/downloads.yaml` (ou do site da Microsoft, M21), com SHA-256 conferido quando o fornecedor publica; nada baixado é aberto antes da conferência. Em vigor desde o M20.
 - **R-62** Imagem montada pelo DISM é sempre desmontada (salvando só se tudo deu certo; senão, descartando) em `finally`; antes e depois, montagens deixadas pelo WinKit na pasta de trabalho são descartadas. Em vigor desde o M23.
 - **R-64** A ISO original só é lida; a cópia nunca pode ter o mesmo caminho dela, e no fim tamanho e data da original são conferidos. Teste de proteção confere o SHA-256. Em vigor desde o M23.
@@ -362,6 +363,7 @@ runner.run(
 | R-59 | `tests/ui/test_responsive.py` (com leituras de 2 s, toda página abre em menos de 0,5 s no CI) |
 | R-61 | `tests/platform/test_download.py` (hash errado apaga o arquivo; zip com caminho para fora é recusado) |
 | R-62, R-64 | `tests/builder/test_custom_iso.py` (falha no meio descarta e não deixa nada montado nem ISO pela metade; o SHA-256 da original não muda) |
+| R-60 | `tests/core/test_usb_safety.py` (todas as travas), `tests/builder/test_usb_media.py::test_wrong_letter_erases_nothing` |
 | R-56, R-57 | `tests/test_docs_sync.py` (README.md com a versão em inglês igual ao README.en.md; ESTRUTURA.md igual ao que o gerador produz) |
 | Empacotamento | `test_no_dynamic_imports_in_package` (IN-013) |
 
@@ -593,6 +595,17 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 **Contexto:** gerar ISO de boot exige UDF + El Torito (BIOS e UEFI); o `oscdimg` vem no ADK, com redistribuição incerta.
 **Decisão:** imagens alteradas pelo módulo DISM do PowerShell (`platform/image_tools.py`: exportar edições — que também converte `.esd` em `.wim` —, drivers no `install.wim` e no `boot.wim` índices 1 e 2, atualizações `.msu`/`.cab`, apps de fábrica do catálogo), tudo em JSON (R-13). A ISO é gravada pelo **`pycdlib`** (nova dependência, LGPL, Python puro; R-43): arquivos em UDF 2.60, e só os arquivos de boot da **própria ISO original** no ISO9660 para o El Torito. Ajustes de registro e recursos do Windows não entram na imagem: o Agente já os aplica na instalação.
 **Consequências:** H36 precisa da VM; montagens órfãs do WinKit são descartadas antes e depois (R-62).
+
+### D-045 — Formatar só o pendrive USB escolhido, com travas
+2026-11-01 · aceita (M24, `PLANO_V3.md`; abre exceção na D-017)
+**Contexto:** o dono quer que o WinKit grave o pendrive sozinho quando não quiser o Ventoy nem o Rufus.
+**Decisão:** só `platform/usb_writer.py` apaga um disco, e só depois de reler o disco e passar por todas as travas de `core/usb_safety.py` (R-60): barramento USB; não é disco de sistema nem de boot; entre 8 GB e 512 GB; número e número de série iguais aos mostrados; a pessoa **digitou a letra** do pendrive. A escolha do disco continua sendo da pessoa (D-017 vale para o resto).
+**Consequências:** HD externo USB nunca é apagado por engano; pendrive acima de 512 GB precisa do Ventoy ou do Rufus.
+
+### D-049 — Pendrive gravado pelo WinKit: FAT32 com `install.wim` dividido
+2026-11-01 · aceita (M24)
+**Decisão:** UEFI e BIOS → MBR com uma partição FAT32 ativa e `bootsect /nt60` (da própria ISO); só UEFI → GPT com FAT32; só BIOS → MBR. A partição tem até 32 GB (limite do FAT32 no Windows). O `install.wim` acima de 4 GB vira `install.swm` (`Split-WindowsImage`); outro arquivo acima de 4 GB faz parar com a instrução de usar a ISO personalizada. Depois de gravar, o pendrive abre no Studio como pendrive comum (D-034).
+**Consequências:** sem NTFS no pendrive; avisos por Windows alvo (o 11 não é suportado em BIOS; 32 bits e Windows 7 preferem BIOS). H40.
 
 ### D-046 — Ventoy e Rufus: baixados, abertos e detectados, nunca embutidos
 2026-11-01 · aceita (M20, `PLANO_V3.md`)

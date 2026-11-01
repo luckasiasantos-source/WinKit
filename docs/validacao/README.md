@@ -45,3 +45,4 @@ Prepare a VM uma vez com [`AMBIENTE_VM.md`](AMBIENTE_VM.md) e siga os roteiros e
 | [M21](M21.md) | Baixar a ISO oficial com pausa e retomada | H37, H38 |
 | [M22](M22.md) | Backup para HD secundário, trazer de volta, Antes de formatar | H44 |
 | [M23](M23.md) | ISO personalizada e autossuficiente | H36, H49 |
+| [M24](M24.md) | O WinKit grava o pendrive | H40, H48 |

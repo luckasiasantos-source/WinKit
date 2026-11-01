@@ -432,7 +432,7 @@ class Power(_Model):
 
 
 TargetVersion = Literal["11", "10"]
-MediaPath = Literal["ventoy", "rufus", "microsoft", "custom_iso"]
+MediaPath = Literal["ventoy", "rufus", "microsoft", "custom_iso", "winkit_usb"]
 
 
 class PcBackup(_Model):
@@ -456,6 +456,8 @@ class Media(_Model):
     """Como o Windows chega ao PC (V3-06): pendrive Ventoy, do Rufus ou da Microsoft."""
 
     path: MediaPath = "ventoy"
+    #: V3-13: tipo de PC quando o WinKit grava o pendrive (MBR serve aos dois).
+    boot: Literal["uefi_bios", "uefi", "bios"] = "uefi_bios"
 
 
 class Recipe(_Model):

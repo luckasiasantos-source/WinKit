@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
+from winkit.core.errors import WinKitError
+from winkit.core.usb_safety import refusal_reasons
 from winkit.platform.image_tools import ImageInfo
 
 
@@ -56,6 +60,12 @@ class FakeImageTools:
     def remove_app(self, folder: Path, display_name: str) -> None:
         self._do("remove", display_name)
 
+    def split(self, wim: Path, swm: Path, size_mb: int) -> None:
+        self._do("split", wim.name)
+        swm.parent.mkdir(parents=True, exist_ok=True)
+        swm.write_bytes(b"swm1")
+        swm.with_name("install2.swm").write_bytes(b"swm2")
+
     def cleanup(self, under: Path) -> int:
         n = len(self.mounted)
         self.mounted.clear()
@@ -75,3 +85,29 @@ class FakeIsoMounter:
 
     def dismount(self, iso: Path) -> None:
         self.mounts.append("dismount")
+
+
+@dataclass
+class FakeUsbWriter:
+    """Pendrives falsos; ``prepare`` confere as travas como o de verdade e "formata" uma pasta."""
+
+    disks: list[Any] = field(default_factory=list)
+    roots: dict[str, Path] = field(
+        default_factory=dict
+    )  # letra → pasta que faz o papel do pendrive
+    prepared: list[tuple[int, str]] = field(default_factory=list)
+
+    def usb_disks(self) -> list[Any]:
+        return list(self.disks)
+
+    def prepare(self, shown: Any, typed_letter: str, *, style: str, label: str) -> str:
+        current = next((d for d in self.disks if d.number == shown.number), None)
+        reasons = refusal_reasons(current, shown, typed_letter)
+        if reasons:
+            raise WinKitError("; ".join(r.key for r in reasons))
+        letter = shown.letters[0]
+        root = self.roots[letter]
+        shutil.rmtree(root, ignore_errors=True)
+        root.mkdir(parents=True)
+        self.prepared.append((shown.number, style))
+        return str(letter)

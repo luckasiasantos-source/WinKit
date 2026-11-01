@@ -45,6 +45,10 @@ class ImageTools(Protocol):
         """Desmonta (descartando) imagens deixadas montadas dentro de ``under``."""
         ...
 
+    def split(self, wim: Path, swm: Path, size_mb: int) -> None:
+        """Divide em ``install.swm``, ``install2.swm``… (FAT32 aceita até 4 GB por arquivo)."""
+        ...
+
 
 class WindowsImageTools:
     def __init__(self, ps: PowerShell) -> None:
@@ -122,3 +126,10 @@ class WindowsImageTools:
             timeout=LONG,
         )
         return len(out)
+
+    def split(self, wim: Path, swm: Path, size_mb: int) -> None:
+        self._ps.run(
+            "Split-WindowsImage -ImagePath $Path -SplitImagePath $Swm -FileSize $Size -CheckIntegrity | Out-Null",
+            {"Path": str(wim), "Swm": str(swm), "Size": size_mb},
+            timeout=LONG,
+        )

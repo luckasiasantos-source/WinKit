@@ -80,6 +80,7 @@
 | `unattend/__init__.py` | Pacote. |
 | `unattend/commands.py` | Linhas de comando embutidas no ``autounattend.xml`` (PLANO.md §9.2). |
 | `unattend/generator.py` | Geração do ``autounattend.xml`` (PLANO.md §9). |
+| `usb_safety.py` | Travas para o WinKit gravar um pendrive (V3-13, D-045, R-60). Regras puras. |
 | `user_folders.py` | Pastas do usuário em outro disco (V2-14): regras puras. |
 | `userassist.py` | Uso de programas pelo ``UserAssist`` do Explorer (V2-20). Leitor puro, sem Windows. |
 | `vdf.py` | Formato texto ``KeyValues`` da Valve (``libraryfolders.vdf``) — leitor e gravador puros. |
@@ -165,6 +166,7 @@
 | `snapshot.py` | Inventário do PC para o relatório antes/depois (V2-19), usado pelo Studio e pelo Agente. |
 | `system.py` | Informações básicas do sistema e caminhos de ferramentas nativas (R-12). |
 | `usage.py` | Uso de programas (``UserAssist``) pelo registro do usuário atual (V2-20). |
+| `usb_writer.py` | O único lugar que apaga e formata um disco: o pendrive escolhido (V3-13, D-045, R-60). |
 | `volumes.py` | Volumes do PC pelo CIM ``Win32_Volume`` (D-035). Só JSON e números (R-13). |
 | `vss.py` | Cópias de sombra (VSS) para capturar arquivos em uso (PLANO.md §7.4.2, D-006). |
 | `wifi.py` | Perfis de Wi-Fi pelo ``netsh wlan`` (V2-02). |
@@ -206,6 +208,7 @@
 | `custom_iso.py` | ISO personalizada: uma **cópia** da ISO original com drivers, atualizações, edições e apps |
 | `isos.py` | Leitura das ISOs do pendrive, com cache (PLANO.md §8.2). |
 | `target.py` | Escolha do pendrive de destino (PLANO.md §8.1, D-034). |
+| `usb_media.py` | O WinKit grava a ISO num pendrive, sem Ventoy nem Rufus (V3-13, D-045, D-049). |
 | `validate.py` | Validação do pendrive sem alterar nada (PLANO.md §8.6). |
 
 ### `agent/` — o Agente que roda na instalação: fases, executor e etapas (`steps/`)
@@ -293,6 +296,7 @@
 | `ui/pages/pcbackup.py` | Backup do PC para outro disco e "Antes de formatar" (V3-09, V3-10, V3-15, V3-16). |
 | `ui/pages/prepare.py` | Grupo "Preparar": pendrive e Windows/conta (R-36: sem lógica de negócio). |
 | `ui/pages/system.py` | Grupo "Sistema": apps pré-instalados, ajustes, energia e atualizações. |
+| `ui/pages/writeusb.py` | O WinKit grava o pendrive (V3-13, D-045): escolher a ISO, o pendrive e o tipo de PC. |
 | `ui/window.py` | Janela principal do WinKit Studio: barra lateral agrupada + páginas (D-042). |
 
 ### `data/` — catálogos versionados (YAML) e modelos de receita

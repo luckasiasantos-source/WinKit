@@ -28,6 +28,23 @@
 
 ---
 
+## 2026-11-01 — M24 — O WinKit grava o pendrive (0.15.0)
+**Tipo:** implementação
+**Resumo:** etapa Gravar o pendrive: o WinKit apaga só o pendrive USB confirmado (letra digitada, travas relidas antes), grava a ISO em FAT32 para UEFI, BIOS ou os dois, divide o `install.wim` grande e segue com o pendrive como pendrive comum.
+
+### Adicionado
+- `src/winkit/core/usb_safety.py` (travas, R-60), `src/winkit/platform/usb_writer.py` (único que apaga disco), `src/winkit/builder/usb_media.py`; `ImageTools.split`; `FakeUsbWriter`
+- Studio: página **Gravar o pendrive** (`studio/ui/pages/writeusb.py`); caminho `winkit_usb` na etapa Começar; receita `media.boot` (aditivo)
+- Testes: `tests/core/test_usb_safety.py` (proteção), `tests/builder/test_usb_media.py`, página em `tests/ui/test_studio_ui.py`; `docs/validacao/M24.md`
+
+### Alterado
+- `CLAUDE.md` — a única exceção ao "nunca formatar"
+- READMEs (três idiomas) — o WinKit grava o pendrive
+- `src/winkit/__init__.py` — 0.15.0; `packaging/NOTAS_DA_VERSAO.md`
+
+### Documentos vivos atualizados
+- ARQUITETURA — D-045, D-049, R-60; STATUS — M24; ESTRUTURA — regerado
+
 ## 2026-11-01 — M23 — ISO personalizada e autossuficiente (0.14.0)
 **Tipo:** implementação
 **Resumo:** etapa ISO personalizada: uma cópia da ISO (a original só é lida) com edições, drivers, atualizações e apps de fábrica ajustados pelo DISM, gravada com boot BIOS e UEFI; opcionalmente com o WinKit inteiro dentro. Nova dependência `pycdlib`; regras inegociáveis atualizadas.

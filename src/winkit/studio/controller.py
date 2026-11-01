@@ -30,6 +30,7 @@ from winkit.builder.build import (
 )
 from winkit.builder.custom_iso import CustomIsoOptions, build_custom_iso, needed_space
 from winkit.builder.isos import scan_isos
+from winkit.builder.usb_media import write_usb
 from winkit.builder.validate import PendriveReport, validate_pendrive
 from winkit.collector import app_updates, pc_backup, snapshot
 from winkit.collector import apps as app_collector
@@ -81,6 +82,7 @@ from winkit.core.recipe.models import (
 from winkit.core.recipe.validation import ValidationReport, username_problem, validate_recipe
 from winkit.core.share import ShareableRecipe
 from winkit.core.suggest import Suggestion
+from winkit.core.usb_safety import UsbDisk
 from winkit.core.user_folders import ORDER, default_folders
 from winkit.core.volumes import VolumeInfo
 from winkit.core.volumes import ref_for as volume_ref
@@ -179,6 +181,7 @@ class StudioController:
             "volumes": self.data_volumes,
             "destinations": self.pc_destinations,
             "health": self.pc_health,
+            "usbdisks": self.usb_disks,
         }
         try:
             value = readers[key]()
@@ -414,6 +417,39 @@ class StudioController:
             now=self.clock(),
             progress=lambda step, frac: progress((step, frac)),
         )
+
+    # ------------------------------------------------------------ o WinKit grava o pendrive (V3-13)
+    def usb_disks(self) -> list[UsbDisk]:
+        return self.services.usb_writer.usb_disks() if self.services.usb_writer else []
+
+    def set_boot(self, boot: str) -> None:
+        self.media = self.media.model_copy(update={"boot": boot})
+        if self.recipe is not None:
+            self.recipe.media = self.media
+            self.save()
+
+    def write_usb(
+        self, iso: Path, shown: UsbDisk, typed_letter: str, progress: Callable[[object], None]
+    ) -> str:
+        s = self.services
+        if s.usb_writer is None or s.image_tools is None or s.iso_mounter is None:
+            raise WinKitError("gravar pendrive indisponível neste sistema")
+        letter = write_usb(
+            iso,
+            shown,
+            typed_letter,
+            self.media.boot,
+            writer=s.usb_writer,
+            tools=s.image_tools,
+            mounter=s.iso_mounter,
+            runner=s.runner,
+            volume_root=s.volume_root,
+            progress=lambda step, frac: progress((step, frac)),
+        )
+        self.cache.pop("pendrives", None)
+        self.cache.pop("usbdisks", None)
+        self.open_folder(s.volume_root(letter))  # segue como pendrive comum (D-034)
+        return letter
 
     def rufus_options(self) -> list[rufus.RufusOption]:
         """O que o Rufus gravou neste pendrive (os originais guardados também contam)."""

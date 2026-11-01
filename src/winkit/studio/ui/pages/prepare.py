@@ -550,7 +550,7 @@ class TemplatesPage(Page):
 
 
 #: Caminhos até o pendrive (V3-06), na ordem da tela.
-MEDIA_PATHS = ("ventoy", "rufus", "microsoft", "custom_iso")
+MEDIA_PATHS = ("ventoy", "rufus", "microsoft", "winkit_usb", "custom_iso")
 
 
 class PathPage(Page):

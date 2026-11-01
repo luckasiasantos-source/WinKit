@@ -31,6 +31,7 @@ from winkit.studio.ui.pages.system import (
     TweaksPage,
     UserFoldersPage,
 )
+from winkit.studio.ui.pages.writeusb import WriteUsbPage
 
 __all__ = [
     "AccountPage",
@@ -64,4 +65,5 @@ __all__ = [
     "TweaksPage",
     "UserFoldersPage",
     "WifiPage",
+    "WriteUsbPage",
 ]

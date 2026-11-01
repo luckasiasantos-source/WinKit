@@ -65,6 +65,7 @@ SAME_AS_BASE: dict[str, set[str]] = {
         "cli.backup_for",
     },
     "es": {
+        "studio.writeusb.boot",
         "studio.path.custom_iso",
         "studio.customiso.title",
         "studio.customiso.original",

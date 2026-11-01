@@ -38,7 +38,7 @@
 | M21 | Baixar a ISO oficial (V3-08) | ✅ código · validação na VM pendente | `docs/validacao/M21.md` |
 | M22 | Backup para HD secundário (V3-09, 10, 15, 16) | ✅ código · validação na VM pendente | `docs/validacao/M22.md` |
 | M23 | ISO personalizada e autossuficiente (V3-11, 12, 17) | ✅ código · validação na VM pendente | `docs/validacao/M23.md` |
-| M24 | O WinKit grava o pendrive (V3-13) | ⬜ | — |
+| M24 | O WinKit grava o pendrive (V3-13) | ✅ código · validação na VM pendente | `docs/validacao/M24.md` |
 | M25 | Windows 7 e 8.1 em modo limitado (V3-14) | ⬜ | — |
 | M26 | Fechamento da v3 | ⬜ | — |
 
@@ -270,6 +270,11 @@
 - ✅ Espaço necessário calculado e conferido antes; progresso por etapa
 - ✅ Regras inegociáveis atualizadas no `CLAUDE.md` (a original nunca; a cópia, a pedido)
 - ✅ Roteiro `docs/validacao/M23.md` e versão 0.14.0
+
+### M24 — O WinKit grava o pendrive ✅ (código) · validação na VM pendente
+- ✅ V3-13 Etapa **Gravar o pendrive** e caminho na etapa Começar: lista só pendrives USB de 8 GB a 512 GB; tipo de PC (UEFI e BIOS, só UEFI, só BIOS) com avisos pelo Windows alvo; confirmação digitando a letra; travas relidas antes de apagar (D-045, R-60); FAT32 com `install.wim` dividido em `.swm` e `bootsect` para BIOS (D-049); no fim, o pendrive abre como pendrive comum
+- ✅ Regra inegociável "nunca formatar" com a única exceção no `CLAUDE.md`
+- ✅ Roteiro `docs/validacao/M24.md` e versão 0.15.0
 
 ## Hipóteses técnicas
 

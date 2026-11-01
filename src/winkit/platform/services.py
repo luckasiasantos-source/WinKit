@@ -23,6 +23,7 @@ from winkit.platform.powershell import PowerShell
 from winkit.platform.registry import Registry, WindowsRegistry
 from winkit.platform.runner import CommandRunner, SubprocessRunner
 from winkit.platform.scheduler import TaskScheduler, WindowsTaskScheduler
+from winkit.platform.usb_writer import UsbWriter, WindowsUsbWriter
 from winkit.platform.volumes import Volumes, WindowsVolumes
 from winkit.platform.vss import ShadowCopies, WindowsShadowCopies
 from winkit.platform.wifi import WifiManager, WindowsWifi
@@ -59,6 +60,8 @@ class Services:
     #: ISO personalizada (V3-11): imagens do Windows e ISO montada só para leitura.
     image_tools: ImageTools | None = None
     iso_mounter: IsoMounter | None = None
+    #: V3-13: o único que apaga um disco — o pendrive confirmado (R-60).
+    usb_writer: UsbWriter | None = None
 
 
 def real_services() -> Services:
@@ -86,4 +89,5 @@ def real_services() -> Services:
         disk_info=WindowsDiskInfo(ps),
         image_tools=WindowsImageTools(ps),
         iso_mounter=WindowsIsoMounter(ps),
+        usb_writer=WindowsUsbWriter(ps),
     )

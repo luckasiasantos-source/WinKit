@@ -335,3 +335,35 @@ def test_custom_iso_page_builds_copy(window: StudioWindow, qapp, tmp_path: Path)
     page._start()  # type: ignore[attr-defined]
     assert page._done == tmp_path / "Win11-winkit.iso" and page._done.is_file()  # type: ignore[attr-defined]
     assert original.read_bytes() == b"ISO"
+
+
+def test_write_usb_page_erases_only_confirmed(
+    window: StudioWindow, qapp, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """V3-13/R-60: grava o pendrive confirmado e segue com ele aberto como pendrive comum."""
+    from winkit.core.usb_safety import UsbDisk
+    from winkit.platform.fakes.images import FakeIsoMounter, FakeUsbWriter
+    from winkit.studio.ui.pages import writeusb
+
+    monkeypatch.setattr(writeusb, "show_error", lambda parent, exc: None)
+    mounter = window.ctl.services.iso_mounter
+    writer = window.ctl.services.usb_writer
+    assert isinstance(mounter, FakeIsoMounter) and isinstance(writer, FakeUsbWriter)
+    for rel in ("boot/bootsect.exe", "sources/install.wim", "setup.exe"):
+        p = mounter.contents / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_bytes(b"x" * 100)
+    pen = UsbDisk(2, "AA11", "Kingston", 16 * 1000**3, 7, False, False, ("F:",))
+    writer.disks = [pen]
+    writer.roots = {"F:": tmp_path / "F"}
+    window.ctl.services.volume_root = lambda v: writer.roots.get(v, tmp_path / v[0])  # type: ignore[misc]
+    page = window.go_to("writeusb")
+    page._iso = tmp_path / "Win11.iso"  # type: ignore[attr-defined]
+    page._pick(pen)  # type: ignore[attr-defined]
+    monkeypatch.setattr(page, "ask_letter", lambda: "C")
+    page._start()  # type: ignore[attr-defined]
+    assert writer.prepared == [] and page._done is None  # type: ignore[attr-defined]
+    monkeypatch.setattr(page, "ask_letter", lambda: "f")
+    page._start()  # type: ignore[attr-defined]
+    assert page._done == "F:" and (tmp_path / "F" / "setup.exe").is_file()  # type: ignore[attr-defined]
+    assert window.ctl.target is not None and window.ctl.target.root == tmp_path / "F"
