@@ -412,6 +412,21 @@ class GameSave(_Model):
     template: str
 
 
+class DownloadSource(_Model):
+    """Programa ou arquivo baixado de fonte oficial (R-61, V3-07)."""
+
+    id: Annotated[str, Field(pattern=r"^[a-z0-9_]+$")]
+    name: str
+    #: Repositório no GitHub (``dono/nome``): a última release é consultada pela API oficial.
+    repo: str
+    #: Expressão regular do nome do arquivo na release.
+    asset: str
+    #: Arquivo da release com as somas SHA-256 (``None`` = procurar no texto da release).
+    checksum_asset: str | None = None
+    #: Para ``.zip``: caminho do executável dentro dele (``{version}`` é trocado).
+    exe_in_zip: str | None = None
+
+
 # ------------------------------------------------------------------ outros
 class EditionEntry(_Model):
     id: str
@@ -463,6 +478,10 @@ class Catalogs(_Model):
     extensions: list[ExtensionEntry] = Field(default_factory=list)
     search_providers: list[SearchProvider] = Field(default_factory=list)
     game_saves: list[GameSave] = Field(default_factory=list)
+    downloads: list[DownloadSource] = Field(default_factory=list)
+
+    def download(self, source_id: str) -> DownloadSource | None:
+        return next((x for x in self.downloads if x.id == source_id), None)
 
     def browser(self, browser_id: str) -> BrowserEntry | None:
         return next((x for x in self.browsers if x.id == browser_id), None)

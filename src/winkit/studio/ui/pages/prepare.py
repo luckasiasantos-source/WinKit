@@ -545,3 +545,129 @@ class TemplatesPage(Page):
         if path:
             self.ctl.share_export(Path(path), title.strip())
             QMessageBox.information(self, t("app.name"), t("studio.templates.exported"))
+
+
+#: Caminhos até o pendrive (V3-06), na ordem da tela.
+MEDIA_PATHS = ("ventoy", "rufus", "microsoft")
+
+
+class PathPage(Page):
+    """V3-06/07: como o Windows chega ao PC e qual Windows. Funciona antes de existir receita."""
+
+    title_key = "studio.path.title"
+    subtitle_key = "studio.path.subtitle"
+
+    def refresh(self) -> None:
+        self.clear_content()
+        chosen = self.ctl.media.path
+        paths = Card()
+        for path in MEDIA_PATHS:
+            current = path == chosen
+            pick = button(
+                t("studio.path.chosen") if current else t("studio.path.choose"),
+                None if current else "Primary",
+                partial(self._choose, path),
+            )
+            pick.setEnabled(not current)
+            paths.add_row(
+                Row(
+                    t(f"studio.path.{path}"),
+                    t(f"studio.path.{path}_hint"),
+                    accessory=pick,
+                    icon=symbol_icon(
+                        "check" if current else "chip", "#34C759" if current else "#8E8E93"
+                    ),
+                )
+            )
+        self.content.addWidget(section(t("studio.path.section"), paths))
+
+        target = self.ctl.target_windows
+        win = Card()
+        versions = SegmentedControl([("11", "Windows 11"), ("10", "Windows 10")], target.version)
+        versions.changed.connect(lambda v: self._target(v, self.ctl.target_windows.arch))
+        win.add_row(
+            Row(
+                t("studio.path.version"),
+                None,
+                accessory=versions,
+                icon=symbol_icon("chip", "#007AFF"),
+            )
+        )
+        if target.version == "10":
+            win.add_row(
+                Row(
+                    t("studio.path.arch"),
+                    t("studio.path.arch_hint"),
+                    accessory=combo(
+                        [("x64", t("studio.path.x64")), ("x86", t("studio.path.x86"))],
+                        target.arch,
+                        lambda v: self._target("10", v),
+                    ),
+                )
+            )
+        else:
+            win.add_row(
+                Row(
+                    t("studio.path.requirements"),
+                    t("studio.path.requirements_hint"),
+                    icon=symbol_icon("!", "#FF9500"),
+                )
+            )
+        self.content.addWidget(section(t("studio.path.section_windows"), win))
+
+        steps = Card()
+        if chosen in ("ventoy", "rufus"):
+            steps.add_row(
+                Row(
+                    t(f"studio.path.tool_{chosen}"),
+                    t(f"studio.path.tool_{chosen}_hint"),
+                    accessory=button(
+                        t("studio.path.download_open"), "Primary", partial(self._tool, chosen)
+                    ),
+                    icon=symbol_icon("download", "#007AFF"),
+                )
+            )
+        else:
+            steps.add_row(
+                Row(t("studio.path.tool_microsoft"), t("studio.path.tool_microsoft_hint"))
+            )
+        for option in self.ctl.rufus_options():
+            steps.add_row(
+                Row(
+                    t(f"rufus.{option.id}"),
+                    t("studio.path.rufus_covered")
+                    if option.covered
+                    else t("studio.path.rufus_not_covered"),
+                    icon=symbol_icon("check", "#34C759")
+                    if option.covered
+                    else symbol_icon("!", "#FF9500"),
+                )
+            )
+        self.content.addWidget(
+            section(t("studio.path.section_steps"), steps, footer=t("studio.path.footer"))
+        )
+
+    def _choose(self, path: str) -> None:
+        self.ctl.set_media_path(path)
+        self.refresh()
+
+    def _target(self, version: str, arch: str) -> None:
+        self.ctl.set_target_windows(version, arch)
+        self.refresh()
+
+    def _tool(self, tool_id: str) -> None:
+        iso: Path | None = None
+        if tool_id == "rufus":
+            name, _ = QFileDialog.getOpenFileName(
+                self, t("studio.path.iso_dialog"), "", t("studio.path.iso_filter")
+            )
+            iso = Path(name) if name else None
+
+        def done(_: object) -> None:
+            QMessageBox.information(self, t("app.name"), t(f"studio.path.opened_{tool_id}"))
+
+        self.tasks.run(
+            t("studio.path.downloading", name=t(f"studio.path.{tool_id}")),
+            lambda: self.ctl.open_tool(tool_id, iso),
+            done,
+        )

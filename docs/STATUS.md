@@ -34,7 +34,7 @@
 | M17 | Inteligência do pendrive (V2-19, 20, 21, 23) | ✅ código · validação na VM pendente | `docs/validacao/M17.md` |
 | M18 | Fechamento da v2 | ✅ | — |
 | M19 | Velocidade, nitidez, janela; testes na VM (V3-01 a 04) | ✅ código · validação na VM pendente | `docs/validacao/M19.md` |
-| M20 | Modo em etapas, caminho, Ventoy e Rufus (V3-05 a 07) | ⬜ | — |
+| M20 | Modo em etapas, caminho, Ventoy e Rufus (V3-05 a 07) | ✅ código · validação na VM pendente | `docs/validacao/M20.md` |
 | M21 | Baixar a ISO oficial (V3-08) | ⬜ | — |
 | M22 | Backup para HD secundário (V3-09, 10, 15, 16) | ⬜ | — |
 | M23 | ISO personalizada e autossuficiente (V3-11, 12, 17) | ⬜ | — |
@@ -244,6 +244,13 @@
 - ✅ V3-03 Janela: barra de título, contorno e cantos no tema do app (`platform/window_style.py`, H45) no Studio e no Agente; barra de rolagem fina, mais visível ao passar o mouse
 - ✅ V3-04 Testes na VM: `docs/validacao/VM_REMOTA.md` e `scripts/vm/` (criar VM Hyper-V com TPM e Secure Boot, pontos de restauração, coletar logs)
 - ✅ Roteiro `docs/validacao/M19.md` e versão 0.10.0
+
+### M20 — Modo em etapas, caminho, Ventoy e Rufus ✅ (código) · validação na VM pendente
+- ✅ V3-05 Modo em etapas: barra Voltar / Pular / Avançar com "Etapa n de N", convivendo com a barra lateral; a revisão lista as etapas puladas (D-052)
+- ✅ V3-06 Etapa **Começar**: caminho (Ventoy, Rufus, ferramenta da Microsoft) e Windows alvo (11 ou 10; 32 ou 64 bits no 10), válidos antes da receita; campos aditivos `media` e `target_windows`
+- ✅ V3-07 Ventoy e Rufus baixados da release oficial, conferidos e abertos (D-046, R-61); download com retomada e SHA-256 (`platform/download.py`); opções do Rufus lidas do pendrive (`core/rufus.py`, H39)
+- ✅ V3-17 (sugestão aprovada) já existia: o XML do WinKit sempre dispensou TPM, Secure Boot e memória no Windows 11 (LabConfig); agora aparece na etapa Começar com o aviso
+- ✅ Roteiro `docs/validacao/M20.md` e versão 0.11.0
 
 ## Hipóteses técnicas
 

@@ -398,7 +398,7 @@ Como o M18: revisão cruzada dos documentos (PLANO, ARQUITETURA com D-044 a D-05
 Fora do escopo até o dono aprovar uma a uma:
 - **V3-15 Saúde do PC antes de formatar:** BitLocker ligado (e se a chave de recuperação está salva), espaço, licença do Windows (digital ou chave), backup feito e conferido.
 - **V3-16 Exportar a chave de recuperação do BitLocker** para o pendrive ou o disco de backup.
-- **V3-17 Dispensar requisitos do Windows 11** (TPM, Secure Boot, RAM) em PCs não suportados, como o Rufus faz, com aviso de que a Microsoft não suporta.
+- **V3-17 Dispensar requisitos do Windows 11** (TPM, Secure Boot, RAM) em PCs não suportados, como o Rufus faz, com aviso de que a Microsoft não suporta. *(Na implementação, descobriu-se que o XML do WinKit já fazia isso desde a v1; o M20 só passou a mostrar na tela.)*
 
 ## 15. Hipóteses novas (H36 a H48)
 

@@ -28,6 +28,26 @@
 
 ---
 
+## 2026-11-01 — M20 — Modo em etapas, etapa Começar, Ventoy e Rufus (0.11.0)
+**Tipo:** implementação
+**Resumo:** o Studio ganhou o modo em etapas (Voltar / Pular / Avançar) junto com a barra lateral e a etapa Começar (caminho e Windows alvo). Ventoy e Rufus são baixados da release oficial, conferidos e abertos para a pessoa gravar o pendrive; as opções que o Rufus gravou são mostradas.
+
+### Adicionado
+- `src/winkit/platform/download.py` — download com progresso, pausa, retomada (`Range`) e SHA-256
+- `src/winkit/platform/external_tools.py`, `src/winkit/data/downloads.yaml` — última release oficial do Ventoy e do Rufus (D-046, R-61); `runner.launch`
+- `src/winkit/core/rufus.py` — opções do Rufus no pendrive e comparação com a receita
+- Receita: `target_windows`, `media` (aditivos); catálogo `downloads`
+- Studio: página **Começar** (`PathPage`); barra do modo em etapas; "Etapas puladas" na revisão
+- Testes: `tests/platform/test_download.py` (servidor HTTP local), `tests/core/test_rufus.py`, modo em etapas e `open_tool` em `tests/ui/test_studio_ui.py`; `docs/validacao/M20.md`
+
+### Alterado
+- `src/winkit/studio/controller.py` — escolhas da etapa Começar valem antes da receita; `open_tool`, `rufus_options`
+- READMEs (três idiomas) — a etapa Começar e o modo em etapas no "Usar"
+- `src/winkit/__init__.py` — 0.11.0; `packaging/NOTAS_DA_VERSAO.md`
+
+### Documentos vivos atualizados
+- ARQUITETURA — D-046, D-052, R-61 e a verificação; STATUS — M20; PLANO_V3 — nota do V3-17 (já existia); ESTRUTURA — regerado
+
 ## 2026-11-01 — M19 — Velocidade, nitidez e janela; testes na VM (0.10.0)
 **Tipo:** implementação
 **Resumo:** plano da v3 aprovado. O Studio abre na hora (leituras lentas em segundo plano, páginas criadas só ao abrir, tela de abertura), fica nítido em 4K e tem a moldura no tema do app. Scripts e guia para testar numa VM do PC do dono.

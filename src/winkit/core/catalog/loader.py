@@ -35,6 +35,7 @@ FILES: dict[str, str] = {
     "extensions": "extensions.yaml",
     "search_providers": "search_providers.yaml",
     "game_saves": "game_saves.yaml",
+    "downloads": "downloads.yaml",
 }
 
 

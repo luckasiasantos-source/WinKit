@@ -46,10 +46,10 @@ from winkit.collector import start_layout as start_collector
 from winkit.collector import suggest as suggest_collector
 from winkit.collector import user_folders as folders_collector
 from winkit.collector import wifi as wifi_collector
-from winkit.core import layout, share
+from winkit.core import layout, media, rufus, share
 from winkit.core.browsers import suggested
 from winkit.core.catalog.loader import default_catalogs
-from winkit.core.catalog.models import AssociationGroup, Catalogs
+from winkit.core.catalog.models import AssociationGroup, Catalogs, DownloadSource
 from winkit.core.errors import RecipeError, WinKitError
 from winkit.core.fsutil import atomic_write_text
 from winkit.core.isos import IsoInfo
@@ -68,9 +68,11 @@ from winkit.core.recipe.models import (
     EnvVar,
     ExtraAccount,
     FontItem,
+    Media,
     NetworkDrive,
     Recipe,
     Scope,
+    TargetWindows,
     WifiNetwork,
 )
 from winkit.core.recipe.validation import ValidationReport, username_problem, validate_recipe
@@ -83,8 +85,9 @@ from winkit.core.volumes import resolve as resolve_volume
 from winkit.core.winget_manifest import split_args
 from winkit.i18n import current_language, t
 from winkit.i18n.format import format_size
-from winkit.platform import hosts
+from winkit.platform import external_tools, hosts
 from winkit.platform.environment import WindowsEnvironment
+from winkit.platform.runner import launch
 from winkit.platform.services import Services
 from winkit.platform.vss import PendingSnapshots
 
@@ -98,6 +101,12 @@ def windows_build() -> int | None:
 def _studio_dir() -> Path:
     base = os.environ.get("LOCALAPPDATA")
     return (Path(base) if base else Path.home() / ".cache") / "WinKit"
+
+
+def fetch_tool(source: DownloadSource) -> Path:  # pragma: no cover — rede real
+    """Baixa a última release oficial (R-61) e devolve o executável."""
+    release = external_tools.latest_release(source)
+    return external_tools.fetch(source, _studio_dir() / "ferramentas", release=release)
 
 
 def default_agent_source() -> Path | None:
@@ -128,6 +137,12 @@ class StudioController:
     agent_runtime: Callable[[], Runtime] = field(default=_real_agent_runtime)
     #: Dados lentos do sistema já lidos (pendrives, tamanhos, volumes); a interface lê daqui (R-59).
     cache: dict[str, Any] = field(default_factory=dict)
+    #: Baixa Ventoy/Rufus (V3-07) e abre programas; os testes passam dublês.
+    tool_fetcher: Callable[[DownloadSource], Path] = field(default=fetch_tool)
+    launcher: Callable[[list[str]], None] = field(default=launch)
+    #: Escolhas da primeira etapa (V3-06); vão para a receita quando ela existir.
+    media: Media = field(default_factory=Media)
+    target_windows: TargetWindows = field(default_factory=TargetWindows)
 
     # ------------------------------------------------------------------ pendrive
     @property
@@ -151,6 +166,51 @@ class StudioController:
         self.cache[key] = value
         return value
 
+    # ------------------------------------------------------------------ caminho (V3-06/07)
+    def set_media_path(self, path: str) -> None:
+        """Vale antes de existir receita (a primeira etapa vem antes do pendrive)."""
+        self.media = Media.model_validate({"path": path})
+        if self.recipe is not None:
+            self.recipe.media = self.media
+            self.save()
+
+    def set_target_windows(self, version: str, arch: str) -> None:
+        if version == "11":
+            arch = "x64"  # o Windows 11 só existe em 64 bits
+        self.target_windows = TargetWindows.model_validate({"version": version, "arch": arch})
+        if self.recipe is not None:
+            self.recipe.target_windows = self.target_windows
+            self.save()
+
+    def open_tool(self, tool_id: str, iso: Path | None = None) -> Path:
+        """Baixa (se preciso), confere e abre o Ventoy2Disk ou o Rufus para a pessoa usar."""
+        source = self.catalogs.download(tool_id)
+        if source is None:
+            raise WinKitError(f"ferramenta desconhecida: {tool_id}")
+        exe = self.tool_fetcher(source)
+        args = [str(exe)]
+        if tool_id == "rufus" and iso is not None:
+            args += ["-i", str(iso)]  # já abre com a ISO escolhida
+        self.launcher(args)
+        self.cache.pop("pendrives", None)  # o pendrive vai mudar
+        return exe
+
+    def rufus_options(self) -> list[rufus.RufusOption]:
+        """O que o Rufus gravou neste pendrive (os originais guardados também contam)."""
+        if self.target is None or self.recipe is None:
+            return []
+        texts = []
+        for rel in (
+            media.UNATTEND,
+            media.UNATTEND_BACKUP,
+            media.OEM_UNATTEND,
+            media.OEM_UNATTEND + ".winkit-bak",
+        ):
+            path = self.root / rel
+            if path.is_file() and not media.is_winkit_unattend(path.read_bytes()):
+                texts.append(path.read_text(encoding="utf-8", errors="replace"))
+        return rufus.compare(rufus.detect(texts), self.recipe)
+
     def open_ventoy(self, v: targets.AnyDrive) -> None:
         self._open(targets.from_drive(v))
 
@@ -164,6 +224,8 @@ class StudioController:
             self.recipe = load_profile_recipe(tgt.root, self.profile_id)
         except RecipeError:
             self.recipe = None
+        if self.recipe is not None:
+            self.media, self.target_windows = self.recipe.media, self.recipe.target_windows
 
     @property
     def root(self) -> Path:
@@ -187,6 +249,7 @@ class StudioController:
             regional=self.services.regional(),
         )
         recipe.windows.computer_name = computer_name or None
+        recipe.media, recipe.target_windows = self.media, self.target_windows
         self.recipe = recipe
         self.save()
         return recipe

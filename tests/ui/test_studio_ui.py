@@ -210,3 +210,41 @@ def test_suggestions_page_adds_and_ignores(window: StudioWindow, qapp, tmp_path:
     assert r is not None
     assert [b.template for b in r.backups] == [r"{APPDATA}\.minecraft\saves"]
     assert r.meta.dismissed_suggestions == ["save:stardew_valley"]
+
+
+def test_wizard_steps_and_path_page(window: StudioWindow, qapp) -> None:
+    """V3-05/06: Avançar, Pular e Voltar; a escolha do caminho vale antes da receita."""
+    page = window.go_to("path")
+    assert window.wizard_steps()[0] == "path" and "live" not in window.wizard_steps()
+    page._choose("rufus")  # type: ignore[attr-defined]
+    page._target("10", "x86")  # type: ignore[attr-defined]
+    assert window.ctl.media.path == "rufus" and window.ctl.target_windows.arch == "x86"
+    window.step_skip()
+    assert window.current_section() == "pendrive"
+    window.step_next()
+    assert window.current_section() == "account"
+    window.step_back()
+    assert window.current_section() == "pendrive"
+    window.ctl.create_recipe("Samuel", None)
+    r = window.ctl.recipe
+    assert r is not None and (r.media.path, r.target_windows.version) == ("rufus", "10")
+    page._target("11", "x86")  # type: ignore[attr-defined]
+    assert r.target_windows.arch == "x64"  # o 11 só tem 64 bits
+    build = window.go_to("build")
+    rows = [w.subtitle_label.text() for w in build.findChildren(Row)]
+    assert any(t("studio.path.title") in text for text in rows)  # "Começar" foi pulada
+
+
+def test_open_tool_downloads_and_launches(tmp_path: Path) -> None:
+    launched: list[list[str]] = []
+    ctl = StudioController(
+        services=fake_services(old_pc=tmp_path / "C"),
+        tool_fetcher=lambda source: tmp_path / f"{source.id}.exe",
+        launcher=launched.append,
+    )
+    ctl.open_tool("rufus", tmp_path / "win.iso")
+    ctl.open_tool("ventoy")
+    assert launched == [
+        [str(tmp_path / "rufus.exe"), "-i", str(tmp_path / "win.iso")],
+        [str(tmp_path / "ventoy.exe")],
+    ]

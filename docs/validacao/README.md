@@ -41,3 +41,4 @@ Prepare a VM uma vez com [`AMBIENTE_VM.md`](AMBIENTE_VM.md) e siga os roteiros e
 | [M16](M16.md) | Pastas em outro disco, jogos, contas extras | H32, H33 |
 | [M17](M17.md) | Sugestões, modelos, exportação, atualização dos instaladores, comparação | H34 |
 | [M19](M19.md) | Velocidade, nitidez e janela; testes numa VM do seu PC ([VM_REMOTA](VM_REMOTA.md)) | H45 |
+| [M20](M20.md) | Modo em etapas, etapa Começar, Ventoy e Rufus baixados e abertos | H39, H46 |

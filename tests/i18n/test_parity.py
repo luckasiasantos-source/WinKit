@@ -65,6 +65,7 @@ SAME_AS_BASE: dict[str, set[str]] = {
         "cli.backup_for",
     },
     "es": {
+        "studio.path.section_windows",
         "validate.warnings",
         "ui.agent.progress_title",
         "plan.tweak",

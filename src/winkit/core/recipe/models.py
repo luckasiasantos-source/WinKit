@@ -431,6 +431,23 @@ class Power(_Model):
     fast_startup: bool | None = None
 
 
+TargetVersion = Literal["11", "10"]
+MediaPath = Literal["ventoy", "rufus", "microsoft"]
+
+
+class TargetWindows(_Model):
+    """Windows que vai ser instalado (V3-06). O 8.1 e o 7 entram no M25."""
+
+    version: TargetVersion = "11"
+    arch: Literal["x64", "x86"] = "x64"  # o Windows 11 só existe em 64 bits
+
+
+class Media(_Model):
+    """Como o Windows chega ao PC (V3-06): pendrive Ventoy, do Rufus ou da Microsoft."""
+
+    path: MediaPath = "ventoy"
+
+
 class Recipe(_Model):
     schema_version: Literal[1] = SCHEMA_VERSION
     meta: Meta
@@ -460,6 +477,9 @@ class Recipe(_Model):
     game_libraries: list[GameLibrary] = Field(default_factory=list)
     #: V2-19: no fim da instalação, comparar com o inventário do PC antigo.
     compare_after_install: bool = True
+    #: V3-06: Windows a instalar e caminho até o pendrive (orienta o Studio).
+    target_windows: TargetWindows = Field(default_factory=TargetWindows)
+    media: Media = Field(default_factory=Media)
 
     # ---- consultas de conveniência (sem efeito colateral)
     def app(self, app_id: str) -> AppItem | None:

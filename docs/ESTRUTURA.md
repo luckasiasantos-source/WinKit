@@ -66,6 +66,7 @@
 | `recipe/models.py` | Modelo da receita (PLANO.md §6). |
 | `recipe/validation.py` | Regras de validação da receita (PLANO.md §6.2). |
 | `regional.py` | Padrões regionais do PC atual para a receita nova (D-030): formatos, teclado e fuso. |
+| `rufus.py` | Opções que o Rufus gravou no pendrive (V3-07, H39). Leitor puro, sem Windows. |
 | `secrets.py` | Registro único de segredos do processo (R-53, D-036). |
 | `share.py` | Receitas compartilháveis e modelos prontos (V2-23, D-040). |
 | `start_layout.py` | Iniciar e barra de tarefas (V2-04): arquivos que o Windows 11 lê no perfil Default. |
@@ -116,8 +117,10 @@
 | `devices.py` | Dispositivos com problema pelo CIM ``Win32_PnPEntity`` (V2-09). Só JSON, nunca texto. |
 | `disks.py` | Discos, partições e leitura de ISO (somente leitura — D-002). Exige administrador. |
 | `dns.py` | Servidores DNS e DNS criptografado (DoH) pelo módulo ``DnsClient`` (V2-16). |
+| `download.py` | Download HTTP com progresso, pausa, retomada e conferência de SHA-256 (V3-07, V3-08; R-61). |
 | `drivers.py` | Drivers de terceiros: listar, exportar e instalar (PLANO.md §7.2, M4). |
 | `environment.py` | Unidades, rede, versão do Windows e trava de instância única. |
+| `external_tools.py` | Ventoy e Rufus: baixar da release oficial, conferir e abrir para a pessoa usar (V3-07, D-046). |
 | `fakes/__init__.py` | Implementações falsas das interfaces de ``winkit.platform`` para testes (R-40). |
 | `fakes/apps.py` | Dublês de inventário, winget, instaladores e atalhos. |
 | `fakes/associations.py` | Dublê do dism de apps padrão. |
@@ -290,6 +293,7 @@
 | `browsers.yaml` | Navegadores que o WinKit configura por política oficial (V2-12, M15; D-038). |
 | `default_excludes.yaml` | Exclusões padrão de todo backup (PLANO.md §7.4.4). Nome de pasta ou padrão de arquivo, |
 | `dns_providers.yaml` | Servidores DNS públicos que o WinKit sabe configurar (V2-16, M14). |
+| `downloads.yaml` | Fontes oficiais de programas que o WinKit baixa (R-61, V3-07). Só releases dos próprios autores. |
 | `dpapi_patterns.yaml` | Dados protegidos por DPAPI ou presos à conta/máquina (PLANO.md §7.4.6). Geram AVISO na |
 | `driver_classes.yaml` | Classes de driver (ClassName do Windows). `priority` menor instala antes: rede e |
 | `editions.yaml` | Chaves GENÉRICAS de instalação publicadas pela Microsoft (D-016). Não ativam o Windows: |

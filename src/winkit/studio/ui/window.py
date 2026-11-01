@@ -34,6 +34,8 @@ from winkit.ui import theme
 from winkit.ui.widgets import app_icon, button, label, symbol_icon
 
 _SECTION_ROLE = Qt.ItemDataRole.UserRole
+#: Seções fora do modo em etapas.
+WIZARD_EXCLUDED = {"live"}
 
 
 @dataclass(frozen=True)
@@ -65,6 +67,7 @@ GROUPS: tuple[SectionGroup, ...] = (
     SectionGroup(
         "prepare",
         (
+            Section("path", "arrow", "#FF9500", pages.PathPage),
             Section("pendrive", "chip", "#8E8E93", pages.PendrivePage),
             Section("account", "pencil", "#AF52DE", pages.AccountPage),
             Section("templates", "sliders", "#AF52DE", pages.TemplatesPage),
@@ -241,8 +244,31 @@ class StudioWindow(QWidget):
         side.addLayout(foot)
         root.addWidget(sidebar)
 
+        main = QVBoxLayout()
+        main.setContentsMargins(0, 0, 0, 0)
+        main.setSpacing(0)
         self.stack = QStackedWidget()
-        root.addWidget(self.stack, 1)
+        main.addWidget(self.stack, 1)
+        # modo em etapas (V3-05): convive com a barra lateral
+        bar = QWidget()
+        bar.setObjectName("WizardBar")
+        bar.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        steps = QHBoxLayout(bar)
+        steps.setContentsMargins(36, 10, 44, 12)
+        self.back_button = button("", None, self.step_back)
+        self.skip_button = button("", None, self.step_skip)
+        self.next_button = button("", "Primary", self.step_next)
+        self.step_label = label("", "Caption", wrap=False)
+        steps.addWidget(self.back_button)
+        steps.addWidget(self.skip_button)
+        steps.addStretch(1)
+        steps.addWidget(self.step_label)
+        steps.addStretch(1)
+        steps.addWidget(self.next_button)
+        main.addWidget(bar)
+        root.addLayout(main, 1)
+        #: Etapas puladas no modo em etapas; a revisão lista (V3-05).
+        self.skipped: set[str] = set()
         #: Páginas já abertas; cada uma só é criada na primeira visita (V3-01).
         self.pages: dict[int, Page] = {}
         self._current = 0
@@ -256,6 +282,9 @@ class StudioWindow(QWidget):
         self.version_label.setText(t("studio.version", version=self.ctl.version()))
         self.search.setPlaceholderText(t("studio.search"))
         self.prefs_button.setText(t("studio.prefs.button"))
+        self.back_button.setText(t("studio.wizard.back"))
+        self.skip_button.setText(t("studio.wizard.skip"))
+        self.next_button.setText(t("studio.wizard.next"))
         self.nav.blockSignals(True)
         self.nav.clear()
         for page in self.pages.values():
@@ -300,6 +329,7 @@ class StudioWindow(QWidget):
             self._current = index
             page.refresh()
             self.stack.setCurrentWidget(page)
+            self._update_steps()
 
     def _page(self, index: int) -> Page:
         if index not in self.pages:
@@ -326,6 +356,53 @@ class StudioWindow(QWidget):
             header_has_match = header_has_match or match
         if header is not None:
             header.setHidden(not header_has_match)
+
+    # ------------------------------------------------------------------ modo em etapas (V3-05)
+    def wizard_steps(self) -> list[str]:
+        """Ordem das etapas: as seções da barra lateral, menos "Aplicar neste PC" (outro fluxo)."""
+        return [s.id for s in self.sections if s.id not in WIZARD_EXCLUDED]
+
+    def _update_steps(self) -> None:
+        steps = self.wizard_steps()
+        current = self.current_section()
+        if current not in steps:
+            self.step_label.setText("")
+            for b in (self.back_button, self.skip_button, self.next_button):
+                b.setEnabled(False)
+            return
+        n = steps.index(current)
+        self.step_label.setText(
+            t(
+                "studio.wizard.step",
+                n=n + 1,
+                total=len(steps),
+                title=self.sections[self._current].title,
+            )
+        )
+        self.back_button.setEnabled(n > 0)
+        self.skip_button.setEnabled(n < len(steps) - 1)
+        self.next_button.setEnabled(n < len(steps) - 1)
+
+    def _move(self, delta: int) -> None:
+        steps = self.wizard_steps()
+        current = self.current_section()
+        if current in steps:
+            n = min(max(steps.index(current) + delta, 0), len(steps) - 1)
+            self.go_to(steps[n])
+
+    def step_back(self) -> None:
+        self._move(-1)
+
+    def step_skip(self) -> None:
+        self.skipped.add(self.current_section())
+        self._move(1)
+
+    def step_next(self) -> None:
+        self.skipped.discard(self.current_section())
+        self._move(1)
+
+    def skipped_titles(self) -> list[str]:
+        return [s.title for s in self.sections if s.id in self.skipped]
 
     # ------------------------------------------------------------ API das páginas e dos testes
     def current_section(self) -> str:

@@ -332,6 +332,7 @@ runner.run(
 - **R-57** `docs/ESTRUTURA.md` descreve a árvore do projeto e cada arquivo de código. É gerado por `scripts/gen_estrutura.py` a partir das docstrings (todo módulo tem docstring) e regerado no mesmo commit que cria, move, remove ou muda a descrição de um arquivo. Em vigor desde 2026-10-31.
 - **R-58** Toda tarefa de código usa a skill `ponytail` (`.claude/skills/`, cópia de github.com/DietrichGebert/ponytail, MIT). Em conflito, valem as regras deste documento e do `CLAUDE.md` (documentos vivos, pt-BR, cobertura da R-38); `shortcut:` exige entrada em `DIVIDAS_TECNICAS.md`, como `TODO` (R-50). Em vigor desde 2026-11-01.
 - **R-59** Nenhuma leitura lenta do sistema (PowerShell, CIM, varredura de disco, rede) roda na thread da interface: o `refresh()` de uma página lê o cache do controlador (`Page.slow`) e o resto carrega em segundo plano (D-054). Em vigor desde o M19.
+- **R-61** Programas e arquivos baixados só de fontes oficiais listadas em `data/downloads.yaml` (ou do site da Microsoft, M21), com SHA-256 conferido quando o fornecedor publica; nada baixado é aberto antes da conferência. Em vigor desde o M20.
 
 ### 5.12 Como as regras são verificadas automaticamente
 
@@ -357,6 +358,7 @@ runner.run(
 | R-55 | `tests/i18n/test_usage.py::test_no_loose_ui_strings` (AST em `studio`, `agent/ui`, `ui`, `cli`) |
 | R-50, R-58 | `test_todo_requires_debt_entry` também cobre `shortcut:` |
 | R-59 | `tests/ui/test_responsive.py` (com leituras de 2 s, toda página abre em menos de 0,5 s no CI) |
+| R-61 | `tests/platform/test_download.py` (hash errado apaga o arquivo; zip com caminho para fora é recusado) |
 | R-56, R-57 | `tests/test_docs_sync.py` (README.md com a versão em inglês igual ao README.en.md; ESTRUTURA.md igual ao que o gerador produz) |
 | Empacotamento | `test_no_dynamic_imports_in_package` (IN-013) |
 
@@ -575,6 +577,16 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 **Contexto:** o .NET 3.5 precisa da pasta `sources\sxs` da mídia de instalação; sem ela, só pela internet (Fase 2). Um mesmo modelo do Ventoy serve a várias ISOs, então o nome da ISO não pode ir no XML.
 **Decisão:** o Construtor grava `WinKit/isos.json` (imagem, build, arquitetura, idiomas) no modo Ventoy. A etapa `feature` usa, nesta ordem, `sources\sxs` do pendrive comum, a ISO do mesmo build montada com `Mount-DiskImage -Access ReadOnly` (desmontada sempre em `finally`, D-002) ou, na Fase 2, o Windows Update. Etapas da Fase 1 com `PlannedStep.phase2_fallback` que ficarem pendentes rodam de novo no começo da Fase 2, sem esperar o pendrive.
 **Consequências:** o .NET 3.5 instala sem internet antes do login quando há ISO do mesmo build; sem ela, a instalação continua e o recurso entra depois do login. Os outros tipos de etapa não ganharam a segunda chance (DT-020).
+
+### D-046 — Ventoy e Rufus: baixados, abertos e detectados, nunca embutidos
+2026-11-01 · aceita (M20, `PLANO_V3.md`)
+**Contexto:** os dois são GPLv3 e o Rufus não tem linha de comando completa; o dono quer que o WinKit baixe e abra.
+**Decisão:** `platform/external_tools.py` consulta a última release oficial (API do GitHub; fontes em `data/downloads.yaml`, R-61), baixa com `platform/download.py`, confere o SHA-256 (o `sha256.txt` do Ventoy; a soma no texto da release do Rufus, quando houver), extrai o zip sem aceitar caminhos para fora da pasta e abre o programa (`runner.launch`) para a pessoa usar; o Rufus abre já com a ISO (`-i`). Nada de terceiros vai no pacote. As opções que o Rufus gravou são lidas por `core/rufus.py` e mostradas com "o WinKit também faz".
+**Consequências:** precisa de internet na primeira vez; versões novas do Rufus podem mudar o que é detectado (H39).
+
+### D-052 — Modo em etapas e barra lateral sobre as mesmas páginas
+2026-11-01 · aceita (M20)
+**Decisão:** cada página é uma etapa; a barra inferior (Voltar / Pular / Avançar, "Etapa n de N") segue a ordem da barra lateral, sem "Aplicar neste PC". Pular fica registrado e a revisão lista o que foi pulado. A primeira etapa (Começar) guarda o caminho e o Windows alvo no controlador até a receita existir, e aí passa para ela (`recipe.media`, `recipe.target_windows`).
 
 ### D-054 — Leituras lentas do sistema nunca na thread da interface
 2026-11-01 · aceita (M19, `PLANO_V3.md`)

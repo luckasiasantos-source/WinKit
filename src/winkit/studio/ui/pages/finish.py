@@ -117,6 +117,15 @@ class BuildPage(Page):
             check.add_row(Row(e, icon=symbol_icon("cross", "#FF3B30")))
         for w in rep.warnings:
             check.add_row(Row(w, icon=symbol_icon("!", "#FF9500")))
+        skipped: list[str] = getattr(self.window(), "skipped_titles", list)()
+        if skipped:  # etapas puladas no modo em etapas (V3-05)
+            check.add_row(
+                Row(
+                    t("studio.build.skipped"),
+                    ", ".join(skipped),
+                    icon=symbol_icon("!", "#8E8E93"),
+                )
+            )
         self.content.addWidget(section(t("studio.build.section_check"), check))
         r = self.ctl.recipe
         if r is not None:

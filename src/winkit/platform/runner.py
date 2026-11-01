@@ -209,3 +209,13 @@ def mask_text(text: str, secrets: Sequence[str]) -> str:
         if secret:
             text = text.replace(secret, MASK)
     return SECRETS.mask(text)
+
+
+def launch(args: Sequence[str | os.PathLike[str]], *, cwd: Path | None = None) -> None:
+    """Abre um programa com janela (Ventoy, Rufus) e não espera ele fechar (V3-07)."""
+    argv = [os.fspath(a) for a in args]
+    log.debug("abrindo: %s", " ".join(argv))
+    try:
+        subprocess.Popen(argv, cwd=cwd, close_fds=True)
+    except OSError as exc:
+        raise CommandError(f"não foi possível abrir {argv[0]}: {exc}") from exc

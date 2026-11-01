@@ -142,6 +142,7 @@ def stylesheet(p: Palette) -> str:
 * {{ font-family: {", ".join(f'"{f}"' for f in FONT_STACK)}; color: {p.text}; }}
 QWidget#Root, QMainWindow, QDialog {{ background: {p.window}; }}
 QWidget#Sidebar {{ background: {p.sidebar}; border-right: 1px solid {p.separator}; }}
+QWidget#WizardBar {{ background: {p.window}; border-top: 1px solid {p.separator}; }}
 QLabel#LargeTitle {{ font-size: 26px; font-weight: 700; }}
 QLabel#Title {{ font-size: 20px; font-weight: 650; }}
 QLabel#Headline {{ font-size: 15px; font-weight: 600; }}

@@ -1,0 +1,11 @@
+# Fontes oficiais de programas que o WinKit baixa (R-61, V3-07). Só releases dos próprios autores.
+- id: ventoy
+  name: Ventoy
+  repo: ventoy/Ventoy
+  asset: '^ventoy-[0-9.]+-windows\.zip$'
+  checksum_asset: '^sha256\.txt$'
+  exe_in_zip: 'ventoy-{version}/Ventoy2Disk.exe'
+- id: rufus
+  name: Rufus
+  repo: pbatard/rufus
+  asset: '^rufus-[0-9.]+\.exe$'
