@@ -7,7 +7,7 @@
 
 **Última atualização:** 2026-10-31
 **Versão do código:** 0.4.0 (pré-alpha, projeto pessoal)
-**Fase do projeto:** v1 implementada (M0–M10); falta a validação em VM/PC real pelos roteiros de `docs/validacao/`. v2 (M11–M18) implementada (0.9.0, `PLANO_V2.md`); falta a validação na VM pelos roteiros M11–M17. v3 (M19–M26) **proposta** em `PLANO_V3.md`, aguardando aprovação
+**Fase do projeto:** v1 implementada (M0–M10); falta a validação em VM/PC real pelos roteiros de `docs/validacao/`. v2 (M11–M18) implementada (0.9.0, `PLANO_V2.md`); falta a validação na VM pelos roteiros M11–M17. v3 (M19–M26) aprovada e em implementação (`PLANO_V3.md`)
 
 ## Resumo
 
@@ -33,6 +33,14 @@
 | M16 | Contas, pastas e jogos (V2-11, 13, 14) | ✅ código | ⬜ roteiro pronto (`docs/validacao/M16.md`) |
 | M17 | Inteligência do pendrive (V2-19, 20, 21, 23) | ✅ código · validação na VM pendente | `docs/validacao/M17.md` |
 | M18 | Fechamento da v2 | ✅ | — |
+| M19 | Velocidade, nitidez, janela; testes na VM (V3-01 a 04) | ✅ código · validação na VM pendente | `docs/validacao/M19.md` |
+| M20 | Modo em etapas, caminho, Ventoy e Rufus (V3-05 a 07) | ⬜ | — |
+| M21 | Baixar a ISO oficial (V3-08) | ⬜ | — |
+| M22 | Backup para HD secundário (V3-09, 10, 15, 16) | ⬜ | — |
+| M23 | ISO personalizada e autossuficiente (V3-11, 12, 17) | ⬜ | — |
+| M24 | O WinKit grava o pendrive (V3-13) | ⬜ | — |
+| M25 | Windows 7 e 8.1 em modo limitado (V3-14) | ⬜ | — |
+| M26 | Fechamento da v3 | ⬜ | — |
 
 ## Detalhe por marco
 
@@ -230,6 +238,13 @@
 - ✅ Auditoria: `scripts/check.sh` OK; cobertura `core` 95%, `collector` 90%, `builder` 94%, `agent` 88% (R-38); nenhum TODO no código (R-50); teste AST da R-55 sem exceções novas
 - ✅ Versão 0.9.0 com notas trilíngues
 
+### M19 — Velocidade, nitidez e janela ✅ (código) · validação na VM pendente
+- ✅ V3-01 Velocidade: leituras lentas fora da thread da interface (R-59, D-054): cache no controlador, `Page.slow`, `TaskRunner.background`; páginas criadas só na primeira visita; tela de abertura com o logo; a lista de pendrives não é mais lida antes de mostrar a janela; teste com leituras de 2 s
+- ✅ V3-02 Nitidez: ícones e logo desenhados na maior escala entre as telas (4K a 250% deixou de esticar)
+- ✅ V3-03 Janela: barra de título, contorno e cantos no tema do app (`platform/window_style.py`, H45) no Studio e no Agente; barra de rolagem fina, mais visível ao passar o mouse
+- ✅ V3-04 Testes na VM: `docs/validacao/VM_REMOTA.md` e `scripts/vm/` (criar VM Hyper-V com TPM e Secure Boot, pontos de restauração, coletar logs)
+- ✅ Roteiro `docs/validacao/M19.md` e versão 0.10.0
+
 ## Hipóteses técnicas
 
 | # | Hipótese (resumo) | Estado | Onde foi validada |
@@ -269,3 +284,16 @@
 | H33 | Acrescentar a biblioteca no `libraryfolders.vdf` com a Steam fechada basta para ela reconhecer os jogos | ⬜ | — |
 | H34 | A estrutura do UserAssist (72 bytes, contador em `+4`, FILETIME em `+60`) continua igual no Windows 11 atual | ⬜ | — |
 | H35 | O endereço `addons.mozilla.org/.../latest/<id>/latest.xpi` aceita o id da extensão quando não há nome curto | ⬜ | — |
+| H36 | O `pycdlib` gera ISO (UDF + El Torito BIOS e UEFI) que o instalador aceita, com `install.wim` acima de 4 GB | ⬜ | — |
+| H37 | O `Fido -GetUrl` funciona para 11, 10 e 8.1, e os links aceitam `Range` | ⬜ | — |
+| H38 | A Microsoft publica um SHA-256 conferível para cada ISO baixada | ⬜ | — |
+| H39 | As versões atuais do Rufus deixam as opções num arquivo legível no pendrive | ⬜ | — |
+| H40 | O instalador usa `install.swm` num pendrive FAT32 gravado pelo WinKit (UEFI e BIOS) | ⬜ | — |
+| H41 | O Windows 7 x64 dá boot em UEFI com o `bootmgfw.efi` tirado da imagem | ⬜ | — |
+| H42 | O PowerShell 2.0 do Windows 7 SP1 roda os scripts do agente legado | ⬜ | — |
+| H43 | O DISM do Windows 11 faz manutenção offline de imagens do 7 e do 8.1 | ⬜ | — |
+| H44 | `MSFT_PhysicalDisk` dá tipo e barramento confiáveis para discos internos | ⬜ | — |
+| H45 | Barra de título e contorno do Windows 11 (DWM) funcionam em janelas Qt | ⬜ | — |
+| H46 | Ventoy e Rufus baixados pelo WinKit abrem sem bloqueio além do SmartScreen | ⬜ | — |
+| H47 | O Agente atual (Python 3.12) roda no Windows 8.1 | ⬜ | — |
+| H48 | Mídias antigas ainda dão boot com Secure Boot depois da troca de certificados (2026) | ⬜ | — |

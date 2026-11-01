@@ -13,6 +13,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from winkit import __version__
 from winkit.agent.live import LiveOptions, LiveResult, run_live
@@ -125,6 +126,8 @@ class StudioController:
     agent_source: Path | None = field(default_factory=default_agent_source)
     #: Monta o Agente para "aplicar neste PC" (os testes passam um com dublês).
     agent_runtime: Callable[[], Runtime] = field(default=_real_agent_runtime)
+    #: Dados lentos do sistema já lidos (pendrives, tamanhos, volumes); a interface lê daqui (R-59).
+    cache: dict[str, Any] = field(default_factory=dict)
 
     # ------------------------------------------------------------------ pendrive
     @property
@@ -134,6 +137,20 @@ class StudioController:
     def pendrives(self) -> list[targets.AnyDrive]:
         return targets.list_targets(self.services.disks, self.services.volume_root)
 
+    def load_slow(self, key: str) -> Any:
+        """Lê um dado lento (fora da thread da interface) e guarda no cache. Erro vira o valor."""
+        readers: dict[str, Callable[[], Any]] = {
+            "pendrives": self.pendrives,
+            "sizes": lambda: (self.sizes(), self.free_bytes()),
+            "volumes": self.data_volumes,
+        }
+        try:
+            value = readers[key]()
+        except Exception as exc:  # noqa: BLE001 — a página mostra o motivo
+            value = exc
+        self.cache[key] = value
+        return value
+
     def open_ventoy(self, v: targets.AnyDrive) -> None:
         self._open(targets.from_drive(v))
 
@@ -142,6 +159,7 @@ class StudioController:
 
     def _open(self, tgt: targets.Target) -> None:
         self.target = tgt
+        self.cache.pop("sizes", None)
         try:
             self.recipe = load_profile_recipe(tgt.root, self.profile_id)
         except RecipeError:

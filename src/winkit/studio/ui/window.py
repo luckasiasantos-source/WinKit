@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QColor
+from PySide6.QtGui import QColor, QShowEvent
 from PySide6.QtWidgets import (
     QApplication,
     QDialog,
@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
 )
 
 from winkit.i18n import normalize, set_language, t, tn
+from winkit.platform import window_style
 from winkit.studio import preferences
 from winkit.studio.controller import StudioController
 from winkit.studio.ui import pages
@@ -242,7 +243,9 @@ class StudioWindow(QWidget):
 
         self.stack = QStackedWidget()
         root.addWidget(self.stack, 1)
-        self.pages: list[Page] = []
+        #: Páginas já abertas; cada uma só é criada na primeira visita (V3-01).
+        self.pages: dict[int, Page] = {}
+        self._current = 0
         self.nav.currentRowChanged.connect(self._go)
         self._build()
 
@@ -255,12 +258,13 @@ class StudioWindow(QWidget):
         self.prefs_button.setText(t("studio.prefs.button"))
         self.nav.blockSignals(True)
         self.nav.clear()
-        for page in self.pages:
+        for page in self.pages.values():
             self.stack.removeWidget(page)
             page.hide()
             page.setParent(None)  # sai da janela já, sem esperar o deleteLater
             page.deleteLater()
-        self.pages = []
+        self.pages = {}
+        index = 0
         for group in GROUPS:
             header = QListWidgetItem(group.title.upper(), self.nav)
             header.setFlags(Qt.ItemFlag.NoItemFlags)
@@ -271,10 +275,8 @@ class StudioWindow(QWidget):
             header.setForeground(QColor(theme.current(self.theme_mode).secondary))
             for s in group.sections:
                 item = QListWidgetItem(symbol_icon(s.glyph, s.color), s.title, self.nav)
-                item.setData(_SECTION_ROLE, len(self.pages))
-                page = s.page(self.ctl, self.tasks)
-                self.pages.append(page)
-                self.stack.addWidget(page)
+                item.setData(_SECTION_ROLE, index)
+                index += 1
         self.nav.blockSignals(False)
         self._select(current or self.sections[0].id)
         self._update_status()
@@ -293,9 +295,18 @@ class StudioWindow(QWidget):
     def _go(self, row: int) -> None:
         item = self.nav.item(row) if row >= 0 else None
         index = item.data(_SECTION_ROLE) if item is not None else None
-        if isinstance(index, int) and 0 <= index < len(self.pages):
-            self.pages[index].refresh()
-            self.stack.setCurrentIndex(index)
+        if isinstance(index, int) and 0 <= index < len(self.sections):
+            page = self._page(index)
+            self._current = index
+            page.refresh()
+            self.stack.setCurrentWidget(page)
+
+    def _page(self, index: int) -> Page:
+        if index not in self.pages:
+            page = self.sections[index].page(self.ctl, self.tasks)
+            self.pages[index] = page
+            self.stack.addWidget(page)
+        return self.pages[index]
 
     def _filter(self, text: str) -> None:
         needle = text.casefold().strip()
@@ -318,15 +329,30 @@ class StudioWindow(QWidget):
 
     # ------------------------------------------------------------ API das páginas e dos testes
     def current_section(self) -> str:
-        return self.sections[self.stack.currentIndex()].id
+        return self.sections[self._current].id
 
     def go_to(self, section_id: str) -> Page:
         self._select(section_id)
-        return self.pages[self.stack.currentIndex()]
+        return self.pages[self._current]
 
     def on_target_changed(self) -> None:
         self._update_status()
-        self.pages[self.stack.currentIndex()].refresh()
+        self.pages[self._current].refresh()
+
+    def showEvent(self, event: QShowEvent) -> None:
+        super().showEvent(event)
+        self._style_frame()
+
+    def _style_frame(self) -> None:
+        """Barra de título e contorno no tema do app, não no do sistema (V3-03)."""
+        p = theme.current(self.theme_mode)
+        window_style.style_window(
+            int(self.winId()),
+            dark=p.name == "dark",
+            caption=p.window,
+            border=p.card_border,
+            text=p.text,
+        )
 
     def apply_preferences(self, prefs: preferences.Preferences) -> None:
         set_language(resolve_language(prefs.language, self.detect_language))  # type: ignore[arg-type]
@@ -335,6 +361,7 @@ class StudioWindow(QWidget):
         if isinstance(app, QApplication):
             theme.apply(app, prefs.theme)
         self._build(self.current_section() if self.pages else None)
+        self._style_frame()
 
     def open_preferences(self) -> None:
         dialog = PreferencesDialog(preferences.load(self.prefs_path), self)

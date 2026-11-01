@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable
 
 from PySide6.QtCore import (
@@ -18,6 +19,7 @@ from PySide6.QtGui import (
     QBrush,
     QColor,
     QFont,
+    QGuiApplication,
     QIcon,
     QLinearGradient,
     QPainter,
@@ -288,9 +290,16 @@ def expanding() -> QWidget:
 
 
 # ------------------------------------------------------------------ ícones desenhados
+def _scale() -> float:
+    """Maior escala entre as telas (4K a 250% = 2,5): desenhar nela evita esticar o ícone (V3-02)."""
+    return max([2.0, *(screen.devicePixelRatio() for screen in QGuiApplication.screens())])
+
+
 def _canvas(size: int) -> tuple[QPixmap, QPainter]:
-    pm = QPixmap(size * 2, size * 2)
-    pm.setDevicePixelRatio(2.0)
+    scale = _scale()
+    pixels = math.ceil(size * scale)
+    pm = QPixmap(pixels, pixels)
+    pm.setDevicePixelRatio(pixels / size)
     pm.fill(Qt.GlobalColor.transparent)
     painter = QPainter(pm)
     painter.setRenderHint(QPainter.RenderHint.Antialiasing)

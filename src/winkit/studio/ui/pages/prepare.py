@@ -27,18 +27,23 @@ class PendrivePage(Page):
         self.clear_content()
         self.content.addLayout(
             self.toolbar(
-                button(t("studio.pendrive.search"), None, self.refresh),
+                button(t("studio.pendrive.search"), None, self._search),
                 button(t("studio.pendrive.use_folder"), None, self._choose_folder),
             )
         )
         found = Card()
-        try:
-            drives = self.ctl.pendrives()
-        except Exception as exc:  # noqa: BLE001 — mostra o motivo na lista
+        drives = self.slow("pendrives")
+        if drives is None:
+            found.add_row(Row(t("studio.loading"), None, icon=symbol_icon("refresh", "#8E8E93")))
             drives = []
+        elif isinstance(drives, Exception):
             found.add_row(
-                Row(t("studio.pendrive.list_failed"), str(exc), icon=symbol_icon("!", "#FF9500"))
+                Row(t("studio.pendrive.list_failed"), str(drives), icon=symbol_icon("!", "#FF9500"))
             )
+            drives = []
+        elif self.ctl.target is None and len(drives) == 1:  # um só pendrive: já abre
+            self._use(drives[0])
+            return
         for v in drives:
             current = self.ctl.target is not None and str(self.ctl.target.root) == v.root
             use = button(
@@ -62,7 +67,7 @@ class PendrivePage(Page):
                     icon=symbol_icon("chip", "#8E8E93"),
                 )
             )
-        if not found.rows:
+        if not found.rows and drives == []:
             found.add_row(
                 Row(
                     t("studio.pendrive.none"),
@@ -80,18 +85,15 @@ class PendrivePage(Page):
                     icon=symbol_icon("check", "#34C759"),
                 )
             )
-            sizes = self.ctl.sizes()
-            used = " · ".join(f"{t(f'size.{k}')} {format_size(v)}" for k, v in sizes.items())
+            loaded = self.slow("sizes")
+            if isinstance(loaded, tuple):
+                sizes, free = loaded
+                used = " · ".join(f"{t(f'size.{k}')} {format_size(v)}" for k, v in sizes.items())
+                detail = t("studio.pendrive.space_detail", used=used, free=format_size(free))
+            else:
+                detail = t("studio.loading")
             info.add_row(
-                Row(
-                    t("studio.pendrive.space"),
-                    t(
-                        "studio.pendrive.space_detail",
-                        used=used,
-                        free=format_size(self.ctl.free_bytes()),
-                    ),
-                    icon=symbol_icon("folder", "#007AFF"),
-                )
+                Row(t("studio.pendrive.space"), detail, icon=symbol_icon("folder", "#007AFF"))
             )
             read = button(t("studio.pendrive.read_isos"), None, self._read_isos)
             info.add_row(
@@ -112,6 +114,10 @@ class PendrivePage(Page):
             )
         )
         self.content.addWidget(section(t("studio.disclaimer.section"), warning))
+
+    def _search(self) -> None:
+        self.ctl.cache.pop("pendrives", None)
+        self.refresh()
 
     def _use(self, v: Any) -> None:
         self.ctl.open_ventoy(v)

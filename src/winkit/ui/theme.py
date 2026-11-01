@@ -175,9 +175,11 @@ QListWidget#SidebarList::item {{ padding: 7px 10px; border-radius: 7px; margin: 
 QListWidget#SidebarList::item:selected {{ background: {p.selection}; color: {p.text}; }}
 QScrollArea {{ background: transparent; border: none; }}
 QScrollArea > QWidget > QWidget {{ background: transparent; }}
-QScrollBar:vertical {{ background: transparent; width: 10px; margin: 2px; }}
-QScrollBar::handle:vertical {{ background: {p.tertiary}; border-radius: 4px; min-height: 30px; }}
+QScrollBar:vertical {{ background: transparent; width: 8px; margin: 2px 1px; }}
+QScrollBar::handle:vertical {{ background: {p.separator}; border-radius: 3px; min-height: 30px; }}
+QScrollBar::handle:vertical:hover {{ background: {p.tertiary}; }}
 QScrollBar::add-line, QScrollBar::sub-line {{ height: 0; }}
+QScrollBar::add-page, QScrollBar::sub-page {{ background: none; }}
 QProgressBar {{ background: {p.switch_off}; border: none; border-radius: 3px; max-height: 6px;
     min-height: 6px; text-align: center; }}
 QProgressBar::chunk {{ background: {p.accent}; border-radius: 3px; }}

@@ -40,3 +40,4 @@ Prepare a VM uma vez com [`AMBIENTE_VM.md`](AMBIENTE_VM.md) e siga os roteiros e
 | [M15](M15.md) | Perfis rápidos, fontes, apps padrão, aparência, navegadores, Iniciar e barra | H25 a H31, H35 |
 | [M16](M16.md) | Pastas em outro disco, jogos, contas extras | H32, H33 |
 | [M17](M17.md) | Sugestões, modelos, exportação, atualização dos instaladores, comparação | H34 |
+| [M19](M19.md) | Velocidade, nitidez e janela; testes numa VM do seu PC ([VM_REMOTA](VM_REMOTA.md)) | H45 |

@@ -522,7 +522,8 @@ class UserFoldersPage(Page):
                 button(t("studio.folders.copy_now"), "Secondary", self._copy_now),
             )
         )
-        volumes = self.ctl.data_volumes()
+        loaded = self.slow("volumes")
+        volumes = loaded if isinstance(loaded, list) else []
         card = Card()
         card.add_row(
             Row(
@@ -534,7 +535,9 @@ class UserFoldersPage(Page):
         )
         options = [(v.serial, self.ctl.volume_label(v)) for v in volumes]
         current = uf.volume.serial if uf.volume else ""
-        if not options:
+        if loaded is None:
+            card.add_row(Row(t("studio.loading"), None))
+        elif not options:
             card.add_row(Row(t("studio.folders.no_volumes"), None))
         else:
             card.add_row(

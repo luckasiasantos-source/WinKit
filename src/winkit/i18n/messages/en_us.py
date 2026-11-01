@@ -1306,4 +1306,5 @@ MESSAGES: dict[str, Entry] = {
         one="You opened it once; last used yesterday.",
         other="You opened it {n} times; last used yesterday.",
     ),
+    "studio.loading": "Loading…",
 }

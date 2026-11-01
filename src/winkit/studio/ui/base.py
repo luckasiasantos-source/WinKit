@@ -101,6 +101,20 @@ class TaskRunner:
         QThreadPool.globalInstance().start(job)
         sheet.exec()
 
+    def background(self, fn: Callable[[], Any], on_done: Callable[[Any], None]) -> None:
+        """Roda sem folha modal; a interface continua livre (R-59). Erros vêm em ``on_done``."""
+        job = _Job(fn)
+        self._jobs.append(job)
+
+        def finish(result: object) -> None:
+            if job in self._jobs:
+                self._jobs.remove(job)
+            on_done(result)
+
+        job.signals.done.connect(finish)
+        job.signals.failed.connect(finish)
+        QThreadPool.globalInstance().start(job)
+
 
 def show_error(parent: QWidget | None, exc: BaseException) -> None:
     box = QMessageBox(parent)
@@ -125,6 +139,7 @@ class Page(QWidget):
         super().__init__()
         self.ctl = ctl
         self.tasks = tasks
+        self._loading: set[str] = set()
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)
         scroll = QScrollArea()
@@ -168,6 +183,23 @@ class Page(QWidget):
 
     def refresh(self) -> None:
         """Reconstrói o conteúdo a partir do controlador."""
+
+    def slow(self, key: str) -> Any:
+        """Dado lento do sistema (R-59): o cache, ou ``None`` enquanto carrega em segundo plano."""
+        if key in self.ctl.cache:
+            return self.ctl.cache[key]
+        if self.tasks.synchronous:
+            return self.ctl.load_slow(key)
+        if key not in self._loading:
+            self._loading.add(key)
+
+            def loaded(_: object) -> None:
+                self._loading.discard(key)
+                if self.isVisible():
+                    self.refresh()
+
+            self.tasks.background(lambda: self.ctl.load_slow(key), loaded)
+        return None
 
     def needs_recipe(self) -> bool:
         """Mostra o aviso e devolve ``True`` quando ainda não há receita."""

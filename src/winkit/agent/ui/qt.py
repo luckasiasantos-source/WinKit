@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 from PySide6.QtCore import QCoreApplication, QObject, Qt, QTimer, QUrl, Signal
-from PySide6.QtGui import QAction, QDesktopServices
+from PySide6.QtGui import QAction, QDesktopServices, QShowEvent
 from PySide6.QtWidgets import (
     QApplication,
     QDialog,
@@ -35,6 +35,7 @@ from winkit.core.planner.models import PlannedStep
 from winkit.core.recipe.models import Execution
 from winkit.core.summary import Summary
 from winkit.i18n import t, tn
+from winkit.platform import window_style
 from winkit.ui import theme
 from winkit.ui.widgets import (
     Card,
@@ -365,6 +366,17 @@ class AgentWindow(QWidget):
         self.stack.addWidget(self.progress_page)
         self.stack.addWidget(self.done_page)
         self.choose_page: ChoosePage | None = None
+
+    def showEvent(self, event: QShowEvent) -> None:
+        super().showEvent(event)
+        p = theme.current()  # moldura no tema do app (V3-03)
+        window_style.style_window(
+            int(self.winId()),
+            dark=p.name == "dark",
+            caption=p.window,
+            border=p.card_border,
+            text=p.text,
+        )
 
     def show_choose(self, page: ChoosePage) -> None:
         if self.choose_page is not None:

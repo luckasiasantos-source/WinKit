@@ -28,6 +28,27 @@
 
 ---
 
+## 2026-11-01 — M19 — Velocidade, nitidez e janela; testes na VM (0.10.0)
+**Tipo:** implementação
+**Resumo:** plano da v3 aprovado. O Studio abre na hora (leituras lentas em segundo plano, páginas criadas só ao abrir, tela de abertura), fica nítido em 4K e tem a moldura no tema do app. Scripts e guia para testar numa VM do PC do dono.
+
+### Adicionado
+- `src/winkit/platform/window_style.py` — barra de título, contorno e cantos pelo DWM (Windows 11)
+- `StudioController.cache` e `load_slow`; `Page.slow`; `TaskRunner.background` (R-59)
+- `scripts/vm/` (nova VM Hyper-V, pontos de restauração, coletar logs); `docs/validacao/VM_REMOTA.md`, `docs/validacao/M19.md`
+- Testes: `tests/ui/test_responsive.py`, `tests/platform/test_window_style.py`
+
+### Alterado
+- `src/winkit/studio/main.py` — tela de abertura; não lê mais os pendrives antes de abrir a janela
+- `src/winkit/studio/ui/window.py` — páginas criadas na primeira visita; moldura no tema
+- `src/winkit/studio/ui/pages/prepare.py`, `system.py` — pendrives, tamanhos e volumes pelo cache, com "Carregando…"
+- `src/winkit/ui/widgets.py` — ícones desenhados na maior escala entre as telas; `src/winkit/ui/theme.py` — barra de rolagem fina
+- `src/winkit/agent/ui/qt.py` — moldura no tema na janela do Agente
+- `src/winkit/__init__.py` — 0.10.0; `packaging/NOTAS_DA_VERSAO.md`
+
+### Documentos vivos atualizados
+- PLANO_V3 — aprovado; CLAUDE.md — v3 em vigor; ARQUITETURA — D-054, R-59 e a verificação; STATUS — M19 a M26 e H36 a H48; ESTRUTURA — regerado
+
 ## 2026-11-01 — Documentação — plano da v3 (proposta)
 **Tipo:** documentação
 **Resumo:** plano da v3 (M19–M26) escrito a partir da conversa com o dono e de duas pesquisas, para aprovação. Nada implementado.

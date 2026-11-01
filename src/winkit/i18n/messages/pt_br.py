@@ -1337,4 +1337,5 @@ MESSAGES: dict[str, Entry] = {
     "suggest.app_used_yesterday": Plural(
         one="Você abriu 1 vez; último uso ontem.", other="Você abriu {n} vezes; último uso ontem."
     ),
+    "studio.loading": "Carregando…",
 }

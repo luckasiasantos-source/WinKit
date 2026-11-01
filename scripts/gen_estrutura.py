@@ -30,7 +30,7 @@ TOP = [
     ("docs/validacao/", "roteiros de teste em VM ou PC real, um por marco"),
     ("docs/imagens/", "capturas de tela usadas nos READMEs"),
     ("packaging/", "specs do PyInstaller, build.ps1, smoke.ps1, make_icon.py (gera o .ico) e notas da versão"),
-    ("scripts/", "check.sh (verificação antes de cada commit) e geradores de documentação"),
+    ("scripts/", "check.sh (verificação antes de cada commit), geradores de documentação e `vm/` (VM de testes no Hyper-V)"),
     ("src/winkit/", "o código (detalhado abaixo)"),
     ("tests/", "testes automáticos, espelhando as pastas de src/winkit"),
 ]

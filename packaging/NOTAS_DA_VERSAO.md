@@ -7,18 +7,14 @@
 
 ## Novidades desta versão
 
-Esta é a **versão 2 completa** (marcos M11 a M18). Tudo o que veio de novo desde a 0.1.0:
+Primeira versão da v3 (M19), com correções que você sente no uso:
 
-- **Sugestões do que levar:** o WinKit olha este PC e sugere os programas que você mais usa, configurações recomendadas, saves de jogos e pastas grandes no C:, sempre dizendo por quê.
-- **Aplicar neste PC:** a mesma receita num Windows já instalado, com prévia e ponto de restauração.
-- **Pendrive comum:** além do Ventoy, o pendrive do Rufus ou da Ferramenta de Criação de Mídia.
-- **Rede e sistema:** Wi-Fi, recursos do Windows (WSL, Sandbox, .NET 3.5…), drivers que faltam, DNS seguro e bloqueios no `hosts`, unidades de rede, manutenção e variáveis de ambiente.
-- **Personalização:** perfis rápidos, fontes, apps padrão, aparência, navegadores e Iniciar/barra.
-- **Contas, pastas e jogos:** contas extras, pastas do usuário em outro disco e jogos da Steam/Epic sem baixar de novo.
-- **Modelos e receitas compartilháveis**, **atualização dos instaladores do pendrive** e **comparação com o PC antigo** no resumo final.
-- O aplicativo em **português, inglês e espanhol**.
+- **Mais rápido:** a janela abre na hora, com uma tela de abertura; a lista de pendrives e o espaço usado carregam em segundo plano, sem travar a janela.
+- **Nítido em 4K:** ícones e logo desenhados na escala real da tela (150%, 250%…).
+- **Janela mais bonita:** logo novo; barra de título, contorno e cantos no tema do aplicativo (Windows 11); barra de rolagem fina.
+- **Testes numa VM:** scripts para criar uma VM Hyper-V de testes, com pontos de restauração (`scripts/vm`).
 
-**Ainda não validado em instalação real.** As hipóteses H1 a H35 (lista em `docs/STATUS.md`) dependem do comportamento do Windows e do Ventoy e só serão confirmadas com os roteiros de `docs/validacao/` (M2 a M17). O que ficou provisório está em `docs/DIVIDAS_TECNICAS.md`.
+A versão 2 completa (0.9.0) trouxe sugestões do que levar, "Aplicar neste PC", pendrive do Rufus/Microsoft, Wi-Fi, recursos do Windows, DNS, personalização, contas, pastas e jogos em outro disco, modelos e a comparação com o PC antigo. **Ainda não validado em instalação real:** as hipóteses estão em `docs/STATUS.md`.
 
 ## Como usar
 
@@ -42,7 +38,7 @@ Requisitos: Windows 10 ou 11 (64 bits) no PC onde você monta o pendrive; pendri
 > [!CAUTION]
 > **Pre-alpha, 100% vibe-coded, personal project. Use at your own risk.** WinKit was made for the author's own use as an experiment; anyone using this version is, in practice, a tester. All code was written by AI without a full human review, and this version **has not yet been validated on a real Windows install**. It may have bugs and security flaws that cause data loss or an unusable Windows. **All responsibility lies with whoever downloads and uses it**; the author accepts no liability (sections 7 and 8 of the Apache 2.0 license and the `NOTICE` file). Test it in a virtual machine first and back up beforehand.
 
-**New in this version:** this is the **complete version 2** (milestones M11–M18): suggestions of what to take, Apply to this PC (preview and restore point), Rufus and Media Creation Tool USB drives, Wi-Fi, Windows features, missing drivers, secure DNS and `hosts` blocking, network drives, maintenance, environment variables, quick profiles, fonts, default apps, appearance, browsers, Start/taskbar, extra accounts, user folders and games on another disk, templates and shareable recipes, updating the installers on the USB drive, a comparison with the old PC in the final summary, and the app in Portuguese, English and Spanish. **Not yet validated on a real install:** hypotheses H1–H35 (listed in `docs/STATUS.md`) depend on how Windows and Ventoy behave and will only be confirmed with the scripts in `docs/validacao/`.
+**New in this version:** first v3 release (M19): **faster** (the window opens right away with a splash screen; USB drives and used space load in the background), **sharp on 4K** screens (icons and logo drawn at the real screen scale), **nicer window** (new logo; title bar, border and corners follow the app theme on Windows 11; thin scroll bar) and **VM test scripts** (Hyper-V). Version 0.9.0 completed v2. **Not yet validated on a real install:** see the hypotheses in `docs/STATUS.md`.
 
 **How to use:** download `WinKit-…-windows-x64.zip` below, extract it, open `winkit-studio\winkit-studio.exe` (it asks for administrator), follow the sidebar and click **Build USB drive** at the end. Boot from Ventoy, choose the original Windows 11 ISO and the `winkit-…` template. The executables are not signed: if SmartScreen warns you, click "More info" → "Run anyway". Check the download against the `.sha256` file.
 
@@ -53,6 +49,6 @@ Requisitos: Windows 10 ou 11 (64 bits) no PC onde você monta o pendrive; pendri
 > [!CAUTION]
 > **Pre-alfa, 100% hecho con vibe coding, proyecto personal. Úsalo bajo tu propio riesgo.** WinKit se hizo para uso propio, como una prueba; quien use esta versión es, en la práctica, un probador. Todo el código lo escribió IA sin auditoría humana completa, y esta versión **aún no se validó en una instalación real de Windows**. Puede tener errores y fallas de seguridad que causen pérdida de datos o un Windows inutilizable. **Toda la responsabilidad es de quien lo descarga y lo usa**; el autor no se responsabiliza por nada (secciones 7 y 8 de la licencia Apache 2.0 y archivo `NOTICE`). Pruébalo primero en una máquina virtual y haz una copia de seguridad antes.
 
-**Novedades de esta versión:** es la **versión 2 completa** (hitos M11–M18): sugerencias de qué llevar, Aplicar en este PC (vista previa y punto de restauración), memorias USB de Rufus y de la Herramienta de creación de medios, Wi-Fi, características de Windows, controladores que faltan, DNS seguro y bloqueo en `hosts`, unidades de red, mantenimiento, variables de entorno, perfiles rápidos, fuentes, aplicaciones predeterminadas, apariencia, navegadores, Inicio/barra, cuentas adicionales, carpetas del usuario y juegos en otro disco, plantillas y recetas compartibles, actualización de los instaladores de la memoria USB, comparación con el PC antiguo en el resumen final y la aplicación en portugués, inglés y español. **Aún no validado en una instalación real:** las hipótesis H1–H35 (lista en `docs/STATUS.md`) dependen del comportamiento de Windows y Ventoy y solo se confirmarán con los guiones de `docs/validacao/`.
+**Novedades de esta versión:** primera versión de la v3 (M19): **más rápido** (la ventana abre al instante con una pantalla de inicio; las memorias USB y el espacio usado cargan en segundo plano), **nítido en 4K** (iconos y logo dibujados a la escala real de la pantalla), **ventana más bonita** (logo nuevo; barra de título, borde y esquinas según el tema de la aplicación en Windows 11; barra de desplazamiento fina) y **scripts de VM de prueba** (Hyper-V). La 0.9.0 completó la v2. **Aún no validado en una instalación real:** ver las hipótesis en `docs/STATUS.md`.
 
 **Cómo usarlo:** descarga `WinKit-…-windows-x64.zip` abajo, descomprímelo, abre `winkit-studio\winkit-studio.exe` (pide permisos de administrador), sigue la barra lateral y haz clic en **Preparar memoria USB** al final. Arranca desde Ventoy, elige la ISO original de Windows 11 y la plantilla `winkit-…`. Los ejecutables no están firmados: si SmartScreen avisa, haz clic en "Más información" → "Ejecutar de todas formas". Compara la descarga con el archivo `.sha256`.

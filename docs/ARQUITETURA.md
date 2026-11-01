@@ -331,6 +331,7 @@ runner.run(
 - **R-56** Toda mudança que altera o que o README descreve (funções, requisitos, comandos, estado do projeto, aviso) atualiza os READMEs no mesmo commit, nos três idiomas. O `README.md` traz a versão em inglês logo abaixo da portuguesa, gerada do `README.en.md` por `scripts/sync_readme.py`; o começo do `README.md` avisa que ela existe. Em vigor desde 2026-10-31.
 - **R-57** `docs/ESTRUTURA.md` descreve a árvore do projeto e cada arquivo de código. É gerado por `scripts/gen_estrutura.py` a partir das docstrings (todo módulo tem docstring) e regerado no mesmo commit que cria, move, remove ou muda a descrição de um arquivo. Em vigor desde 2026-10-31.
 - **R-58** Toda tarefa de código usa a skill `ponytail` (`.claude/skills/`, cópia de github.com/DietrichGebert/ponytail, MIT). Em conflito, valem as regras deste documento e do `CLAUDE.md` (documentos vivos, pt-BR, cobertura da R-38); `shortcut:` exige entrada em `DIVIDAS_TECNICAS.md`, como `TODO` (R-50). Em vigor desde 2026-11-01.
+- **R-59** Nenhuma leitura lenta do sistema (PowerShell, CIM, varredura de disco, rede) roda na thread da interface: o `refresh()` de uma página lê o cache do controlador (`Page.slow`) e o resto carrega em segundo plano (D-054). Em vigor desde o M19.
 
 ### 5.12 Como as regras são verificadas automaticamente
 
@@ -355,6 +356,7 @@ runner.run(
 | XML (IN-015) | `test_no_global_xml_namespace_registration` e `test_strip_key_does_not_change_other_xml` |
 | R-55 | `tests/i18n/test_usage.py::test_no_loose_ui_strings` (AST em `studio`, `agent/ui`, `ui`, `cli`) |
 | R-50, R-58 | `test_todo_requires_debt_entry` também cobre `shortcut:` |
+| R-59 | `tests/ui/test_responsive.py` (com leituras de 2 s, toda página abre em menos de 0,5 s no CI) |
 | R-56, R-57 | `tests/test_docs_sync.py` (README.md com a versão em inglês igual ao README.en.md; ESTRUTURA.md igual ao que o gerador produz) |
 | Empacotamento | `test_no_dynamic_imports_in_package` (IN-013) |
 
@@ -573,3 +575,9 @@ Formato: **D-nnn — título** · data · status (`aceita`, `substituída por D-
 **Contexto:** o .NET 3.5 precisa da pasta `sources\sxs` da mídia de instalação; sem ela, só pela internet (Fase 2). Um mesmo modelo do Ventoy serve a várias ISOs, então o nome da ISO não pode ir no XML.
 **Decisão:** o Construtor grava `WinKit/isos.json` (imagem, build, arquitetura, idiomas) no modo Ventoy. A etapa `feature` usa, nesta ordem, `sources\sxs` do pendrive comum, a ISO do mesmo build montada com `Mount-DiskImage -Access ReadOnly` (desmontada sempre em `finally`, D-002) ou, na Fase 2, o Windows Update. Etapas da Fase 1 com `PlannedStep.phase2_fallback` que ficarem pendentes rodam de novo no começo da Fase 2, sem esperar o pendrive.
 **Consequências:** o .NET 3.5 instala sem internet antes do login quando há ISO do mesmo build; sem ela, a instalação continua e o recurso entra depois do login. Os outros tipos de etapa não ganharam a segunda chance (DT-020).
+
+### D-054 — Leituras lentas do sistema nunca na thread da interface
+2026-11-01 · aceita (M19, `PLANO_V3.md`)
+**Contexto:** o Studio travava ao abrir: a lista de pendrives (PowerShell) era lida antes de mostrar a janela, e a página Pendrive somava o tamanho de tudo no pendrive a cada abertura.
+**Decisão:** R-59. O controlador guarda as leituras lentas num cache (`StudioController.cache`, por chave); `Page.slow(chave)` devolve o cache ou carrega em segundo plano (`TaskRunner.background`, sem folha modal) e redesenha a página quando chega. As páginas são criadas só na primeira visita. Uma tela de abertura com o logo aparece antes das importações pesadas.
+**Consequências:** a janela abre na hora; a lista de pendrives aparece logo depois, com "Carregando…" no meio. O cache dos tamanhos é esquecido ao trocar de pendrive e depois de construir.

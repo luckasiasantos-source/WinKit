@@ -18,7 +18,7 @@
 | `docs/validacao/` | roteiros de teste em VM ou PC real, um por marco |
 | `docs/imagens/` | capturas de tela usadas nos READMEs |
 | `packaging/` | specs do PyInstaller, build.ps1, smoke.ps1, make_icon.py (gera o .ico) e notas da versão |
-| `scripts/` | check.sh (verificação antes de cada commit) e geradores de documentação |
+| `scripts/` | check.sh (verificação antes de cada commit), geradores de documentação e `vm/` (VM de testes no Hyper-V) |
 | `src/winkit/` | o código (detalhado abaixo) |
 | `tests/` | testes automáticos, espelhando as pastas de src/winkit |
 
@@ -160,6 +160,7 @@
 | `volumes.py` | Volumes do PC pelo CIM ``Win32_Volume`` (D-035). Só JSON e números (R-13). |
 | `vss.py` | Cópias de sombra (VSS) para capturar arquivos em uso (PLANO.md §7.4.2, D-006). |
 | `wifi.py` | Perfis de Wi-Fi pelo ``netsh wlan`` (V2-02). |
+| `window_style.py` | Barra de título, contorno e cantos da janela no tema do app (Windows 11, DWM; V3-03). |
 | `windows_update.py` | Windows Update pela API COM ``Microsoft.Update.Session`` (PLANO.md §20, M8; D-011). |
 | `winget.py` | winget: export, download, install (PLANO.md §7.1.4, §13.4). |
 

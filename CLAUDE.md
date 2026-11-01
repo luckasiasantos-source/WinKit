@@ -8,7 +8,7 @@ Leia, nesta ordem:
 
 1. `docs/PLANO.md` — o que o produto é e como foi desenhado.
    - `docs/PLANO_V2.md` — plano da v2 (M11–M18): funções novas, decisões D-030+ e regras R-51+.
-   - `docs/PLANO_V3.md` — plano da v3 (M19–M26), **proposta aguardando aprovação**: nada dele vale como regra até ser aprovado.
+   - `docs/PLANO_V3.md` — plano da v3 (M19–M26): funções novas, decisões D-044+ e regras R-59+. Suas decisões e regras entram no `ARQUITETURA.md` no marco que as usa.
 2. `docs/ARQUITETURA.md` — arquitetura e **regras do código** (obrigatórias).
 3. `docs/STATUS.md` — o que já está implementado e o que está em andamento.
 4. `docs/DIVIDAS_TECNICAS.md` — o que sabemos que está incompleto ou feito de um jeito provisório.
